@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -15,8 +14,13 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            // Add phone with string length of 45, unique and nullable for in case of Oauth
+            $table->string('phone', 45)->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            // Add google ID with string length of 45, and can be nullable
+            $table->string('google_id', 45)->nullable();
+            // Add facebook ID with string length of 45, and can be nullable
+            $table->string('facebook_id', 45)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
