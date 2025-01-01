@@ -9,4 +9,7 @@ class City extends Model
 {
     /** @use HasFactory<\Database\Factories\CityFactory> */
     use HasFactory;
+    public $timestamps = false;
+
+    protected $fillable = ['name', 'province_id'];
 }

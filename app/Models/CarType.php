@@ -9,4 +9,7 @@ class CarType extends Model
 {
     /** @use HasFactory<\Database\Factories\CarTypeFactory> */
     use HasFactory;
+    public $timestamps = false;
+
+    protected $fillable = ['name'];
 }

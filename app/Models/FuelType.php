@@ -10,4 +10,6 @@ class FuelType extends Model
     /** @use HasFactory<\Database\Factories\FuelTypeFactory> */
     use HasFactory;
     public $timestamps = false;
+
+    protected $fillable = ['name'];
 }
