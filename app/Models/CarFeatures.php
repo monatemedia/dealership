@@ -4,12 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CarFeatures extends Model
 {
     /** @use HasFactory<\Database\Factories\CarFeaturesFactory> */
     use HasFactory;
     public $timestamps = false;
+
+    protected $primaryKey = 'car_id';
 
     protected $fillable = [
         'car_id',
@@ -26,4 +29,10 @@ class CarFeatures extends Model
         'rear_parking_sensors',
         'leather_seats',
     ];
+
+    # Relationships
+    public function car(): BelongsTo
+    {
+        return $this->belongsTo(Car::class);
+    }
 }
