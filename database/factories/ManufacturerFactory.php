@@ -17,7 +17,8 @@ class ManufacturerFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            // Generate a new fake word for the name of our manufacturer
+            'name' => fake()->word()
         ];
     }
 }
