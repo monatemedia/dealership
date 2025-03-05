@@ -17,7 +17,7 @@ class FuelTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => fake()->randomElement(['Gasoline', 'Diesel', 'Electric', 'Hybrid']),
         ];
     }
 }
