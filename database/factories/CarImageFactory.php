@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CarImage>
  */
-class CarImagesFactory extends Factory
+class CarImageFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -18,11 +18,14 @@ class CarImagesFactory extends Factory
     public function definition(): array
     {
         return [
-            // 'car_id' => 1, // Prove a car id
-
-            // Image URL
-            'image_path' => fake()
-                ->imageUrl(), // Generate a random image URL
+            // Generate random image URL with colors and text
+            'image_path' => 'https://placehold.co/'
+                . fake()->numberBetween(300, 800) . 'x' // Width random between 300 and 800
+                . fake()->numberBetween(200, 600) . '/' // Height random between 200 and 600
+                . fake()->safeColorName() . '/' // Background color
+                . fake()->safeColorName() . // Text color
+                '.png?text='
+                . fake()->word(), // Random text for the image
 
             // Position
             'position' => function (array $attributes) {

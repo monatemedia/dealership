@@ -13,24 +13,16 @@ class HomeController extends Controller
 {
     public function index()
     {
-        User::factory()
-            ->has(Car::factory()->count(5), 'favouriteCars')
-            ->create();
+        // Get the latest 30 cars
+        $cars = Car::where('published_at', '<', now()) // Only show cars that are published
+            ->orderBy('published_at', 'desc') // Order by the newest cars
+            ->limit(30) // Limit to 30 cars
+            ->get(); // Get the cars
 
-        // Create a user
-        // $user = User::factory()->create();
-
-        // Create 5 cars and assign them to the user
-        // $cars = Car::factory()->count(5)->create([
-        //     'user_id' => $user->id, // Assign user ID
-        // ]);
-
-        // Save cars using saveMany() for a hasMany relationship
-        // $user->cars()->saveMany($cars);
-
-        // dd($user->cars); // Dump the cars for debugging
-
-        // Return the blade view
-        return view('home.index');
+        // Return the view with the cars
+        return view(
+            'home.index', // The view to return
+            ['cars' => $cars]
+        ); // Pass the cars to the view
     }
 }
