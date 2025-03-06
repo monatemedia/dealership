@@ -15,6 +15,10 @@ class Car extends Model
     /** @use HasFactory<\Database\Factories\CarFactory> */
     use HasFactory, SoftDeletes;
 
+    protected $casts = [
+        'published_at' => 'datetime',
+    ];
+
     protected $fillable = [
         'manufacturer_id',
         'model_id',

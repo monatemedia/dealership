@@ -58,7 +58,7 @@ class User extends Authenticatable
         return $this->belongsToMany(Car::class, 'favourite_cars', 'user_id', 'car_id');
     }
 
-    // Define method for users to add to cars to their watchlist with return type
+    // Define method for users to add cars they own return type
     public function cars(): HasMany
     {
         return $this->hasMany(Car::class);

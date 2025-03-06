@@ -23,6 +23,9 @@ class CarFactory extends Factory
      */
     public function definition(): array
     {
+        // Fetch a random user first to ensure we get a phone number
+        $user = User::inRandomOrder()->first();
+
         return [
             // Manufacturer
             'manufacturer_id' => Manufacturer::inRandomOrder() // Get random manufacturer
@@ -66,9 +69,7 @@ class CarFactory extends Factory
                 ->id, // Get fuel type id
 
             // User
-            'user_id' => User::inRandomOrder() // Get random user
-                ->first() // Get first user
-                ->id, // Get user id
+            'user_id' => $user->id,  // Assign the user ID
 
             // City
             'city_id' => City::inRandomOrder() // Get random city
@@ -79,11 +80,7 @@ class CarFactory extends Factory
             'address' => fake()->address, // Random address
 
             // Phone number
-            'phone' => function (array $attributes) {
-                // Get phone number based on user id
-                return User::find($attributes['user_id']) // Find user by id
-                    ->phone; // Get phone number
-            },
+            'phone' => $user->phone,  // Assign the user's phone number directly
 
             // Description
             'description' => fake()
@@ -92,7 +89,7 @@ class CarFactory extends Factory
             // Published at date
             'published_at' => fake()
                 ->optional(0.9) // 90% chance the value will be generated
-                ->dateTimeBetween('-1 month', '+1 day'), // A date in the range between the past month or the next day
+                ->dateTimeBetween('-1 month', '+1 day') // A date in the range between the past month or the next day
         ];
     }
 }
