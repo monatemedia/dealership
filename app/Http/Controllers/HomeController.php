@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Car;
+use App\Models\CarImage;
 use App\Models\Manufacturer;
 use App\Models\Model;
 use App\Models\User;
