@@ -104,4 +104,10 @@ class Car extends Model
         // This car belongs to many users' watchlist
         return $this->belongsToMany(User::class, 'favourite_cars', 'car_id', 'user_id');
     }
+
+    // Create a method to get the create date
+    public function getCreateDate(): string
+    {
+        return (new \Carbon\Carbon($this->created_at))->format('Y-m-d');
+    }
 }

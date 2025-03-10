@@ -26,11 +26,12 @@ class CarFactory extends Factory
         // Fetch a random user first to ensure we get a phone number
         $user = User::inRandomOrder()->first();
 
+        // Fetch a random manufacturer
+        $manufacturer = Manufacturer::inRandomOrder()->first();
+
         return [
             // Manufacturer
-            'manufacturer_id' => Manufacturer::inRandomOrder() // Get random manufacturer
-                ->first() // Get first manufacturer
-                ->id, // Get manufacturer id
+            'manufacturer_id' => $manufacturer->id, // Assign the manufacturer ID
 
             // Model
             'model_id' => function (array $attributes) {

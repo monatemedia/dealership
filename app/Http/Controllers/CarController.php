@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Car;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class CarController extends Controller
@@ -12,7 +13,19 @@ class CarController extends Controller
      */
     public function index()
     {
-        return view('car.index');
+        // Find cars for authenticated user
+        // TODO We'll come back to this later
+        $cars = User::find(5) // Select the user
+            ->cars() // Select the cars that belong to the user
+            ->orderBy('created_at', 'desc') // Order by created_at column
+            ->get(); // Get the results
+
+        return view(
+            'car.index', // Return the view
+            [
+                'cars' => $cars // Pass the cars to the view
+            ]
+        );
     }
 
     /**
@@ -36,7 +49,9 @@ class CarController extends Controller
      */
     public function show(Car $car)
     {
-        return view('car.show');
+        return view('car.show', [
+            'car' => $car
+        ]);
     }
 
     /**
