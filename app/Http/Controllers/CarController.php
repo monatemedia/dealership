@@ -96,4 +96,17 @@ class CarController extends Controller
             'carCount' => $carCount
         ]);
     }
+
+    public function watchlist()
+    {
+        // Find favourite cars for authenticated user
+        // TODO We'll come back to this later
+        $cars = User::find(4)->favouriteCars; // Select the user and get the favourite cars
+        return view(
+            'car.watchlist', // Return the view
+            [
+                'cars' => $cars // Pass the cars to the view
+            ]
+        );
+    }
 }
