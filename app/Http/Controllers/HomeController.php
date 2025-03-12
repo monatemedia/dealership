@@ -14,11 +14,12 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Get the latest 30 cars
-        $cars = Car::where('published_at', '<', now()) // Only show cars that are published
-            ->orderBy('published_at', 'desc') // Order by the newest cars
-            ->limit(30) // Limit to 30 cars
-            ->get(); // Get the cars
+        // Select latest published 30 cars and sort them by published_at date
+        $cars = Car::with(['city', 'carType', 'fuelType', 'manufacturer', 'model', 'primaryImage']) // Eager load the relationships
+            ->where('published_at', '<', now()) // Only show cars that are published
+            ->orderBy('published_at', 'desc') // Order by the published_at date
+            ->limit(30) // Limit the results to 30
+            ->get(); // Get the results
 
         // Return the view with the cars
         return view(
