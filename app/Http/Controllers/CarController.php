@@ -98,46 +98,10 @@ class CarController extends Controller
             ->where('published_at', '<', now()) // Only show cars that are published
             ->orderBy('published_at', 'desc'); // Order by the published_at date
 
-        $query
-            // Join the cities table
-            ->join( // Create a join
-                'cities', // Table name to join
-                'cities.id', // Column name in the joined table
-                '=', // Operator
-                'cars.city_id' // Column name in the current table
-            )
-            // Join the car_types table
-            ->join( // Create a join
-                'car_types', // Table name to join
-                'car_types.id', // Column name in the joined table
-                '=', // Operator
-                'cars.car_type_id' // Column name in the current table
-            )
-            ->where( //  Filter the results by the province
-                'cities.province_id', // Where province `id`
-                3 // Equals 1
-            )
-            ->where( // Filter the results by the car type
-                'car_types.name', // Where car type `name`
-                'Sedan' // Equals `Sedan`
-            );
-
-        // $query->select( // Select the columns
-        //     'cars.*', // Select all columns from the cars table
-        //     'cities.name as city_name' // Select the city name
-        // );
-
-        // Get total count of the cars
-        $carCount = $query->count();
-
-        // Select 30 cars
-        $cars = $query->limit(30)->get();
-
-        dd($cars[0]); // Dump the first car
+        $cars = $query->paginate(15); // Paginate the results
 
         return view('car.search', [
             'cars' => $cars,
-            'carCount' => $carCount
         ]);
     }
 
