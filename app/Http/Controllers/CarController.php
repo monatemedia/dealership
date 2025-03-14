@@ -98,7 +98,7 @@ class CarController extends Controller
             ->where('published_at', '<', now()) // Only show cars that are published
             ->orderBy('published_at', 'desc'); // Order by the published_at date
 
-        $cars = $query->paginate(15); // Paginate the results
+        $cars = $query->paginate(5); // Paginate the results
 
         return view('car.search', [
             'cars' => $cars,
