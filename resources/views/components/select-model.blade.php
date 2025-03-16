@@ -3,7 +3,7 @@
     @foreach($models as $model) {{--  Iterate over models --}}
         <option
             value="{{ $model->id }}" {{-- Get Model id --}}
-            data-parent="{{ $model->manufacturer_id }}"> {{--  Get associaed model-?manufacturer_id --}}
+            data-parent="{{ $model->manufacturer_id }}"> {{--  Show only models of selected manufacturer--}}
             {{ $model->name }} {{-- Model name --}}
         </option>
     @endforeach

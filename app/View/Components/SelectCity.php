@@ -2,18 +2,22 @@
 
 namespace App\View\Components;
 
+use App\Models\City;
 use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Illuminate\View\Component;
 
 class SelectCity extends Component
 {
+    public Collection $cities;
+
     /**
      * Create a new component instance.
      */
     public function __construct()
     {
-        //
+        $this->cities = City::orderBy('name')->get();
     }
 
     /**

@@ -1,3 +1,8 @@
-<div>
-    <!-- If you do not have a consistent goal in life, you can not live it in a consistent way. - Marcus Aurelius -->
-</div>
+<select id="provinceSelect" name="province_id">
+    <option value="">Province</option> {{-- default option --}}
+    @foreach ($provinces as $province) {{-- iterate over provinces --}}
+        <option value="{{ $province->id }}"> {{-- province id --}}
+            {{ $province->name }}{{-- province name --}}
+        </option>
+    @endforeach
+</select>
