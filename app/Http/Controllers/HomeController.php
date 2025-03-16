@@ -14,7 +14,6 @@ class HomeController extends Controller
 {
     public function index()
     {
-        return response('Hello World', 201);
         // Select latest published 30 cars and sort them by published_at date
         $cars = Car::with(['city', 'carType', 'fuelType', 'manufacturer', 'model', 'primaryImage']) // Eager load the relationships
             ->where('published_at', '<', now()) // Only show cars that are published

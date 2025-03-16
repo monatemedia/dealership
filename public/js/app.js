@@ -217,8 +217,8 @@ document.addEventListener("DOMContentLoaded", function () {
   initMobileNavbar();
   imageCarousel();
   initMobileFilters();
-  initCascadingDropdown('#makerSelect', '#modelSelect');
-  initCascadingDropdown('#stateSelect', '#citySelect');
+  initCascadingDropdown('#manufacturerSelect', '#modelSelect');
+  initCascadingDropdown('#provinceSelect', '#citySelect');
   initSortingDropdown()
 
   ScrollReveal().reveal(".hero-slide.active .hero-slider-title", {
