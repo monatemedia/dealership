@@ -11,8 +11,9 @@ class CarController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        dd($request, request());
         // Find cars for authenticated user
         // TODO We'll come back to this later
         $cars = User::find(1)
@@ -22,8 +23,7 @@ class CarController extends Controller
                 'model',
                 'primaryImage'
             ])
-            ->limit(10)
-            ->get();
+            ->paginate(15); // Get the results
 
         return view(
             'car.index', // Return the view
@@ -52,7 +52,7 @@ class CarController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Car $car)
+    public function show(Request $request, Car $car)
     {
         return view('car.show', [
             'car' => $car
@@ -98,7 +98,7 @@ class CarController extends Controller
             ->where('published_at', '<', now()) // Only show cars that are published
             ->orderBy('published_at', 'desc'); // Order by the published_at date
 
-        $cars = $query->paginate(5); // Paginate the results
+        $cars = $query->paginate(15); // Paginate the results
 
         return view('car.search', [
             'cars' => $cars,
@@ -119,7 +119,7 @@ class CarController extends Controller
                 'model',
                 'primaryImage'
             ])
-            ->get(); // Get the results
+            ->paginate(15); // Get the results
 
         return view(
             'car.watchlist', // Return the view
