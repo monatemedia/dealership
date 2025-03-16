@@ -2,18 +2,23 @@
 
 namespace App\View\Components;
 
+use App\Models\FuelType;
 use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Illuminate\View\Component;
 
 class SelectFuelType extends Component
 {
+
+    public Collection $fuelTypes;
+
     /**
      * Create a new component instance.
      */
     public function __construct()
     {
-        //
+        $this->fuelTypes = FuelType::orderBy('name')->get();
     }
 
     /**

@@ -16,15 +16,7 @@
                             <x-select-city />
                         </div>
                         <div>
-                            <select name="car_type_id">
-                                <option value="">Type</option>
-                                <option value="2">Hatchback</option>
-                                <option value="6">Jeep</option>
-                                <option value="5">Minivan</option>
-                                <option value="4">Pickup Truck</option>
-                                <option value="3">SUV</option>
-                                <option value="1">Sedan</option>
-                            </select>
+                            <x-select-car-type />
                         </div>
                         <div>
                             <input type="number" placeholder="Year From" name="year_from" />
@@ -39,13 +31,7 @@
                             <input type="number" placeholder="Price To" name="price_to" />
                         </div>
                         <div>
-                            <select name="fuel_type_id">
-                                <option value="">Fuel Type</option>
-                                <option value="2">Diesel</option>
-                                <option value="3">Electric</option>
-                                <option value="1">Gasoline</option>
-                                <option value="4">Hybrid</option>
-                            </select>
+                            <x-select-fuel-type />
                         </div>
                     </div>
                     <div>
