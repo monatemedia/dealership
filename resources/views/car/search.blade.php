@@ -40,7 +40,11 @@
 
                         <!-- Find a car form -->
                         <section class="find-a-car">
-                            <form action="/s.html" method="GET" class="find-a-car-form card flex p-medium">
+                            <form
+                                action=""
+                                method="GET"
+                                class="find-a-car-form card flex p-medium"
+                            >
                                 <div class="find-a-car-inputs">
                                     <div class="form-group">
                                         <label class="mb-medium">Manufacturer</label>

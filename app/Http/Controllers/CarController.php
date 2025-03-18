@@ -6,6 +6,7 @@ use App\Models\Car;
 use App\Models\User;
 use Illuminate\Http\Request;
 
+
 class CarController extends Controller
 {
     /**
@@ -83,10 +84,23 @@ class CarController extends Controller
         //
     }
 
-    public function search()
+    public function search(Request $request) // Import request object
     {
+        // Get request data in correct format
+        $manufacturer = $request->integer('manufacturer_id');
+        $model = $request->integer('model_id');
+        $carType = $request->integer('car_type_id');
+        $fuelType = $request->integer('fuel_type_id');
+        $province = $request->integer('province_id');
+        $city = $request->integer('city_id');
+        $yearFrom = $request->integer('year_from');
+        $yearTo = $request->integer('year_to');
+        $priceFrom = $request->integer('price_from');
+        $priceTo = $request->integer('price_to');
+        $mileage = $request->integer('mileage');
+
         // Get the query builder instance with conditions
-        $query = Car::select('cars.*') // Select all columns from the cars table
+        $query = Car::where('published_at', '<', now()) // Only show cars that are published
             ->with([ // Eager load the relationships
                 'city',
                 'carType',
@@ -95,8 +109,55 @@ class CarController extends Controller
                 'model',
                 'primaryImage'
             ])
-            ->where('published_at', '<', now()) // Only show cars that are published
             ->orderBy('published_at', 'desc'); // Order by the published_at date
+
+        // Filtering is done after the initial query!
+        if ($manufacturer) { // If manufacturer is recieved
+            $query->where('manufacturer_id', $manufacturer); // then where manufacturer
+        }
+        if ($model) {
+            $query->where('model_id', $model);
+        }
+        /**
+         ** Filtering by province is tricky, because cars do not have a `province_id`
+         ** Here we need to implement a join to
+         **/
+        if ($province) { // If province is recieved
+            $query->join( // Do a join on
+                'cities', // 'cities'
+                'cities.id', // where 'cities.id`
+                '=', // is equal to
+                'cars.city_id' // 'cars.city_id'
+            )
+                ->where( // where
+                    'cities.province_id', // 'cities.province_id'
+                    $province
+                ); // matches the $province from the search
+        }
+        if ($city) {
+            $query->where('city_id', $city);
+        }
+        if ($carType) {
+            $query->where('car_type_id', $carType);
+        }
+        if ($fuelType) {
+            $query->where('fuel_type_id', $fuelType);
+        }
+        if ($yearFrom) {
+            $query->where('year', '>=', $yearFrom);
+        }
+        if ($yearTo) {
+            $query->where('year', '<=', $yearTo);
+        }
+        if ($priceFrom) {
+            $query->where('price', '>=', $priceFrom);
+        }
+        if ($priceTo) {
+            $query->where('price', '<=', $priceTo);
+        }
+        if ($mileage) {
+            $query->where('mileage', '<=', $mileage);
+        }
 
         $cars = $query->paginate(15); // Paginate the results
 
