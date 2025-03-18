@@ -4,7 +4,7 @@
         <option
             value="{{ $city->id }}"{{-- get city id --}}
             data-parent="{{ $city->province_id }}" {{-- only show if cities is selected province --}}
-            >
+            @selected($attributes->get('value') == $city->id)>
             {{ $city->name }} {{-- city name --}}
         </option>
     @endforeach

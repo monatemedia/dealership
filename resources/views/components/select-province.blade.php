@@ -1,8 +1,9 @@
 <select id="provinceSelect" name="province_id">
-    <option value="">Province</option> {{-- default option --}}
-    @foreach ($provinces as $province) {{-- iterate over provinces --}}
-        <option value="{{ $province->id }}"> {{-- province id --}}
-            {{ $province->name }}{{-- province name --}}
+    <option value="">Province</option>
+    @foreach ($provinces as $province)
+        <option value="{{ $province->id }}"
+            @selected($attributes->get('value') == $province->id)>
+            {{ $province->name }}
         </option>
     @endforeach
 </select>
