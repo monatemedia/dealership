@@ -14,22 +14,15 @@
                         <div class="row">
                             <div class="col">
                                 <div class="form-group">
-                                    <label>Maker</label>
-                                    <select>
-                                        <option value="">Maker</option>
-                                        <option value="bmw">BMW</option>
-                                        <option value="lexus">Lexus</option>
-                                        <option value="mercedes">Mercedes</option>
-                                    </select>
+                                    <label>Manufacturer</label>
+                                    <x-select-manufacturer />
                                     <p class="error-message">This field is required</p>
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="form-group">
                                     <label>Model</label>
-                                    <select>
-                                        <option value="">Model</option>
-                                    </select>
+                                    <x-select-model />
                                 </div>
                             </div>
                             <div class="col">
@@ -105,19 +98,19 @@
                             <div class="col">
                                 <div class="form-group">
                                     <label>Price</label>
-                                    <input type="number" placeholder="Price" />
+                                    <input type="number" placeholder="Price" name="price"/>
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="form-group">
                                     <label>Vin Code</label>
-                                    <input placeholder="Vin Code" />
+                                    <input placeholder="Vin Code" name="vin"/>
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="form-group">
                                     <label>Mileage (ml)</label>
-                                    <input placeholder="Mileage" />
+                                    <input placeholder="Mileage" name="mileage"/>
                                 </div>
                             </div>
                         </div>
@@ -153,18 +146,16 @@
                         <div class="row">
                             <div class="col">
                                 <div class="form-group">
-                                    <label>State/Region</label>
+                                    <label>Province</label>
                                     <select>
-                                        <option value="">State/Region</option>
+                                        <option value="">Province</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="form-group">
                                     <label>City</label>
-                                    <select>
-                                        <option value="">City</option>
-                                    </select>
+                                    <x-select-city />
                                 </div>
                             </div>
                         </div>
@@ -172,89 +163,24 @@
                             <div class="col">
                                 <div class="form-group">
                                     <label>Address</label>
-                                    <input placeholder="Address" />
+                                    <input placeholder="Address" name="address" />
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="form-group">
                                     <label>Phone</label>
-                                    <input placeholder="Phone" />
+                                    <input placeholder="Phone" name="phone"/>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <div class="row">
-                                <div class="col">
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="air_conditioning" value="1" />
-                                        Air Conditioning
-                                    </label>
-
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="power_windows" value="1" />
-                                        Power Windows
-                                    </label>
-
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="power_door_locks" value="1" />
-                                        Power Door Locks
-                                    </label>
-
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="abs" value="1" />
-                                        ABS
-                                    </label>
-
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="cruise_control" value="1" />
-                                        Cruise Control
-                                    </label>
-
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="bluetooth_connectivity" value="1" />
-                                        Bluetooth Connectivity
-                                    </label>
-                                </div>
-                                <div class="col">
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="remote_start" value="1" />
-                                        Remote Start
-                                    </label>
-
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="gps_navigation" value="1" />
-                                        GPS Navigation System
-                                    </label>
-
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="heated_seats" value="1" />
-                                        Heated Seats
-                                    </label>
-
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="climate_control" value="1" />
-                                        Climate Control
-                                    </label>
-
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="rear_parking_sensors" value="1" />
-                                        Rear Parking Sensors
-                                    </label>
-
-                                    <label class="checkbox">
-                                        <input type="checkbox" name="leather_seats" value="1" />
-                                        Leather Seats
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
+                            <x-checkbox-car-features />
                         <div class="form-group">
                             <label>Detailed Description</label>
-                            <textarea rows="10"></textarea>
+                            <textarea rows="10" name="description"></textarea>
                         </div>
                         <div class="form-group">
                             <label class="checkbox">
-                                <input type="checkbox" name="published" />
+                                <input type="date" name="published_at" />
                                 Published
                             </label>
                         </div>
