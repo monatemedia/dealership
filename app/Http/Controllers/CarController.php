@@ -98,6 +98,7 @@ class CarController extends Controller
         $priceFrom = $request->integer('price_from');
         $priceTo = $request->integer('price_to');
         $mileage = $request->integer('mileage');
+        $sort = $request->input('sort', '-published_at');
 
         // Get the query builder instance with conditions
         $query = Car::where('published_at', '<', now()) // Only show cars that are published
@@ -108,8 +109,7 @@ class CarController extends Controller
                 'manufacturer',
                 'model',
                 'primaryImage'
-            ])
-            ->orderBy('published_at', 'desc'); // Order by the published_at date
+            ]);
 
         // Filtering is done after the initial query!
         if ($manufacturer) { // If manufacturer is recieved
@@ -159,7 +159,20 @@ class CarController extends Controller
             $query->where('mileage', '<=', $mileage);
         }
 
-        $cars = $query->paginate(15); // Paginate the results
+        // If sorting starts with '-'
+        if (str_starts_with($sort, '-')) {
+            // Take field name without the '-' and put into $sortBy
+            $sortBy = substr($sort, 1);
+            // On search query call OrderBy descending
+            $query->orderBy($sortBy, 'desc');
+        } else {
+            // Else OrderBy ascending
+            $query->orderBy($sort);
+        }
+
+        $cars = $query
+            ->paginate(15)
+            ->withQueryString();
 
         return view('car.search', [
             'cars' => $cars,

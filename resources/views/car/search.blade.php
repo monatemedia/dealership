@@ -21,6 +21,12 @@
                         <option value="">Order By</option>
                         <option value="price">Price Asc</option>
                         <option value="-price">Price Desc</option>
+                        <option value="year">Year Asc</option>
+                        <option value="-year">Year Desc</option>
+                        <option value="mileage">Mileage Asc</option>
+                        <option value="-mileage">Mileage Desc</option>
+                        <option value="published_at">Newest at the top</option>
+                        <option value="-published_at">Oldest at the top</option>
                     </select>
                 </div>
                 <div class="search-car-results-wrapper">
@@ -125,13 +131,18 @@
                     </div>
 
                     <div class="search-cars-results">
-                        <div class="car-items-listing">
-                            @foreach($cars as $car)
-                                <x-car-item :$car />
-                            @endforeach
-                        </div>
+                        @if ($cars->count())
+                            <div class="car-items-listing">
+                                @foreach($cars as $car)
+                                    <x-car-item :$car />
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center p-large">
+                                No cars were found by given search criteria.
+                            </div>
+                        @endif
                         {{ $cars->onEachSide(1)->links() }}
-
                     </div>
                 </div>
             </div>
