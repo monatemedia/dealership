@@ -14,7 +14,6 @@ class CarController extends Controller
      */
     public function index(Request $request)
     {
-        dd($request, request());
         // Find cars for authenticated user
         // TODO We'll come back to this later
         $cars = User::find(1)
@@ -47,7 +46,20 @@ class CarController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+
+        // Assign request->all() to variable called $data
+        $data = $request->all();
+
+        // Provide User ID
+        $data['user_id'] = 1;
+
+        // dd($data);
+
+        // On Car call create method and provide the data
+        Car::create($data);
+
+        // Redirect to car.index route
+        return redirect()->route('car.index');
     }
 
     /**
