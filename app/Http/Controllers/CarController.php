@@ -50,13 +50,17 @@ class CarController extends Controller
         // Assign request->all() to variable called $data
         $data = $request->all();
 
+        // Get features data
+        $featuresData = $data['features'];
+
         // Provide User ID
         $data['user_id'] = 1;
 
-        // dd($data);
-
         // On Car call create method and provide the data
-        Car::create($data);
+        $car = Car::create($data);
+
+        // Create features
+        $car->features()->create($featuresData);
 
         // Redirect to car.index route
         return redirect()->route('car.index');
@@ -67,6 +71,12 @@ class CarController extends Controller
      */
     public function show(Request $request, Car $car)
     {
+        // If car is 'published_at' does not exist
+        if (!$car->published_at) {
+            // Use not found method
+            abort(404);
+        }
+
         return view('car.show', [
             'car' => $car
         ]);
