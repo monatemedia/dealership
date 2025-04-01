@@ -20,7 +20,7 @@
                                 <tr>
                                     <td>
                                         <img
-                                            src="{{ $car->primaryImage?->image_path ?: '/img/no_image.png' }}"
+                                            src="{{ $car->primaryImage?->getUrl() ?: '/img/no_image.png' }}"
                                             alt=""
                                             class="my-cars-img-thumbnail"
                                         />

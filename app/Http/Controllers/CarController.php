@@ -48,10 +48,9 @@ class CarController extends Controller
     {
 
         // Assign request->all() to variable called $data
-        $data = $request->all();
-
-        // Get features data
-        $featuresData = $data['features'];
+        $data = $request->all(); // Get all request data
+        $featuresData = $data['features']; // Get features data
+        $images = $request->file('images') ?: []; // Get images data
 
         // Provide User ID
         $data['user_id'] = 1;
@@ -61,6 +60,15 @@ class CarController extends Controller
 
         // Create features
         $car->features()->create($featuresData);
+
+        // Iterate through the images
+        foreach ($images as $i => $image) {
+            $path = $image->store('images', 'public'); // Store the image in the public disk
+            $car->images()->create([ // Create a new image record
+                'image_path' => $path, // Set the path to the image
+                'position' => $i + 1 // Set the position to the index + 1
+            ]);
+        }
 
         // Redirect to car.index route
         return redirect()->route('car.index');

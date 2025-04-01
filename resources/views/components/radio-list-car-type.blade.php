@@ -12,3 +12,4 @@
             <div class="row">
         @endif
     @endforeach
+</div>
