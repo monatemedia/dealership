@@ -46,9 +46,17 @@ class CarController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate the request data
+        $data = $request->validate([
+            'manufacturer_id' => 'required',
+            'model_id' => 'required',
+            // Use an array to combine multiple validation rules together
+            'year' => ['required', 'integer', 'min:1900', 'max:' . date('Y')],
+        ]);
 
-        // Assign request->all() to variable called $data
-        $data = $request->all(); // Get all request data
+        // Dump the data
+        dd($data);
+
         $featuresData = $data['features']; // Get features data
         $images = $request->file('images') ?: []; // Get images data
 
