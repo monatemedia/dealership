@@ -4,7 +4,7 @@
         <option
             value="{{ $manufacturer->id }}"
             @selected($attributes->get('value') == $manufacturer->id)>
-                {{ $manufacturer->name }} {{-- get manufacturer name --}}
+                {{ $manufacturer->name }}
 	    </option>
     @endforeach
 </select>

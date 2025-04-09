@@ -15,7 +15,7 @@
                             <div class="col">
                                 <div class="form-group @error('manufacturer_id') has-error @enderror">
                                     <label>Manufacturer</label>
-                                    <x-select-manufacturer />
+                                    <x-select-manufacturer :value="old('manufacturer_id')"/>
                                     <p class="error-message">
                                         {{ $errors->first('manufacturer_id') }}
                                     </p>
@@ -24,7 +24,7 @@
                             <div class="col">
                                 <div class="form-group @error('model_id') has-error @enderror">
                                     <label>Model</label>
-                                    <x-select-model />
+                                    <x-select-model :value="old('manufacturer_id')"/>
                                     <p class="error-message">
                                         {{ $errors->first('model_id') }}
                                     </p>
