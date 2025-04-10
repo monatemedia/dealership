@@ -9,6 +9,7 @@
                 class="card add-new-car-form"
             >
                 @csrf
+                @dump($errors)
                 <div class="form-content">
                     <div class="form-details">
                         <div class="row">

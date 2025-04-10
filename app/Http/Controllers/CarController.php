@@ -6,6 +6,7 @@ use App\Models\Car;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\File;
 
 
 class CarController extends Controller
@@ -52,32 +53,13 @@ class CarController extends Controller
         $data = $request->validate([
             'manufacturer_id' => 'required',
             'model_id' => 'required',
-            // Use an array to combine multiple validation rules together
             'year' => ['required', 'integer', 'min:1900', 'max:' . date('Y')],
+            'features' => 'array',
+            'features.*' => 'string',
+            'images' => 'array',
+            'images.*' => File::image()
+                ->max(2048)
         ]);
-
-        $validator = Validator::make($request->all(), [
-            'manufacturer_id' => 'required',
-            'model_id' => 'required',
-            // Use an array to combine multiple validation rules together
-            'year' => ['required', 'integer', 'min:1900', 'max:' . date('Y')],
-        ]);
-
-        // Check if validation fails, redirect user back to create page
-        if ($validator->fails()) {
-            // Do something first
-            // Then redirect
-            return redirect(route('car.create')) // Redirect
-                ->withErrors($validator) // Include the error messages
-                ->withInput(); // Include the inputs recieved in the form
-        }
-        ;
-
-        // Get the request data
-        $data = $validator->validated();
-
-        // Get only selected data
-        $data = $validator->safe()->only(['manufacturer_id', 'model_id']);
 
         // Dump the data
         dd($data);
