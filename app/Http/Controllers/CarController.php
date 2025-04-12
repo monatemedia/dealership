@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Car;
 use App\Models\User;
+use App\Rules\Phone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\File;
@@ -40,7 +41,6 @@ class CarController extends Controller
      */
     public function create(Request $request)
     {
-        dump($request->old('manufacturer_id'));
         return view('car.create');
     }
 
@@ -49,20 +49,27 @@ class CarController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the request data
+        // Get request data
         $data = $request->validate([
             'manufacturer_id' => 'required',
             'model_id' => 'required',
             'year' => ['required', 'integer', 'min:1900', 'max:' . date('Y')],
+            'price' => 'required|integer|min:0',
+            'vin' => 'required|string|size:17',
+            'mileage' => 'required|integer|min:0',
+            'car_type_id' => 'required|exists:car_types,id',
+            'fuel_type_id' => 'required|exists:fuel_types,id',
+            'city_id' => 'required|exists:cities,id',
+            'address' => 'required|string',
+            'phone' => 'required|string|min:10',
+            'description' => 'nullable|string',
+            'published_at' => 'nullable|string',
             'features' => 'array',
             'features.*' => 'string',
             'images' => 'array',
             'images.*' => File::image()
                 ->max(2048)
         ]);
-
-        // Dump the data
-        dd($data);
 
         $featuresData = $data['features']; // Get features data
         $images = $request->file('images') ?: []; // Get images data

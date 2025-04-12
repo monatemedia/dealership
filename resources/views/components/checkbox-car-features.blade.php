@@ -17,7 +17,7 @@
 @endphp
 
 {{-- Iterate over features --}}
-<div class="form-group">
+<div class="form-group @error('features') has-error @enderror">
     <div class="row">
         <div class="col">
             @foreach ($features as $key => $feature)
