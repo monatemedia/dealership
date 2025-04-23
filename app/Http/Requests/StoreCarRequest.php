@@ -32,6 +32,7 @@ class StoreCarRequest extends FormRequest
             'mileage' => 'required|integer|min:0',
             'car_type_id' => 'required|exists:car_types,id',
             'fuel_type_id' => 'required|exists:fuel_types,id',
+            'province_id' => 'required|exists:provinces,id',
             'city_id' => 'required|exists:cities,id',
             'address' => 'required|string',
             'phone' => 'required|string|min:10',

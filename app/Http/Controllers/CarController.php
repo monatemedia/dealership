@@ -81,7 +81,7 @@ class CarController extends Controller
      */
     public function show(Request $request, Car $car)
     {
-        // If car is 'published_at' does not exist
+        // If car 'published_at' does not exist
         if (!$car->published_at) {
             // Use not found method
             abort(404);
@@ -97,7 +97,9 @@ class CarController extends Controller
      */
     public function edit(Car $car)
     {
-        return view('car.edit');
+        return view('car.edit', [
+            'car' => $car
+        ]);
     }
 
     /**

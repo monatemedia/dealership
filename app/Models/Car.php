@@ -110,4 +110,11 @@ class Car extends Model
     {
         return (new \Carbon\Carbon($this->created_at))->format('Y-m-d');
     }
+
+    // Create a method to get the page title
+    public function getTitle()
+    {
+        // Return the car title
+        return $this->year . ' - ' . $this->manufacturer->name . ' ' . $this->model->name;
+    }
 }

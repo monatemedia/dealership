@@ -25,7 +25,7 @@
                                             class="my-cars-img-thumbnail"
                                         />
                                     </td>
-                                    <td>{{ $car->year}} - {{ $car->manufacturer->name}} {{ $car->model->name }}</td>
+                                    <td>{{ $car->getTitle() }}</td>
                                     <td>{{ $car->getCreateDate() }}</td>
                                     <td>{{ $car->published_at ? 'Yes' : 'No'}}</td>
                                     {{-- Show the edit, images and delete buttons --}}
