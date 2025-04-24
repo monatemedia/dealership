@@ -105,9 +105,29 @@ class CarController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(StoreCarRequest $request, Car $car)
     {
-        //
+        $data = $request->validated(); // Get request data
+        $features = array_merge([
+            'abs' => 0,
+            'air_conditioning' => 0,
+            'power_windows' => 0,
+            'power_door_locks' => 0,
+            'cruise_control' => 0,
+            'bluetooth_connectivity' => 0,
+            'remote_start' => 0,
+            'gps_navigation' => 0,
+            'heated_seats' => 0,
+            'climate_control' => 0,
+            'rear_parking_sensors' => 0,
+            'leather_seats' => 0,
+        ], $data['features'] ?? []);
+        // Update car details
+        $car->update($data);
+        // Update Car features
+        $car->features()->update($features);
+        // Redirect user back to car listing page
+        return redirect()->route('car.index');
     }
 
     /**
