@@ -139,6 +139,9 @@ class CarController extends Controller
         return redirect()->route('car.index');
     }
 
+    /**
+     * Search for cars
+     */
     public function search(Request $request) // Import request object
     {
         // Get request data in correct format
@@ -234,6 +237,9 @@ class CarController extends Controller
         ]);
     }
 
+    /**
+     * Show the watchlist.
+     */
     public function watchlist()
     {
         // Find favourite cars for authenticated user
@@ -256,5 +262,21 @@ class CarController extends Controller
                 'cars' => $cars // Pass the cars to the view
             ]
         );
+    }
+
+    /**
+     * Show the images of a car.
+     */
+    public function carImages(Car $car)
+    {
+        return view('car.images', ['car' => $car]);
+    }
+
+    /**
+     * Update the images of a car.
+     */
+    public function updateImages(Request $request, Car $car)
+    {
+        return "Update images for car {$car->id}"; // TODO
     }
 }

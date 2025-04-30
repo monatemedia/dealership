@@ -13,6 +13,10 @@ Route::get('/car/search', [CarController::class, 'search'])
 Route::get('/car/watchlist', [CarController::class, 'watchlist'])
     ->name('car.watchlist');
 Route::resource('car', CarController::class);
+Route::get('/car/{car}/images', [CarController::class, 'carImages'])
+    ->name('car.images');
+Route::put('/car/{car}/images', [CarController::class, 'updateImages'])
+    ->name('car.updateImages');
 
 Route::get('/signup', [SignupController::class, 'create'])->name('signup');
 Route::get('/login', [LoginController::class, 'create'])->name('login');

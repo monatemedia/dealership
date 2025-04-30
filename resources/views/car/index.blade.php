@@ -41,7 +41,7 @@
 
                                             edit
                                         </a>
-                                        <a href="car_images.html" class="btn btn-edit inline-flex items-center">
+                                        <a href="{{ route('car.images', $car) }}" class="btn btn-edit inline-flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor"
                                                 style="width: 12px; margin-right: 5px">
