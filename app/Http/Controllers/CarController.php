@@ -6,7 +6,7 @@ use App\Http\Requests\StoreCarRequest;
 use App\Models\Car;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 
 class CarController extends Controller
@@ -277,6 +277,37 @@ class CarController extends Controller
      */
     public function updateImages(Request $request, Car $car)
     {
-        return "Update images for car {$car->id}"; // TODO
+        // Get Validated data of delete images and positions
+        $data = $request->validate([
+            'delete_images' => 'array',
+            'delete_images.*' => 'integer',
+            'positions' => 'array',
+            'positions.*' => 'integer',
+        ]);
+
+        $deleteImages = $data['delete_images'] ?? [];
+        $positions = $data['positions'] ?? [];
+
+        // Select images to delete
+        $imagesToDelete = $car->images()->whereIn('id', $deleteImages)->get();
+
+        // Iterate over images to delete and delete them from file system
+        foreach ($imagesToDelete as $image) {
+            $path = str_replace('public/', '', $image->image_path);
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        // Delete images from the database
+        $car->images()->whereIn('id', $deleteImages)->delete();
+
+        // Iterate over positions and update position for each image, by its ID
+        foreach ($positions as $id => $position) {
+            $car->images()->where('id', $id)->update(['position' => $position]);
+        }
+
+        // Redirect back to car.images route
+        return redirect()->back();
     }
 }

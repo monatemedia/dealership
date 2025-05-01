@@ -95,7 +95,7 @@ class Car extends Model
     public function images(): HasMany
     {
         // Return that the `Car` object has many `CarImage` objects
-        return $this->hasMany(CarImage::class, 'car_id'); // car_id is optional
+        return $this->hasMany(CarImage::class, 'car_id')->orderBy('position');
     }
 
     // Define method for users to add cars to watchlist
