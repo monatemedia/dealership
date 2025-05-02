@@ -17,6 +17,8 @@ Route::get('/car/{car}/images', [CarController::class, 'carImages'])
     ->name('car.images');
 Route::put('/car/{car}/images', [CarController::class, 'updateImages'])
     ->name('car.updateImages');
+Route::post('/car/{car}/images', [CarController::class, 'addImages'])
+    ->name('car.addImages');
 
 Route::get('/signup', [SignupController::class, 'create'])->name('signup');
 Route::get('/login', [LoginController::class, 'create'])->name('login');

@@ -310,4 +310,9 @@ class CarController extends Controller
         // Redirect back to car.images route
         return redirect()->back();
     }
+
+    public function addImages(Request $request, Car $car)
+    {
+        //...
+    }
 }
