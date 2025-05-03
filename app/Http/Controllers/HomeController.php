@@ -9,10 +9,11 @@ use App\Models\Model;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\Sequence;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         // Select latest published 30 cars and sort them by published_at date
         $cars = Car::with(['city', 'carType', 'fuelType', 'manufacturer', 'model', 'primaryImage']) // Eager load the relationships
