@@ -73,7 +73,8 @@ class CarController extends Controller
         }
 
         // Redirect to car.index route
-        return redirect()->route('car.index');
+        return redirect()->route('car.index')
+            ->with('success', 'Car was created');
     }
 
     /**
@@ -126,8 +127,11 @@ class CarController extends Controller
         $car->update($data);
         // Update Car features
         $car->features()->update($features);
-        // Redirect user back to car listing page
-        return redirect()->route('car.index');
+        // Flash success message
+        $request->session()->flash('success', 'Car was updated');
+        // Redirect user back to car listing page with success message
+        return redirect()->route('car.index')
+            ->with('success', 'Car was updated');
     }
 
     /**
@@ -136,7 +140,8 @@ class CarController extends Controller
     public function destroy(Car $car)
     {
         $car->delete();
-        return redirect()->route('car.index');
+        return redirect()->route('car.index')
+            ->with('success', 'Car was deleted');
     }
 
     /**
@@ -308,7 +313,8 @@ class CarController extends Controller
         }
 
         // Redirect back to car.images route
-        return redirect()->back();
+        return redirect()->back()
+            ->with('success', 'Car images were updated');
     }
 
     /**
@@ -330,6 +336,7 @@ class CarController extends Controller
             ]);
             $position++;
         }
-        return redirect()->back();
+        return redirect()->back()
+            ->with('success', 'New images were added');
     }
 }
