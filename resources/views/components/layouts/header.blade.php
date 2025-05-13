@@ -42,7 +42,8 @@
                         <a href="watchlist.html">My Favourite Cars</a>
                     </li>
                     <li>
-                        <form action="#" method="post">
+                        <form action="{{ route('logout') }}" method="post">
+                            @csrf
                             <button>Logout</button>
                         </form>
                     </li>
