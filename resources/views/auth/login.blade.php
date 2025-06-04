@@ -22,7 +22,7 @@
             {{ $errors->first('password') }}
         </div>
         <div class="text-right mb-medium">
-            <a href="/" {{-- TODO "{{ route('password.request') }}" --}}
+            <a href="{{ route('password.request') }}"
                 class="auth-page-password-reset">
                 Forgot Password?
             </a>

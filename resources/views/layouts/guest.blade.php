@@ -1,4 +1,4 @@
-@props(['title' => '', 'bodyClass' => ''])
+@props(['title' => '', 'bodyClass' => '', 'socialAuth' => true])
 
 <x-base-layout :$title :$bodyClass>
     <main>
@@ -11,17 +11,30 @@
                         </a>
                     </div>
 
+                    @session('success')
+                        <div class="my-large">
+                            <div class="success-message">
+                                {{ session('success') }}
+                            </div>
+                        </div>
+                    @endsession
+
                     {{ $slot }}
 
+                    @if ($socialAuth)
                     <div class="grid grid-cols-2 gap-1 social-auth-buttons">
                         <!-- Google Button -->
                         <x-google-button />
                         <!-- FaceBook Button -->
                         <x-fb-button />
                     </div>
+                    @endif
+
+                    @isset($footerLink)
                     <div class="login-text-dont-have-account">
                         {{ $footerLink }}
                     </div>
+                    @endisset
 
 
                 </div>
