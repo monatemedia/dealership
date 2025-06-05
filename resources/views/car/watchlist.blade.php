@@ -19,6 +19,13 @@
                     <x-car-item :car="$car" :isInWatchlist="true"/>
                 @endforeach
             </div>
+
+            @if ($cars->count() === 0)
+                <div class="text-center p-large">
+                    You don't have any favourite cars.
+                </div>
+            @endif
+
             {{ $cars->onEachSide(1)->links() }}
           </div>
         </section>
