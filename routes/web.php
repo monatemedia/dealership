@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\SignupController;
+use App\Http\Controllers\SocialiteController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -71,3 +72,7 @@ Route::post('/email/verification-notification', [EmailVerifyController::class, '
     // It is called when the user clicks on the "Resend Verification Email" button
     // in the verification notice page
     ->name('verification.send');
+
+Route::get('/login/oauth/{provider}', [SocialiteController::class, 'redirectToProvider'])
+    ->name('login.oauth');
+Route::get('/callback/oauth/{provider}', [SocialiteController::class, 'handleCallback']);
