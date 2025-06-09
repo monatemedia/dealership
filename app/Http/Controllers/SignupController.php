@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -46,8 +48,18 @@ class SignupController extends Controller
             'phone' => $request->phone,
             'password' => Hash::make($request->password)
         ]);
+        // Send Email Verification
+        event(new Registered($user));
+        // Log the user in
+        // This will automatically create a session for the user
+        // and set the user as the authenticated user
+        // This is done so that the user can access the home page
+        // and see the success message
+        // without having to log in again
+        Auth::login($user);
         // Redirect to home page with flash message
         return redirect()->route('home')
-            ->with('success', 'Account created successfully');
+            ->with('success', 'Account created Successfully. Please check your email
+        to verify your account');
     }
 }

@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
-
+// Add Implement HasMiddleware to the CarController
 class CarController extends Controller
 {
     /**
