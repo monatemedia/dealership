@@ -26,7 +26,7 @@ class LoginController extends Controller
             // and redirect user to home page. But if user is coming from another page to login page, redirect to that
             // intended page
             return redirect()->intended(route('home'))
-                ->with('success', 'Welcome Back');
+                ->with('success', 'Welcome back, ' . Auth::user()->name);
         }
         // If attempt was not successful, redirect back into login form with error on email and with email input data
         return redirect()->back()->withErrors([

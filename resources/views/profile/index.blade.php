@@ -18,7 +18,8 @@
                     <div class="form-group @error('email') has-error @enderror">
                         <label>Email</label>
                         <input type="text" name="email" placeholder="Your Email"
-                                    value="{{ old('email', $user->email) }}">
+                                    value="{{ old('email', $user->email) }}"
+                                    @disabled($user->isOauthUser())>
                         <p class="error-message">
                             {{ $errors->first('email') }}
                         </p>
