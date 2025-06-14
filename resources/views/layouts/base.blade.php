@@ -17,12 +17,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
         integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css"
-      rel="stylesheet"
-    /> -->
-
-    <link rel="stylesheet" href="/css/app.css" />{{-- From resources/css/app.css --}}
+    <style>
+    {!! \Illuminate\Support\Facades\Vite::content('resources/css/app.css') !!}
+    </style>
+    @vite(['resources/js/app.js'])
 </head>
 
 <body @if ($bodyClass) class="{{ $bodyClass }}" @endif>
@@ -32,7 +30,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/scrollReveal.js/4.0.9/scrollreveal.js"
         integrity="sha512-XJgPMFq31Ren4pKVQgeD+0JTDzn0IwS1802sc+QTZckE6rny7AN2HLReq6Yamwpd2hFe5nJJGZLvPStWFv5Kww=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script> {{-- For scroll reveal animations --}}
-    <script src="/js/app.js"></script> {{-- From resources/js/app.js --}}
 </body>
 
 </html>
