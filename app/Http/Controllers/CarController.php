@@ -176,7 +176,8 @@ class CarController extends Controller
                 'fuelType',
                 'manufacturer',
                 'model',
-                'primaryImage'
+                'primaryImage',
+                'favouredUsers'
             ]);
 
         // Filtering is done after the initial query!
