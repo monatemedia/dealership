@@ -56,7 +56,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function favouriteCars(): BelongsToMany
     {
         // This user has many cars in his watchlist
-        return $this->belongsToMany(Car::class, 'favourite_cars', 'user_id', 'car_id');
+        return $this->belongsToMany(Car::class, 'favourite_cars')
+            // The pivot table is favourite_cars
+            ->withPivot('id')
+            ->orderBy('favourite_cars.id', 'desc');
     }
 
     // Define method for users to add cars they own return type
