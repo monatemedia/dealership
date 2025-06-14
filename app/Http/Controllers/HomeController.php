@@ -3,12 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Car;
-use App\Models\CarImage;
-use App\Models\Manufacturer;
-use App\Models\Model;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
