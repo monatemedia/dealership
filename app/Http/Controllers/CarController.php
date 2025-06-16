@@ -95,7 +95,7 @@ class CarController extends Controller
      */
     public function edit(Car $car)
     {
-        Gate::authorize('update-car', $car);
+        Gate::authorize('update', $car);
         return view('car.edit', [
             'car' => $car
         ]);
@@ -138,9 +138,7 @@ class CarController extends Controller
      */
     public function destroy(Car $car)
     {
-        if ($car->user_id !== Auth::id()) {
-            abort(403);
-        }
+        Gate::authorize('delete', $car);
         $car->delete();
         return redirect()->route('car.index')
             ->with('success', 'Car was deleted');
