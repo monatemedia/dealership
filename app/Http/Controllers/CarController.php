@@ -20,7 +20,7 @@ class CarController extends Controller
         // Find cars for authenticated user
         $cars = $request->user()
             ->cars()
-            ->with(['primaryImage', 'maker', 'model'])
+            ->with(['primaryImage', 'manufacturer', 'model'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
@@ -37,6 +37,7 @@ class CarController extends Controller
      */
     public function create(Request $request)
     {
+        Gate::authorize('create', Car::class);
         return view('car.create');
     }
 
@@ -45,6 +46,9 @@ class CarController extends Controller
      */
     public function store(StoreCarRequest $request)
     {
+        // Authorize the user to create a car
+        Gate::authorize('create', Car::class);
+
         // Get request data
         $data = $request->validated();
 
@@ -248,6 +252,8 @@ class CarController extends Controller
      */
     public function carImages(Car $car)
     {
+
+        Gate::authorize('update', $car);
         return view('car.images', ['car' => $car]);
     }
 
@@ -256,9 +262,7 @@ class CarController extends Controller
      */
     public function updateImages(Request $request, Car $car)
     {
-        if ($car->user_id !== Auth::id()) {
-            abort(403);
-        }
+        Gate::authorize('update', $car);
         // Get Validated data of delete images and positions
         $data = $request->validate([
             'delete_images' => 'array',
@@ -299,9 +303,7 @@ class CarController extends Controller
      */
     public function addImages(Request $request, Car $car)
     {
-        if ($car->user_id !== Auth::id()) {
-            abort(403);
-        }
+        Gate::authorize('update', $car);
         // Get images from request
         $images = $request->file('images') ?? [];
         // Select max position of car images

@@ -8,28 +8,14 @@ use Illuminate\Auth\Access\Response;
 
 class CarPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, Car $car): bool
-    {
-        return false;
-    }
 
     /**
      * Determine whether the user can create models.
      */
     public function create(User $user): bool
     {
-        return false;
+        // Check if the user has a phone number
+        return !!$user->phone; // Convert phone existance into true or false
     }
 
     /**
@@ -48,21 +34,5 @@ class CarPolicy
     {
         return $user->id === $car->user_id ? Response::allow()
             : Response::denyWithStatus(404);
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Car $car): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Car $car): bool
-    {
-        return false;
     }
 }
