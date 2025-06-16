@@ -24,10 +24,16 @@ class WatchlistController extends Controller
         // Remove if it exists
         if ($carExists) {
             $user->favouriteCars()->detach($car);
-            return back()->with('success', 'Car was removed from watchlist');
+            return response()->json([
+                'added' => false,
+                'message' => 'Car was removed from watchlist'
+            ]);
         }
         // Add the car into favourite cars of the user
         $user->favouriteCars()->attach($car);
-        return back()->with('success', 'Car was added to watchlist');
+        return response()->json([
+            'added' => true,
+            'message' => 'Car was added to watchlist'
+        ]);
     }
 }

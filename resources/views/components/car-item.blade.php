@@ -11,11 +11,10 @@
     <div class="p-medium">
         <div class="flex items-center justify-between">
             <small class="m-0 text-muted">{{ $car->city->name }}</small>
-            <form action="{{ route('watchlist.storeDestroy', $car) }}"
-                method="POST">
-                @csrf
-                @method('POST')
-                <button class="btn-heart text-primary">
+                <button
+                    class="btn-heart text-primary"
+                    data-url="{{ route('watchlist.storeDestroy', $car) }}"
+                >
                     <svg
                          xmlns="http://www.w3.org/2000/svg"
                          fill="none"
@@ -40,7 +39,6 @@
                          />
                     </svg>
                 </button>
-            </form>
         </div>
         <h2 class="car-item-title">
             {{ $car->getTitle() }}

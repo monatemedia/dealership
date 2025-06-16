@@ -1,3 +1,4 @@
+import axios from 'axios';
 import './bootstrap';
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -214,6 +215,36 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  const initAddToWatchlist = () => {
+    // Select add to watchlist buttons
+    const buttons = document.querySelectorAll('.btn-heart');
+    // Iterate over these buttons and add click event listener
+    buttons.forEach((button) => {
+        button.addEventListener('click', ev => {
+            // Get the button element on which click happened
+            const button = ev.currentTarget;
+            // We added data-url attribute to the button in blade file
+            // get the url
+            const url = button.dataset.url;
+            // Make request on the URL to add or remove the car from watchlist
+            axios.post(url).then((response) => {
+                // Select both svg tags of the button
+                const toShow = button.querySelector('svg.hidden');
+                const toHide = button.querySelector('svg:not(.hidden)');
+                // Which was hidden must be displayed
+                toShow.classList.remove('hidden')
+                // Which was displayed must be hidden
+                toHide.classList.add('hidden')
+                // Show alert to the user
+                alert(response.data.message)
+            })
+                .catch(error => {
+                alert("Internal Server Error. Please Try again later!")
+            })
+        })
+    })
+  }
+
   initSlider();
   initImagePicker();
   initMobileNavbar();
@@ -221,7 +252,9 @@ document.addEventListener("DOMContentLoaded", function () {
   initMobileFilters();
   initCascadingDropdown('#manufacturerSelect', '#modelSelect');
   initCascadingDropdown('#provinceSelect', '#citySelect');
-  initSortingDropdown()
+  initSortingDropdown();
+  initAddToWatchlist();
+
 
   ScrollReveal().reveal(".hero-slide.active .hero-slider-title", {
     delay: 200,
