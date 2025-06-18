@@ -221,6 +221,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Iterate over these buttons and add click event listener
     buttons.forEach((button) => {
         button.addEventListener('click', ev => {
+            // debugger;
             // Get the button element on which click happened
             const button = ev.currentTarget;
             // We added data-url attribute to the button in blade file
@@ -239,7 +240,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert(response.data.message)
             })
                 .catch(error => {
-                alert("Internal Server Error. Please Try again later!")
+                // If there was an error, log it
+                console.error(error.message);
+                alert("Internal Server Error. Please try again later!")
             })
         })
     })

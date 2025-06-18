@@ -117,4 +117,10 @@ class Car extends Model
         // Return the car title
         return $this->year . ' - ' . $this->manufacturer->name . ' ' . $this->model->name;
     }
+
+    // Create a method to check if the car is in the watchlist
+    public function isInWatchlist(User $user = null)
+    {
+        return $this->favouredUsers->contains($user);
+    }
 }
