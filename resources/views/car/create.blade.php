@@ -34,7 +34,7 @@
                             <div class="col">
                                 <div class="form-group @error('year') has-error @enderror">
                                     <label>Year</label>
-                                    <x-select-year />
+                                    <x-select-year :value="old('year')" />
                                     <p class="error-message">
                                         {{ $errors->first('year') }}
                                     </p>
@@ -89,9 +89,12 @@
                         </div>
                         <div class="row">
                             <div class="col">
-                                <div class="form-group">
-                                    <label>Province</label>
-                                    <x-select-province />
+                                <div class="form-group @error('province_id') has-error @enderror">
+                                    <label>Province/Region</label>
+                                    <x-select-province :value="old('province_id')"/>
+                                    <p class="error-message">
+                                        {{ $errors->first('province_id') }}
+                                    </p>
                                 </div>
                             </div>
                             <div class="col">
