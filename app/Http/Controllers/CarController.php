@@ -321,4 +321,8 @@ class CarController extends Controller
         return redirect()->back()
             ->with('success', 'New images were added');
     }
+    public function showPhone(Car $car)
+    {
+        return response()->json(['phone' => $car->phone]);
+    }
 }
