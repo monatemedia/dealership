@@ -14,12 +14,11 @@
                         </h1>
                         <div class="hero-slider-content">
                             <p>
-                                Use powerful search tool to find your desired cars based on
-                                multiple search criteria: Maker, Model, Year, Price Range, Car
+                                Use the powerful search tool to find your desired cars based on
+                                multiple search criteria: Manufacturer, Model, Year, Price Range, Car
                                 Type, etc...
                             </p>
-
-                            <button class="btn btn-hero-slider">Find the car</button>
+                            <a href="{{ route('car.search') }}" class="btn btn-hero-slider">Find A Car</a>
                         </div>
                     </div>
                     <div class="slide-image">
@@ -40,8 +39,7 @@
                                 Submit your car in our user friendly interface, describe it,
                                 upload photos and the perfect buyer will find it...
                             </p>
-
-                            <button class="btn btn-hero-slider">Add Your Car</button>
+                            <a href="{{ route('car.create') }}" class="btn btn-hero-slider">Add Your Car</a>
                         </div>
                     </div>
                     <div class="slide-image">
