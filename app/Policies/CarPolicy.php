@@ -15,7 +15,7 @@ class CarPolicy
     public function create(User $user): bool
     {
         // Check if the user has a phone number
-        return !!$user->phone; // Convert phone existance into true or false
+        return !!$user->phone; // Convert phone existance into true or false usiing double negation
     }
 
     /**

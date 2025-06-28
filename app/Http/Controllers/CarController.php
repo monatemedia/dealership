@@ -37,6 +37,17 @@ class CarController extends Controller
      */
     public function create(Request $request)
     {
+        $user = $request->user();
+
+        // Check if user has a phone number
+        if (!$user->phone) {
+            // Store intended route
+            session(['url.intended' => route('car.create')]);
+            // Redirect to profile.index with a warning message
+            // to provide a phone number before adding a car
+            return redirect()->route('profile.index')
+                ->with('warning', 'Please provide a phone number before adding a car');
+        }
         Gate::authorize('create', Car::class);
         return view('car.create');
     }
@@ -46,6 +57,18 @@ class CarController extends Controller
      */
     public function store(StoreCarRequest $request)
     {
+        $user = $request->user();
+
+        // Check if user has a phone number
+        if (!$user->phone) {
+            // Store intended route
+            session(['url.intended' => route('car.create')]);
+            // Redirect to profile.index with a warning message
+            // to provide a phone number before adding a car
+            return redirect()->route('profile.index')
+                ->with('warning', 'Please provide a phone number before adding a car');
+        }
+
         // Authorize the user to create a car
         Gate::authorize('create', Car::class);
 

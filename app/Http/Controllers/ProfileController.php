@@ -58,7 +58,7 @@ class ProfileController extends Controller
         // Save the user
         $user->save();
         // Redirect user back to profile page with success message
-        return redirect()->route('profile.index')
+        return redirect()->intended(route('profile.index'))
             ->with('success', $success);
     }
     public function updatePassword(Request $request)
