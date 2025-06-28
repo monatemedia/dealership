@@ -75,6 +75,7 @@
         <section>
             <div class="container">
                 <h2>Latest Added Cars</h2>
+                @if ($cars->count() > 0)
                 <div class="car-items-listing">
                     @foreach($cars as $car)
                         <x-car-item :$car
@@ -83,6 +84,11 @@
                         )"/>
                     @endforeach
                 </div>
+                @else
+                    <div class="text-center p-large">
+                        There are no cars available at the moment.
+                    </div>
+                @endif
             </div>
         </section>
         <!--/ New Cars -->
