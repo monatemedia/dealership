@@ -6,6 +6,7 @@ use App\Models\Province;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\Component;
 
 class SelectProvince extends Component
@@ -17,7 +18,9 @@ class SelectProvince extends Component
      */
     public function __construct()
     {
-        $this->provinces = Province::orderBy('name')->get();
+        $this->provinces = Cache::rememberForever('provinces', function () {
+            return Province::orderBy('name')->get();
+        });
     }
 
     /**
