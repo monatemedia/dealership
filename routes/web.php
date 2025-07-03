@@ -46,5 +46,6 @@ Route::middleware(['auth'])->group(function () {
 // Public car details route
 Route::get('/car/{car}', [CarController::class, 'show'])->name('car.show');
 Route::post('/car/phone/{car}', [CarController::class, 'showPhone'])->name('car.showPhone');
+
 // Include the authentication routes
-require_once __DIR__ . '/auth.php';
+require __DIR__ . '/auth.php';
