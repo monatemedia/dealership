@@ -20,3 +20,14 @@ it('returns success on forgot password page', function () {
 
     $response->assertStatus(200);
 });
+
+// Test for accessing the car create page as an unauthenticated user
+it('redirects to login page, when accessing car create page as guest user', function () {
+    /** @var \Illuminate\Testing\TestResponse $response */
+    $response = $this->get(route('car.create'));
+    // Assert that the response is a redirect to the login route
+    $response->assertRedirectToRoute('login');
+    // Assert that the response status is 302 (redirect)
+    $response->assertStatus(302);
+});
+
