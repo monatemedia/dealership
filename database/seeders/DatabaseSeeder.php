@@ -11,7 +11,6 @@ use App\Models\Manufacturer;
 use App\Models\Model;
 use App\Models\Province;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
 

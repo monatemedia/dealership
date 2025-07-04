@@ -84,7 +84,7 @@
                 </div>
                 @else
                     <div class="text-center p-large">
-                        There are no cars available at the moment.
+                        There are no published cars.
                     </div>
                 @endif
             </div>
