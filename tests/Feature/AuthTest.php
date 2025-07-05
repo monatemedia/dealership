@@ -26,6 +26,53 @@ it('returns success on login page', function () {
         ->assertSee(route('login.oauth', ['provider' => 'facebook']), false);
 });
 
+// Test for login with correct credentials
+it('should not be possible to login with incorrect credentials', function () {
+    // Create a user using the factory
+    \App\Models\User::factory()->create([
+        // Use a valid email and password for the test
+        'email' => 'edward@gmail.com',
+        'password' => bcrypt('password'), // Ensure the password is hashed
+    ]);
+
+    /** @var \Illuminate\Testing\TestResponse $response */
+    $response = $this->post(route('login.store'), [
+        // Use the same email and password as the created user
+        'email' => 'edward@gmail.com',
+        'password' => 'wrong-password',
+    ]);
+
+    // Assert that the response status is 302 (redirect)
+    $response->assertStatus(302)
+        // Assert that the session has an 'email' key
+        // ->assertSessionHasErrors(['email']);
+        ->assertInvalid(['email']);
+});
+
+// Test for login with correct credentials
+it('should be possible to login with correct credentials', function () {
+    // Create a user using the factory
+    \App\Models\User::factory()->create([
+        // Use a valid email and password for the test
+        'email' => 'edward@gmail.com',
+        'password' => bcrypt('password'), // Ensure the password is hashed
+    ]);
+
+    /** @var \Illuminate\Testing\TestResponse $response */
+    $response = $this->post(route('login.store'), [
+        // Use the same email and password as the created user
+        'email' => 'edward@gmail.com',
+        'password' => 'password',
+    ]);
+
+    // Assert that the response status is 302 (redirect)
+    $response->assertStatus(302)
+        // Assert that the user is redirected to the home page
+        ->assertRedirectToRoute('home')
+        // Assert that the session has an 'email' key
+        ->assertSessionHas(['success']);
+});
+
 // Test for the signup page
 it('returns success on signup page', function () {
     /** @var \Illuminate\Testing\TestResponse $response */
@@ -41,6 +88,3 @@ it('returns success on forgot password page', function () {
 
     $response->assertStatus(200);
 });
-
-
-
