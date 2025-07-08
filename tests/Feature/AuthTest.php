@@ -178,10 +178,54 @@ it('should be possible to signup with correct credentials', function () {
         ->assertSessionHas(['success']);
 });
 
-// Test for the password forgot page
+// Test for the forgot password page
 it('returns success on forgot password page', function () {
     /** @var \Illuminate\Testing\TestResponse $response */
     $response = $this->get(route('password.request'));
 
-    $response->assertStatus(200);
+    // Check if the response status is 200
+    $response->assertStatus(200)
+        // Check if the response contains the text 'Request Password Reset'
+        ->assertSee('Request Password Reset')
+        // Check if the response contains the text 'Click here to login'
+        ->assertSee('Click here to login')
+        // Check if the response contains a link to the login page
+        ->assertSee('<a href="' . route('login') . '"', false);
+});
+
+// Test for password reset with invalid email
+it('should not be possible to request password reset with invalid email', function () {
+
+    /** @var \Illuminate\Testing\TestResponse $response */
+    $response = $this->post(route('password.email'), [
+        // Use an invalid email to trigger validation error
+        'email' => 'not-a-valid-email',
+    ]);
+
+    // $response->ddSession();
+
+    // Assert that the response status is 302 (redirect)
+    $response->assertStatus(302)
+        // Assert that the session has an 'email' key
+        ->assertSessionHasErrors(['email']);
+});
+
+// Test for password reset with correct email
+it('should be possible to request password reset with correct email', function () {
+    // Create a user using the factory
+    \App\Models\User::factory()->create([
+        'email' => 'edward@gmail.com',
+    ]);
+
+    /** @var \Illuminate\Testing\TestResponse $response */
+    $response = $this->post(route('password.email'), [
+        // Use the same email and password as the created user
+        'email' => 'edward@gmail.com',
+    ]);
+
+    // Assert that the response status is 302 (redirect)
+    $response->assertStatus(302)
+        // Assert that the session has an 'email' key
+        // ->assertSessionHasErrors(['email']);
+        ->assertSessionHas(['success']);
 });
