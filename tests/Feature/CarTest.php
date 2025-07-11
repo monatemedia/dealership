@@ -199,16 +199,23 @@ it('should be possible to create a car with valid data', function () {
         UploadedFile::fake()->image('5.jpg'),
     ];
 
+    // Create features for the car
+    // This simulates selecting features for the car listing
+    // The features are set to values that are valid according to the validation rules
+    $features = [
+        'abs' => '1',
+        'air_conditioning' => '1',
+        'power_windows' => '1',
+        'power_door_locks' => '1',
+        'cruise_control' => '1',
+        'bluetooth_connectivity' => '1',
+    ];
 
-    /** @var \Illuminate\Testing\TestResponse $response */
-    // Make a POST request to the car store route with invalid data
-    // This simulates submitting the form with invalid data
-    // The fields are set to values that do not meet the validation rules
-    // This will help ensure that the validation rules are working correctly
-    // and that the application does not allow creating a car with invalid data
-    // The fields are set to values that are outside the acceptable range
-    // or format, such as negative prices, invalid years, etc.
-    $response = $this->actingAs($user)->post(route('car.store'), [
+    // Create the car data to be submitted
+    // This simulates filling out the car creation form with valid data
+    // The fields are set to values that meet the validation rules
+    // This will help ensure that the car is created successfully
+    $carData = [
         'manufacturer_id' => 1,
         'model_id' => 1,
         'year' => 2020,
@@ -221,9 +228,19 @@ it('should be possible to create a car with valid data', function () {
         'city_id' => 1,
         'address' => '123 Main Street',
         'phone' => '0123456789',
-        'features' => [],
+        'features' => $features,
         'images' => $images,
-    ]);
+    ];
+
+    /** @var \Illuminate\Testing\TestResponse $response */
+    // Make a POST request to the car store route with invalid data
+    // This simulates submitting the form with invalid data
+    // The fields are set to values that do not meet the validation rules
+    // This will help ensure that the validation rules are working correctly
+    // and that the application does not allow creating a car with invalid data
+    // The fields are set to values that are outside the acceptable range
+    // or format, such as negative prices, invalid years, etc.
+    $response = $this->actingAs($user)->post(route('car.store'), $carData);
 
     // Debugging: Check the session data to see what was submitted
     // This can help identify what data was sent in the request
@@ -233,9 +250,38 @@ it('should be possible to create a car with valid data', function () {
     $response->assertRedirectToRoute('car.index')
         ->assertSessionHas('success');
 
+    // Get the last car created in the database
+    $lastCar = \App\Models\Car::latest('id')->first();
+
+    // Add the car ID to the features array
+    // This is necessary to associate the features with the car
+    // The car ID is used to link the features to the specific car listing
+    $features['car_id'] = $lastCar->id;
+
+    // Add the car ID to the car data
+    // This is necessary to associate the car data with the car
+    // The car ID is used to link the car data to the specific car listing
+    // This allows us to assert the car data in the database later
+    // This is important for ensuring that the car data is correctly associated
+    $carData['id'] = $lastCar->id;
+
+    // Unset the features and images from the car data
+    // This is necessary because the features and images are stored in separate tables
+    // and should not be included in the car data when asserting the database
+    // The car data should only contain the fields that are directly related to the car
+    unset($carData['features']);
+    unset($carData['images']);
+    unset($carData['province_id']);
+
     // Assert that the car was created in the database
     // And that the count of cars in the database is now 101
     $this->assertDatabaseCount('cars', $countCars + 1);
     // Assert that the count of images in the database is now 505
     $this->assertDatabaseCount('car_images', $countImages + count($images));
+    // Assert that the car features were created in the database
+    $this->assertDatabaseCount('car_features', $countCars + 1);
+    // Assert that the car was created in the database with the correct values
+    $this->assertDatabaseHas('cars', $carData);
+    // Assert that the car features were created in the database with the correct values
+    $this->assertDatabaseHas('car_features', $features);
 });
