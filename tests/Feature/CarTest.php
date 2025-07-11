@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Http\UploadedFile;
+
 // Test for accessing the car create page as an unauthenticated user
 it('should not be possible to access car create page as guest user', function () {
     /** @var \Illuminate\Testing\TestResponse $response */
@@ -171,6 +173,11 @@ it('should be possible to create a car with valid data', function () {
     // Seed the database with necessary data
     $this->seed();
 
+    // Count the number of cars and images in the database before the test
+    // This is useful to verify that a new car is created after the test
+    $countCars = \App\Models\Car::count();
+    $countImages = \App\Models\CarImage::count();
+
     // Create a user to associate with the car
     // This is necessary because the car creation form requires a user ID
     // and the user must be authenticated to create a car
@@ -179,6 +186,19 @@ it('should be possible to create a car with valid data', function () {
     // This simulates a real-world scenario where a user must be logged in
     // to create a car listing
     $user = \App\Models\User::factory()->create();
+
+    // Create fake images to upload
+    // This simulates uploading images for the car listing
+    // The images are created using the UploadedFile::fake() method
+    // This allows us to test the file upload functionality without needing actual image files
+    $images = [
+        UploadedFile::fake()->image('1.jpg'),
+        UploadedFile::fake()->image('2.jpg'),
+        UploadedFile::fake()->image('3.jpg'),
+        UploadedFile::fake()->image('4.jpg'),
+        UploadedFile::fake()->image('5.jpg'),
+    ];
+
 
     /** @var \Illuminate\Testing\TestResponse $response */
     // Make a POST request to the car store route with invalid data
@@ -202,6 +222,7 @@ it('should be possible to create a car with valid data', function () {
         'address' => '123 Main Street',
         'phone' => '0123456789',
         'features' => [],
+        'images' => $images,
     ]);
 
     // Debugging: Check the session data to see what was submitted
@@ -214,5 +235,7 @@ it('should be possible to create a car with valid data', function () {
 
     // Assert that the car was created in the database
     // And that the count of cars in the database is now 101
-    $this->assertDatabaseCount('cars', 101);
+    $this->assertDatabaseCount('cars', $countCars + 1);
+    // Assert that the count of images in the database is now 505
+    $this->assertDatabaseCount('car_images', $countImages + count($images));
 });
