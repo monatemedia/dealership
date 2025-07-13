@@ -54,7 +54,7 @@
                             <div class="col">
                                 <div class="form-group @error('price') has-error @enderror">
                                     <label>Price</label>
-                                    <input type="number" placeholder="Price" name="price"
+                                    <input type="number" min="0" step="1" name="price"
                                         value="{{ old('price', $car->price) }}"/>
                                     <p class="error-message">
                                         {{ $errors->first('price') }}
@@ -64,7 +64,7 @@
                             <div class="col">
                                 <div class="form-group @error('vin') has-error @enderror">
                                     <label>Vin Code</label>
-                                    <input placeholder="Vin Code" name="vin"
+                                    <input type="number" placeholder="Vin Code" name="vin"
                                         value="{{ old('vin', $car->vin) }}"/>
                                     <p class="error-message">
                                         {{ $errors->first('vin') }}
@@ -74,7 +74,7 @@
                             <div class="col">
                                 <div class="form-group @error('mileage') has-error @enderror">
                                     <label>Mileage (km)</label>
-                                    <input placeholder="Mileage" name="mileage"
+                                    <input type="number" min="0" step="1" name="mileage"
                                         value="{{ old('mileage', $car->mileage) }}"/>
                                     <p class="error-message">
                                         {{ $errors->first('mileage') }}
