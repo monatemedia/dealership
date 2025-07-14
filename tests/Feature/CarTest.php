@@ -285,3 +285,221 @@ it('should be possible to create a car with valid data', function () {
     // Assert that the car features were created in the database with the correct values
     $this->assertDatabaseHas('car_features', $features);
 });
+
+// Test for displaying the update car page with correct data
+it('should display update car page with correct data', function () {
+    // Seed the database with necessary data
+    $this->seed();
+
+    // Select he first user from the database
+    $user = \App\Models\User::first();
+
+    // Select the first car associated with the user
+    $firstCar = $user->cars()->first();
+
+    // Access the car edit page as the authenticated user
+    /** @var \Illuminate\Testing\TestResponse $response */
+    $response = $this->actingAs($user)
+        ->get(route('car.edit', $firstCar->id));
+
+    // Assert that we can see the car edit page
+    $response->assertSee("Edit Car:");
+
+    // Assert that the response contains the car's manufacturer select dropdown
+    // and that it has the correct manufacturer ID selected
+    // Assert that the model select dropdown is rendered
+    $response->assertSee('<select id="manufacturerSelect" name="manufacturer_id">', false);
+    // Use regex to confirm the correct manufacturer is selected in the correct option tag
+    preg_match(
+        '/<option\s+value="' . $firstCar->manufacturer_id . '"\s+selected[^>]*>\s*' . preg_quote($firstCar->manufacturer->name, '/') . '\s*<\/option>/',
+        $response->getContent(),
+        $matches
+    );
+    // Use Pest assertions
+    expect($matches)->not->toBeEmpty(); // Pest
+    // OR
+    // $this->assertNotEmpty($matches); // PHPUnit
+
+    // Assert that the response contains the car's model select dropdown
+    // and that it has the correct model ID selected
+    // Assert that the model select dropdown is rendered
+    $response->assertSee('<select id="modelSelect" name="model_id">', false);
+    // Use regex to confirm the correct model is selected in the correct option tag
+    preg_match(
+        '/<option\s+value="' . $firstCar->model_id . '"[^>]*selected[^>]*>\s*' . preg_quote($firstCar->model->name, '/') . '\s*<\/option>/',
+        $response->getContent(),
+        $matches
+    );
+    // Use Pest assertions
+    expect($matches)->not->toBeEmpty(); // Pest
+    // OR
+    // $this->assertNotEmpty($matches); // PHPUnit
+
+    // Assert that the response contains the car's year select dropdown
+    $response->assertSee('<select name="year">', false);
+    // Use regex to confirm the correct year is selected
+    preg_match(
+        '/<option\s+value="' . preg_quote($firstCar->year, '/') . '"[^>]*selected[^>]*>\s*' . preg_quote($firstCar->year, '/') . '\s*<\/option>/',
+        $response->getContent(),
+        $matches
+    );
+    // Pest
+    expect($matches)->not->toBeEmpty();
+    // PHPUnit alternative:
+    // $this->assertNotEmpty($matches);
+
+    // Assert that the response contains the car's type radio button
+    // and that at least one exists
+    // Use regex to confirm the correct car type radio button is checked
+    preg_match(
+        '/<label[^>]*>\s*<input\s+[^>]*name="car_type_id"[^>]*value="' . preg_quote($firstCar->car_type_id, '/') . '"[^>]*checked[^>]*>\s*' . preg_quote($firstCar->carType->name, '/') . '\s*<\/label>/i',
+        $response->getContent(),
+        $matches
+    );
+    // Pest
+    expect($matches)->not->toBeEmpty();
+    // PHPUnit alternative:
+    // $this->assertNotEmpty($matches);
+
+    // Assert that the response contains the car's price
+    $response->assertSeeInOrder([
+        'name="price"',
+        ' value="' . $firstCar->price . '"',
+    ], false);
+
+    // Assert that the response contains the car's VIN
+    $response->assertSeeInOrder([
+        'name="vin"',
+        ' value="' . $firstCar->vin . '"',
+    ], false);
+
+    // Assert that the response contains the car's mileage
+    $response->assertSeeInOrder([
+        'name="mileage"',
+        ' value="' . $firstCar->mileage . '"',
+    ], false);
+
+    // Assert that the response contains the car's fuel type radio button
+    // and that at least one exists
+    // Use regex to confirm the correct fuel type radio button is checked
+    preg_match(
+        '/<label[^>]*>\s*<input\s+[^>]*name="fuel_type_id"[^>]*value="' . preg_quote($firstCar->fuel_type_id, '/') . '"[^>]*checked[^>]*>\s*' . preg_quote($firstCar->fuelType->name, '/') . '\s*<\/label>/i',
+        $response->getContent(),
+        $matches
+    );
+    // Pest
+    expect($matches)->not->toBeEmpty();
+    // PHPUnit alternative:
+    // $this->assertNotEmpty($matches);
+
+    // Assert that the response contains the car's province select dropdown
+    // and that it has the correct province ID selected
+    // Assert that the model select dropdown is rendered
+    $response->assertSee('<select id="provinceSelect" name="province_id">', false);
+    // Use regex to confirm the correct province is selected in the correct option tag
+    preg_match(
+        '/<option\s+value="' . $firstCar->city->province_id . '"\s+selected[^>]*>\s*' . preg_quote($firstCar->city->province->name, '/') . '\s*<\/option>/',
+        $response->getContent(),
+        $matches
+    );
+    // Use Pest assertions
+    expect($matches)->not->toBeEmpty(); // Pest
+    // OR
+    // $this->assertNotEmpty($matches); // PHPUnit
+
+    // Assert that the response contains the car's city select dropdown
+    // and that it has the correct city ID selected
+    // Assert that the city dropdown is rendered
+    $response->assertSee('<select id="citySelect" name="city_id">', false);
+    // Confirm the correct city option is selected and structured properly
+    preg_match(
+        '/<option[^>]*value="' . $firstCar->city_id . '"[^>]*data-parent="' . $firstCar->city->province_id . '"[^>]*selected[^>]*>\s*' .
+        preg_quote($firstCar->city->name, '/') .
+        '\s*<\/option>/i',
+        $response->getContent(),
+        $matches
+    );
+    // Use Pest assertions
+    expect($matches)->not->toBeEmpty(); // Pest
+    // OR
+    // $this->assertNotEmpty($matches); // PHPUnit
+
+    // Assert that the response contains the car's address
+    $response->assertSeeInOrder([
+        'name="address"',
+        ' value="' . $firstCar->address . '"',
+    ], false);
+
+    // Assert that the response contains the car's phone
+    $response->assertSeeInOrder([
+        'name="phone"',
+        ' value="' . $firstCar->phone . '"',
+    ], false);
+
+    // Create an array of feature keys to check
+    // This array contains the keys for the features that should be present
+    $featureKeys = [
+        'air_conditioning',
+        'power_windows',
+        'power_door_locks',
+        'abs',
+        'cruise_control',
+        'bluetooth_connectivity',
+        'remote_start',
+        'gps_navigation',
+        'heated_seats',
+        'climate_control',
+        'rear_parking_sensors',
+        'leather_seats',
+    ];
+    // Assert that the response contains the car's features checkboxes
+    // Loop through each feature key and check if the checkbox is present
+    foreach ($featureKeys as $key) {
+        $featureName = 'name="features[' . $key . ']"';
+        $featureValue = 'value="1"';
+        // If the feature is present in the car's features
+        if (!empty($firstCar->features[$key])) {
+            // Assert the feature checkbox is checked
+            $response->assertSeeInOrder([
+                '<label class="checkbox">',
+                '<input',
+                'type="checkbox"',
+                $featureName,
+                $featureValue,
+                'checked',
+            ], false);
+        } else {
+            // Assert the feature checkbox is NOT checked
+            $response->assertSeeInOrder([
+                '<label class="checkbox">',
+                '<input',
+                'type="checkbox"',
+                $featureName,
+                $featureValue,
+            ], false);
+            // And explicitly assert "checked" does not appear in the same input
+            $pattern = '/<input[^>]*' . preg_quote($featureName, '/') . '[^>]*' . preg_quote($featureValue, '/') . '[^>]*checked[^>]*>/i';
+            expect(preg_match($pattern, $response->getContent()))->toBe(0);
+        }
+    }
+
+    // Assert that the response contains the car's description textarea
+    // Assert that the label is present
+    $response->assertSee('<label>Detailed Description</label>', false);
+    // Assert that the textarea is present with the car's description
+    $response->assertSeeInOrder([
+        '<textarea',
+        'name="description">' . $firstCar->description . '</textarea>',
+    ], false);
+
+    // Assert that the response contains the car's published_at label
+    // Assert that the label is present
+    $response->assertSee('<label>Publish Date</label>', false);
+    // Assert that the response contains the car's published_at input
+    $response->assertSeeInOrder([
+        '<input',
+        'type="date"',
+        'name="published_at"',
+        'value="' . $firstCar->published_at->format('Y-m-d') . '"',
+    ], false);
+});
