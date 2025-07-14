@@ -16,7 +16,7 @@ class City extends Model
     protected $fillable = ['name', 'province_id'];
 
     // Relationships
-    public function state(): BelongsTo
+    public function province(): BelongsTo
     {
         return $this->belongsTo(Province::class);
     }
