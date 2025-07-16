@@ -70,6 +70,12 @@ class Car extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    // Alias user() to owner() for convenience
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     // Define method for `City` and the return type
     public function city(): BelongsTo
     {

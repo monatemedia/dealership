@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Car;
+use App\Models\CarImage;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 
 // Test for accessing the car create page as an unauthenticated user
@@ -175,8 +178,8 @@ it('should be possible to create a car with valid data', function () {
 
     // Count the number of cars and images in the database before the test
     // This is useful to verify that a new car is created after the test
-    $countCars = \App\Models\Car::count();
-    $countImages = \App\Models\CarImage::count();
+    $countCars = Car::count();
+    $countImages = CarImage::count();
 
     // Create a user to associate with the car
     // This is necessary because the car creation form requires a user ID
@@ -185,7 +188,7 @@ it('should be possible to create a car with valid data', function () {
     // due to missing user ID in the request
     // This simulates a real-world scenario where a user must be logged in
     // to create a car listing
-    $user = \App\Models\User::factory()->create();
+    $user = User::factory()->create();
 
     // Create fake images to upload
     // This simulates uploading images for the car listing
@@ -292,7 +295,7 @@ it('should display update car page with correct data', function () {
     $this->seed();
 
     // Select he first user from the database
-    $user = \App\Models\User::first();
+    $user = User::first();
 
     // Select the first car associated with the user
     $firstCar = $user->cars()->first();
@@ -503,3 +506,115 @@ it('should display update car page with correct data', function () {
         'value="' . $firstCar->published_at->format('Y-m-d') . '"',
     ], false);
 });
+
+// Test for successfully updating car details
+it('should successfully update car details', function () {
+    // Seed the database with necessary data
+    $this->seed();
+
+    // Count the number of cars in the database before the test
+    // This is useful to verify that no new car is created after the test
+    // and that the existing car is updated
+    $countCars = Car::count();
+
+    // Create a user to associate with the car
+    // This is necessary because the car update form requires a user ID
+    // and the user must be authenticated to update a car
+    // If the user is not authenticated, the request will fail
+    // due to missing user ID in the request
+    $user = User::first();
+
+    // dd($user)
+
+    // Select the first car associated with the user
+    // This is necessary to ensure that the car being updated belongs to the user
+    // If the user does not have any cars, this will return null
+    // and the test will fail
+    $firstCar = $user->cars()->first();
+
+    // dd($firstCar);
+
+    $features = [
+        'abs' => '1',
+        'air_conditioning' => '1',
+        'power_windows' => '1',
+        'power_door_locks' => '1',
+        'cruise_control' => '1',
+        'bluetooth_connectivity' => '1',
+    ];
+
+    // Create the car data to be submitted
+    // This simulates filling out the car creation form with valid data
+    // The fields are set to values that meet the validation rules
+    // This will help ensure that the car is created successfully
+    $carData = [
+        'manufacturer_id' => 1,
+        'model_id' => 1,
+        'year' => 2020,
+        'price' => 10000,
+        'vin' => '11111111111111111',
+        'mileage' => 10000,
+        'car_type_id' => 1,
+        'fuel_type_id' => 1,
+        'province_id' => 1,
+        'city_id' => 1,
+        'address' => '123 Main Street',
+        'phone' => '0123456789',
+        'features' => $features,
+    ];
+
+    /** @var \Illuminate\Testing\TestResponse $response */
+    // Make a PUT request to the car store route with invalid data
+    // This simulates submitting the form with invalid data
+    // The fields are set to values that do not meet the validation rules
+    // This will help ensure that the validation rules are working correctly
+    // and that the application does not allow creating a car with invalid data
+    // The fields are set to values that are outside the acceptable range
+    // or format, such as negative prices, invalid years, etc.
+    $response = $this->actingAs($user)->put(route('car.update', $firstCar), $carData);
+
+    // Debugging: Check the session data to see what was submitted
+    // This can help identify what data was sent in the request
+    // $response->ddSession();
+
+    // Assert that the response has validation errors for the required fields
+    $response->assertRedirectToRoute('car.index')
+        ->assertSessionHas('success');
+
+    // Add the car ID to the car data
+    // This is necessary to associate the car data with the car
+    // The car ID is used to link the car data to the specific car listing
+    // This allows us to assert the car data in the database later
+    $carData['id'] = $firstCar->id;
+
+    // Add the car ID to the features array
+    // This is necessary to associate the features with the car
+    // The car ID is used to link the features to the specific car listing
+    // This allows us to assert the car features in the database later
+    // This is important for ensuring that the car features are correctly associated
+    // with the car being updated
+    $features['car_id'] = $firstCar->id;
+
+    // Remove non-db fields before DB check
+    unset($carData['features'], $carData['province_id']);
+
+    // Assert that the car was updated in the database
+    // And that the count of cars in the database is still the same
+    // This is important to ensure that no new car was created
+    // and that the existing car was updated with the new data
+    $this->assertDatabaseCount('cars', $countCars);
+
+    // Assert car record updated
+    $this->assertDatabaseHas('cars', $carData);
+
+
+    // Assert that the car features were created in the database
+    $this->assertDatabaseCount('car_features', $countCars);
+    // Assert that the car was created in the database with the correct values
+    $this->assertDatabaseHas('cars', $carData);
+    // Assert that the car features is equal to the number of cars
+    $this->assertDatabaseCount('car_features', $countCars);
+    // Assert that the car features were created in the database with the correct values
+    $this->assertDatabaseHas('car_features', $features);
+});
+
