@@ -341,7 +341,7 @@ class CarController extends Controller
             ]);
             $position++;
         }
-        return redirect()->back()
+        return redirect()->route('car.images', $car)
             ->with('success', 'New images were added');
     }
     public function showPhone(Car $car)
