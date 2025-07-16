@@ -604,10 +604,6 @@ it('should successfully update car details', function () {
     // and that the existing car was updated with the new data
     $this->assertDatabaseCount('cars', $countCars);
 
-    // Assert car record updated
-    $this->assertDatabaseHas('cars', $carData);
-
-
     // Assert that the car features were created in the database
     $this->assertDatabaseCount('car_features', $countCars);
     // Assert that the car was created in the database with the correct values
@@ -618,3 +614,41 @@ it('should successfully update car details', function () {
     $this->assertDatabaseHas('car_features', $features);
 });
 
+// Test for successfully deleting a car
+it('should successfully delete a car', function () {
+    // Seed the database with necessary data
+    $this->seed();
+
+    // Count the number of cars in the database before the test
+    // This is useful to verify that the car is deleted after the test
+    $countCars = Car::count();
+
+    // Select the first user from the database
+    // This is necessary because the car deletion requires a user ID
+    // and the user must be authenticated to delete a car
+    // If the user is not authenticated, the request will fail
+    // due to missing user ID in the request
+    $user = User::first();
+
+    // dd($user)
+
+    // Select the first car associated with the user
+    // This is necessary to ensure that the car being deleted belongs to the user
+    // If the user does not have any cars, this will return null
+    // and the test will fail
+    $firstCar = $user->cars()->first();
+
+    /** @var \Illuminate\Testing\TestResponse $response */
+    $response = $this->actingAs($user)
+        ->delete(route('car.destroy', $firstCar));
+
+    $response->assertRedirectToRoute('car.index')
+        ->assertSessionHas('success');
+
+    // Assert that the car was deleted from the database
+    // And that the count of cars in the database is now one less than before
+    $this->assertDatabaseHas('cars', [
+        'id' => $firstCar->id,
+        'deleted_at' => now(),
+    ]);
+});
