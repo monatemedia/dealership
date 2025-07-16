@@ -652,3 +652,41 @@ it('should successfully delete a car', function () {
         'deleted_at' => now(),
     ]);
 });
+
+it('should upload more images on the car', function () {
+    // Seed the database with necessary data
+    $this->seed();
+
+    // Select the first user from the database
+    $user = User::first();
+
+    // Select the first car associated with the user
+    $firstCar = $user->cars()->first();
+
+    $oldCount = $firstCar->images()->count();
+
+    // Create fake images to upload
+    // This simulates uploading images for the car listing
+    // The images are created using the UploadedFile::fake() method
+    // This allows us to test the file upload functionality without needing actual image files
+    $images = [
+        UploadedFile::fake()->image('1.jpg'),
+        UploadedFile::fake()->image('2.jpg'),
+        UploadedFile::fake()->image('3.jpg'),
+        UploadedFile::fake()->image('4.jpg'),
+        UploadedFile::fake()->image('5.jpg'),
+    ];
+
+    /** @var \Illuminate\Testing\TestResponse $response */
+    $response = $this->actingAs($user)
+        ->post(route('car.addImages', $firstCar), [
+            'images' => $images,
+        ]);
+
+    $response->assertRedirectToRoute('car.images', $firstCar)
+        ->assertSessionHas('success');
+
+    $newCount = $firstCar->images()->count();
+
+    $this->assertEquals($newCount, $oldCount + count($images));
+});
