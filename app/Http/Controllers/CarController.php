@@ -133,7 +133,7 @@ class CarController extends Controller
      */
     public function update(StoreCarRequest $request, Car $car)
     {
-        Gate::authorize('update-car', $car);
+        Gate::authorize('update', $car);
         $data = $request->validated(); // Get request data
         $features = array_merge([
             'abs' => 0,
