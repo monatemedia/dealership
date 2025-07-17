@@ -317,7 +317,7 @@ class CarController extends Controller
         }
 
         // Redirect back to car.images route
-        return redirect()->back()
+        return redirect()->route('car.images', $car)
             ->with('success', 'Car images were updated');
     }
 
