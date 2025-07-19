@@ -742,4 +742,59 @@ it('should successfully delete images on the car', function () {
     $this->assertEquals($newCount, $oldCount - 2);
 });
 
+// Test for successfully updating image positions on the car
+it('should successfully update image positions', function () {
+    // Seed the database with necessary data
+    $this->seed();
 
+    // Select the first user from the database
+    $user = User::first();
+
+    // Select the first car associated with the user
+    $firstCar = $user->cars()->first();
+
+    // Get all the images associated with the car
+    // and reorder them by position in descending order
+    // This is useful to ensure that the images are in the correct order
+    // before updating their positions
+    $images = $firstCar->images()->reorder('position', 'desc')->get();
+
+    // Create an array to hold the new positions
+    $data = [];
+
+    // Loop through each image and assign a new position
+    // The new position is set to the index of the image in the array plus one
+    // This ensures that the positions are sequential starting from 1
+    // This is important for maintaining the order of the images
+    foreach ($images as $i => $image) {
+        $data[$image->id] = $i + 1;
+    }
+
+    // Debugging: Check the data array to see the new positions
+    // dump($data);
+
+    // Make a PUT request to the car update images route with the new positions
+    // This simulates submitting the form with the new image positions
+    // The positions are set to the values in the $data array
+    /** @var \Illuminate\Testing\TestResponse $response */
+    $response = $this->actingAs($user)
+        ->put(route('car.updateImages', $firstCar), [
+            'positions' => $data,
+        ]);
+
+    // Assert that the response is a redirect
+    // This indicates that the image positions were successfully updated
+    // and the user is redirected to the car images route
+    // This is important to ensure that the user is informed of the successful update
+    $response->assertRedirectToRoute('car.images', $firstCar)
+        ->assertSessionHas('success');
+
+    // Assert that the database has the updated image positions
+    // This checks that each image ID in the $data array has the correct position
+    foreach ($data as $id => $position) {
+        $this->assertDatabaseHas('car_images', [
+            'id' => $id,
+            'position' => $position,
+        ]);
+    }
+});
