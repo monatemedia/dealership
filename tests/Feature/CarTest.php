@@ -4,6 +4,7 @@ use App\Models\Car;
 use App\Models\CarImage;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use function PHPUnit\Framework\assertEquals;
 
 // Test for accessing the car create page as an unauthenticated user
 it('should not be possible to access car create page as guest user', function () {
@@ -653,6 +654,7 @@ it('should successfully delete a car', function () {
     ]);
 });
 
+// Test for uploading more images to a car
 it('should upload more images on the car', function () {
     // Seed the database with necessary data
     $this->seed();
@@ -690,3 +692,54 @@ it('should upload more images on the car', function () {
 
     $this->assertEquals($newCount, $oldCount + count($images));
 });
+
+// Test for successfully deleting images on the car
+it('should successfully delete images on the car', function () {
+    // Seed the database with necessary data
+    $this->seed();
+
+    // Select the first user from the database
+    $user = User::first();
+
+    // Select the first car associated with the user
+    $firstCar = $user->cars()->first();
+
+    // Count the number of images associated with the car before deletion
+    $oldCount = $firstCar->images()->count();
+
+    // Get the IDs of the first two images associated with the car
+    $ids = $firstCar->images()->limit(2)->pluck('id')->toArray();
+
+    /** @var \Illuminate\Testing\TestResponse $response */
+    $response = $this->actingAs($user)
+        ->put(route('car.updateImages', $firstCar), [
+            'delete_images' => $ids,
+        ]);
+
+    // Assert that the response is a redirect
+    // This indicates that the images were successfully deleted
+    // and the user is redirected to the car images route
+    $response->assertStatus(302);
+
+    // Count the number of images associated with the car after deletion
+    $newCount = $firstCar->images()->count();
+
+    // Assert that the number of images after deletion is equal to the
+    // old count minus the number of deleted images
+    $this->assertEquals($newCount, $oldCount - 2);
+
+    // Assert that the response redirects to the car images route with
+    // the first car
+    $response->assertRedirectToRoute('car.images', $firstCar)
+        ->assertSessionHas('success');
+
+    // Assert that the number of images in the database is equal to
+    // the new count
+    $newCount = $firstCar->images()->count();
+
+    // Assert that the number of images after deletion is equal to
+    // the old count minus the number of deleted images
+    $this->assertEquals($newCount, $oldCount - 2);
+});
+
+
