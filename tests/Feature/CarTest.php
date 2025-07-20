@@ -499,12 +499,18 @@ it('should display update car page with correct data', function () {
     // Assert that the response contains the car's published_at label
     // Assert that the label is present
     $response->assertSee('<label>Publish Date</label>', false);
+
+    // dd([
+    //     '$firstCar->published_at = ' . $firstCar->published_at,
+    //     '$firstCar->published_at->format("Y-m-d") = ' . $firstCar->published_at->format('Y-m-d'),
+    // ]);
+
     // Assert that the response contains the car's published_at input
     $response->assertSeeInOrder([
         '<input',
         'type="date"',
         'name="published_at"',
-        'value="' . $firstCar->published_at->format('Y-m-d') . '"',
+        'value="' . optional($firstCar->published_at)->format('Y-m-d') . '"',
     ], false);
 });
 
@@ -797,4 +803,30 @@ it('should successfully update image positions', function () {
             'position' => $position,
         ]);
     }
+});
+
+// Test for ensuring that a user cannot access other users' cars
+it('should test that the user can\'t access other users\' cars', function () {
+    // Seed the database with necessary data
+    $this->seed();
+
+    // Select two users from the database
+    // This is necessary to ensure that we have two different users
+    // to test the access control
+    [$user1, $user2] = User::limit(2)->get();
+
+    // Debugging: Check the users to see their details
+    // This can help identify if the users are correctly selected
+    // dump($user1, $user2);
+
+    // Select the first car associated with user1
+    $car = $user1->cars()->first();
+
+    // Act as user2 and try to access user1's car
+    /** @var \Illuminate\Testing\TestResponse $response */
+    $response = $this->actingAs($user2)
+        ->get(route('car.edit', $car));
+
+    // Assert that the response is a 404 Not Found status
+    $response->assertStatus(404);
 });
