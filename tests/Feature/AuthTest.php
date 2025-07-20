@@ -229,3 +229,22 @@ it('should be possible to request password reset with correct email', function (
         // ->assertSessionHasErrors(['email']);
         ->assertSessionHas(['success']);
 });
+
+// Test for displaying Signup and Login links for guest user
+it('should display Signup and Login links for guest user', function () {
+    /** @var \Illuminate\Testing\TestResponse $response */
+    $response = $this->get(route('home'));
+
+    // Assert that the response status is 200
+    $response->assertStatus(200)
+        // Assert that the response contains the Signup link
+        ->assertSeeInOrder([
+            '<a href="' . route('signup') . '"',
+            'Signup',
+        ], false)
+        // Assert that the response contains the Login link
+        ->assertSeeInOrder([
+            '<a href="' . route('login') . '"',
+            'Login',
+        ], false);
+});
