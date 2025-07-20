@@ -246,5 +246,26 @@ it('should display Signup and Login links for guest user', function () {
         ->assertSeeInOrder([
             '<a href="' . route('login') . '"',
             'Login',
-        ], false);
+        ], false)
+        // Assert that the response does not contain the text 'Welcome, '
+        ->assertDontSee('Welcome, ');
+});
+
+// Test for displaying Welcome Dropdown for authenticated user
+it('should display Welcome Dropdown for authenticated user', function () {
+
+    $this->seed();
+
+    $user = \App\Models\User::first();
+
+    /** @var \Illuminate\Testing\TestResponse $response */
+    $response = $this->actingAs($user)
+        ->get(route('home'));
+
+    // Assert that the response status is 200
+    $response->assertStatus(200)
+        // Assert that the response contains the Signup link
+        ->assertDontSee('Signup')        // Assert that the response contains the Login link
+        ->assertDontSee('Login')        // Assert that the response does not contain the text 'Welcome, '
+        ->assertSee('Welcome, ' . $user->name);
 });
