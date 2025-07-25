@@ -7,7 +7,7 @@
     <main>
         <div class="container">
             <h1 class="car-details-page-title">{{ $car->manufacturer->name }} {{ $car->model->name }} - {{ $car->year }}</h1>
-            <div class="car-details-region">{{ $car->city->name}} - {{ $car->published_at }}</div>
+            <div class="car-details-region">{{ $car->city->name}} - {{ $car->published_at->toDateString() }}</div>
 
             <div class="car-details-content">
                 <div class="car-images-and-description">
