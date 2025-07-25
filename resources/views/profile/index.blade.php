@@ -1,5 +1,5 @@
 
-<x-app-layout>
+<x-app-layout title="My Profile">
     <main>
         <div class="container-small">
             <h1 class="car-details-page-title">My Profile</h1>
