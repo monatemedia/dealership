@@ -87,6 +87,7 @@
                         There are no published cars.
                     </div>
                 @endif
+                {{ $cars->onEachSide(1)->links() }}
             </div>
         </section>
         <!--/ New Cars -->

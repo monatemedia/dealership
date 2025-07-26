@@ -64,3 +64,18 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Future Tests and Features
+
+[X] Add titles to all pages
+[ ] Pagination on home page
+[ ] Reduce image sizes on upload
+[ ] Add Footer on home page
+[ ] Data enrichment with AI
+[ ] Admin Dashboard for superuser - Multitenancy
+[ ] Molymorphism
+[ ] Dealer 
+[ ] Dealer Admin Dashboard
+[ ] Paystack payment gateway
+[ ] Test resetting password feature
+[ ] Set up mail service

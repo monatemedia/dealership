@@ -10,18 +10,17 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        $cars = Cache::remember('home-cars', 60, function () {
+        $page = $request->get('page', 1);
+
+        $cacheKey = "home-cars-page-{$page}";
+
+        $cars = Cache::remember($cacheKey, 60, function () use ($page) {
             return Car::where('published_at', '<', now())
                 ->with(['primaryImage', 'city', 'carType', 'fuelType', 'manufacturer', 'model', 'favouredUsers'])
                 ->orderBy('published_at', 'desc')
-                ->limit(30)
-                ->get();
+                ->paginate(30, ['*'], 'page', $page);
         });
 
-        // Return the view with the cars
-        return view(
-            'home.index', // The view to return
-            ['cars' => $cars]
-        ); // Pass the cars to the view
+        return view('home.index', ['cars' => $cars]);
     }
 }
