@@ -68,8 +68,8 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 ## Future Tests and Features
 
 [X] Add titles to all pages
-[ ] Pagination on home page
-[ ] Reduce image sizes on upload
+[X] Pagination on home page
+[X] Reduce image sizes on upload
 [ ] Add Footer on home page
 [ ] Data enrichment with AI
 [ ] Admin Dashboard for superuser - Multitenancy
@@ -79,3 +79,8 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 [ ] Paystack payment gateway
 [ ] Test resetting password feature
 [ ] Set up mail service
+
+## Known Bugs
+[ ] Because Image rezise runs in a job, after uploading images, the images do not show in the update images pane without a page reload - Recommend fixing with Axios
+[ ] Because Images resize run in a background job, after creating a new car, images do not immediately show up in `My Cars` - Recommend fixing with Axios
+[ ] Delete requests do not delete images. They only mark the record for the car as deleted.

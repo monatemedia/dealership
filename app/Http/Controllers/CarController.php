@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use App\Jobs\ProcessCarImage;
 
 // Add Implement HasMiddleware to the CarController
 class CarController extends Controller
@@ -89,11 +90,17 @@ class CarController extends Controller
 
         // Iterate through the images
         foreach ($images as $i => $image) {
-            $path = $image->store('images', 'public'); // Store the image in the public disk
-            $car->images()->create([ // Create a new image record
-                'image_path' => $path, // Set the path to the image
-                'position' => $i + 1 // Set the position to the index + 1
-            ]);
+            $position = $i + 1;
+
+            // Save file temporarily
+            $filename = uniqid() . '.' . $image->getClientOriginalExtension();
+            $storedPath = Storage::disk('local')->putFileAs('processing_queue', $image, $filename);
+
+
+            // Full path to pass to job
+            $fullTempPath = Storage::disk('local')->path($storedPath);
+
+            ProcessCarImage::dispatch($fullTempPath, $car->id, $position);
         }
 
         // Redirect to car.index route
@@ -331,16 +338,21 @@ class CarController extends Controller
         $images = $request->file('images') ?? [];
         // Select max position of car images
         $position = $car->images()->max('position') ?? 0;
+
+        // Send each image to ProcessCarImage job
+        // and increment position for each image
+        // to ensure correct ordering
         foreach ($images as $image) {
-            // Save it on the file system
-            $path = $image->store('images', 'public');
-            // Save it in the database
-            $car->images()->create([
-                'image_path' => $path,
-                'position' => $position + 1
-            ]);
             $position++;
+            $filename = uniqid() . '.' . $image->getClientOriginalExtension();
+            $storedPath = Storage::disk('local')->putFileAs('processing_queue', $image, $filename);
+
+            $fullTempPath = Storage::disk('local')->path($storedPath);
+            ProcessCarImage::dispatch($fullTempPath, $car->id, $position);
         }
+
+        // Redirect back to car.images route
+        // with success message
         return redirect()->route('car.images', $car)
             ->with('success', 'New images were added');
     }

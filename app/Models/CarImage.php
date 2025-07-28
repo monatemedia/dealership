@@ -16,6 +16,7 @@ class CarImage extends Model
     protected $fillable = [
         'image_path',
         'position',
+        'variant',
     ];
 
     public function car(): BelongsTo
