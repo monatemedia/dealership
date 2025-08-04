@@ -14,6 +14,15 @@
                     <div class="form-details">
                         <div class="row">
                             <div class="col">
+                                <div class="form-group @error('year') has-error @enderror">
+                                    <label>Year</label>
+                                    <x-select-year :value="old('year')" />
+                                    <p class="error-message">
+                                        {{ $errors->first('year') }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col">
                                 <div class="form-group @error('manufacturer_id') has-error @enderror">
                                     <label>Manufacturer</label>
                                     <x-select-manufacturer :value="old('manufacturer_id')"/>
@@ -28,15 +37,6 @@
                                     <x-select-model :value="old('model_id')"/>
                                     <p class="error-message">
                                         {{ $errors->first('model_id') }}
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="form-group @error('year') has-error @enderror">
-                                    <label>Year</label>
-                                    <x-select-year :value="old('year')" />
-                                    <p class="error-message">
-                                        {{ $errors->first('year') }}
                                     </p>
                                 </div>
                             </div>

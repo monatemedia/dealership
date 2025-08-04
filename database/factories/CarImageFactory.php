@@ -18,20 +18,23 @@ class CarImageFactory extends Factory
     public function definition(): array
     {
         return [
-            // Generate random image URL with colors and text
-            'image_path' => 'https://placehold.co/'
-                . fake()->numberBetween(300, 800) . 'x' // Width random between 300 and 800
-                . fake()->numberBetween(200, 600) . '/' // Height random between 200 and 600
-                . fake()->safeColorName() . '/' // Background color
-                . fake()->safeColorName() . // Text color
-                '.png?text='
-                . fake()->word(), // Random text for the image
+            'image_path' => function (array $attributes) {
+                $car = Car::find($attributes['car_id']);
 
-            // Position
+                return sprintf(
+                    'https://placehold.co/%dx%d/%s/%s/png?text=%s',
+                    fake()->numberBetween(300, 800),  // width
+                    fake()->numberBetween(200, 600),  // height
+                    fake()->safeColorName(),          // background color
+                    fake()->safeColorName(),          // text color
+                    urlencode($car->manufacturer->name) // actual text
+                );
+            },
+
             'position' => function (array $attributes) {
-                return Car::find($attributes['car_id']) // Find the car
-                    ->images() // Get the images
-                    ->count() + 1; // Increment the count
+                return Car::find($attributes['car_id'])
+                    ->images()
+                    ->count() + 1;
             }
         ];
     }

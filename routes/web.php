@@ -30,6 +30,9 @@ Route::middleware(['auth'])->group(function () {
             ->name('car.updateImages');
         Route::post('/car/{car}/images', [CarController::class, 'addImages'])
             ->name('car.addImages');
+        // API to fetch status of My Cars images
+        Route::get('/api/my-cars/status', [CarController::class, 'status'])
+            ->name('api.my-cars.status');
     });
 
     // Profile management routes

@@ -37,8 +37,33 @@ class ProcessCarImage implements ShouldQueue
             ]);
 
             $car = Car::findOrFail($this->carId);
-            $processor->process($this->tempFilePath, $car, $this->position);
 
+            try {
+                $processor->process($this->tempFilePath, $car, $this->position);
+            } catch (\Throwable $e) {
+                Log::error('Image processing service failed', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                    'car_id' => $this->carId,
+                ]);
+                throw $e;
+            }
+
+            Log::debug("Checking position in job", [
+                'position_raw' => $this->position,
+                'position_type' => gettype($this->position),
+                'check' => $this->position === 1,
+            ]);
+
+            // If this was the primary image, update the car record
+            // Tell the front-end that the primary image is done processing
+            if ($this->position == 1) {
+                $car->processing_primary_image = false;
+                $car->save();
+                Log::info("Car #{$this->carId}: primary image processing completed, flag cleared.");
+            }
+
+            // Delete original file
             if (file_exists($this->tempFilePath)) {
                 unlink($this->tempFilePath);
                 Log::info("Temp file deleted: {$this->tempFilePath}");

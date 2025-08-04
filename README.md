@@ -65,22 +65,19 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-## Future Tests and Features
+## How to Start The App
 
-[X] Add titles to all pages
-[X] Pagination on home page
-[X] Reduce image sizes on upload
-[ ] Add Footer on home page
-[ ] Data enrichment with AI
-[ ] Admin Dashboard for superuser - Multitenancy
-[ ] Molymorphism
-[ ] Dealer 
-[ ] Dealer Admin Dashboard
-[ ] Paystack payment gateway
-[ ] Test resetting password feature
-[ ] Set up mail service
+- In the first terminal run
+```sh
+php artisan serve
+```
 
-## Known Bugs
-[ ] Because Image rezise runs in a job, after uploading images, the images do not show in the update images pane without a page reload - Recommend fixing with Axios
-[ ] Because Images resize run in a background job, after creating a new car, images do not immediately show up in `My Cars` - Recommend fixing with Axios
-[ ] Delete requests do not delete images. They only mark the record for the car as deleted.
+- In a second terminal run
+```sh
+npm run dev
+```
+
+- In a third terminal run
+```sh
+php artisan queue:work
+```

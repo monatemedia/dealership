@@ -1,5 +1,5 @@
 <x-app-layout title="My Cars" bodyClass="page-my-cars">
-    <main>
+    <main id="my-cars-page" data-check-images="true">
         <div>
             <div class="container">
                 <h1 class="car-details-page-title">My Cars</h1>
@@ -20,9 +20,10 @@
                                 <tr>
                                     <td>
                                         <img
-                                            src="{{ $car->primaryImage?->getUrl() ?: '/img/no_image.png' }}"
-                                            alt=""
-                                            class="my-cars-img-thumbnail"
+                                            data-car-id="{{ $car->id }}"
+                                            class="my-cars-img-thumbnail primary-image"
+                                            src="{{ $car->processing_primary_image ? asset('img/loading.gif') : ($car->primaryImage?->getUrl() ?: asset('img/no_image.png')) }}"
+                                            alt="Car Image"
                                         />
                                     </td>
                                     <td>{{ $car->getTitle() }}</td>

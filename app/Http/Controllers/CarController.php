@@ -85,6 +85,12 @@ class CarController extends Controller
         // On Car call create method and provide the data
         $car = Car::create($data);
 
+        // if user uploaded at least one image
+        if (count($images) > 0) {
+            $car->processing_primary_image = true;
+            $car->save();
+        }
+
         // Create features
         $car->features()->create($featuresData);
 
@@ -356,6 +362,32 @@ class CarController extends Controller
         return redirect()->route('car.images', $car)
             ->with('success', 'New images were added');
     }
+
+    /**
+     * Summary of status
+     * @return \Illuminate\Database\Eloquent\Collection<int, array{id: mixed, primary_image_url: mixed, processing_primary_image: mixed>|\Illuminate\Support\Collection<int, array{id: mixed, primary_image_url: mixed, processing_primary_image: mixed}>}
+     */
+    public function status()
+    {
+        $cars = auth()->user()->cars()  // assuming user has a 'cars' relationship
+            ->select('id', 'processing_primary_image')
+            ->with('primaryImage')  // eager load relation, adjust as needed
+            ->get();
+
+        return $cars->map(function ($car) {
+            return [
+                'id' => $car->id,
+                'processing_primary_image' => $car->processing_primary_image,
+                'primary_image_url' => $car->primaryImage?->getUrl() ?: asset('img/no_image.png'),
+            ];
+        });
+    }
+
+    /**
+     * Summary of showPhone
+     * @param \App\Models\Car $car
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function showPhone(Car $car)
     {
         return response()->json(['phone' => $car->phone]);

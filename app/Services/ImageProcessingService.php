@@ -20,10 +20,9 @@ class ImageProcessingService
 
     public function process(string $filePath, Car $car, int $position)
     {
-        $variant = 'cars';
         $width = 520;
         $filename = Str::uuid() . ".webp";
-        $path = "images/{$variant}/" . $filename;
+        $path = "images/cars/" . $filename;
 
         if (!file_exists($filePath)) {
             throw new \Exception("File does not exist at path: $filePath");
@@ -38,6 +37,12 @@ class ImageProcessingService
             throw $e;
         }
 
+        logger()->info("Image successfully processed", [
+            'car_id' => $car->id,
+            'position' => $position,
+            'path' => $path,
+        ]);
+
         Storage::disk('public')->put($path, (string) $image);
 
         $this->optimizer->optimize(Storage::disk('public')->path($path));
@@ -45,7 +50,11 @@ class ImageProcessingService
         $car->images()->create([
             'image_path' => $path,
             'position' => $position,
-            'variant' => $variant,
+        ]);
+
+        logger()->info("Image record created and file stored", [
+            'car_id' => $car->id,
+            'path' => $path,
         ]);
     }
 }

@@ -94,6 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const initMobileNavbar = () => {
     const btnToggle = document.querySelector(".btn-navbar-toggle");
+    if (!btnToggle) return; // ← Guard
 
     btnToggle.onclick = () => {
       document.body.classList.toggle("navbar-opened");
@@ -102,13 +103,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const imageCarousel = () => {
     const carousel = document.querySelector('.car-images-carousel');
-    if (!carousel) {
-      return;
-    }
+    if (!carousel) return;
+
     const thumbnails = document.querySelectorAll('.car-image-thumbnails img');
     const activeImage = document.getElementById('activeImage');
     const prevButton = document.getElementById('prevButton');
     const nextButton = document.getElementById('nextButton');
+    if (!activeImage || !prevButton || !nextButton) return; // ← Guard
 
 
     let currentIndex = 0;
@@ -154,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.querySelector('.search-cars-sidebar');
     const closeButton = document.querySelector('.close-filters-button');
 
-    if (!filterButton) return;
+    if (!filterButton || !sidebar) return; // ← Guard
 
     console.log(filterButton.classList)
     filterButton.addEventListener('click', () => {
@@ -257,7 +258,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const initShowPhoneNumber = () => {
     // Select the element we need to listen to click
     const span = document.querySelector('.car-details-phone-view');
-    span.addEventListener('click', ev => {
+    if (!span) return; // ← Guard
+      span.addEventListener('click', ev => {
         // Prevent default action of the click
         ev.preventDefault();
         // Get the url on which we should make Ajax request
@@ -274,8 +276,88 @@ document.addEventListener("DOMContentLoaded", function () {
         const phoneEl = a.querySelector('.text-phone')
         phoneEl.innerText = phone;
         })
-    })
+      })
     }
+
+  // Load Thumbnail on My Cars Page after Image queue completes
+  const initMyCarsImageLoader = () => {
+    const myCarsPage = document.getElementById('my-cars-page');
+    if (!myCarsPage || !myCarsPage.dataset.checkImages) {
+      return; // Not My Cars index page
+    }
+
+    let tries = 0;
+    const maxTries = 3;
+    let intervalId = null;
+
+    function updateCarImages() {
+      axios.get('/api/my-cars/status')
+        .then(response => {
+          const cars = response.data;
+          let allLoaded = true;
+
+          cars.forEach(car => {
+            if (car.processing_primary_image) {
+              allLoaded = false;
+            } else {
+              const imgEl = document.querySelector(
+                `img.primary-image[data-car-id='${car.id}']`
+              );
+              if (imgEl && imgEl.src.includes('loading.gif')) {
+                imgEl.src = car.primary_image_url;
+              }
+            }
+          });
+
+          tries++;
+
+          if (allLoaded) {
+            clearInterval(intervalId);
+          } else if (tries >= maxTries) {
+            clearInterval(intervalId);
+            showBusyMessage();
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching car images status:', error);
+          clearInterval(intervalId); // avoid 401 spam
+        });
+    }
+
+    function showBusyMessage() {
+      const container = document.createElement('div');
+      container.className = 'alert alert-warning';
+      container.textContent = 'The website is very busy. Your images will be available soon.';
+      document.querySelector('.container')?.prepend(container);
+    }
+
+    // First check immediately
+    axios.get('/api/my-cars/status')
+      .then(response => {
+        const cars = response.data;
+        let allLoaded = true;
+
+        cars.forEach(car => {
+          if (car.processing_primary_image) {
+            allLoaded = false;
+          } else {
+            const imgEl = document.querySelector(
+              `img.primary-image[data-car-id='${car.id}']`
+            );
+            if (imgEl && imgEl.src.includes('loading.gif')) {
+              imgEl.src = car.primary_image_url;
+            }
+          }
+        });
+
+        if (!allLoaded) {
+          intervalId = setInterval(updateCarImages, 5000);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching car images status:', error);
+      });
+  };
 
   initSlider();
   initImagePicker();
@@ -287,7 +369,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initSortingDropdown();
   initAddToWatchlist();
   initShowPhoneNumber();
-
+  initMyCarsImageLoader();
 
   ScrollReveal().reveal(".hero-slide.active .hero-slider-title", {
     delay: 200,

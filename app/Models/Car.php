@@ -17,6 +17,7 @@ class Car extends Model
 
     protected $casts = [
         'published_at' => 'datetime',
+        'processing_primary_image' => 'boolean',
     ];
 
     protected $fillable = [
