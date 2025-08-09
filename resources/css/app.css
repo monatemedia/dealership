@@ -13,6 +13,10 @@
   --navbar-link-color: #252525;
   --navbar-link-padding: 0 1rem;
   --navbar-height: 80px;
+  --border: #cbd5e1;
+  --border-color: #e9580c;
+  --add-images-bg: #fff;
+  --add-images-hover-bg: #ffefef;
 
   /* Buttons */
   --default-button-color: var(--text-color);
@@ -1446,3 +1450,179 @@ a.pagination-item:hover {
     grid-template-columns: repeat(1, minmax(0, 1fr));
   }
 }
+
+.sortable-list-wrapper {
+    max-width: 700px;
+    margin: auto;
+}
+
+.sortable-list-wrapper h1 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 5px;
+  }
+
+.sortable-list-wrapper p.subtitle {
+    text-align: center;
+    color: var(--text-color);
+    margin-bottom: 20px;
+}
+
+.sortable-list-wrapper label.add-images {
+    display: block;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    background: var(--add-images-bg);
+    padding: 20px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    transition: all 0.2s;
+}
+
+.sortable-list-wrapper label.add-images:hover {
+    border-color: var(--border-color);
+    background: var(--add-images-hover-bg);
+}
+
+.sortable-list-wrapper label.add-images i {
+    font-size: 24px;
+    margin-bottom: 8px;
+    display: block;
+    color: var(--text-color);
+}
+
+.sortable-list-wrapper .list-item {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+    cursor: grab;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.sortable-list-wrapper .list-item.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+.sortable-list-wrapper .list-item.over {
+    border-color: #93c5fd;
+    box-shadow: 0 4px 12px rgba(147, 197, 253, 0.6);
+    transform: scale(1.02);
+}
+
+.sortable-list-wrapper .marked {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.sortable-list-wrapper .too-many {
+    background: #fef9c3;
+    border-color: #fde68a;
+}
+
+.sortable-list-wrapper .too-big {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.sortable-list-wrapper .grip {
+    color: #94a3b8;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.sortable-list-wrapper .pos-num {
+    width: 24px;
+    text-align: center;
+    font-weight: bold;
+    margin-right: 10px;
+    font-size: 16px;
+    color: #334155;
+}
+
+.sortable-list-wrapper .trash-icon { color: #ef4444; }
+
+.sortable-list-wrapper .ban-icon-amber { color: #d97706; }
+
+.sortable-list-wrapper .ban-icon-red { color: #ef4444; }
+
+.sortable-list-wrapper .list-item img {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-right: 12px;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.sortable-list-wrapper .list-item:hover img { transform: scale(1.05); }
+
+.sortable-list-wrapper .list-item .info { flex: 1; }
+
+.sortable-list-wrapper .list-item .info h3 { margin: 0 0 5px; font-size: 16px; }
+
+.sortable-list-wrapper .list-item .info p { margin: 0; font-size: 14px; color: #475569; }
+
+.sortable-list-wrapper .trash-btn {
+    margin-left: 12px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    border: 2px solid #cbd5e1;
+    color: #94a3b8;
+    transition: all 0.2s;
+}
+
+.sortable-list-wrapper .trash-btn:hover {
+    border-color: #fca5a5;
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+.sortable-list-wrapper .trash-btn.marked {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: white;
+}
+
+.sortable-list-wrapper .trash-btn.marked-amber {
+    background: #d97706;
+    border-color: #d97706;
+    color: white;
+}
+
+.sortable-list-wrapper .submit-section {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.sortable-list-wrapper .submit-section p { margin: 0; font-size: 14px; color: #475569; }
+
+.sortable-list-wrapper #submitBtn {
+    background: var(--primary-color);
+    color: var(--primary-button-color);
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.sortable-list-wrapper #submitBtn:hover { background: var(--primary-color-hover); transform: translateY(-1px); }

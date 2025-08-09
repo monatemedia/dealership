@@ -85,7 +85,7 @@ class CarController extends Controller
         // On Car call create method and provide the data
         $car = Car::create($data);
 
-        // if user uploaded at least one image
+        // set spinner flag if user uploaded at least one image
         if (count($images) > 0) {
             $car->processing_primary_image = true;
             $car->save();
@@ -290,6 +290,8 @@ class CarController extends Controller
     {
 
         Gate::authorize('update', $car);
+
+        dump($car->images);
         return view('car.images', ['car' => $car]);
     }
 
