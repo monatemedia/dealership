@@ -83,6 +83,11 @@ class CarController extends Controller
         $featuresData = $data['features']; // Extract features data
         $images = $request->file('images') ?: []; // Extract uploaded images
 
+        // Limit images to a maximum of 12
+        if (count($images) > 12) {
+            $images = array_slice($images, 0, 12);
+        }
+
         // Assign the authenticated user ID to the car record
         $data['user_id'] = Auth::id();
 
