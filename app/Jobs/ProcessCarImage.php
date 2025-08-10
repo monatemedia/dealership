@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\Car;
+use App\Models\CarImage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -16,74 +16,62 @@ class ProcessCarImage implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected string $tempFilePath;
-    protected int $carId;
-    protected int $position;
+    protected int $carImageId;
 
-    public function __construct(string $tempFilePath, int $carId, int $position)
+    public function __construct(int $carImageId)
     {
-        $this->tempFilePath = $tempFilePath;
-        $this->carId = $carId;
-        $this->position = $position;
+        $this->carImageId = $carImageId;
     }
 
     public function handle(ImageProcessingService $processor)
     {
+        $carImage = CarImage::findOrFail($this->carImageId);
+
+        // Mark as processing
+        $carImage->update(['status' => 'processing']);
+
+        // Validate the file path before attempting to process
+        if (empty($carImage->temp_file_path) || !file_exists($carImage->temp_file_path)) {
+            Log::error("ProcessCarImage: File missing for CarImage ID {$carImage->id}", [
+                'temp_file_path' => $carImage->temp_file_path,
+            ]);
+
+            // Mark as failed due to missing file
+            $carImage->update(['status' => 'failed']);
+            return; // stop processing
+        }
+
         try {
-            Log::info('Processing image', [
-                'tempFilePath' => $this->tempFilePath,
-                'carId' => $this->carId,
-                'position' => $this->position,
-            ]);
+            // Process the image using the service
+            $processor->process($carImage);
 
-            $car = Car::findOrFail($this->carId);
+            // Mark as completed
+            $carImage->update(['status' => 'completed']);
 
-            try {
-                $processor->process($this->tempFilePath, $car, $this->position);
-            } catch (\Throwable $e) {
-                Log::error('Image processing service failed', [
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                    'car_id' => $this->carId,
-                ]);
-                throw $e;
-            }
+            // Clean up temp file
+            unlink($carImage->temp_file_path);
 
-            Log::debug("Checking position in job", [
-                'position_raw' => $this->position,
-                'position_type' => gettype($this->position),
-                'check' => $this->position === 1,
-            ]);
-
-            // If this was the primary image, update the car record
-            // Tell the front-end that the primary image is done processing
-            if ($this->position == 1) {
-                $car->processing_primary_image = false;
-                $car->save();
-                Log::info("Car #{$this->carId}: primary image processing completed, flag cleared.");
-            }
-
-            // Delete original file
-            if (file_exists($this->tempFilePath)) {
-                unlink($this->tempFilePath);
-                Log::info("Temp file deleted: {$this->tempFilePath}");
-            }
-
-        } catch (Exception $e) {
-            Log::error('Error processing car image', [
+        } catch (\Throwable $e) {
+            // Log the error for debugging
+            Log::error("ProcessCarImage: Error processing CarImage ID {$carImage->id}", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            // Rethrow to mark job as failed
-            throw $e;
+            // Mark as failed
+            $carImage->update(['status' => 'failed']);
+            throw $e; // Let Laravel's job failure handling catch it
         }
     }
 
     public function failed(Exception $exception): void
     {
-        Log::critical('Job failed permanently', [
-            'carId' => $this->carId,
+        // Ensure status is set to failed if job crashes unexpectedly
+        CarImage::where('id', $this->carImageId)->update([
+            'status' => 'failed'
+        ]);
+
+        Log::error("ProcessCarImage: Job permanently failed for CarImage ID {$this->carImageId}", [
             'error' => $exception->getMessage(),
         ]);
     }

@@ -58,9 +58,14 @@ class CarController extends Controller
      */
     public function store(StoreCarRequest $request)
     {
+        // Get the user from the request object
         $user = $request->user();
 
-        // Check if user has a phone number
+        /**
+         * Ensure user profile is complete (has phone number)
+         * If not, store the intended route and redirect them to profile settings
+         * so they can update their phone number before listing a car.
+         */
         if (!$user->phone) {
             // Store intended route
             session(['url.intended' => route('car.create')]);
@@ -70,46 +75,60 @@ class CarController extends Controller
                 ->with('warning', 'Please provide a phone number before adding a car');
         }
 
-        // Authorize the user to create a car
+        // Authorize user to create a car (policy check)
         Gate::authorize('create', Car::class);
 
-        // Get request data
+        // Get validated request data
         $data = $request->validated();
+        $featuresData = $data['features']; // Extract features data
+        $images = $request->file('images') ?: []; // Extract uploaded images
 
-        $featuresData = $data['features']; // Get features data
-        $images = $request->file('images') ?: []; // Get images data
-
-        // Set user ID
+        // Assign the authenticated user ID to the car record
         $data['user_id'] = Auth::id();
 
-        // On Car call create method and provide the data
+        // Create the Car record
         $car = Car::create($data);
 
-        // set spinner flag if user uploaded at least one image
-        if (count($images) > 0) {
-            $car->processing_primary_image = true;
-            $car->save();
-        }
-
-        // Create features
+        // Create associated features record
         $car->features()->create($featuresData);
 
-        // Iterate through the images
+        /**
+         * Handle image uploads:
+         * - Save each image to the private processing queue directory
+         * - Create a CarImage record with the full temporary path
+         * - Dispatch the processing job for each image
+         */
         foreach ($images as $i => $image) {
             $position = $i + 1;
 
-            // Save file temporarily
+            // Generate a unique filename while preserving the extension
             $filename = uniqid() . '.' . $image->getClientOriginalExtension();
-            $storedPath = Storage::disk('local')->putFileAs('processing_queue', $image, $filename);
 
+            // Store the file in the private/processing_queue directory
+            // 'private' here corresponds to storage/app/private
+            $storedPath = Storage::disk('private')
+                ->putFileAs('processing_queue', $image, $filename);
 
-            // Full path to pass to job
-            $fullTempPath = Storage::disk('local')->path($storedPath);
+            // Get the absolute full path to where the file was stored
+            $fullTempPath = Storage::disk('private')->path($storedPath);
 
-            ProcessCarImage::dispatch($fullTempPath, $car->id, $position);
+            // Normalize slashes for cross-OS compatibility
+            $fullTempPath = str_replace('\\', '/', $fullTempPath);
+
+            // Create a CarImage record with all required fields
+            $carImage = $car->images()->create([
+                'original_filename' => $image->getClientOriginalName(),
+                'temp_file_path' => $fullTempPath, // critical for the job to find the file
+                'image_path' => '', // will be set after processing
+                'position' => $position,
+                'status' => 'pending',
+            ]);
+
+            // Dispatch the image processing job with the CarImage ID
+            ProcessCarImage::dispatch($carImage->id);
         }
 
-        // Redirect to car.index route
+        // Redirect back to the index with a success message
         return redirect()->route('car.index')
             ->with('success', 'Car was created');
     }

@@ -13,8 +13,13 @@ return new class extends Migration {
         Schema::create('car_images', function (Blueprint $table) {
             $table->id();
             $table->foreignId('car_id')->constrained('cars');
+            $table->string('original_filename')->nullable();
+            $table->string('temp_file_path')->nullable();
             $table->string('image_path', 255);
             $table->integer('position');
+            $table->enum('status', ['pending', 'processing', 'completed', 'failed'])
+                ->default('pending');
+            $table->timestamps();
         });
     }
 

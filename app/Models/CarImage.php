@@ -11,11 +11,14 @@ class CarImage extends Model
 {
     /** @use HasFactory<\Database\Factories\CarImageFactory> */
     use HasFactory;
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
+        'original_filename',
+        'temp_file_path',
         'image_path',
         'position',
+        'status'
     ];
 
     public function car(): BelongsTo
