@@ -22,8 +22,11 @@
                                         <img
                                             data-car-id="{{ $car->id }}"
                                             class="my-cars-img-thumbnail primary-image"
-                                            src="{{ $car->processing_primary_image ? asset('img/loading.gif') : ($car->primaryImage?->getUrl() ?: asset('img/no_image.png')) }}"
-                                            alt="Car Image"
+                                            src="{{ $car->primaryImage && $car->primaryImage->status === 'pending'
+                                                ? asset('img/loading.gif')
+                                                : ($car->primaryImage?->getUrl() ?: asset('img/no_image.png'))
+                                            }}"
+                                            alt="Primary Image"
                                         />
                                     </td>
                                     <td>{{ $car->getTitle() }}</td>

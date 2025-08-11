@@ -93,7 +93,10 @@ class Car extends Model
     // Define the primaryImage function and define the return type
     public function primaryImage(): HasOne
     {
-        return $this->hasOne(CarImage::class)->oldestOfMany('position');
+        return $this->hasOne(CarImage::class)
+            ->orderBy('position', 'asc')
+            ->limit(1);
+        // return $this->hasOne(CarImage::class)->oldestOfMany('car_images.position');
         // the save as above
         // return $this->hasOne(CarImage::class)->ofMany('position', 'min');
     }

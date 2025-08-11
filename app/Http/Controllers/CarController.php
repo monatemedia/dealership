@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCarRequest;
 use App\Models\Car;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Jobs\ProcessCarImage;
 
@@ -21,7 +23,11 @@ class CarController extends Controller
         // Find cars for authenticated user
         $cars = $request->user()
             ->cars()
-            ->with(['primaryImage', 'manufacturer', 'model'])
+            ->with([
+                'primaryImage',
+                'manufacturer',
+                'model'
+            ])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
@@ -391,22 +397,62 @@ class CarController extends Controller
 
     /**
      * Summary of status
-     * @return \Illuminate\Database\Eloquent\Collection<int, array{id: mixed, primary_image_url: mixed, processing_primary_image: mixed>|\Illuminate\Support\Collection<int, array{id: mixed, primary_image_url: mixed, processing_primary_image: mixed}>}
+     * @return \Illuminate\Database\Eloquent\Collection<int, array{id: mixed, primary_image_status: mixed, primary_image_url: string>|\Illuminate\Support\Collection<int, array{id: mixed, primary_image_status: mixed, primary_image_url: string}>}
      */
-    public function status()
+    public function status(): JsonResponse
     {
-        $cars = auth()->user()->cars()  // assuming user has a 'cars' relationship
-            ->select('id', 'processing_primary_image')
-            ->with('primaryImage')  // eager load relation, adjust as needed
-            ->get();
+        try {
+            $cars = auth()->user()->cars()
+                ->with([
+                    'primaryImage' => function ($query) {
+                        $query->select('id', 'car_id', 'status', 'image_path', 'position');
+                    }
+                ])
+                ->select('id')
+                ->get();
+        } catch (\Throwable $e) {
+            Log::error('Error loading cars for status()', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage(),
+            ]);
 
-        return $cars->map(function ($car) {
+            return response()->json([
+                'error' => 'Unable to load cars.',
+            ], 500);
+        }
+
+        $result = $cars->map(function ($car) {
+            $status = 'failed';
+            $url = asset('img/no_image.png');
+
+            try {
+                if ($car->primaryImage) {
+                    $status = $car->primaryImage->status ?? 'failed';
+                    if (!empty($car->primaryImage->image_path)) {
+                        $url = asset('storage/' . ltrim($car->primaryImage->image_path, '/'));
+                    }
+                } else {
+                    Log::warning('Car missing primary image.', [
+                        'car_id' => $car->id,
+                        'user_id' => auth()->id(),
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                Log::error('Error accessing primaryImage for car.', [
+                    'car_id' => $car->id,
+                    'user_id' => auth()->id(),
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
             return [
                 'id' => $car->id,
-                'processing_primary_image' => $car->processing_primary_image,
-                'primary_image_url' => $car->primaryImage?->getUrl() ?: asset('img/no_image.png'),
+                'primary_image_status' => $status,
+                'primary_image_url' => $url,
             ];
         });
+
+        return response()->json($result);
     }
 
     /**
