@@ -11,13 +11,8 @@
                         </a>
                     </div>
 
-                    @session('success')
-                        <div class="my-large">
-                            <div class="success-message">
-                                {{ session('success') }}
-                            </div>
-                        </div>
-                    @endsession
+                    {{-- Flash Messages --}}
+                    <x-flash-messages />
 
                     {{ $slot }}
 

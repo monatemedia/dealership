@@ -1,7 +1,51 @@
 import axios from 'axios';
 import './bootstrap';
+import Alpine from 'alpinejs';
 
 document.addEventListener("DOMContentLoaded", function () {
+
+  // ----------------------------
+  // Flash Messages Alpine Setup
+  // ----------------------------
+  function flashMessages(initialMessages = []) {
+    return {
+      messages: initialMessages.map((m, i) => ({
+        id: Date.now() + i,
+        type: m.type,
+        text: m.text,
+        icon: m.type === 'success'
+          ? 'fa-solid fa-flag-checkered'
+          : m.type === 'warning'
+          ? 'fa-solid fa-triangle-exclamation'
+          : 'fa-solid fa-car-burst',
+          cssClass: m.type === 'success'
+          ? 'flash-success-message'
+          : m.type === 'warning'
+          ? 'flash-warning-message'
+          : 'flash-error-message',
+        visible: true
+      })),
+      dismiss(id) {
+        const msg = this.messages.find(m => m.id === id);
+        if (msg) msg.visible = false;
+        setTimeout(() => {
+          this.messages = this.messages.filter(m => m.id !== id);
+        }, 300);
+      },
+      init() {
+        this.messages.forEach(msg => {
+          setTimeout(() => this.dismiss(msg.id), 4000);
+        });
+      }
+    }
+  }
+
+  // Make it flashMessages globally available for Alpine
+  window.flashMessages = flashMessages;
+
+  // ----------------------------
+  // Hero Slider Initialization
+  // ----------------------------
   const initSlider = () => {
     const slides = document.querySelectorAll(".hero-slide");
     let currentIndex = 0; // Track the current slide
@@ -523,6 +567,11 @@ const initMyCarsImageLoader = () => {
   initShowPhoneNumber();
   initMyCarsImageLoader();
 //   sortableList();
+  // ----------------------------
+  // Start Alpine
+  // ----------------------------
+  window.Alpine = Alpine;
+  Alpine.start();
 
   ScrollReveal().reveal(".hero-slide.active .hero-slider-title", {
     delay: 200,
