@@ -25,8 +25,8 @@
                         <option value="-year">Year Desc</option>
                         <option value="mileage">Mileage Asc</option>
                         <option value="-mileage">Mileage Desc</option>
-                        <option value="published_at">Newest at the top</option>
-                        <option value="-published_at">Oldest at the top</option>
+                        <option value="published_at">Latest Listing First</option>
+                        <option value="-published_at">Oldest Listing First</option>
                     </select>
                 </div>
                 <div class="search-car-results-wrapper">
