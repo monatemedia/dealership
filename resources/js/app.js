@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
   window.flashMessages = flashMessages;
 
   // ----------------------------
-  // Hero Slider Initialization
+  // Hero Image Slider
   // ----------------------------
   const initSlider = () => {
     const slides = document.querySelectorAll(".hero-slide");
@@ -96,6 +96,10 @@ document.addEventListener("DOMContentLoaded", function () {
     moveToSlide(0);
   };
 
+  // ----------------------------
+  // Image Upload Picker and Previews
+  // - On "New Car" and "Edit Car" Pages
+  // ----------------------------
   const initImagePicker = () => {
     const fileInput = document.querySelector("#carFormImageUpload");
     const imagePreview = document.querySelector("#imagePreviews");
@@ -136,6 +140,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   };
 
+
+  // ----------------------------
+  // Mobile Navbar
+  // ----------------------------
   const initMobileNavbar = () => {
     const btnToggle = document.querySelector(".btn-navbar-toggle");
     if (!btnToggle) return; // ← Guard
@@ -145,6 +153,9 @@ document.addEventListener("DOMContentLoaded", function () {
     };
   };
 
+  // ----------------------------
+  // Image Carousel on "Show Car" Page
+  // ----------------------------
   const imageCarousel = () => {
     const carousel = document.querySelector('.car-images-carousel');
     if (!carousel) return;
@@ -194,6 +205,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // ----------------------------
+  // Toggle Search on Mobile
+  // ----------------------------
   const initMobileFilters = () => {
     const filterButton = document.querySelector('.show-filters-button');
     const sidebar = document.querySelector('.search-cars-sidebar');
@@ -217,6 +231,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // ----------------------------
+  // Cascading Dropdown Selector
+  // - For "Model" on "Manufacturer"
+  // - For "City" on "Province"
+  // ----------------------------
   const initCascadingDropdown = (parentSelector, childSelector) => {
     const parentDropdown = document.querySelector(parentSelector);
     const childDropdown = document.querySelector(childSelector);
@@ -242,6 +261,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // ----------------------------
+  // Order Lisings Dropdown
+  // - By Price, Year, Milage and Date Listed
+  // - Used on "Search" Page
+  // ----------------------------
   const initSortingDropdown = () => {
     const sortingDropdown = document.querySelector('.sort-dropdown');
     if (!sortingDropdown) return;
@@ -260,6 +284,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // ----------------------------
+  // Add Car To Watchlist
+  // - Used on "Listing" and "Search" Pages
+  // ----------------------------
   const initAddToWatchlist = () => {
     // Select add to watchlist buttons
     const buttons = document.querySelectorAll('.btn-heart');
@@ -299,71 +327,89 @@ document.addEventListener("DOMContentLoaded", function () {
     })
   }
 
+  // ----------------------------
+  // Show Phone Number
+  // - Used on "Show" Page
+  // ----------------------------
   const initShowPhoneNumber = () => {
     // Select the element we need to listen to click
     const span = document.querySelector('.car-details-phone-view');
     if (!span) return; // ← Guard
-      span.addEventListener('click', ev => {
-        // Prevent default action of the click
-        ev.preventDefault();
-        // Get the url on which we should make Ajax request
-        const url = span.dataset.url;
-        // Make the request
-        axios.post(url).then(response => {
+
+    span.addEventListener('click', ev => {
+      // Prevent default action of the click
+      ev.preventDefault();
+
+      // Get the url on which we should make Ajax request
+      const url = span.dataset.url;
+
+      // Make the request
+      axios.post(url).then(response => {
+
         // Get response from backend and take actual phone number
         const phone = response.data.phone;
+
         // Find the <a> element
         const a = span.parentElement;
+
         // and update its href attribute with full phone number received from backend
         a.href = 'tel:' + phone;
+
         // Find the element which contains obfuscated text and update it
         const phoneEl = a.querySelector('.text-phone')
         phoneEl.innerText = phone;
-        })
       })
+    })
+  }
+
+  // ----------------------------
+  // Load Thumbnail on "My Cars" Page
+  // ----------------------------
+  const initMyCarsImageLoader = () => {
+    const myCarsPage = document.getElementById('my-cars-page');
+    if (!myCarsPage || !myCarsPage.dataset.checkImages) {
+      return; // Not My Cars index page
     }
 
-// Load Thumbnail on My Cars Page after Image queue completes
-const initMyCarsImageLoader = () => {
-  const myCarsPage = document.getElementById('my-cars-page');
-  if (!myCarsPage || !myCarsPage.dataset.checkImages) {
-    return; // Not My Cars index page
-  }
+    let tries = 0;
+    const maxTries = 12; // e.g., poll for 1 minute max
+    let intervalId = null;
 
-  let tries = 0;
-  const maxTries = 12; // e.g., poll for 1 minute max
-  let intervalId = null;
+    function showBusyMessage() {
+      const container = document.createElement('div');
+      container.className = 'alert alert-warning';
+      container.textContent = 'The website is very busy. Your images will be available soon.';
+      document.querySelector('.container')?.prepend(container);
+    }
 
-  function showBusyMessage() {
-    const container = document.createElement('div');
-    container.className = 'alert alert-warning';
-    container.textContent = 'The website is very busy. Your images will be available soon.';
-    document.querySelector('.container')?.prepend(container);
-  }
+    function updateCarImages() {
+      console.log(`Polling attempt ${tries + 1}...`);
 
-  function updateCarImages() {
-    console.log(`Polling attempt ${tries + 1}...`);
+      axios.get('/api/my-cars/status')
 
-    axios.get('/api/my-cars/status')
       .then(response => {
         const cars = response.data;
         let allLoaded = true;
 
         cars.forEach(car => {
           const imgEl = document.querySelector(`img.primary-image[data-car-id='${car.id}']`);
+
           if (!imgEl) return;
 
           if (car.primary_image_status === 'pending' || car.primary_image_status === 'processing') {
             allLoaded = false;
+
             if (!imgEl.src.includes('loading.gif')) {
               imgEl.src = '/img/loading.gif';
             }
           }
+
           else if (car.primary_image_status === 'completed') {
             if (imgEl.src.includes('loading.gif') && car.primary_image_url) {
               imgEl.src = car.primary_image_url;
             }
           }
+
           else if (car.primary_image_status === 'failed') {
             if (imgEl.src.includes('loading.gif')) {
               imgEl.src = '/img/no_image.png';
@@ -383,178 +429,199 @@ const initMyCarsImageLoader = () => {
           showBusyMessage();
         }
       })
+
       .catch(error => {
         console.error('❌ Error fetching car images status:', error);
         clearInterval(intervalId);
       });
+    }
+
+    // First call immediately
+    updateCarImages();
+
+    // Then poll every 5 seconds
+    intervalId = setInterval(updateCarImages, 5000);
+  };
+
+  // ----------------------------
+  // Sortable Image List
+  // ----------------------------
+  const sortableList = () => {
+    const MAX_VALID = 12;
+    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+    const ordinals = ["Primary Image","Second Image","Third Image","Fourth Image","Fifth Image","Sixth Image","Seventh Image","Eighth Image","Ninth Image","Tenth Image","Eleventh Image","Twelfth Image"];
+
+    const items = [
+    { id: '1', image: 'https://images.pexels.com/photos/1562/italian-landscape-mountains-nature.jpg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop', state: 'valid' },
+    { id: '2', image: 'https://images.pexels.com/photos/416676/pexels-photo-416676.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop', state: 'valid' },
+    { id: '3', image: 'https://images.pexels.com/photos/147411/italy-mountains-dawn-daybreak-147411.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop', state: 'valid' }
+    ];
+
+    let draggedIndex = null;
+
+    function renderList() {
+      const list = document.getElementById('list');
+      if (!list) return; // guard
+      list.innerHTML = '';
+
+      const validItems = items.filter(i => i.state === 'valid');
+      validItems.forEach((item, idx) => {
+        if (idx < MAX_VALID) {
+          item.state = 'valid';
+        } else {
+          item.state = 'tooMany';
+        }
+      });
+
+      items.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        if (item.state === 'marked') div.classList.add('marked');
+        if (item.state === 'tooMany') div.classList.add('too-many');
+        if (item.state === 'tooBig') div.classList.add('too-big');
+        div.draggable = true;
+
+        div.addEventListener('dragstart', () => { draggedIndex = index; div.classList.add('dragging'); });
+        div.addEventListener('dragend', () => { draggedIndex = null; div.classList.remove('dragging'); });
+        div.addEventListener('dragover', (e) => { e.preventDefault(); div.classList.add('over'); });
+        div.addEventListener('dragleave', () => div.classList.remove('over'));
+        div.addEventListener('drop', () => { const draggedItem = items.splice(draggedIndex, 1)[0]; items.splice(index, 0, draggedItem); renderList(); });
+
+        let posNumHTML = '';
+        if (item.state === 'valid') {
+          const pos = validItems.indexOf(item);
+          posNumHTML = pos === -1 ? '' : (pos+1);
+        } else if (item.state === 'marked') {
+          posNumHTML = `<i class="fa-solid fa-trash trash-icon"></i>`;
+        } else if (item.state === 'tooMany') {
+          posNumHTML = `<i class="fa-solid fa-ban ban-icon-amber"></i>`;
+        } else if (item.state === 'tooBig') {
+          posNumHTML = `<i class="fa-solid fa-ban ban-icon-red"></i>`;
+        }
+
+        let title = '', desc = '';
+        if (item.state === 'valid') {
+          const pos = validItems.indexOf(item);
+          title = ordinals[pos] || `${pos+1}th Image`;
+          desc = "Ready to submit!";
+        } else if (item.state === 'marked') {
+          title = "Delete Image";
+          desc = "Marked for deletion";
+        } else if (item.state === 'tooMany') {
+          title = "Too many images";
+          desc = "This image will not be uploaded!";
+        } else if (item.state === 'tooBig') {
+          title = "Image size is too big";
+          desc = "Images may not be more than 2MB";
+        }
+
+        const trashBtnClass =
+        item.state === 'marked' || item.state === 'tooBig' ? 'marked'
+        : item.state === 'tooMany' ? 'marked-amber'
+        : '';
+
+        div.innerHTML = `
+        <i class="fa-solid fa-grip-vertical grip"></i>
+        <div class="pos-num">${posNumHTML}</div>
+        <img src="${item.image}" alt="">
+        <div class="info">
+          <h3>${title}</h3>
+          <p>${desc}</p>
+        </div>
+        <div class="trash-btn ${trashBtnClass}">
+          <i class="fa-solid fa-trash"></i>
+        </div>
+        `;
+
+        div.querySelector('.trash-btn').addEventListener('click', () => {
+        if (item.state === 'valid') {
+          item.state = 'marked';
+          promoteTooMany();
+        } else if (item.state === 'marked') {
+          item.state = 'valid';
+        } else {
+          return; // tooMany / tooBig cannot toggle
+        }
+        renderList();
+      });
+
+      list.appendChild(div);
+      });
+
+      updateMarkedCount();
+    }
+
+    function promoteTooMany() {
+      const tooManyIndex = items.findIndex(i => i.state === 'tooMany');
+      if (tooManyIndex !== -1) {
+        items[tooManyIndex].state = 'valid';
+      }
+    }
+
+    function updateMarkedCount() {
+      const markedCountEl = document.getElementById('markedCount');
+      if (!markedCountEl) return; // guard
+      const tooManyCount = items.filter(i => i.state === 'tooMany').length;
+      const tooBigCount = items.filter(i => i.state === 'tooBig').length;
+      const markedCount = items.filter(i => i.state === 'marked').length;
+      const parts = [];
+      if (tooManyCount > 0) parts.push(`There ${tooManyCount === 1 ? 'is' : 'are'} ${tooManyCount} item${tooManyCount>1?'s':''} too many`);
+      if (tooBigCount > 0) parts.push(`${tooBigCount} item${tooBigCount>1?'s':''} ${tooBigCount===1?'is':'are'} too big`);
+      if (markedCount > 0) parts.push(`${markedCount} item${markedCount>1?'s':''} marked for deletion`);
+      document.getElementById('markedCount').textContent = parts.join(', ') || 'No issues';
+    }
+
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput) {
+      document.getElementById('fileInput').addEventListener('change', (e) => {
+        const files = e.target.files;
+        Array.from(files).forEach(file => {
+          // ✅ Only accept jpeg, jpg, png
+          const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+          if (!validTypes.includes(file.type)) {
+            alert(`"${file.name}" is not a supported format. Please upload only JPEG or PNG images.`);
+          return;
+          }
+
+          const state = file.size > MAX_SIZE ? 'tooBig' : 'valid';
+          const reader = new FileReader();
+          reader.onload = () => {
+            items.push({
+              id: Date.now().toString(),
+              image: reader.result,
+              state
+            });
+          renderList();
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+    }
+
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+      document.getElementById('submitBtn').addEventListener('click', () => {
+        console.log('Submitting list', {
+          allItems: items,
+          markedForDeletion: items.filter(i => i.state === 'marked'),
+          remaining: items.filter(i => i.state === 'valid')
+        });
+        alert('List submitted! Check console for details.');
+      });
+    }
+
+    renderList();
   }
 
-  // First call immediately
-  updateCarImages();
+  // ----------------------------
+  // Start Alpine
+  // ----------------------------
+  window.Alpine = Alpine;
+  Alpine.start();
 
-  // Then poll every 5 seconds
-  intervalId = setInterval(updateCarImages, 5000);
-};
-
-  // Sortable List
-//   const sortableList = () => {
-//     const MAX_VALID = 12;
-//     const MAX_SIZE = 2 * 1024 * 1024; // 2MB
-//     const ordinals = ["Primary Image","Second Image","Third Image","Fourth Image","Fifth Image","Sixth Image","Seventh Image","Eighth Image","Ninth Image","Tenth Image","Eleventh Image","Twelfth Image"];
-
-//     const items = [
-//     { id: '1', image: 'https://images.pexels.com/photos/1562/italian-landscape-mountains-nature.jpg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop', state: 'valid' },
-//     { id: '2', image: 'https://images.pexels.com/photos/416676/pexels-photo-416676.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop', state: 'valid' },
-//     { id: '3', image: 'https://images.pexels.com/photos/147411/italy-mountains-dawn-daybreak-147411.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop', state: 'valid' }
-//     ];
-
-//     let draggedIndex = null;
-
-//     function renderList() {
-//       const list = document.getElementById('list');
-//       list.innerHTML = '';
-
-//       const validItems = items.filter(i => i.state === 'valid');
-//       validItems.forEach((item, idx) => {
-//         if (idx < MAX_VALID) {
-//           item.state = 'valid';
-//         } else {
-//           item.state = 'tooMany';
-//         }
-//       });
-
-//       items.forEach((item, index) => {
-//         const div = document.createElement('div');
-//         div.className = 'list-item';
-//         if (item.state === 'marked') div.classList.add('marked');
-//         if (item.state === 'tooMany') div.classList.add('too-many');
-//         if (item.state === 'tooBig') div.classList.add('too-big');
-//         div.draggable = true;
-
-//         div.addEventListener('dragstart', () => { draggedIndex = index; div.classList.add('dragging'); });
-//         div.addEventListener('dragend', () => { draggedIndex = null; div.classList.remove('dragging'); });
-//         div.addEventListener('dragover', (e) => { e.preventDefault(); div.classList.add('over'); });
-//         div.addEventListener('dragleave', () => div.classList.remove('over'));
-//         div.addEventListener('drop', () => { const draggedItem = items.splice(draggedIndex, 1)[0]; items.splice(index, 0, draggedItem); renderList(); });
-
-//         let posNumHTML = '';
-//         if (item.state === 'valid') {
-//           const pos = validItems.indexOf(item);
-//           posNumHTML = pos === -1 ? '' : (pos+1);
-//         } else if (item.state === 'marked') {
-//           posNumHTML = `<i class="fa-solid fa-trash trash-icon"></i>`;
-//         } else if (item.state === 'tooMany') {
-//           posNumHTML = `<i class="fa-solid fa-ban ban-icon-amber"></i>`;
-//         } else if (item.state === 'tooBig') {
-//           posNumHTML = `<i class="fa-solid fa-ban ban-icon-red"></i>`;
-//         }
-
-//         let title = '', desc = '';
-//         if (item.state === 'valid') {
-//           const pos = validItems.indexOf(item);
-//           title = ordinals[pos] || `${pos+1}th Image`;
-//           desc = "Ready to submit!";
-//         } else if (item.state === 'marked') {
-//           title = "Delete Image";
-//           desc = "Marked for deletion";
-//         } else if (item.state === 'tooMany') {
-//           title = "Too many images";
-//           desc = "This image will not be uploaded!";
-//         } else if (item.state === 'tooBig') {
-//           title = "Image size is too big";
-//           desc = "Images may not be more than 2MB";
-//         }
-
-//         const trashBtnClass =
-//         item.state === 'marked' || item.state === 'tooBig' ? 'marked'
-//         : item.state === 'tooMany' ? 'marked-amber'
-//         : '';
-
-//         div.innerHTML = `
-//         <i class="fa-solid fa-grip-vertical grip"></i>
-//         <div class="pos-num">${posNumHTML}</div>
-//         <img src="${item.image}" alt="">
-//         <div class="info">
-//           <h3>${title}</h3>
-//           <p>${desc}</p>
-//         </div>
-//         <div class="trash-btn ${trashBtnClass}">
-//           <i class="fa-solid fa-trash"></i>
-//         </div>
-//         `;
-
-//         div.querySelector('.trash-btn').addEventListener('click', () => {
-//         if (item.state === 'valid') {
-//           item.state = 'marked';
-//           promoteTooMany();
-//         } else if (item.state === 'marked') {
-//           item.state = 'valid';
-//         } else {
-//           return; // tooMany / tooBig cannot toggle
-//         }
-//         renderList();
-//       });
-
-//       list.appendChild(div);
-//       });
-
-//       updateMarkedCount();
-//     }
-
-//     function promoteTooMany() {
-//       const tooManyIndex = items.findIndex(i => i.state === 'tooMany');
-//       if (tooManyIndex !== -1) {
-//         items[tooManyIndex].state = 'valid';
-//       }
-//     }
-
-//     function updateMarkedCount() {
-//       const tooManyCount = items.filter(i => i.state === 'tooMany').length;
-//       const tooBigCount = items.filter(i => i.state === 'tooBig').length;
-//       const markedCount = items.filter(i => i.state === 'marked').length;
-//       const parts = [];
-//       if (tooManyCount > 0) parts.push(`There ${tooManyCount === 1 ? 'is' : 'are'} ${tooManyCount} item${tooManyCount>1?'s':''} too many`);
-//       if (tooBigCount > 0) parts.push(`${tooBigCount} item${tooBigCount>1?'s':''} ${tooBigCount===1?'is':'are'} too big`);
-//       if (markedCount > 0) parts.push(`${markedCount} item${markedCount>1?'s':''} marked for deletion`);
-//       document.getElementById('markedCount').textContent = parts.join(', ') || 'No issues';
-//     }
-
-//     document.getElementById('fileInput').addEventListener('change', (e) => {
-//       const files = e.target.files;
-//       Array.from(files).forEach(file => {
-//         // ✅ Only accept jpeg, jpg, png
-//         const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-//         if (!validTypes.includes(file.type)) {
-//           alert(`"${file.name}" is not a supported format. Please upload only JPEG or PNG images.`);
-//         return;
-//         }
-
-//         const state = file.size > MAX_SIZE ? 'tooBig' : 'valid';
-//         const reader = new FileReader();
-//         reader.onload = () => {
-//           items.push({
-//             id: Date.now().toString(),
-//             image: reader.result,
-//             state
-//           });
-//         renderList();
-//         };
-//         reader.readAsDataURL(file);
-//       });
-//     });
-
-//     document.getElementById('submitBtn').addEventListener('click', () => {
-//       console.log('Submitting list', {
-//         allItems: items,
-//         markedForDeletion: items.filter(i => i.state === 'marked'),
-//         remaining: items.filter(i => i.state === 'valid')
-//       });
-//       alert('List submitted! Check console for details.');
-//     });
-
-//     renderList();
-//   }
-
+  // ----------------------------
+  // Start Functions
+  // ----------------------------
   initSlider();
   initImagePicker();
   initMobileNavbar();
@@ -566,17 +633,17 @@ const initMyCarsImageLoader = () => {
   initAddToWatchlist();
   initShowPhoneNumber();
   initMyCarsImageLoader();
-//   sortableList();
-  // ----------------------------
-  // Start Alpine
-  // ----------------------------
-  window.Alpine = Alpine;
-  Alpine.start();
+  sortableList();
 
+  // ----------------------------
+  // Hero Slider Scroll Reveal
+  // ----------------------------
+  // Slider Title
   ScrollReveal().reveal(".hero-slide.active .hero-slider-title", {
     delay: 200,
     reset: true,
   });
+  // Slider Content
   ScrollReveal().reveal(".hero-slide.active .hero-slider-content", {
     delay: 200,
     origin: "bottom",
