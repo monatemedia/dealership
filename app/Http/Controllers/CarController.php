@@ -166,6 +166,7 @@ class CarController extends Controller
     public function edit(Car $car)
     {
         Gate::authorize('update', $car);
+        dump($car->images->toArray());
         return view('car.edit', [
             'car' => $car
         ]);
@@ -321,7 +322,7 @@ class CarController extends Controller
 
         Gate::authorize('update', $car);
 
-        dump($car->images);
+        dump($car->images->toArray());
         return view('car.images', ['car' => $car]);
     }
 
@@ -371,22 +372,45 @@ class CarController extends Controller
      */
     public function addImages(Request $request, Car $car)
     {
+        // Ensure the authenticated user is allowed to update this car
         Gate::authorize('update', $car);
-        // Get images from request
+
+        // Get uploaded images from request (default to empty array if none)
         $images = $request->file('images') ?? [];
-        // Select max position of car images
+
+        // Get the current max position from existing car images (for ordering)
         $position = $car->images()->max('position') ?? 0;
 
-        // Send each image to ProcessCarImage job
-        // and increment position for each image
-        // to ensure correct ordering
+        // Loop through each uploaded image and save it
         foreach ($images as $image) {
-            $position++;
-            $filename = uniqid() . '.' . $image->getClientOriginalExtension();
-            $storedPath = Storage::disk('local')->putFileAs('processing_queue', $image, $filename);
+            $position++; // increment position for each new image
 
-            $fullTempPath = Storage::disk('local')->path($storedPath);
-            ProcessCarImage::dispatch($fullTempPath, $car->id, $position);
+            // Generate a unique filename while keeping the original extension
+            $filename = uniqid() . '.' . $image->getClientOriginalExtension();
+
+            // Store the file in the private/processing_queue directory
+            // "private" = storage/app/private (not publicly accessible)
+            $storedPath = Storage::disk('private')
+                ->putFileAs('processing_queue', $image, $filename);
+
+            // Get the absolute path to the stored file
+            $fullTempPath = Storage::disk('private')->path($storedPath);
+
+            // Normalize slashes for cross-OS compatibility (Windows/Linux)
+            $fullTempPath = str_replace('\\', '/', $fullTempPath);
+
+            // Create a CarImage record in the database so the job has context
+            $carImage = $car->images()->create([
+                'original_filename' => $image->getClientOriginalName(), // keep original name for reference
+                'temp_file_path' => $fullTempPath,                   // temporary file path (to be processed)
+                'image_path' => '',                             // final processed path will be set later
+                'position' => $position,                      // image order within this car
+                'status' => 'pending',                      // start as pending
+            ]);
+
+            // Dispatch the image processing job
+            // The job only needs the CarImage ID, it will fetch the record itself
+            ProcessCarImage::dispatch($carImage->id);
         }
 
         // Redirect back to car.images route

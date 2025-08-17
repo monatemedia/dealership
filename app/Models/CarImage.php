@@ -21,6 +21,11 @@ class CarImage extends Model
         'status'
     ];
 
+    // Hide temp_file_path from all array/JSON outputs
+    protected $hidden = [
+        'temp_file_path'
+    ];
+
     public function car(): BelongsTo
     {
         return $this->belongsTo(Car::class);
