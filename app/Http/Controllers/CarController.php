@@ -7,6 +7,7 @@ use App\Models\Car;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -418,6 +419,107 @@ class CarController extends Controller
         // with success message
         return redirect()->route('car.images', $car)
             ->with('success', 'New images were added');
+    }
+
+    /**
+     * Sync the car images with user changes:
+     * - deletes marked images
+     * - reorders images
+     * - stages new uploads for processing
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Car $car
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function syncImages(Request $request, Car $car)
+    {
+        // Make sure the user is authorized to update this car
+        Gate::authorize('update', $car);
+
+        // Validate the incoming request payload
+        $data = $request->validate([
+            'delete_images' => 'array',     // IDs of images marked for deletion
+            'delete_images.*' => 'integer',
+            'positions' => 'array',         // Image ID => new position
+            'positions.*' => 'integer',
+            'images' => 'array',            // Newly uploaded image files
+            'images.*' => 'file|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        // Break out the validated inputs for clarity
+        $deleteIds = $data['delete_images'] ?? [];
+        $positions = $data['positions'] ?? [];
+        $uploads = $data['images'] ?? [];
+
+        // Stage new uploads in a temporary "processing" folder (private disk)
+        $stagedUploads = [];
+        foreach ($uploads as $image) {
+            $filename = uniqid() . '.' . $image->getClientOriginalExtension();
+
+            // Store in private disk so it's not public until processed
+            $storedPath = Storage::disk('private')
+                ->putFileAs('processing_queue', $image, $filename);
+
+            // Normalize slashes for cross-platform support
+            $fullTempPath = str_replace('\\', '/', Storage::disk('private')
+                ->path($storedPath));
+
+            $stagedUploads[] = [
+                'original_filename' => $image->getClientOriginalName(),
+                'temp_file_path' => $fullTempPath,
+            ];
+        }
+
+        // Collect public file paths to delete AFTER the transaction commits
+        $filesToDelete = [];
+
+        DB::transaction(function () use ($car, $deleteIds, $positions, $stagedUploads, &$filesToDelete) {
+            // Handle deletions
+            $imagesToDelete = $car->images()->whereIn('id', $deleteIds)->get();
+            foreach ($imagesToDelete as $image) {
+                // Strip "public/" since Storage::disk('public') already points to that root
+                $path = str_replace('public/', '', $image->image_path);
+                $filesToDelete[] = $path; // defer deletion until after commit
+            }
+            $car->images()->whereIn('id', $deleteIds)->delete();
+
+            // --- Handle reordering ---
+            foreach ($positions as $id => $pos) {
+                $car->images()->where('id', $id)->update(['position' => $pos]);
+            }
+
+            // --- Handle new uploads ---
+            $position = $car->images()->max('position') ?? 0;
+            foreach ($stagedUploads as $upload) {
+                $position++;
+
+                // Create a placeholder CarImage record
+                $carImage = $car->images()->create([
+                    'original_filename' => $upload['original_filename'],
+                    'temp_file_path' => $upload['temp_file_path'],
+                    'image_path' => '', // will be filled once processed
+                    'position' => $position,
+                    'status' => 'pending', // queue job will update this
+                ]);
+
+                // Queue the processing job AFTER the transaction commits successfully
+                DB::afterCommit(fn()
+                    => ProcessCarImage::dispatch($carImage->id));
+            }
+        });
+
+        // --- After transaction commit ---
+
+        // Physically remove deleted files from public storage
+        foreach ($filesToDelete as $path) {
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        // Redirect back to the car images page with success message
+        return redirect()->route('car.index')
+            ->with('success', 'Car images have been synchronized.');
     }
 
     /**
