@@ -5,45 +5,6 @@ import Alpine from 'alpinejs';
 document.addEventListener("DOMContentLoaded", function () {
 
   // ----------------------------
-  // Flash Messages Alpine Setup
-  // ----------------------------
-  function flashMessages(initialMessages = []) {
-    return {
-      messages: initialMessages.map((m, i) => ({
-        id: Date.now() + i,
-        type: m.type,
-        text: m.text,
-        icon: m.type === 'success'
-          ? 'fa-solid fa-flag-checkered'
-          : m.type === 'warning'
-          ? 'fa-solid fa-triangle-exclamation'
-          : 'fa-solid fa-car-burst',
-          cssClass: m.type === 'success'
-          ? 'flash-success-message'
-          : m.type === 'warning'
-          ? 'flash-warning-message'
-          : 'flash-error-message',
-        visible: true
-      })),
-      dismiss(id) {
-        const msg = this.messages.find(m => m.id === id);
-        if (msg) msg.visible = false;
-        setTimeout(() => {
-          this.messages = this.messages.filter(m => m.id !== id);
-        }, 300);
-      },
-      init() {
-        this.messages.forEach(msg => {
-          setTimeout(() => this.dismiss(msg.id), 4000);
-        });
-      }
-    }
-  }
-
-  // Make it flashMessages globally available for Alpine
-  window.flashMessages = flashMessages;
-
-  // ----------------------------
   // Hero Image Slider
   // ----------------------------
   const initSlider = () => {
@@ -95,6 +56,45 @@ document.addEventListener("DOMContentLoaded", function () {
     // Initialize the slider
     moveToSlide(0);
   };
+
+  // ----------------------------
+  // Flash Messages Alpine Setup
+  // ----------------------------
+  function flashMessages(initialMessages = []) {
+    return {
+      messages: initialMessages.map((m, i) => ({
+        id: Date.now() + i,
+        type: m.type,
+        text: m.text,
+        icon: m.type === 'success'
+          ? 'fa-solid fa-flag-checkered'
+          : m.type === 'warning'
+          ? 'fa-solid fa-triangle-exclamation'
+          : 'fa-solid fa-car-burst',
+          cssClass: m.type === 'success'
+          ? 'flash-success-message'
+          : m.type === 'warning'
+          ? 'flash-warning-message'
+          : 'flash-error-message',
+        visible: true
+      })),
+      dismiss(id) {
+        const msg = this.messages.find(m => m.id === id);
+        if (msg) msg.visible = false;
+        setTimeout(() => {
+          this.messages = this.messages.filter(m => m.id !== id);
+        }, 300);
+      },
+      init() {
+        this.messages.forEach(msg => {
+          setTimeout(() => this.dismiss(msg.id), 4000);
+        });
+      }
+    }
+  }
+
+  // Make it flashMessages globally available for Alpine
+  window.flashMessages = flashMessages;
 
   // ----------------------------
   // Image Upload Picker and Previews
@@ -444,82 +444,97 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   // ----------------------------
-  // Sortable Image List
+  // Sortable Car Images List
   // ----------------------------
-  const sortableList = () => {
-    const MAX_VALID = 12;
-    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+  const sortableCarImages = () => {
+    const MAX_VALID = 12; // Maximum number of valid images allowed
+    const MAX_SIZE = 2 * 1024 * 1024; // 2MB max file size
     const ordinals = ["Primary Image","Second Image","Third Image","Fourth Image","Fifth Image","Sixth Image","Seventh Image","Eighth Image","Ninth Image","Tenth Image","Eleventh Image","Twelfth Image"];
 
-    const items = [
-    { id: '1', image: 'https://images.pexels.com/photos/1562/italian-landscape-mountains-nature.jpg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop', state: 'valid' },
-    { id: '2', image: 'https://images.pexels.com/photos/416676/pexels-photo-416676.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop', state: 'valid' },
-    { id: '3', image: 'https://images.pexels.com/photos/147411/italy-mountains-dawn-daybreak-147411.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&fit=crop', state: 'valid' }
-    ];
+    // Initialize items array from backend images
+    const items = (window.carImages || []).map(img => ({
+      id: img.id.toString(), // unique identifier (position)
+      image: img.image,      // full URL for image
+      uiState: 'valid',      // frontend state, always 'valid' initially
+      car_id: img.car_id,
+      original_filename: img.original_filename,
+      status: img.status     // backend processing status ('pending', 'processing', 'completed', 'failed')
+    }));
 
-    let draggedIndex = null;
+    let draggedIndex = null; // Track index of the item being dragged
 
+    // Render the sortable list
     function renderList() {
       const list = document.getElementById('list');
-      if (!list) return; // guard
+      if (!list) return; // guard: exit if element not found
       list.innerHTML = '';
 
-      const validItems = items.filter(i => i.state === 'valid');
+      // Update uiState for valid / tooMany items
+      const validItems = items.filter(i => i.uiState === 'valid');
       validItems.forEach((item, idx) => {
         if (idx < MAX_VALID) {
-          item.state = 'valid';
+          item.uiState = 'valid';
         } else {
-          item.state = 'tooMany';
+          item.uiState = 'tooMany';
         }
       });
 
+      // Loop through items and build each list item div
       items.forEach((item, index) => {
         const div = document.createElement('div');
         div.className = 'list-item';
-        if (item.state === 'marked') div.classList.add('marked');
-        if (item.state === 'tooMany') div.classList.add('too-many');
-        if (item.state === 'tooBig') div.classList.add('too-big');
+        if (item.uiState === 'marked') div.classList.add('marked');
+        if (item.uiState === 'tooMany') div.classList.add('too-many');
+        if (item.uiState === 'tooBig') div.classList.add('too-big');
         div.draggable = true;
 
+        // Drag & Drop Event Listeners
         div.addEventListener('dragstart', () => { draggedIndex = index; div.classList.add('dragging'); });
         div.addEventListener('dragend', () => { draggedIndex = null; div.classList.remove('dragging'); });
         div.addEventListener('dragover', (e) => { e.preventDefault(); div.classList.add('over'); });
         div.addEventListener('dragleave', () => div.classList.remove('over'));
-        div.addEventListener('drop', () => { const draggedItem = items.splice(draggedIndex, 1)[0]; items.splice(index, 0, draggedItem); renderList(); });
+        div.addEventListener('drop', () => {
+          const draggedItem = items.splice(draggedIndex, 1)[0];
+          items.splice(index, 0, draggedItem);
+          renderList(); // re-render list after drop
+        });
 
+        // Determine position number / icons
         let posNumHTML = '';
-        if (item.state === 'valid') {
+        if (item.uiState === 'valid') {
           const pos = validItems.indexOf(item);
           posNumHTML = pos === -1 ? '' : (pos+1);
-        } else if (item.state === 'marked') {
+        } else if (item.uiState === 'marked') {
           posNumHTML = `<i class="fa-solid fa-trash trash-icon"></i>`;
-        } else if (item.state === 'tooMany') {
+        } else if (item.uiState === 'tooMany') {
           posNumHTML = `<i class="fa-solid fa-ban ban-icon-amber"></i>`;
-        } else if (item.state === 'tooBig') {
+        } else if (item.uiState === 'tooBig') {
           posNumHTML = `<i class="fa-solid fa-ban ban-icon-red"></i>`;
         }
 
+        // Title and description based on uiState
         let title = '', desc = '';
-        if (item.state === 'valid') {
+        if (item.uiState === 'valid') {
           const pos = validItems.indexOf(item);
           title = ordinals[pos] || `${pos+1}th Image`;
           desc = "Ready to submit!";
-        } else if (item.state === 'marked') {
+        } else if (item.uiState === 'marked') {
           title = "Delete Image";
           desc = "Marked for deletion";
-        } else if (item.state === 'tooMany') {
+        } else if (item.uiState === 'tooMany') {
           title = "Too many images";
           desc = "This image will not be uploaded!";
-        } else if (item.state === 'tooBig') {
+        } else if (item.uiState === 'tooBig') {
           title = "Image size is too big";
           desc = "Images may not be more than 2MB";
         }
 
         const trashBtnClass =
-        item.state === 'marked' || item.state === 'tooBig' ? 'marked'
-        : item.state === 'tooMany' ? 'marked-amber'
+        item.uiState === 'marked' || item.uiState === 'tooBig' ? 'marked'
+        : item.uiState === 'tooMany' ? 'marked-amber'
         : '';
 
+        // Inner HTML for each list item
         div.innerHTML = `
         <i class="fa-solid fa-grip-vertical grip"></i>
         <div class="pos-num">${posNumHTML}</div>
@@ -533,12 +548,13 @@ document.addEventListener("DOMContentLoaded", function () {
         </div>
         `;
 
+        // Trash button click handler
         div.querySelector('.trash-btn').addEventListener('click', () => {
-        if (item.state === 'valid') {
-          item.state = 'marked';
+        if (item.uiState === 'valid') {
+          item.uiState = 'marked';
           promoteTooMany();
-        } else if (item.state === 'marked') {
-          item.state = 'valid';
+        } else if (item.uiState === 'marked') {
+          item.uiState = 'valid';
         } else {
           return; // tooMany / tooBig cannot toggle
         }
@@ -551,19 +567,21 @@ document.addEventListener("DOMContentLoaded", function () {
       updateMarkedCount();
     }
 
+    // Promote a "tooMany" image to valid if a valid image is marked for deletion
     function promoteTooMany() {
-      const tooManyIndex = items.findIndex(i => i.state === 'tooMany');
+      const tooManyIndex = items.findIndex(i => i.uiState === 'tooMany');
       if (tooManyIndex !== -1) {
-        items[tooManyIndex].state = 'valid';
+        items[tooManyIndex].uiState = 'valid';
       }
     }
 
+    // Update marked count in the submit section
     function updateMarkedCount() {
       const markedCountEl = document.getElementById('markedCount');
       if (!markedCountEl) return; // guard
-      const tooManyCount = items.filter(i => i.state === 'tooMany').length;
-      const tooBigCount = items.filter(i => i.state === 'tooBig').length;
-      const markedCount = items.filter(i => i.state === 'marked').length;
+      const tooManyCount = items.filter(i => i.uiState === 'tooMany').length;
+      const tooBigCount = items.filter(i => i.uiState === 'tooBig').length;
+      const markedCount = items.filter(i => i.uiState === 'marked').length;
       const parts = [];
       if (tooManyCount > 0) parts.push(`There ${tooManyCount === 1 ? 'is' : 'are'} ${tooManyCount} item${tooManyCount>1?'s':''} too many`);
       if (tooBigCount > 0) parts.push(`${tooBigCount} item${tooBigCount>1?'s':''} ${tooBigCount===1?'is':'are'} too big`);
@@ -571,25 +589,26 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById('markedCount').textContent = parts.join(', ') || 'No issues';
     }
 
+    // File input change handler (add new images)
     const fileInput = document.getElementById('fileInput');
     if (fileInput) {
       document.getElementById('fileInput').addEventListener('change', (e) => {
         const files = e.target.files;
         Array.from(files).forEach(file => {
-          // ✅ Only accept jpeg, jpg, png
+          // Only accept JPEG or PNG
           const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
           if (!validTypes.includes(file.type)) {
             alert(`"${file.name}" is not a supported format. Please upload only JPEG or PNG images.`);
           return;
           }
 
-          const state = file.size > MAX_SIZE ? 'tooBig' : 'valid';
+          const uiState = file.size > MAX_SIZE ? 'tooBig' : 'valid';
           const reader = new FileReader();
           reader.onload = () => {
             items.push({
-              id: Date.now().toString(),
+              id: Date.now().toString(), // unique id for frontend only
               image: reader.result,
-              state
+              uiState
             });
           renderList();
           };
@@ -598,18 +617,20 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
+    // Submit button click handler
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
       document.getElementById('submitBtn').addEventListener('click', () => {
         console.log('Submitting list', {
           allItems: items,
-          markedForDeletion: items.filter(i => i.state === 'marked'),
-          remaining: items.filter(i => i.state === 'valid')
+          markedForDeletion: items.filter(i => i.uiState === 'marked'),
+          remaining: items.filter(i => i.uiState === 'valid')
         });
         alert('List submitted! Check console for details.');
       });
     }
 
+    // Initial render of the list
     renderList();
   }
 
@@ -620,7 +641,7 @@ document.addEventListener("DOMContentLoaded", function () {
   Alpine.start();
 
   // ----------------------------
-  // Start Functions
+  // Initialize Functions
   // ----------------------------
   initSlider();
   initImagePicker();
@@ -633,7 +654,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initAddToWatchlist();
   initShowPhoneNumber();
   initMyCarsImageLoader();
-  sortableList();
+  sortableCarImages();
 
   // ----------------------------
   // Hero Slider Scroll Reveal

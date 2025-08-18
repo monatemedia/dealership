@@ -323,6 +323,7 @@ class CarController extends Controller
         Gate::authorize('update', $car);
 
         dump($car->images->toArray());
+        dump($car->toArray());
         return view('car.images', ['car' => $car]);
     }
 
