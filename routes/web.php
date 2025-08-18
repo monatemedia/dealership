@@ -23,6 +23,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('watchlist.index');
         Route::post('/watchlist/{car}', [WatchlistController::class, 'storeDestroy'])
             ->name('watchlist.storeDestroy');
+        // Page that shows the images UI
         Route::resource('car', CarController::class)->except(['show']);
         Route::get('/car/{car}/images', [CarController::class, 'carImages'])
             ->name('car.images');
@@ -30,6 +31,9 @@ Route::middleware(['auth'])->group(function () {
             ->name('car.updateImages');
         Route::post('/car/{car}/images', [CarController::class, 'addImages'])
             ->name('car.addImages');
+        // Single endpoint that handles deletions + reordering + new uploads
+        Route::post('/car/{car}/images/sync', [CarController::class, 'syncImages'])
+            ->name('car.syncImages');
         // API to fetch status of My Cars images
         Route::get('/api/my-cars/status', [CarController::class, 'status'])
             ->name('api.my-cars.status');
