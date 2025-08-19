@@ -4,18 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCarRequest;
 use App\Models\Car;
+use App\Services\CarImage\CarImageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Jobs\ProcessCarImage;
+use Illuminate\Support\Facades\Validator;
 
 // Add Implement HasMiddleware to the CarController
 class CarController extends Controller
 {
+    protected CarImageService $carImageService;
+
+    public function __construct(CarImageService $carImageService)
+    {
+        $this->carImageService = $carImageService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -316,6 +324,7 @@ class CarController extends Controller
     }
 
     /**
+     * CarController::carImages
      * Show the images of a car.
      */
     public function carImages(Car $car)
@@ -422,104 +431,82 @@ class CarController extends Controller
     }
 
     /**
-     * Sync the car images with user changes:
-     * - deletes marked images
-     * - reorders images
-     * - stages new uploads for processing
+     * CarController::syncImages
+     * Sync car images (upload, delete, reorder).
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Car $car
+     * @param Request $request
+     * @param Car $car
      * @return \Illuminate\Http\RedirectResponse
      */
     public function syncImages(Request $request, Car $car)
     {
-        // Make sure the user is authorized to update this car
         Gate::authorize('update', $car);
 
-        // Validate the incoming request payload
-        $data = $request->validate([
-            'delete_images' => 'array',     // IDs of images marked for deletion
-            'delete_images.*' => 'integer',
-            'positions' => 'array',         // Image ID => new position
-            'positions.*' => 'integer',
-            'images' => 'array',            // Newly uploaded image files
-            'images.*' => 'file|mimes:jpg,jpeg,png|max:2048',
-        ]);
+        try {
+            // Validate files (if any)
+            $request->validate([
+                'images.*' => 'file|mimes:jpg,jpeg,png|max:2048',
+            ]);
 
-        // Break out the validated inputs for clarity
-        $deleteIds = $data['delete_images'] ?? [];
-        $positions = $data['positions'] ?? [];
-        $uploads = $data['images'] ?? [];
+            // Decode the JSON payload
+            $raw = $request->input('payload', '{}');
+            $payload = json_decode($raw, true) ?: [];
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return back()->withErrors(['payload' => 'Invalid JSON payload.']);
+            }
 
-        // Stage new uploads in a temporary "processing" folder (private disk)
-        $stagedUploads = [];
-        foreach ($uploads as $image) {
-            $filename = uniqid() . '.' . $image->getClientOriginalExtension();
+            // Existing image IDs for this car (for safety)
+            $carImageIds = $car
+                ->images()
+                ->pluck('id')
+                ->map(fn($v) => (int) $v)
+                ->all();
 
-            // Store in private disk so it's not public until processed
-            $storedPath = Storage::disk('private')
-                ->putFileAs('processing_queue', $image, $filename);
+            // delete_images: keep only valid ints belonging to this car
+            $deleteIds = collect($payload['delete_images'] ?? [])
+                ->map(fn($id) => (int) $id)
+                ->filter(fn($id) => in_array($id, $carImageIds, true))
+                ->values()
+                ->all();
 
-            // Normalize slashes for cross-platform support
-            $fullTempPath = str_replace('\\', '/', Storage::disk('private')
-                ->path($storedPath));
+            // positions: [image_id => position] — keep only valid ints for this car
+            $positions = collect($payload['positions'] ?? [])
+                ->mapWithKeys(fn($pos, $id) => [(int) $id => (int) $pos])
+                ->filter(fn($pos, $id) => $pos > 0 && in_array($id, $carImageIds, true))
+                ->all();
 
-            $stagedUploads[] = [
-                'original_filename' => $image->getClientOriginalName(),
-                'temp_file_path' => $fullTempPath,
-            ];
+            // Files to upload (UploadedFile[])
+            $newImages = $request->file('images', []);
+
+            Log::info('syncImages: parsed request', [
+                'car_id' => $car->id,
+                'new_count' => is_array($newImages) ? count($newImages) : 0,
+                'delete_count' => count($deleteIds),
+                'position_count' => count($positions),
+            ]);
+
+            // Delegate all work to the service
+            $this->carImageService
+                ->sync(
+                    $car,
+                    $newImages,
+                    $deleteIds,
+                    $positions
+                );
+
+            return redirect()
+                ->route('car.index')
+                ->with('success', 'Images synced successfully.');
+        } catch (\Throwable $e) {
+            Log::warning("Sync failed at controller level", [
+                'car_id' => $car->id ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->route('car.index')
+                ->with('error', 'Failed to sync images.');
         }
-
-        // Collect public file paths to delete AFTER the transaction commits
-        $filesToDelete = [];
-
-        DB::transaction(function () use ($car, $deleteIds, $positions, $stagedUploads, &$filesToDelete) {
-            // Handle deletions
-            $imagesToDelete = $car->images()->whereIn('id', $deleteIds)->get();
-            foreach ($imagesToDelete as $image) {
-                // Strip "public/" since Storage::disk('public') already points to that root
-                $path = str_replace('public/', '', $image->image_path);
-                $filesToDelete[] = $path; // defer deletion until after commit
-            }
-            $car->images()->whereIn('id', $deleteIds)->delete();
-
-            // --- Handle reordering ---
-            foreach ($positions as $id => $pos) {
-                $car->images()->where('id', $id)->update(['position' => $pos]);
-            }
-
-            // --- Handle new uploads ---
-            $position = $car->images()->max('position') ?? 0;
-            foreach ($stagedUploads as $upload) {
-                $position++;
-
-                // Create a placeholder CarImage record
-                $carImage = $car->images()->create([
-                    'original_filename' => $upload['original_filename'],
-                    'temp_file_path' => $upload['temp_file_path'],
-                    'image_path' => '', // will be filled once processed
-                    'position' => $position,
-                    'status' => 'pending', // queue job will update this
-                ]);
-
-                // Queue the processing job AFTER the transaction commits successfully
-                DB::afterCommit(fn()
-                    => ProcessCarImage::dispatch($carImage->id));
-            }
-        });
-
-        // --- After transaction commit ---
-
-        // Physically remove deleted files from public storage
-        foreach ($filesToDelete as $path) {
-            if (Storage::disk('public')->exists($path)) {
-                Storage::disk('public')->delete($path);
-            }
-        }
-
-        // Redirect back to the car images page with success message
-        return redirect()->route('car.index')
-            ->with('success', 'Car images have been synchronized.');
     }
 
     /**

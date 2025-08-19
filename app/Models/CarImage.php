@@ -14,8 +14,8 @@ class CarImage extends Model
     public $timestamps = true;
 
     protected $fillable = [
+        'car_id',
         'original_filename',
-        'temp_file_path',
         'image_path',
         'position',
         'status'

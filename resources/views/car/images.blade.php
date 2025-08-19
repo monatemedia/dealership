@@ -1,3 +1,5 @@
+{{-- resources\views\car\images.blade.php --}}
+
 <x-app-layout title="My Cars" bodyClass="page-my-cars">
     <main>
         <div>
@@ -94,7 +96,10 @@
                         Manage Images for {{ $car->getTitle() }}
                     </h1>
                     {{-- Sortable List Component --}}
-                    <x-sortable-car-images :images="$car->images" />
+                    <x-sortable-car-images
+                        :car="$car"
+                        :images="$car->images"
+                    />
                 </div>
             </div>
         </div>

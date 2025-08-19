@@ -1,5 +1,7 @@
 <?php
 
+// resources\views\components\sortable-car-images.blade.php
+
 namespace App\View\Components;
 
 use Closure;

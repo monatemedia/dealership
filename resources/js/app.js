@@ -446,193 +446,206 @@ document.addEventListener("DOMContentLoaded", function () {
   // ----------------------------
   // Sortable Car Images List
   // ----------------------------
-  const sortableCarImages = () => {
-    const MAX_VALID = 12; // Maximum number of valid images allowed
-    const MAX_SIZE = 2 * 1024 * 1024; // 2MB max file size
-    const ordinals = ["Primary Image","Second Image","Third Image","Fourth Image","Fifth Image","Sixth Image","Seventh Image","Eighth Image","Ninth Image","Tenth Image","Eleventh Image","Twelfth Image"];
+//   const sortableCarImages = () => {
+//     const MAX_VALID = 12; // Maximum number of valid images allowed
+//     const MAX_SIZE = 2 * 1024 * 1024; // 2MB max file size
+//     const ordinals = ["Primary Image","Second Image","Third Image","Fourth Image","Fifth Image","Sixth Image","Seventh Image","Eighth Image","Ninth Image","Tenth Image","Eleventh Image","Twelfth Image"];
 
-    // Initialize items array from backend images
-    const items = (window.carImages || []).map(img => ({
-      id: img.id.toString(), // unique identifier (position)
-      image: img.image,      // full URL for image
-      uiState: 'valid',      // frontend state, always 'valid' initially
-      car_id: img.car_id,
-      original_filename: img.original_filename,
-      status: img.status     // backend processing status ('pending', 'processing', 'completed', 'failed')
-    }));
+//     // Initialize items with IDs 1..N for existing images
+//     const items = (window.carImages || []).map((img, idx) => ({
+//       id: idx + 1,               // deterministic 1..N for backend
+//       image: img.image,           // full URL for image
+//       uiState: 'valid',           // frontend state
+//       car_id: img.car_id,
+//       original_filename: img.original_filename,
+//       status: img.status
+//     }));
 
-    let draggedIndex = null; // Track index of the item being dragged
+//     let draggedIndex = null; // Track index of the item being dragged
+//     let tempIdCounter = 1000; // for frontend-only tooMany images
 
-    // Render the sortable list
-    function renderList() {
-      const list = document.getElementById('list');
-      if (!list) return; // guard: exit if element not found
-      list.innerHTML = '';
+//     // Render the sortable list
+//     function renderList() {
+//       const list = document.getElementById('list');
+//       if (!list) return;
+//       list.innerHTML = '';
 
-      // Update uiState for valid / tooMany items
-      const validItems = items.filter(i => i.uiState === 'valid');
-      validItems.forEach((item, idx) => {
-        if (idx < MAX_VALID) {
-          item.uiState = 'valid';
-        } else {
-          item.uiState = 'tooMany';
-        }
-      });
+//       // Update uiState: valid / tooMany
+//       const validItems = items.filter(i => i.uiState === 'valid');
+//       validItems.forEach((item, idx) => {
+//         if (idx < MAX_VALID) {
+//           item.uiState = 'valid';
+//         } else {
+//           item.uiState = 'tooMany';
+//         }
+//       });
 
-      // Loop through items and build each list item div
-      items.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = 'list-item';
-        if (item.uiState === 'marked') div.classList.add('marked');
-        if (item.uiState === 'tooMany') div.classList.add('too-many');
-        if (item.uiState === 'tooBig') div.classList.add('too-big');
-        div.draggable = true;
+//       items.forEach((item, index) => {
+//         const div = document.createElement('div');
+//         div.className = 'list-item';
+//         if (item.uiState === 'marked') div.classList.add('marked');
+//         if (item.uiState === 'tooMany') div.classList.add('too-many');
+//         if (item.uiState === 'tooBig') div.classList.add('too-big');
+//         div.draggable = true;
 
-        // Drag & Drop Event Listeners
-        div.addEventListener('dragstart', () => { draggedIndex = index; div.classList.add('dragging'); });
-        div.addEventListener('dragend', () => { draggedIndex = null; div.classList.remove('dragging'); });
-        div.addEventListener('dragover', (e) => { e.preventDefault(); div.classList.add('over'); });
-        div.addEventListener('dragleave', () => div.classList.remove('over'));
-        div.addEventListener('drop', () => {
-          const draggedItem = items.splice(draggedIndex, 1)[0];
-          items.splice(index, 0, draggedItem);
-          renderList(); // re-render list after drop
-        });
+//         // Drag & Drop
+//         div.addEventListener('dragstart', () => { draggedIndex = index; div.classList.add('dragging'); });
+//         div.addEventListener('dragend', () => { draggedIndex = null; div.classList.remove('dragging'); });
+//         div.addEventListener('dragover', e => { e.preventDefault(); div.classList.add('over'); });
+//         div.addEventListener('dragleave', () => div.classList.remove('over'));
+//         div.addEventListener('drop', () => {
+//           const draggedItem = items.splice(draggedIndex, 1)[0];
+//           items.splice(index, 0, draggedItem);
+//           renderList();
+//         });
 
-        // Determine position number / icons
-        let posNumHTML = '';
-        if (item.uiState === 'valid') {
-          const pos = validItems.indexOf(item);
-          posNumHTML = pos === -1 ? '' : (pos+1);
-        } else if (item.uiState === 'marked') {
-          posNumHTML = `<i class="fa-solid fa-trash trash-icon"></i>`;
-        } else if (item.uiState === 'tooMany') {
-          posNumHTML = `<i class="fa-solid fa-ban ban-icon-amber"></i>`;
-        } else if (item.uiState === 'tooBig') {
-          posNumHTML = `<i class="fa-solid fa-ban ban-icon-red"></i>`;
-        }
+//         // Position / icon
+//         let posNumHTML = '';
+//         if (item.uiState === 'valid') {
+//           const pos = validItems.indexOf(item);
+//           posNumHTML = pos === -1 ? '' : (pos + 1);
+//         } else if (item.uiState === 'marked') {
+//           posNumHTML = `<i class="fa-solid fa-trash trash-icon"></i>`;
+//         } else if (item.uiState === 'tooMany') {
+//           posNumHTML = `<i class="fa-solid fa-ban ban-icon-amber"></i>`;
+//         } else if (item.uiState === 'tooBig') {
+//           posNumHTML = `<i class="fa-solid fa-ban ban-icon-red"></i>`;
+//         }
 
-        // Title and description based on uiState
-        let title = '', desc = '';
-        if (item.uiState === 'valid') {
-          const pos = validItems.indexOf(item);
-          title = ordinals[pos] || `${pos+1}th Image`;
-          desc = "Ready to submit!";
-        } else if (item.uiState === 'marked') {
-          title = "Delete Image";
-          desc = "Marked for deletion";
-        } else if (item.uiState === 'tooMany') {
-          title = "Too many images";
-          desc = "This image will not be uploaded!";
-        } else if (item.uiState === 'tooBig') {
-          title = "Image size is too big";
-          desc = "Images may not be more than 2MB";
-        }
+//         // Title & description
+//         let title = '', desc = '';
+//         if (item.uiState === 'valid') {
+//           const pos = validItems.indexOf(item);
+//           title = ordinals[pos] || `${pos + 1}th Image`;
+//           desc = "Ready to submit!";
+//         } else if (item.uiState === 'marked') {
+//           title = "Delete Image";
+//           desc = "Marked for deletion";
+//         } else if (item.uiState === 'tooMany') {
+//           title = "Too many images";
+//           desc = "This image will not be uploaded!";
+//         } else if (item.uiState === 'tooBig') {
+//           title = "Image size is too big";
+//           desc = "Images may not be more than 2MB";
+//         }
 
-        const trashBtnClass =
-        item.uiState === 'marked' || item.uiState === 'tooBig' ? 'marked'
-        : item.uiState === 'tooMany' ? 'marked-amber'
-        : '';
+//         const trashBtnClass =
+//           item.uiState === 'marked' || item.uiState === 'tooBig' ? 'marked'
+//           : item.uiState === 'tooMany' ? 'marked-amber'
+//           : '';
 
-        // Inner HTML for each list item
-        div.innerHTML = `
-        <i class="fa-solid fa-grip-vertical grip"></i>
-        <div class="pos-num">${posNumHTML}</div>
-        <img src="${item.image}" alt="">
-        <div class="info">
-          <h3>${title}</h3>
-          <p>${desc}</p>
-        </div>
-        <div class="trash-btn ${trashBtnClass}">
-          <i class="fa-solid fa-trash"></i>
-        </div>
-        `;
+//         div.innerHTML = `
+//           <i class="fa-solid fa-grip-vertical grip"></i>
+//           <div class="pos-num">${posNumHTML}</div>
+//           <img src="${item.image}" alt="">
+//           <div class="info">
+//             <h3>${title}</h3>
+//             <p>${desc}</p>
+//           </div>
+//           <div class="trash-btn ${trashBtnClass}">
+//             <i class="fa-solid fa-trash"></i>
+//           </div>
+//         `;
 
-        // Trash button click handler
-        div.querySelector('.trash-btn').addEventListener('click', () => {
-        if (item.uiState === 'valid') {
-          item.uiState = 'marked';
-          promoteTooMany();
-        } else if (item.uiState === 'marked') {
-          item.uiState = 'valid';
-        } else {
-          return; // tooMany / tooBig cannot toggle
-        }
-        renderList();
-      });
+//         // Trash click
+//         div.querySelector('.trash-btn').addEventListener('click', () => {
+//           if (item.uiState === 'valid') {
+//             item.uiState = 'marked';
+//             promoteTooMany();
+//           } else if (item.uiState === 'marked') {
+//             item.uiState = 'valid';
+//           }
+//           renderList();
+//         });
 
-      list.appendChild(div);
-      });
+//         list.appendChild(div);
+//       });
 
-      updateMarkedCount();
-    }
+//       updateMarkedCount();
+//     }
 
-    // Promote a "tooMany" image to valid if a valid image is marked for deletion
-    function promoteTooMany() {
-      const tooManyIndex = items.findIndex(i => i.uiState === 'tooMany');
-      if (tooManyIndex !== -1) {
-        items[tooManyIndex].uiState = 'valid';
-      }
-    }
+//     // Promote a "tooMany" image to valid if a valid image is marked
+//     function promoteTooMany() {
+//       const tooManyIndex = items.findIndex(i => i.uiState === 'tooMany');
+//       if (tooManyIndex !== -1) {
+//         items[tooManyIndex].uiState = 'valid';
+//       }
+//     }
 
-    // Update marked count in the submit section
-    function updateMarkedCount() {
-      const markedCountEl = document.getElementById('markedCount');
-      if (!markedCountEl) return; // guard
-      const tooManyCount = items.filter(i => i.uiState === 'tooMany').length;
-      const tooBigCount = items.filter(i => i.uiState === 'tooBig').length;
-      const markedCount = items.filter(i => i.uiState === 'marked').length;
-      const parts = [];
-      if (tooManyCount > 0) parts.push(`There ${tooManyCount === 1 ? 'is' : 'are'} ${tooManyCount} item${tooManyCount>1?'s':''} too many`);
-      if (tooBigCount > 0) parts.push(`${tooBigCount} item${tooBigCount>1?'s':''} ${tooBigCount===1?'is':'are'} too big`);
-      if (markedCount > 0) parts.push(`${markedCount} item${markedCount>1?'s':''} marked for deletion`);
-      document.getElementById('markedCount').textContent = parts.join(', ') || 'No issues';
-    }
+//     // Update marked count
+//     function updateMarkedCount() {
+//       const markedCountEl = document.getElementById('markedCount');
+//       if (!markedCountEl) return;
+//       const tooManyCount = items.filter(i => i.uiState === 'tooMany').length;
+//       const tooBigCount = items.filter(i => i.uiState === 'tooBig').length;
+//       const markedCount = items.filter(i => i.uiState === 'marked').length;
+//       const parts = [];
+//       if (tooManyCount > 0) parts.push(`There ${tooManyCount === 1 ? 'is' : 'are'} ${tooManyCount} item${tooManyCount>1?'s':''} too many`);
+//       if (tooBigCount > 0) parts.push(`${tooBigCount} item${tooBigCount>1?'s':''} ${tooBigCount===1?'is':'are'} too big`);
+//       if (markedCount > 0) parts.push(`${markedCount} item${markedCount>1?'s':''} marked for deletion`);
+//       markedCountEl.textContent = parts.join(', ') || 'No issues';
+//     }
 
-    // File input change handler (add new images)
-    const fileInput = document.getElementById('fileInput');
-    if (fileInput) {
-      document.getElementById('fileInput').addEventListener('change', (e) => {
-        const files = e.target.files;
-        Array.from(files).forEach(file => {
-          // Only accept JPEG or PNG
-          const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-          if (!validTypes.includes(file.type)) {
-            alert(`"${file.name}" is not a supported format. Please upload only JPEG or PNG images.`);
-          return;
-          }
+//     // File input change handler
+//     const fileInput = document.getElementById('fileInput');
+//     if (fileInput) {
+//       fileInput.addEventListener('change', e => {
+//         const files = e.target.files;
+//         Array.from(files).forEach(file => {
+//           const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+//           if (!validTypes.includes(file.type)) {
+//             alert(`"${file.name}" is not a supported format. Only JPEG or PNG.`);
+//             return;
+//           }
 
-          const uiState = file.size > MAX_SIZE ? 'tooBig' : 'valid';
-          const reader = new FileReader();
-          reader.onload = () => {
-            items.push({
-              id: Date.now().toString(), // unique id for frontend only
-              image: reader.result,
-              uiState
-            });
-          renderList();
-          };
-          reader.readAsDataURL(file);
-        });
-      });
-    }
+//           const uiState = file.size > MAX_SIZE ? 'tooBig' : 'valid';
+//           const reader = new FileReader();
+//           reader.onload = () => {
+//             items.push({
+//               id: uiState === 'valid' ? tempIdCounter++ : tempIdCounter++, // frontend temp id
+//               image: reader.result,
+//               uiState,
+//               original_filename: file.name
+//             });
+//             renderList();
+//           };
+//           reader.readAsDataURL(file);
+//         });
+//       });
+//     }
 
-    // Submit button click handler
-    const submitBtn = document.getElementById('submitBtn');
-    if (submitBtn) {
-      document.getElementById('submitBtn').addEventListener('click', () => {
-        console.log('Submitting list', {
-          allItems: items,
-          markedForDeletion: items.filter(i => i.uiState === 'marked'),
-          remaining: items.filter(i => i.uiState === 'valid')
-        });
-        alert('List submitted! Check console for details.');
-      });
-    }
+//     // Submit button
+//     const submitBtn = document.getElementById('submitBtn');
+//     if (submitBtn) {
+//       submitBtn.addEventListener('click', () => {
+//         const delete_images = items.filter(i => i.uiState === 'marked').map(i => parseInt(i.id));
+//         const positions = {};
+//         items.filter(i => i.uiState === 'valid').forEach((i, idx) => {
+//           positions[i.id] = idx + 1;
+//         });
 
-    // Initial render of the list
-    renderList();
-  }
+//         const newUploads = items
+//           .filter(i => !i.car_id && i.uiState === 'valid')
+//           .map((i, idx) => ({
+//             id: i.id,
+//             original_filename: i.original_filename || `upload_${idx}`,
+//             index: idx
+//           }));
+
+//         const payload = { delete_images, positions, images: newUploads };
+//         console.log('Payload for syncImages:', payload);
+
+//         const payloadInput = document.getElementById('payloadInput');
+//         if (payloadInput) payloadInput.value = JSON.stringify(payload);
+
+//         const syncForm = document.getElementById('syncImagesForm');
+//         if (syncForm) syncForm.submit();
+//       });
+//     }
+
+//     // Initial render
+//     renderList();
+//   };
 
   // ----------------------------
   // Start Alpine
@@ -654,7 +667,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initAddToWatchlist();
   initShowPhoneNumber();
   initMyCarsImageLoader();
-  sortableCarImages();
+//   sortableCarImages();
 
   // ----------------------------
   // Hero Slider Scroll Reveal
