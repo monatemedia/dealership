@@ -1,5 +1,7 @@
 <?php
 
+// app/Services/ImageProcessingService.php
+
 namespace App\Services;
 
 use App\Models\CarImage;

@@ -379,6 +379,7 @@ class CarController extends Controller
     }
 
     /**
+     * CarController::addImages
      * Add images to a car.
      */
     public function addImages(Request $request, Car $car)

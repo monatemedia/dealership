@@ -1,5 +1,7 @@
 <?php
 
+// app/Jobs/ProcessCarImage.php
+
 namespace App\Jobs;
 
 use App\Models\CarImage;
