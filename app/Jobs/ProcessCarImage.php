@@ -51,7 +51,9 @@ class ProcessCarImage implements ShouldQueue
             $carImage->update(['status' => 'completed']);
 
             // Clean up temp file
-            unlink($carImage->temp_file_path);
+            if (!empty($carImage->temp_file_path) && file_exists($carImage->temp_file_path)) {
+                @unlink($carImage->temp_file_path); // @ suppresses any rare unlink error
+            }
 
         } catch (\Throwable $e) {
             // Log the error for debugging
