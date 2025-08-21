@@ -1,6 +1,6 @@
 <?php
 
-// routes\web.php
+// routes/web.php
 
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\HomeController;

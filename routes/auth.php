@@ -1,5 +1,7 @@
 <?php
 
+// routes/auth.php
+
 use App\Http\Controllers\EmailVerifyController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PasswordResetController;

@@ -1,26 +1,30 @@
 <?php
 
-// resources\views\components\sortable-car-images.blade.php
+// resources/views/components/sortable-car-images.blade.php
 
 namespace App\View\Components;
 
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
+use App\Models\Car;
 
 class SortableCarImages extends Component
 {
-    public $images;
+    public Car $car;
+    public array $images;
 
     /**
      * Create a new component instance.
      *
-     * @param  \Illuminate\Support\Collection|array  $images
+     * @param Car $car
      */
-    public function __construct($images)
+    public function __construct(Car $car)
     {
+        $this->car = $car;
+
         // Transform images to JS-ready format
-        $this->images = collect($images)->map(function ($image) {
+        $this->images = $car->images->map(function ($image) {
             return [
                 'id' => (string) $image->id,          // JS needs string IDs
                 'image' => $image->getUrl(),           // full URL

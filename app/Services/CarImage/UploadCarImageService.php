@@ -4,6 +4,7 @@
 
 namespace App\Services\CarImage;
 
+use App\Jobs\ProcessCarImage;
 use App\Models\Car;
 use App\Models\CarImage;
 use Illuminate\Http\UploadedFile;
@@ -26,23 +27,40 @@ class UploadCarImageService
                     continue;
                 }
 
-                $filename = uniqid('', true) . '.' . strtolower($file->getClientOriginalExtension());
-                $path = $file->storeAs("cars/{$car->id}", $filename, 'public');
+                // Generate a unique filename while preserving the extension
+                $filename = uniqid() . '.' . $file->getClientOriginalExtension();
 
-                CarImage::create([
+                // Store the file in the private/processing_queue directory
+                // 'private' here corresponds to storage/app/private
+                $storedPath = Storage::disk('private')
+                    ->putFileAs('processing_queue', $file, $filename);
+
+                // Get the absolute full path to where the file was stored
+                $fullTempPath = Storage::disk('private')->path($storedPath);
+
+                // Normalize slashes for cross-OS compatibility (Windows vs Linux)
+                $fullTempPath = str_replace('\\', '/', $fullTempPath);
+
+                // Save record in DB — note: status is now 'pending' since
+                // it’s queued for processing, not immediately completed
+                $carImage = CarImage::create([
                     'car_id' => $car->id,
                     'original_filename' => $file->getClientOriginalName(),
-                    'image_path' => $path,
+                    'temp_file_path' => $fullTempPath, // critical for the job to find the file
+                    'image_path' => '', // will be set after processing
                     'position' => 0, // normalized later
-                    'status' => 'completed',
+                    'status' => 'pending',
                 ]);
+
+                // Dispatch the processing job immediately after creation
+                ProcessCarImage::dispatch($carImage->id);
 
                 $count++;
 
                 Log::info("Uploaded car image", [
                     'car_id' => $car->id,
                     'filename' => $file->getClientOriginalName(),
-                    'path' => $path,
+                    'temp_file_path' => $fullTempPath, // critical for the job to find the file
                 ]);
             }
 

@@ -69,6 +69,7 @@ class CarController extends Controller
     }
 
     /**
+     * CarController::store
      * Store a newly created resource in storage.
      */
     public function store(StoreCarRequest $request)
@@ -324,7 +325,7 @@ class CarController extends Controller
     }
 
     /**
-     * CarController::carImages
+     * app/Http/Controllers/CarController::carImages
      * Show the images of a car.
      */
     public function carImages(Car $car)
@@ -432,7 +433,7 @@ class CarController extends Controller
     }
 
     /**
-     * CarController::syncImages
+     * app/Http/Controllers/CarController::syncImages
      * Sync car images (upload, delete, reorder).
      *
      * @param Request $request

@@ -1,6 +1,4 @@
-{{-- resources\views\components\sortable-car-images.blade.php --}}
-
-@props(['car', 'images'])
+{{-- resources/views/components/sortable-car-images.blade.php --}}
 
 <div class="sortable-list-wrapper">
     <form id="syncImagesForm"
@@ -43,6 +41,7 @@
     </form>
 
     <script>
+        // Use the images array built in the component
         window.carImages = @json($images);
 
         document.addEventListener('DOMContentLoaded', function () {
