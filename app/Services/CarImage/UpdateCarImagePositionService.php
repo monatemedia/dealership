@@ -12,32 +12,27 @@ class UpdateCarImagePositionService
 {
     /**
      * Update positions for images that belong to this car.
-     * @return int number updated
+     *
+     * @param array $positions  // [id => position, ...]
+     * @param Car $car
+     * @return int
      */
     public function handle(array $positions, Car $car): int
     {
         $updated = 0;
 
         try {
-            // Only existing IDs for this car
-            $validIds = CarImage::where('car_id', $car->id)->pluck('id')->all();
-            $validIds = array_map('intval', $validIds);
-
             foreach ($positions as $id => $pos) {
                 $id = (int) $id;
-                $pos = (int) $pos;
-
-                if ($pos <= 0)
-                    continue;
-                if (!in_array($id, $validIds, true))
-                    continue;
+                $pos = max(1, (int) $pos); // ensure >0
 
                 $changed = CarImage::where('id', $id)
                     ->where('car_id', $car->id)
                     ->update(['position' => $pos]);
 
-                if ($changed)
+                if ($changed) {
                     $updated++;
+                }
             }
 
             Log::info("Updated image positions", [
@@ -57,27 +52,56 @@ class UpdateCarImagePositionService
     }
 
     /**
-     * Normalize positions so they are 1..N in the current order.
+     * Normalize positions so they are sequential 1..N while preserving frontend order.
+     *
+     * @param Car $car
+     * @param array $positionMap Optional: use this map to enforce frontend order [id => position]
      */
-    public function normalize(Car $car): void
+    public function normalize(Car $car, array $positionMap = []): void
     {
-        // Order by position asc, then id as a stable tie-breaker
-        $images = CarImage::where('car_id', $car->id)
-            ->orderBy('position')
-            ->orderBy('id')
-            ->get(['id', 'position']);
+        try {
+            if (!empty($positionMap)) {
+                // Sort by frontend positions
+                asort($positionMap);
 
-        $pos = 1;
-        foreach ($images as $img) {
-            if ($img->position !== $pos) {
-                CarImage::where('id', $img->id)->update(['position' => $pos]);
+                $pos = 1;
+                foreach (array_keys($positionMap) as $id) {
+                    CarImage::where('id', $id)
+                        ->where('car_id', $car->id)
+                        ->update(['position' => $pos]);
+                    $pos++;
+                }
+
+                Log::info("Normalized image positions using frontend positionMap", [
+                    'car_id' => $car->id,
+                    'map' => $positionMap,
+                ]);
+            } else {
+                // fallback: normalize by current DB order
+                $images = CarImage::where('car_id', $car->id)
+                    ->orderBy('position')
+                    ->orderBy('id')
+                    ->get(['id', 'position']);
+
+                $pos = 1;
+                foreach ($images as $img) {
+                    if ($img->position !== $pos) {
+                        CarImage::where('id', $img->id)->update(['position' => $pos]);
+                    }
+                    $pos++;
+                }
+
+                Log::info('Normalized image positions fallback', [
+                    'car_id' => $car->id,
+                    'total' => count($images),
+                ]);
             }
-            $pos++;
+        } catch (\Throwable $e) {
+            Log::error("Failed to normalize image positions", [
+                'car_id' => $car->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
         }
-
-        Log::info('Normalized image positions', [
-            'car_id' => $car->id,
-            'total' => count($images),
-        ]);
     }
 }

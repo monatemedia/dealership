@@ -436,77 +436,68 @@ class CarController extends Controller
      * app/Http/Controllers/CarController::syncImages
      * Sync car images (upload, delete, reorder).
      *
-     * @param Request $request
-     * @param Car $car
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Car $car
+     * @param \App\Services\CarImage\CarImageService $imageService
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function syncImages(Request $request, Car $car)
+    public function syncImages(Request $request, Car $car, CarImageService $imageService)
     {
         Gate::authorize('update', $car);
 
-        try {
-            // Validate files (if any)
-            $request->validate([
-                'images.*' => 'file|mimes:jpg,jpeg,png|max:2048',
-            ]);
+        // ✅ Validation for payload (must be valid JSON string) and files
+        $request->validate([
+            'images.*' => 'file|mimes:jpg,jpeg,png|max:2048',
+            'payload' => 'required|string',
+        ]);
 
-            // Decode the JSON payload
-            $raw = $request->input('payload', '{}');
-            $payload = json_decode($raw, true) ?: [];
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                return back()->withErrors(['payload' => 'Invalid JSON payload.']);
+        $payload = json_decode($request->input('payload', '[]'), true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return back()->withErrors(['payload' => 'Invalid JSON payload.']);
+        }
+
+        // ✅ Ensure order of files matches frontend by consuming sequentially
+        $uploadedFiles = $request->file('images', []);
+        $uploadIndex = 0; // Track file order
+
+        $imagesData = [];
+        foreach ($payload as $item) {
+            if (!isset($item['id'], $item['action'])) {
+                continue;
             }
 
-            // Existing image IDs for this car (for safety)
-            $carImageIds = $car
-                ->images()
-                ->pluck('id')
-                ->map(fn($v) => (int) $v)
-                ->all();
+            $record = [
+                'id' => $item['id'],
+                'action' => $item['action'],
+                'position' => $item['position'] ?? null, // 🔑 keep frontend order
+            ];
 
-            // delete_images: keep only valid ints belonging to this car
-            $deleteIds = collect($payload['delete_images'] ?? [])
-                ->map(fn($id) => (int) $id)
-                ->filter(fn($id) => in_array($id, $carImageIds, true))
-                ->values()
-                ->all();
+            // Attach uploaded file if this is an upload action
+            if ($item['action'] === 'upload' && isset($uploadedFiles[$uploadIndex])) {
+                $record['file'] = $uploadedFiles[$uploadIndex];
+                $uploadIndex++;
+            }
 
-            // positions: [image_id => position] — keep only valid ints for this car
-            $positions = collect($payload['positions'] ?? [])
-                ->mapWithKeys(fn($pos, $id) => [(int) $id => (int) $pos])
-                ->filter(fn($pos, $id) => $pos > 0 && in_array($id, $carImageIds, true))
-                ->all();
+            $imagesData[] = $record;
+        }
 
-            // Files to upload (UploadedFile[])
-            $newImages = $request->file('images', []);
+        try {
 
-            Log::info('syncImages: parsed request', [
-                'car_id' => $car->id,
-                'new_count' => is_array($newImages) ? count($newImages) : 0,
-                'delete_count' => count($deleteIds),
-                'position_count' => count($positions),
-            ]);
-
-            // Delegate all work to the service
-            $this->carImageService
-                ->sync(
-                    $car,
-                    $newImages,
-                    $deleteIds,
-                    $positions
-                );
+            // ✅ Now passing unified array of (id, action, file?, position?) to service
+            $imageService->sync($car, $imagesData);
 
             return redirect()
-                ->route('car.index')
+                ->route('car.index', $car)
                 ->with('success', 'Images synced successfully.');
         } catch (\Throwable $e) {
-            Log::warning("Sync failed at controller level", [
-                'car_id' => $car->id ?? null,
+            Log::error("Sync failed at controller", [
+                'car_id' => $car->id,
+                'user_id' => $request->user()->id ?? null,
                 'error' => $e->getMessage(),
             ]);
 
             return redirect()
-                ->route('car.index')
+                ->route('car.images', $car)
                 ->with('error', 'Failed to sync images.');
         }
     }

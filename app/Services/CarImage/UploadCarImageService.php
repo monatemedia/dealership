@@ -14,64 +14,47 @@ use Illuminate\Support\Facades\Storage;
 class UploadCarImageService
 {
     /**
-     * @param UploadedFile[] $images
-     * @return int number uploaded
+     * Upload one or multiple images for a car.
+     *
+     * @param UploadedFile|UploadedFile[] $images
+     * @param Car $car
+     * @return CarImage[]  // Return array of CarImage objects
      */
-    public function handle(array $images, Car $car): int
+    public function handle($images, Car $car): array
     {
-        $count = 0;
+        $uploaded = [];
 
-        try {
-            foreach ($images as $file) {
-                if (!($file instanceof UploadedFile)) {
-                    continue;
-                }
+        // Normalize to array
+        $images = is_array($images) ? $images : [$images];
 
-                // Generate a unique filename while preserving the extension
-                $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-
-                // Store the file in the private/processing_queue directory
-                // 'private' here corresponds to storage/app/private
-                $storedPath = Storage::disk('private')
-                    ->putFileAs('processing_queue', $file, $filename);
-
-                // Get the absolute full path to where the file was stored
-                $fullTempPath = Storage::disk('private')->path($storedPath);
-
-                // Normalize slashes for cross-OS compatibility (Windows vs Linux)
-                $fullTempPath = str_replace('\\', '/', $fullTempPath);
-
-                // Save record in DB — note: status is now 'pending' since
-                // it’s queued for processing, not immediately completed
-                $carImage = CarImage::create([
-                    'car_id' => $car->id,
-                    'original_filename' => $file->getClientOriginalName(),
-                    'temp_file_path' => $fullTempPath, // critical for the job to find the file
-                    'image_path' => '', // will be set after processing
-                    'position' => 0, // normalized later
-                    'status' => 'pending',
-                ]);
-
-                // Dispatch the processing job immediately after creation
-                ProcessCarImage::dispatch($carImage->id);
-
-                $count++;
-
-                Log::info("Uploaded car image", [
-                    'car_id' => $car->id,
-                    'filename' => $file->getClientOriginalName(),
-                    'temp_file_path' => $fullTempPath, // critical for the job to find the file
-                ]);
+        foreach ($images as $file) {
+            if (!($file instanceof UploadedFile)) {
+                continue;
             }
 
-            return $count;
+            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+            $storedPath = Storage::disk('private')->putFileAs('processing_queue', $file, $filename);
+            $fullTempPath = str_replace('\\', '/', Storage::disk('private')->path($storedPath));
 
-        } catch (\Throwable $e) {
-            Log::error("Failed to upload car images", [
+            $carImage = CarImage::create([
                 'car_id' => $car->id,
-                'error' => $e->getMessage(),
+                'original_filename' => $file->getClientOriginalName(),
+                'temp_file_path' => $fullTempPath,
+                'image_path' => '',
+                'position' => 0,
+                'status' => 'pending',
             ]);
-            throw $e;
+
+            ProcessCarImage::dispatch($carImage->id);
+            $uploaded[] = $carImage;
+
+            Log::info("Uploaded car image", [
+                'car_id' => $car->id,
+                'filename' => $file->getClientOriginalName(),
+                'temp_file_path' => $fullTempPath,
+            ]);
         }
+
+        return $uploaded;
     }
 }
