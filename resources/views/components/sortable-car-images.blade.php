@@ -106,12 +106,17 @@
                 else if(item.uiState === 'tooMany') { title="Too many images"; desc="This image will not be uploaded!"; }
                 else if(item.uiState === 'tooBig') { title="Image size is too big"; desc="Images may not be more than 2MB"; }
 
+                const trashBtnClass =
+                    item.uiState === 'marked' ? 'marked' :
+                    item.uiState === 'tooMany' ? 'marked-amber' :
+                    item.uiState === 'tooBig' ? 'marked' : '';
+
                 div.innerHTML = `
                     <i class="fa-solid fa-grip-vertical grip"></i>
                     <div class="pos-num">${posNumHTML}</div>
                     <img src="${item.image}" alt="">
                     <div class="info"><h3>${title}</h3><p>${desc}</p></div>
-                    <div class="trash-btn"><i class="fa-solid fa-trash"></i></div>
+                    <div class="trash-btn ${trashBtnClass}"><i class="fa-solid fa-trash"></i></div>
                 `;
 
                 div.querySelector('.trash-btn').addEventListener('click', () => {
@@ -211,7 +216,7 @@
                 formData.append('images[]', fileItem.file, fileItem.original_filename);
             });
 
-            // CHANGED: Log full formData before sending
+            // Log full formData before sending
             console.log("Submitting syncImages payload:", payload);
             for (let [key, val] of formData.entries()) {
                 console.log("formData =>", key, val);
