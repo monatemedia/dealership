@@ -1,3 +1,5 @@
+{{-- resources/views/car/index.blade.php --}}
+
 <x-app-layout title="My Cars" bodyClass="page-my-cars">
     <main id="my-cars-page" data-check-images="true">
         <div>

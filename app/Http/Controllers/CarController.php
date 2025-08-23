@@ -503,6 +503,7 @@ class CarController extends Controller
     }
 
     /**
+     * app/Http/Controllers/CarController.php
      * Summary of status
      * @return \Illuminate\Database\Eloquent\Collection<int, array{id: mixed, primary_image_status: mixed, primary_image_url: string>|\Illuminate\Support\Collection<int, array{id: mixed, primary_image_status: mixed, primary_image_url: string}>}
      */

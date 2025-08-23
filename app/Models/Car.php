@@ -101,7 +101,13 @@ class Car extends Model
         // return $this->hasOne(CarImage::class)->ofMany('position', 'min');
     }
 
-    // Define the images function and define the return type
+    /**
+     * app/Models/Car.php
+     * Summary of images
+     * Define the images function and define the return type
+     *
+     * @return HasMany<CarImage, Car>
+     */
     public function images(): HasMany
     {
         // Return that the `Car` object has many `CarImage` objects

@@ -78,6 +78,7 @@
                 if (item.uiState === 'marked') div.classList.add('marked');
                 if (item.uiState === 'tooMany') div.classList.add('too-many');
                 if (item.uiState === 'tooBig') div.classList.add('too-big');
+                if (item.uiState === 'duplicate') div.classList.add('too-big');
                 div.draggable = true;
 
                 // Drag events
@@ -92,24 +93,45 @@
                 });
 
                 let posNumHTML = '';
-                if(item.uiState === 'valid') posNumHTML = validItems.indexOf(item) + 1;
-                else if(item.uiState === 'marked') posNumHTML = `<i class="fa-solid fa-trash trash-icon"></i>`;
-                else if(item.uiState === 'tooMany') posNumHTML = `<i class="fa-solid fa-ban ban-icon-amber"></i>`;
-                else if(item.uiState === 'tooBig') posNumHTML = `<i class="fa-solid fa-ban ban-icon-red"></i>`;
+                if(item.uiState === 'valid')
+                    posNumHTML = validItems.indexOf(item) + 1;
+                else if(item.uiState === 'marked')
+                    posNumHTML = `<i class="fa-solid fa-trash trash-icon"></i>`;
+                else if(item.uiState === 'tooMany')
+                    posNumHTML = `<i class="fa-solid fa-ban ban-icon-amber"></i>`;
+                else if(item.uiState === 'tooBig')
+                    posNumHTML = `<i class="fa-solid fa-ban ban-icon-red"></i>`;
+                else if(item.uiState === 'duplicate')
+                    posNumHTML = `<i class="fa-solid fa-ban ban-icon-red"></i>`;
 
                 let title = '', desc = '';
-                if(item.uiState === 'valid') {
+                if (item.uiState === 'valid') {
                     const pos = validItems.indexOf(item);
                     title = ordinals[pos] || `${pos+1}th Image`;
-                    desc = "Ready to submit!";
-                } else if(item.uiState === 'marked') { title="Delete Image"; desc="Marked for deletion"; }
-                else if(item.uiState === 'tooMany') { title="Too many images"; desc="This image will not be uploaded!"; }
-                else if(item.uiState === 'tooBig') { title="Image size is too big"; desc="Images may not be more than 2MB"; }
+
+                    if (item.status === 'completed') {
+                        desc = "Uploaded and available.";
+                    } else if (item.status === 'pending' || item.status === 'processing') {
+                        desc = "Processing, please wait...";
+                    } else if (item.status === 'failed') {
+                        desc = "Still processing, check back later.";
+                    } else {
+                        desc = "Ready to submit!";
+                    }
+                }
+                else if(item.uiState === 'marked')
+                    { title="Delete Image"; desc="Marked for deletion"; }
+                else if(item.uiState === 'tooMany')
+                    { title="Too many images"; desc="This image will not be uploaded!"; }
+                else if(item.uiState === 'tooBig')
+                    { title="Image too big"; desc="Images may not be more than 2MB."; }
+                else if(item.uiState === 'duplicate')
+                    { title="Duplicate image"; desc="This image is already in the list."; }
 
                 const trashBtnClass =
                     item.uiState === 'marked' ? 'marked' :
                     item.uiState === 'tooMany' ? 'marked-amber' :
-                    item.uiState === 'tooBig' ? 'marked' : '';
+                    (item.uiState === 'tooBig' || item.uiState === 'duplicate') ? 'marked' : '';
 
                 div.innerHTML = `
                     <i class="fa-solid fa-grip-vertical grip"></i>
@@ -119,10 +141,37 @@
                     <div class="trash-btn ${trashBtnClass}"><i class="fa-solid fa-trash"></i></div>
                 `;
 
-                div.querySelector('.trash-btn').addEventListener('click', () => {
-                    item.uiState = item.uiState === 'valid' ? 'marked' : 'valid';
-                    renderList();
-                });
+                // ✅ Trash toggle + promote tooMany if possible
+                const trashBtn = div.querySelector('.trash-btn');
+                if (item.uiState === 'valid' || item.uiState === 'marked') {
+                    trashBtn.addEventListener('click', () => {
+                        if (item.uiState === 'valid') {
+                            // Mark this one for deletion
+                            item.uiState = 'marked';
+
+                            // Find first "tooMany" image in the list
+                            const nextTooMany = items.find(i => i.uiState === 'tooMany');
+                            if (nextTooMany) {
+                                nextTooMany.uiState = 'valid';
+                            }
+                        } else {
+                            // Unmark: switch back to valid
+                            item.uiState = 'valid';
+
+                            // ⚠️ If unmarking would exceed MAX_VALID, demote the last valid to tooMany
+                            const validItems = items.filter(i => i.uiState === 'valid');
+                            if (validItems.length > MAX_VALID) {
+                                const lastValid = validItems[MAX_VALID]; // beyond the allowed 12
+                                if (lastValid) lastValid.uiState = 'tooMany';
+                            }
+                        }
+                        renderList();
+                    });
+                } else {
+                    // Grey out disabled states
+                    trashBtn.style.opacity = "0.5";
+                    trashBtn.style.cursor = "not-allowed";
+                }
 
                 list.appendChild(div);
             });
@@ -134,38 +183,61 @@
             const markedCountEl = document.getElementById('markedCount');
             const tooManyCount = items.filter(i => i.uiState==='tooMany').length;
             const tooBigCount = items.filter(i => i.uiState==='tooBig').length;
+            const duplicateCount = items.filter(i => i.uiState==='duplicate').length;
             const markedCount = items.filter(i => i.uiState==='marked').length;
+
             const parts = [];
             if(tooManyCount) parts.push(`There ${tooManyCount===1?'is':'are'} ${tooManyCount} item${tooManyCount>1?'s':''} too many`);
             if(tooBigCount) parts.push(`${tooBigCount} item${tooBigCount>1?'s':''} too big`);
+            if(duplicateCount) parts.push(`${duplicateCount} duplicate${duplicateCount>1?'s':''}`);
             if(markedCount) parts.push(`${markedCount} item${markedCount>1?'s':''} marked for deletion`);
             markedCountEl.textContent = parts.join(', ') || 'No issues';
         }
 
         renderList();
 
+        // File add handler
         fileInput.addEventListener('change', e => {
-            const files = Array.from(e.target.files);
-            files.forEach(file => {
-                const validTypes = ['image/jpeg','image/png','image/jpg'];
-                if(!validTypes.includes(file.type)) {
-                    alert(`"${file.name}" is not supported. Only JPEG/PNG.`);
-                    return;
-                }
-                const uiState = file.size > MAX_SIZE ? 'tooBig' : 'valid';
-                const reader = new FileReader();
-                reader.onload = () => {
-                    items.push({
-                        id: tempIdCounter++,       // unique frontend temp ID
-                        image: reader.result,      // preview
-                        uiState,
-                        original_filename: file.name,
-                        file                        // store actual File object
-                    });
-                    renderList();
-                };
-                reader.readAsDataURL(file);
+        const files = Array.from(e.target.files);
+        files.forEach(file => {
+            const validTypes = ['image/jpeg','image/png','image/jpg'];
+            if(!validTypes.includes(file.type)) {
+            alert(`"${file.name}" is not supported. Only JPEG/PNG.`);
+            return;
+            }
+
+            // 🚨 Duplicate check
+            const duplicate = items.some(i => i.original_filename === file.name);
+            if (duplicate) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                items.push({
+                id: tempIdCounter++,
+                image: reader.result,
+                uiState: 'duplicate',
+                original_filename: file.name,
+                file
+                });
+                renderList();
+            };
+            reader.readAsDataURL(file);
+            return;
+            }
+
+            const uiState = file.size > MAX_SIZE ? 'tooBig' : 'valid';
+            const reader = new FileReader();
+            reader.onload = () => {
+            items.push({
+                id: tempIdCounter++,
+                image: reader.result,
+                uiState,
+                original_filename: file.name,
+                file
             });
+            renderList();
+            };
+            reader.readAsDataURL(file);
+        });
         });
 
         /*
@@ -186,7 +258,11 @@
             let order = 1;
 
             items.forEach(item => {
-                if(item.uiState === 'tooMany' || item.uiState === 'tooBig') return;
+                if(
+                    item.uiState === 'tooMany' ||
+                    item.uiState === 'tooBig' ||
+                    item.uiState === 'duplicate'
+                ) return;
 
                 if(item.uiState === 'marked' && item.car_id) {
                     payload.push({id: item.id, action: 'delete'});

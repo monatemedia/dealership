@@ -1,3 +1,5 @@
+// resources/js/app/js
+
 import axios from 'axios';
 import './bootstrap';
 import Alpine from 'alpinejs';
@@ -365,7 +367,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // ----------------------------
   // Load Thumbnail on "My Cars" Page
   // ----------------------------
-  const initMyCarsImageLoader = () => {
+  const initImageLoader = () => {
     const myCarsPage = document.getElementById('my-cars-page');
     if (!myCarsPage || !myCarsPage.dataset.checkImages) {
       return; // Not My Cars index page
@@ -385,7 +387,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateCarImages() {
       console.log(`Polling attempt ${tries + 1}...`);
 
-      axios.get('/api/my-cars/status')
+      axios.get('/api/car-image/status')
 
       .then(response => {
         const cars = response.data;
@@ -666,7 +668,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initSortingDropdown();
   initAddToWatchlist();
   initShowPhoneNumber();
-  initMyCarsImageLoader();
+  initImageLoader();
 //   sortableCarImages();
 
   // ----------------------------

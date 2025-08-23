@@ -36,9 +36,9 @@ Route::middleware(['auth'])->group(function () {
         // Single endpoint that handles deletions + reordering + new uploads
         Route::post('/car/{car}/images/sync', [CarController::class, 'syncImages'])
             ->name('car.syncImages');
-        // API to fetch status of My Cars images
-        Route::get('/api/my-cars/status', [CarController::class, 'status'])
-            ->name('api.my-cars.status');
+        // API to fetch status of Cars Images
+        Route::get('/api/car-image/status', [CarController::class, 'status'])
+            ->name('api.car-image.status');
     });
 
     // Profile management routes
