@@ -256,13 +256,12 @@
             const payload = [];
             let order = 1;
 
-            items.forEach(item => {
-                if (
-                    item.uiState === 'tooMany' ||
-                    item.uiState === 'tooBig' ||
-                    item.uiState === 'duplicate'
-                ) return;
+            // Filtered valid items only
+            const validItems = items.filter(item =>
+                item.uiState === 'valid' || item.uiState === 'marked'
+            );
 
+            validItems.forEach(item => {
                 if (item.uiState === 'marked' && item.car_id) {
                     payload.push({ id: item.id, action: 'delete' });
                 } else if (item.uiState === 'valid' && !item.car_id) {
@@ -271,7 +270,6 @@
                     payload.push({ id: item.id, action: 'keep' });
                 }
 
-                // Set position if it's valid
                 if (item.uiState === 'valid') {
                     payload[payload.length - 1].position = order++;
                 }
@@ -280,7 +278,15 @@
             // Set the hidden input value
             payloadInput.value = JSON.stringify(payload);
 
-            // ✅ Submit the form normally
+            // ⚡ Filter the <input type="file"> before submitting
+            const dataTransfer = new DataTransfer();
+            validItems.forEach(item => {
+                if (item.file && item.uiState === 'valid') {
+                    dataTransfer.items.add(item.file);
+                }
+            });
+            fileInput.files = dataTransfer.files;
+
             form.submit();
         });
     });

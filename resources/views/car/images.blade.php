@@ -7,7 +7,7 @@
                 <h1 class="car-details-page-title">
                     Manage Images for {{ $car->getTitle() }}
                 </h1>
-                <div class="car-images-wrapper">
+                {{-- <div class="car-images-wrapper">
                     <form
                         action="{{ route('car.updateImages', $car) }}"
                         method="POST"
@@ -90,11 +90,11 @@
                             </div>
                         </div>
                     </form>
-                </div>
+                </div> --}}
                 <div class="container">
-                    <h1 class="car-details-page-title">
+                    {{-- <h1 class="car-details-page-title">
                         Manage Images for {{ $car->getTitle() }}
-                    </h1>
+                    </h1> --}}
                     {{-- Sortable List Component --}}
                     <x-sortable-car-images :car="$car"/>
                 </div>

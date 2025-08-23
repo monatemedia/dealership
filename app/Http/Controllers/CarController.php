@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Jobs\ProcessCarImage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 // Add Implement HasMiddleware to the CarController
 class CarController extends Controller
@@ -445,45 +446,50 @@ class CarController extends Controller
     {
         Gate::authorize('update', $car);
 
-        // ✅ Validation for payload (must be valid JSON string) and files
-        $request->validate([
-            'images.*' => 'file|mimes:jpg,jpeg,png|max:2048',
-            'payload' => 'required|string',
-        ]);
-
-        $payload = json_decode($request->input('payload', '[]'), true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return back()->withErrors(['payload' => 'Invalid JSON payload.']);
-        }
-
-        // ✅ Ensure order of files matches frontend by consuming sequentially
-        $uploadedFiles = $request->file('images', []);
-        $uploadIndex = 0; // Track file order
-
-        $imagesData = [];
-        foreach ($payload as $item) {
-            if (!isset($item['id'], $item['action'])) {
-                continue;
-            }
-
-            $record = [
-                'id' => $item['id'],
-                'action' => $item['action'],
-                'position' => $item['position'] ?? null, // 🔑 keep frontend order
-            ];
-
-            // Attach uploaded file if this is an upload action
-            if ($item['action'] === 'upload' && isset($uploadedFiles[$uploadIndex])) {
-                $record['file'] = $uploadedFiles[$uploadIndex];
-                $uploadIndex++;
-            }
-
-            $imagesData[] = $record;
-        }
-
         try {
+            // Catch validation issues manually
+            try {
+                $request->validate([
+                    'images.*' => 'file|mimes:jpg,jpeg,png|max:2048',
+                    'payload' => 'required|string',
+                ]);
+            } catch (ValidationException $e) {
+                // Redirect to car.index with flash error
+                return redirect()
+                    ->route('car.index')
+                    ->with('error', 'One or more uploaded images exceed 2MB or are invalid.');
+            }
 
-            // ✅ Now passing unified array of (id, action, file?, position?) to service
+            $payload = json_decode($request->input('payload', '[]'), true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return redirect()
+                    ->route('car.index')
+                    ->with('error', 'Invalid JSON payload.');
+            }
+
+            $uploadedFiles = $request->file('images', []);
+            $uploadIndex = 0;
+
+            $imagesData = [];
+            foreach ($payload as $item) {
+                if (!isset($item['id'], $item['action']))
+                    continue;
+
+                $record = [
+                    'id' => $item['id'],
+                    'action' => $item['action'],
+                    'position' => $item['position'] ?? null,
+                ];
+
+                if ($item['action'] === 'upload' && isset($uploadedFiles[$uploadIndex])) {
+                    $record['file'] = $uploadedFiles[$uploadIndex];
+                    $uploadIndex++;
+                }
+
+                $imagesData[] = $record;
+            }
+
+            // Pass array to service
             $imageService->sync($car, $imagesData);
 
             return redirect()
