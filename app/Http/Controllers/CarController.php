@@ -333,8 +333,8 @@ class CarController extends Controller
 
         Gate::authorize('update', $car);
 
-        dump($car->images->toArray());
-        dump($car->toArray());
+        // dump($car->images->toArray());
+        // dump($car->toArray());
         return view('car.images', ['car' => $car]);
     }
 
@@ -487,8 +487,9 @@ class CarController extends Controller
             $imageService->sync($car, $imagesData);
 
             return redirect()
-                ->route('car.index', $car)
+                ->route('car.index')
                 ->with('success', 'Images synced successfully.');
+
         } catch (\Throwable $e) {
             Log::error("Sync failed at controller", [
                 'car_id' => $car->id,

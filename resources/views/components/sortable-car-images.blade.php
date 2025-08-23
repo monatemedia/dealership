@@ -251,58 +251,37 @@
         - action = 'keep' | 'delete' | 'upload'
         - file = only present for new uploads
         */
-
         // Submit handler
         submitBtn.addEventListener('click', () => {
             const payload = [];
             let order = 1;
 
             items.forEach(item => {
-                if(
+                if (
                     item.uiState === 'tooMany' ||
                     item.uiState === 'tooBig' ||
                     item.uiState === 'duplicate'
                 ) return;
 
-                if(item.uiState === 'marked' && item.car_id) {
-                    payload.push({id: item.id, action: 'delete'});
-                }
-                else if(item.uiState === 'valid' && !item.car_id) {
-                    payload.push({id: item.id, action: 'upload', tempId: item.id});
-                }
-                else if(item.uiState === 'valid' && item.car_id) {
-                    payload.push({id: item.id, action: 'keep'});
+                if (item.uiState === 'marked' && item.car_id) {
+                    payload.push({ id: item.id, action: 'delete' });
+                } else if (item.uiState === 'valid' && !item.car_id) {
+                    payload.push({ id: item.id, action: 'upload', tempId: item.id });
+                } else if (item.uiState === 'valid' && item.car_id) {
+                    payload.push({ id: item.id, action: 'keep' });
                 }
 
-                // set position if it's valid
-                if(item.uiState === 'valid') {
-                    payload[payload.length-1].position = order++;
+                // Set position if it's valid
+                if (item.uiState === 'valid') {
+                    payload[payload.length - 1].position = order++;
                 }
             });
 
+            // Set the hidden input value
             payloadInput.value = JSON.stringify(payload);
 
-            // 🔑 Build FormData to attach new files in correct order
-            const formData = new FormData();
-            formData.append('_token', form.querySelector('input[name=_token]').value);
-            formData.append('payload', payloadInput.value);
-
-            // Append files in order
-            items.filter(i => i.uiState==='valid' && !i.car_id && i.file).forEach(fileItem => {
-                formData.append('images[]', fileItem.file, fileItem.original_filename);
-            });
-
-            // Log full formData before sending
-            console.log("Submitting syncImages payload:", payload);
-            for (let [key, val] of formData.entries()) {
-                console.log("formData =>", key, val);
-            }
-
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {'X-CSRF-TOKEN': form.querySelector('input[name=_token]').value}
-            }).then(() => window.location.reload());
+            // ✅ Submit the form normally
+            form.submit();
         });
     });
     </script>
