@@ -102,7 +102,7 @@ class Car extends Model
     }
 
     /**
-     * app/Models/Car.php
+     * app/Models/Car::images
      * Summary of images
      * Define the images function and define the return type
      *

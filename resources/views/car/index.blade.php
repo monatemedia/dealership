@@ -1,7 +1,9 @@
 {{-- resources/views/car/index.blade.php --}}
 
 <x-app-layout title="My Cars" bodyClass="page-my-cars">
-    <main id="my-cars-page" data-check-images="true">
+    <main id="my-cars-page"
+        data-check-images="true">
+
         <div>
             <div class="container">
                 <h1 class="car-details-page-title">My Cars</h1>
@@ -23,20 +25,18 @@
                                     <td>
                                         <img
                                             data-car-id="{{ $car->id }}"
-                                            class="my-cars-img-thumbnail primary-image"
-                                            src="{{ $car->primaryImage && $car->primaryImage->status === 'pending'
-                                                ? asset('img/loading.gif')
-                                                : ($car->primaryImage?->getUrl() ?: asset('img/no_image.png'))
-                                            }}"
+                                            class="primary-image my-cars-img-thumbnail"
+                                            src="{{ $car->primaryImage && $car->primaryImage->status === 'completed'
+                                                ? $car->primaryImage->getUrl()
+                                                : asset('img/loading.gif') }}"
+                                            onerror="this.src='{{ asset('img/no_image.png') }}'"
                                             alt="Primary Image"
                                         />
                                     </td>
                                     <td>{{ $car->getTitle() }}</td>
                                     <td>{{ $car->getCreateDate() }}</td>
-                                    <td>{{ $car->published_at ? 'Yes' : 'No'}}</td>
-                                    {{-- Show the edit, images and delete buttons --}}
-                                    {{-- TODO We'll come back to this later --}}
-                                    <td class="">
+                                    <td>{{ $car->published_at ? 'Yes' : 'No' }}</td>
+                                    <td>
                                         <a href="{{ route('car.edit', $car) }}" class="btn btn-edit inline-flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                 stroke-width="1.5" stroke="currentColor"
@@ -56,9 +56,7 @@
                                             </svg>
                                             images
                                         </a>
-                                        {{-- DELETE button --}}
-                                        <form action="{{ route('car.destroy', $car) }}"
-                                                method="POST" class="inline-flex">
+                                        <form action="{{ route('car.destroy', $car) }}" method="POST" class="inline-flex">
                                             @csrf
                                             @method('DELETE')
                                             <button
@@ -82,7 +80,6 @@
                                                 delete
                                             </button>
                                         </form>
-
                                     </td>
                                 </tr>
                                 @empty

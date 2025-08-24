@@ -512,14 +512,14 @@ class CarController extends Controller
     /**
      * app/Http/Controllers/CarController.php
      * Summary of status
-     * @return \Illuminate\Database\Eloquent\Collection<int, array{id: mixed, primary_image_status: mixed, primary_image_url: string>|\Illuminate\Support\Collection<int, array{id: mixed, primary_image_status: mixed, primary_image_url: string}>}
      */
     public function status(): JsonResponse
     {
         try {
             $cars = auth()->user()->cars()
                 ->with([
-                    'primaryImage' => function ($query) {
+                    'primaryImage',
+                    'images' => function ($query) {
                         $query->select('id', 'car_id', 'status', 'image_path', 'position');
                     }
                 ])
@@ -530,40 +530,30 @@ class CarController extends Controller
                 'user_id' => auth()->id(),
                 'error' => $e->getMessage(),
             ]);
-
-            return response()->json([
-                'error' => 'Unable to load cars.',
-            ], 500);
+            return response()->json(['error' => 'Unable to load cars.'], 500);
         }
 
         $result = $cars->map(function ($car) {
-            $status = 'failed';
-            $url = asset('img/no_image.png');
-
-            try {
-                if ($car->primaryImage) {
-                    $status = $car->primaryImage->status ?? 'failed';
-                    if (!empty($car->primaryImage->image_path)) {
-                        $url = asset('storage/' . ltrim($car->primaryImage->image_path, '/'));
-                    }
-                } else {
-                    Log::warning('Car missing primary image.', [
-                        'car_id' => $car->id,
-                        'user_id' => auth()->id(),
-                    ]);
-                }
-            } catch (\Throwable $e) {
-                Log::error('Error accessing primaryImage for car.', [
-                    'car_id' => $car->id,
-                    'user_id' => auth()->id(),
-                    'error' => $e->getMessage(),
-                ]);
-            }
+            $primary = $car->primaryImage;
+            $images = $car->images ?? collect();
 
             return [
-                'id' => $car->id,
-                'primary_image_status' => $status,
-                'primary_image_url' => $url,
+                'car_id' => $car->id,
+                'primary_image' => [
+                    'id' => $primary->id ?? null,
+                    'status' => $primary->status ?? 'failed',
+                    'url' => ($primary && $primary->status === 'completed' && $primary->image_path)
+                        ? asset('storage/' . ltrim($primary->image_path, '/'))
+                        : null,
+                ],
+                'images' => $images->map(fn($img) => [
+                    'id' => $img->id,
+                    'status' => $img->status,
+                    'url' => ($img->status === 'completed' && $img->image_path)
+                        ? asset('storage/' . ltrim($img->image_path, '/'))
+                        : null,
+                    'position' => $img->position,
+                ])
             ];
         });
 

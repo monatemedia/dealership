@@ -1,5 +1,7 @@
 <?php
 
+//app/Models/CarImage.php
+
 namespace App\Models;
 
 use \Illuminate\Support\Facades\Storage;
