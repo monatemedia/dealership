@@ -92,9 +92,6 @@
                     </form>
                 </div> --}}
                 <div class="container">
-                    {{-- <h1 class="car-details-page-title">
-                        Manage Images for {{ $car->getTitle() }}
-                    </h1> --}}
                     {{-- Sortable List Component --}}
                     <x-sortable-car-images :car="$car"/>
                 </div>

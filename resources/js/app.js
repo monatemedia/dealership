@@ -503,7 +503,11 @@ document.addEventListener("DOMContentLoaded", function () {
                   if(item.status==='completed') desc="Uploaded and available.";
                   else if(item.status==='pending'||item.status==='processing') desc="Processing, please wait...";
                   else if(item.status==='failed') desc="Still processing, check back later.";
-                  else desc="Ready to submit!";
+                  else {
+                    // Valid but not yet uploaded
+                    desc = "Ready to upload!";
+                    item.readyToSubmit = true; // mark it for counting
+                }
               } else if(item.uiState==='marked') {
                   title="Delete Image"; desc="Marked for deletion";
               } else if(item.uiState==='tooMany') {
@@ -558,12 +562,15 @@ document.addEventListener("DOMContentLoaded", function () {
           const tooBigCount = items.filter(i=>i.uiState==='tooBig').length;
           const duplicateCount = items.filter(i=>i.uiState==='duplicate').length;
           const markedCount = items.filter(i=>i.uiState==='marked').length;
+          const readyCount = items.filter(i => i.uiState==='valid' &&
+            i.status === '').length;
 
           const parts = [];
           if(tooManyCount) parts.push(`There ${tooManyCount===1?'is':'are'} ${tooManyCount} item${tooManyCount>1?'s':''} too many`);
           if(tooBigCount) parts.push(`${tooBigCount} item${tooBigCount>1?'s':''} too big`);
           if(duplicateCount) parts.push(`${duplicateCount} duplicate${duplicateCount>1?'s':''}`);
           if(markedCount) parts.push(`${markedCount} item${markedCount>1?'s':''} marked for deletion`);
+          if(readyCount) parts.push(`${readyCount} item${readyCount>1?'s':''} ready to upload`);
 
           markedCountEl.textContent = parts.join(', ') || 'No issues';
       }
@@ -589,7 +596,7 @@ document.addEventListener("DOMContentLoaded", function () {
                       uiState: duplicate ? 'duplicate' : (file.size > MAX_SIZE ? 'tooBig' : 'valid'),
                       original_filename: file.name,
                       file,
-                      status: 'pending'
+                      status: ''
                   });
                   renderList();
               };
