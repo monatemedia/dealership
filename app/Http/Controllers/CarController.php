@@ -70,7 +70,7 @@ class CarController extends Controller
     }
 
     /**
-     * CarController::store
+     * app/Http/Controllers/CarController::store
      * Store a newly created resource in storage.
      */
     public function store(StoreCarRequest $request)
