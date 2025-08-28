@@ -1,3 +1,9 @@
+/* resources/css/app.css */
+
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+
 :root {
   --primary-font: "Ubuntu", sans-serif;
   --primary-color: #e9580c;
@@ -1048,6 +1054,7 @@ a.pagination-item:hover {
   border-radius: 10px;
   border: 1px dotted var(--text-muted-color);
   color: var(--text-muted-color);
+  cursor: pointer;
 }
 
 .form-image-upload input[type="file"] {
@@ -1714,3 +1721,95 @@ a.pagination-item:hover {
 }
 
 .sortable-list-wrapper #submitBtn:hover { background: var(--primary-color-hover); transform: translateY(-1px); }
+
+/* hide elements with x-cloak before Alpine initializes */
+[x-cloak] {
+    display: none !important;
+}
+
+/* Add these styles to the end of your app.css file */
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal-content {
+    background-color: var(--body-bg);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 800px; /* Adjust max-width as needed */
+    max-height: 90vh;
+    overflow-y: auto;
+    /* Prevents the modal itself from showing a scrollbar */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.modal-content::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+}
+
+/* Ensure the component inside the modal fits well */
+.modal-content .sortable-list-wrapper {
+    margin-top: 1rem;
+}
+
+/* Make the upload placeholder in the main form more button-like */
+.form-image-upload {
+    cursor: pointer;
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.form-image-upload:hover {
+    background-color: #f9fafb;
+}
+
+.form-image-upload .upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b7280;
+}
+
+/* Add these styles to the end of your app.css file */
+
+.car-form-images {
+    display: grid;
+    /* Creates a responsive grid that fits as many 100px columns as possible */
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem; /* Adds space between the image previews */
+    margin-top: 1.5rem; /* Adds space above the preview area */
+    padding-top: 1.5rem; /* Adds space inside, below a border */
+    border-top: 1px solid #e5e7eb; /* Adds a separator line */
+    width: 100%;
+}
+
+.car-form-images img {
+    width: 100%;
+    height: 100%;
+    /* Ensures the image covers the grid area without being stretched */
+    object-fit: cover;
+    /* Makes the images square, creating a uniform look */
+    aspect-ratio: 1 / 1;
+    border-radius: 8px; /* Matches the modal's styling */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Adds a subtle shadow */
+}

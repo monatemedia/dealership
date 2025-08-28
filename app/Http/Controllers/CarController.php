@@ -436,7 +436,7 @@ class CarController extends Controller
     /**
      * app/Http/Controllers/CarController::syncImages
      * Sync car images (upload, delete, reorder).
-     *
+     * Summary of syncImages
      * @param \Illuminate\Http\Request $request
      * @param \App\Models\Car $car
      * @param \App\Services\CarImage\CarImageService $imageService

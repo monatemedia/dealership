@@ -425,7 +425,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ----------------------------
-  // Sortable Car Images - Edit Car Page
+  // Sortable Car Images
   // ----------------------------
   function initSortableCarImages(wrapper) {
       if (!wrapper) return;
@@ -433,146 +433,189 @@ document.addEventListener("DOMContentLoaded", function () {
       const MAX_VALID = 12;
       const MAX_SIZE = 2 * 1024 * 1024; // 2MB
       const ordinals = [
-          "Primary Image","Second Image","Third Image","Fourth Image","Fifth Image",
-          "Sixth Image","Seventh Image","Eighth Image","Ninth Image","Tenth Image",
-          "Eleventh Image","Twelfth Image"
+          "Primary Image", "Second Image", "Third Image", "Fourth Image", "Fifth Image",
+          "Sixth Image", "Seventh Image", "Eighth Image", "Ninth Image", "Tenth Image",
+          "Eleventh Image", "Twelfth Image"
       ];
 
+      // Determine component mode
+      const mode = wrapper.dataset.mode;
       const currentCarId = wrapper.dataset.carId;
       const initialImages = JSON.parse(wrapper.dataset.images || "[]");
 
       let draggedIndex = null;
       let tempIdCounter = 100000;
-
-      let items = initialImages.map(img => ({
-          id: parseInt(img.id, 10),
-          image: (img.status === 'completed' && img.url) ? img.url : '/img/loading.gif',
-          uiState: 'valid',
-          car_id: img.car_id,
-          original_filename: img.original_filename,
-          status: img.status
-      }));
+      let items = [];
 
       const list = wrapper.querySelector('#list');
       const fileInput = wrapper.querySelector('#fileInput');
       const submitBtn = wrapper.querySelector('#submitBtn');
-      const payloadInput = wrapper.querySelector('#payloadInput');
-      const form = wrapper.querySelector('#syncImagesForm');
 
-      // ----------------------------
-      // Render List
-      // ----------------------------
-      function renderList() {
-          list.innerHTML = '';
+      // --- Elements specific to each mode ---
+      let payloadInput, form, mainFormImagePreviews, mainFormFileInput;
 
-          const validItems = items.filter(i => i.uiState === 'valid');
-          validItems.slice(MAX_VALID).forEach(i => i.uiState='tooMany');
+      if (mode === 'normal') {
+          payloadInput = wrapper.querySelector('#payloadInput');
+          form = wrapper.querySelector('#syncImagesForm');
+          items = initialImages.map(img => ({
+              id: parseInt(img.id, 10),
+              image: (img.status === 'completed' && img.url) ? img.url : '/img/loading.gif',
+              uiState: 'valid',
+              car_id: img.car_id,
+              original_filename: img.original_filename,
+              status: img.status
+          }));
+      } else { // mode === 'modal'
+          mainFormImagePreviews = document.querySelector('#imagePreviews');
+          mainFormFileInput = document.querySelector('#carFormImageUpload');
 
-          items.forEach((item, index) => {
-              const div = document.createElement('div');
-              div.className = 'list-item';
-              if(item.uiState === 'marked') div.classList.add('marked');
-              if(item.uiState === 'tooMany') div.classList.add('too-many');
-              if(item.uiState === 'tooBig') div.classList.add('too-big');
-              if(item.uiState === 'duplicate') div.classList.add('too-big');
-              div.draggable = true;
+          // NEW: More robust function to load files from the main form
+          const loadFromMainForm = () => {
+              const files = Array.from(mainFormFileInput.files);
 
-              // Drag events
-              div.addEventListener('dragstart', () => { draggedIndex = index; div.classList.add('dragging'); });
-              div.addEventListener('dragend', () => { draggedIndex = null; div.classList.remove('dragging'); });
-              div.addEventListener('dragover', e => { e.preventDefault(); div.classList.add('over'); });
-              div.addEventListener('dragleave', () => div.classList.remove('over'));
-              div.addEventListener('drop', () => {
-                  const draggedItem = items.splice(draggedIndex, 1)[0];
-                  items.splice(index, 0, draggedItem);
+              // Handle case with no files
+              if (files.length === 0) {
+                  items = [];
                   renderList();
+                  return;
+              }
+
+              // Use Promise.all to wait for all files to be read by FileReader
+              const fileReadPromises = files.map(file => {
+                  return new Promise((resolve) => {
+                      const reader = new FileReader();
+                      reader.onload = (e) => {
+                          resolve({
+                              id: tempIdCounter++,
+                              image: e.target.result,
+                              uiState: file.size > MAX_SIZE ? 'tooBig' : 'valid',
+                              original_filename: file.name,
+                              file,
+                              status: ''
+                          });
+                      };
+                      reader.readAsDataURL(file);
+                  });
               });
 
-              // Position/Icons
-              let posNumHTML = '';
-              if(item.uiState === 'valid') posNumHTML = validItems.indexOf(item)+1;
-              else if(item.uiState === 'marked') posNumHTML = `<i class="fa-solid fa-trash trash-icon"></i>`;
-              else if(item.uiState === 'tooMany') posNumHTML = `<i class="fa-solid fa-ban ban-icon-amber"></i>`;
-              else if(item.uiState === 'tooBig' || item.uiState === 'duplicate') posNumHTML = `<i class="fa-solid fa-ban ban-icon-red"></i>`;
+              // Once all files are read, update the items and render the list once
+              Promise.all(fileReadPromises).then(newItems => {
+                  items = newItems;
+                  renderList();
+              });
+          };
 
-              // Titles/Descriptions
-              let title='', desc='';
-              if(item.uiState === 'valid') {
-                  const pos = validItems.indexOf(item);
-                  title = ordinals[pos] || `${pos+1}th Image`;
-                  if(item.status==='completed') desc="Uploaded and available.";
-                  else if(item.status==='pending'||item.status==='processing') desc="Processing, please wait...";
-                  else if(item.status==='failed') desc="Still processing, check back later.";
-                  else {
-                    // Valid but not yet uploaded
-                    desc = "Ready to upload!";
-                    item.readyToSubmit = true; // mark it for counting
-                }
-              } else if(item.uiState==='marked') {
-                  title="Delete Image"; desc="Marked for deletion";
-              } else if(item.uiState==='tooMany') {
-                  title="Too many images"; desc="This image will not be uploaded!";
-              } else if(item.uiState==='tooBig') {
-                  title="Image too big"; desc="Images may not be more than 2MB.";
-              } else if(item.uiState==='duplicate') {
-                  title="Duplicate image"; desc="This image is already in the list.";
-              }
-
-              const trashBtnClass =
-                  item.uiState==='marked' ? 'marked' :
-                  item.uiState==='tooMany' ? 'marked-amber' :
-                  (item.uiState==='tooBig'||item.uiState==='duplicate') ? 'marked' : '';
-
-              div.innerHTML = `
-                  <i class="fa-solid fa-grip-vertical grip"></i>
-                  <div class="pos-num">${posNumHTML}</div>
-                  <img src="${item.image}" alt="">
-                  <div class="info"><h3>${title}</h3><p>${desc}</p></div>
-                  <div class="trash-btn ${trashBtnClass}"><i class="fa-solid fa-trash"></i></div>
-              `;
-
-              const trashBtn = div.querySelector('.trash-btn');
-              if(item.uiState==='valid' || item.uiState==='marked') {
-                  trashBtn.addEventListener('click', () => {
-                      if(item.uiState==='valid') {
-                          item.uiState='marked';
-                          const nextTooMany = items.find(i => i.uiState==='tooMany');
-                          if(nextTooMany) nextTooMany.uiState='valid';
-                      } else {
-                          item.uiState='valid';
-                          const validNow = items.filter(i => i.uiState==='valid');
-                          if(validNow.length>MAX_VALID) validNow[MAX_VALID].uiState='tooMany';
-                      }
-                      renderList();
-                  });
-              } else {
-                  trashBtn.style.opacity="0.5";
-                  trashBtn.style.cursor="not-allowed";
-              }
-
-              list.appendChild(div);
-          });
-
-          updateMarkedCount();
+          // REPLACED: Ditching the MutationObserver for a simpler event listener
+          window.addEventListener('open-image-modal', loadFromMainForm);
       }
 
+      // ----------------------------
+      // Render List (Unchanged)
+      // ----------------------------
+      function renderList() {
+        list.innerHTML = '';
+        const validItems = items.filter(i => i.uiState === 'valid');
+        validItems.slice(MAX_VALID).forEach(i => i.uiState='tooMany');
+
+        items.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            if(item.uiState === 'marked') div.classList.add('marked');
+            if(item.uiState === 'tooMany') div.classList.add('too-many');
+            if(item.uiState === 'tooBig') div.classList.add('too-big');
+            if(item.uiState === 'duplicate') div.classList.add('too-big'); // Note: 'too-big' class is used for red ban icon
+            div.draggable = true;
+
+            // Drag events
+            div.addEventListener('dragstart', () => { draggedIndex = index; div.classList.add('dragging'); });
+            div.addEventListener('dragend', () => { draggedIndex = null; div.classList.remove('dragging'); });
+            div.addEventListener('dragover', e => { e.preventDefault(); div.classList.add('over'); });
+            div.addEventListener('dragleave', () => div.classList.remove('over'));
+            div.addEventListener('drop', () => {
+                const draggedItem = items.splice(draggedIndex, 1)[0];
+                items.splice(index, 0, draggedItem);
+                renderList();
+            });
+
+            // Position/Icons
+            let posNumHTML = '';
+            if(item.uiState === 'valid') posNumHTML = validItems.indexOf(item)+1;
+            else if(item.uiState === 'marked') posNumHTML = `<i class="fa-solid fa-trash trash-icon"></i>`;
+            else if(item.uiState === 'tooMany') posNumHTML = `<i class="fa-solid fa-ban ban-icon-amber"></i>`;
+            else if(item.uiState === 'tooBig' || item.uiState === 'duplicate') posNumHTML = `<i class="fa-solid fa-ban ban-icon-red"></i>`;
+
+            // Titles/Descriptions
+            let title='', desc='';
+            if(item.uiState === 'valid') {
+                const pos = validItems.indexOf(item);
+                title = ordinals[pos] || `${pos+1}th Image`;
+                if(item.status ==='completed') desc="Uploaded and available.";
+                else if(item.status ==='pending'||item.status==='processing') desc="Processing, please wait...";
+                else if(item.status ==='failed') desc="Still processing, check back later.";
+                else {
+                  desc = "Ready to upload!";
+                  item.readyToSubmit = true;
+              }
+            } else if(item.uiState==='marked') {
+                title="Delete Image"; desc="Marked for deletion";
+            } else if(item.uiState==='tooMany') {
+                title="Too many images"; desc="This image will not be uploaded!";
+            } else if(item.uiState==='tooBig') {
+                title="Image too big"; desc="Images may not be more than 2MB.";
+            } else if(item.uiState==='duplicate') {
+                title="Duplicate image"; desc="This image is already in the list.";
+            }
+            const trashBtnClass =
+                item.uiState==='marked' ? 'marked' :
+                item.uiState==='tooMany' ? 'marked-amber' :
+                (item.uiState==='tooBig'||item.uiState==='duplicate') ? 'marked' : '';
+            div.innerHTML = `
+                <i class="fa-solid fa-grip-vertical grip"></i>
+                <div class="pos-num">${posNumHTML}</div>
+                <img src="${item.image}" alt="${item.original_filename || 'preview'}">
+                <div class="info"><h3>${title}</h3><p>${desc}</p></div>
+                <div class="trash-btn ${trashBtnClass}"><i class="fa-solid fa-trash"></i></div>
+            `;
+            const trashBtn = div.querySelector('.trash-btn');
+            if(item.uiState==='valid' || item.uiState==='marked') {
+                trashBtn.addEventListener('click', () => {
+                    if(item.uiState==='valid') {
+                        item.uiState='marked';
+                        const nextTooMany = items.find(i => i.uiState==='tooMany');
+                        if(nextTooMany) nextTooMany.uiState='valid';
+                    } else {
+                        item.uiState='valid';
+                        const validNow = items.filter(i => i.uiState==='valid');
+                        if(validNow.length>MAX_VALID) validNow[MAX_VALID].uiState='tooMany';
+                    }
+                    renderList();
+                });
+            } else {
+                trashBtn.style.opacity="0.5";
+                trashBtn.style.cursor="not-allowed";
+            }
+            list.appendChild(div);
+        });
+        updateMarkedCount();
+      }
+
+      // ----------------------------
+      // Update Marked Count (Unchanged)
+      // ----------------------------
       function updateMarkedCount() {
-          const markedCountEl = wrapper.querySelector('#markedCount');
-          const tooManyCount = items.filter(i=>i.uiState==='tooMany').length;
-          const tooBigCount = items.filter(i=>i.uiState==='tooBig').length;
-          const duplicateCount = items.filter(i=>i.uiState==='duplicate').length;
-          const markedCount = items.filter(i=>i.uiState==='marked').length;
-          const readyCount = items.filter(i => i.uiState==='valid' &&
-            i.status === '').length;
-
-          const parts = [];
-          if(tooManyCount) parts.push(`There ${tooManyCount===1?'is':'are'} ${tooManyCount} item${tooManyCount>1?'s':''} too many`);
-          if(tooBigCount) parts.push(`${tooBigCount} item${tooBigCount>1?'s':''} too big`);
-          if(duplicateCount) parts.push(`${duplicateCount} duplicate${duplicateCount>1?'s':''}`);
-          if(markedCount) parts.push(`${markedCount} item${markedCount>1?'s':''} marked for deletion`);
-          if(readyCount) parts.push(`${readyCount} item${readyCount>1?'s':''} ready to upload`);
-
-          markedCountEl.textContent = parts.join(', ') || 'No issues';
+        const markedCountEl = wrapper.querySelector('#markedCount');
+        const tooManyCount = items.filter(i=>i.uiState==='tooMany').length;
+        const tooBigCount = items.filter(i=>i.uiState==='tooBig').length;
+        const duplicateCount = items.filter(i=>i.uiState==='duplicate').length;
+        const markedCount = items.filter(i=>i.uiState==='marked').length;
+        const readyCount = items.filter(i => i.uiState === 'valid' && !i.status).length;
+        const parts = [];
+        if(tooManyCount) parts.push(`There ${tooManyCount===1?'is':'are'} ${tooManyCount} item${tooManyCount>1?'s':''} too many`);
+        if(tooBigCount) parts.push(`${tooBigCount} item${tooBigCount>1?'s':''} too big`);
+        if(duplicateCount) parts.push(`${duplicateCount} duplicate${duplicateCount>1?'s':''}`);
+        if(markedCount) parts.push(`${markedCount} item${markedCount>1?'s':''} marked for deletion`);
+        if(readyCount) parts.push(`${readyCount} new item${readyCount>1?'s':''} ready`);
+        markedCountEl.textContent = parts.join(', ') || 'No issues';
       }
 
       // ----------------------------
@@ -586,75 +629,107 @@ document.addEventListener("DOMContentLoaded", function () {
                   alert(`"${file.name}" is not supported. Only JPEG/PNG.`);
                   return;
               }
-
               const duplicate = items.some(i=>i.original_filename===file.name);
               const reader = new FileReader();
               reader.onload = () => {
                   items.push({
                       id: tempIdCounter++,
-                      image: reader.result, // always show preview
+                      image: reader.result,
                       uiState: duplicate ? 'duplicate' : (file.size > MAX_SIZE ? 'tooBig' : 'valid'),
                       original_filename: file.name,
-                      file,
+                      file, // The actual File object
                       status: ''
                   });
                   renderList();
               };
               reader.readAsDataURL(file);
           });
+          // Clear the file input to allow re-selecting the same file if needed
+          e.target.value = '';
       });
 
       // ----------------------------
-      // Submit Handler
+      // Submit Handler (MODIFIED)
       // ----------------------------
       submitBtn.addEventListener('click', () => {
-          const payload = [];
-          let order = 1;
-          const validItems = items.filter(i=>i.uiState==='valid' || i.uiState==='marked');
+          if (mode === 'modal') {
+              // --- MODAL SUBMIT LOGIC ---
+              const validItems = items.filter(i => i.uiState === 'valid' && i.file);
 
-          validItems.forEach(item => {
-              if(item.uiState==='marked' && item.car_id) payload.push({id:item.id, action:'delete'});
-              else if(item.uiState==='valid' && !item.car_id) payload.push({id:item.id, action:'upload', tempId:item.id});
-              else if(item.uiState==='valid' && item.car_id) payload.push({id:item.id, action:'keep'});
+              // 1. Create a DataTransfer object to hold the final files
+              const dataTransfer = new DataTransfer();
+              validItems.forEach(item => {
+                  dataTransfer.items.add(item.file);
+              });
 
-              if(item.uiState==='valid') payload[payload.length-1].position=order++;
-          });
+              // 2. Update the main form's file input
+              mainFormFileInput.files = dataTransfer.files;
 
-          payloadInput.value = JSON.stringify(payload);
+              // 3. Update the image previews on the main form
+              mainFormImagePreviews.innerHTML = '';
+              validItems.forEach(item => {
+                  const img = document.createElement('img');
+                  img.src = item.image; // Use the base64 preview
+                  mainFormImagePreviews.appendChild(img);
+              });
 
-          const dataTransfer = new DataTransfer();
-          validItems.forEach(item=>{ if(item.file && item.uiState==='valid') dataTransfer.items.add(item.file); });
-          fileInput.files = dataTransfer.files;
+              // 4. Reset component state for the next time it opens
+              items = [];
+              renderList();
 
-          form.submit();
+              // 5. Dispatch event to close the modal (handled by Alpine.js)
+              wrapper.dispatchEvent(new CustomEvent('close-modal', { bubbles: true, composed: true }));
+
+          } else { // mode === 'normal'
+              // --- NORMAL SUBMIT LOGIC (EXISTING) ---
+              const payload = [];
+              let order = 1;
+              const validItems = items.filter(i=>i.uiState==='valid' || i.uiState==='marked');
+              validItems.forEach(item => {
+                  if(item.uiState==='marked' && item.car_id) payload.push({id:item.id, action:'delete'});
+                  else if(item.uiState==='valid' && !item.car_id) payload.push({id:item.id, action:'upload', tempId:item.id});
+                  else if(item.uiState==='valid' && item.car_id) payload.push({id:item.id, action:'keep'});
+                  if(item.uiState==='valid') payload[payload.length-1].position=order++;
+              });
+
+              payloadInput.value = JSON.stringify(payload);
+              const dataTransfer = new DataTransfer();
+              validItems.forEach(item=>{ if(item.file && item.uiState==='valid') dataTransfer.items.add(item.file); });
+              fileInput.files = dataTransfer.files;
+              form.submit();
+          }
       });
 
       // ----------------------------
-      // Poll backend image status
+      // Poll backend image status (only for 'normal' mode)
       // ----------------------------
-      const updateImageStatusFromBackend = (cars) => {
-          cars.forEach(car => {
-              if (car.car_id != currentCarId) return;
-
-              car.images.forEach(img => {
-                  const item = items.find(i => i.id == img.id);
-                  if (!item) return;
-
-                  item.status = img.status;
-
-                  if (img.status === 'completed' && img.url) {
-                      item.image = img.url;
-                  } else if (img.status === 'pending' || img.status === 'processing') {
-                      item.image = '/img/loading.gif';
-                  } else {
-                      item.image = '/img/no_image.png';
-                  }
+      if (mode === 'normal') {
+          const updateImageStatusFromBackend = (cars) => {
+              cars.forEach(car => {
+                  if (car.car_id != currentCarId) return;
+                  car.images.forEach(img => {
+                      const item = items.find(i => i.id == img.id);
+                      if (!item) return;
+                      item.status = img.status;
+                      if (img.status === 'completed' && img.url) {
+                          item.image = img.url;
+                      } else if (img.status === 'pending' || img.status === 'processing') {
+                          item.image = '/img/loading.gif';
+                      } else {
+                          item.image = '/img/no_image.png';
+                      }
+                  });
               });
-          });
-          renderList();
-      };
+              renderList();
+          };
+          // This assumes initPollCarImages is a globally available function
+          // If it's not, you may need to adjust how it's called.
+          if(typeof initPollCarImages !== 'undefined') {
+            initPollCarImages({ onUpdate: updateImageStatusFromBackend });
+          }
+      }
 
-      initPollCarImages({ onUpdate: updateImageStatusFromBackend });
+      // Initial Render
       renderList();
   }
 

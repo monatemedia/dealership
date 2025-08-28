@@ -11,28 +11,29 @@ use App\Models\Car;
 
 class SortableCarImages extends Component
 {
-    public Car $car;
+    public ?Car $car;
     public array $images;
+    public string $mode;
 
     /**
      * Create a new component instance.
      *
      * @param Car $car
      */
-    public function __construct(Car $car)
+    public function __construct(Car $car = null, string $mode = 'normal')
     {
         $this->car = $car;
+        $this->mode = $mode;
 
-        // Transform images to JS-ready format
-        $this->images = $car->images->map(function ($image) {
-            return [
-                'id' => (string) $image->id,          // JS needs string IDs
-                'image' => $image->getUrl(),           // full URL
+        $this->images = $car
+            ? $car->images->map(fn($image) => [
+                'id' => (string) $image->id,
+                'image' => $image->getUrl(),
                 'car_id' => $image->car_id,
                 'original_filename' => $image->original_filename,
-                'status' => $image->status ?? 'valid', // default if null
-            ];
-        })->toArray(); // Convert to array for Blade @json
+                'status' => $image->status ?? 'valid',
+            ])->toArray() // convert to array for Blade
+            : []; // empty for create
     }
 
     /**

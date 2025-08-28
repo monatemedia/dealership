@@ -1,8 +1,25 @@
+{{-- resources/views/car/create.blade.php --}}
+
 <x-app-layout title="Add New">
     <main>
-        <div class="container-small">
+        {{-- Add Alpine.js data store for modal management --}}
+        <div class="container-small" x-data="{ isModalOpen: false }" @close-modal.window="isModalOpen = false">
+
+            {{-- Modal backdrop and content --}}
+            <div x-show="isModalOpen" class="modal-backdrop" style="display: none;">
+                <div x-show="isModalOpen" class="modal-content" @click.outside="isModalOpen = false" style="display: none;">
+                    {{--
+                        The sortable images component is now inside the modal.
+                        - mode="modal" tells the JS to handle it differently.
+                        - :car="null" is passed since we are in create mode.
+                    --}}
+                    <x-sortable-car-images :car="null" mode="modal" />
+                </div>
+            </div>
+
             <h1 class="car-details-page-title">Add new car</h1>
             <form
+                id="createCarForm"
                 action="{{ route('car.store') }}"
                 method="POST"
                 enctype="multipart/form-data"
@@ -152,16 +169,29 @@
                                 <div class="text-error mb-small">{{ $err }}</div>
                             @endforeach
                         @endforeach
-                        <div class="form-image-upload">
+
+                        {{-- This div opens the modal AND dispatches an event --}}
+                        <div class="form-image-upload"
+                            @click="isModalOpen = true;
+                            window.dispatchEvent(new CustomEvent('open-image-modal'))"
+                        >
                             <div class="upload-placeholder">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" style="width: 48px">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                 </svg>
+                                {{-- <span>Add/Edit Images</span> --}}
                             </div>
-                            <input id="carFormImageUpload" type="file" name="images[]" multiple />
                         </div>
+
+                        {{--
+                           This hidden input will be populated by the modal's JS.
+                           It's what gets submitted with the form.
+                        --}}
+                        <input id="carFormImageUpload" type="file" name="images[]" multiple hidden />
+
+                        {{-- This div will be populated with image previews by the modal's JS --}}
                         <div id="imagePreviews" class="car-form-images"></div>
                     </div>
                 </div>

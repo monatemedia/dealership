@@ -91,10 +91,8 @@
                         </div>
                     </form>
                 </div> --}}
-                <div class="container">
-                    {{-- Sortable List Component --}}
-                    <x-sortable-car-images :car="$car"/>
-                </div>
+                {{-- Sortable List Component --}}
+                <x-sortable-car-images :car="$car"/>
             </div>
         </div>
     </main>
