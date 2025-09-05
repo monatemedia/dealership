@@ -30,11 +30,10 @@ class DatabaseSeeder extends Seeder
                 ['name' => 'SUV'],
                 ['name' => 'Pickup Truck'],
                 ['name' => 'Minivan'],
-                ['name' => 'Jeep'],
+                ['name' => '4X4'],
                 ['name' => 'Coupe'],
                 ['name' => 'Crossover'],
                 ['name' => 'Sports Car'],
-                ['name' => 'Sedan'],
             )
             ->count(9) // Count must be the same as the number of car types in the sequence
             ->create(); // Create the car types

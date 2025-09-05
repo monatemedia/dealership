@@ -13,6 +13,7 @@
                         - mode="modal" tells the JS to handle it differently.
                         - :car="null" is passed since we are in create mode.
                     --}}
+                    <h2>Add Images</h2>
                     <x-sortable-car-images :car="null" mode="modal" />
                 </div>
             </div>

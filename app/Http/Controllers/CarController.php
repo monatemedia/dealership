@@ -177,7 +177,7 @@ class CarController extends Controller
     public function edit(Car $car)
     {
         Gate::authorize('update', $car);
-        dump($car->images->toArray());
+        // dump($car->images->toArray());
         return view('car.edit', [
             'car' => $car
         ]);

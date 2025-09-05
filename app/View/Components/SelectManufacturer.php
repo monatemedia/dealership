@@ -1,5 +1,7 @@
 <?php
 
+// app/View/Components/SelectManufacturer.php
+
 namespace App\View\Components;
 
 use App\Models\Manufacturer;
