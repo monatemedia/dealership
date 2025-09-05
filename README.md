@@ -231,8 +231,7 @@ Don't forget to give the project a star! Thanks again!
 
 Here’s everything consolidated into a **single markdown document** you can drop into your repo (`BRANCHING_MODEL.md` or similar):
 
-````md
-## GitFlow Branching Model
+### GitFlow Branching Model
 
 This project follows the **GitFlow branching strategy**.  
 The goal is to keep `main` always production-ready while using `dev` as an integration branch.  
@@ -274,7 +273,7 @@ git pull origin dev
 git checkout -b feature/<name>
 # work, commit
 git push origin feature/<name>
-````
+```
 
 Merge via Pull Request into `dev`.
 
