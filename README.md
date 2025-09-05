@@ -37,7 +37,7 @@
 <h3 align="center">Dealership</h3>
 
   <p align="center">
-    project_description
+    This project is a car selling platform designed to connect buyers and sellers through a user-friendly web application. It allows dealerships and individual sellers to list vehicles with detailed specifications, images, and pricing, while providing buyers with powerful search and filtering tools to find the right car. The application supports account management, inventory tracking, and secure communication between buyers and sellers, ensuring a streamlined and efficient vehicle marketplace experience.
     <br />
     <a href="https://github.com/monatemedia/dealership"><strong>Explore the docs »</strong></a>
     <br />
@@ -85,7 +85,7 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-Here's a blank template to get started. To avoid retyping too much info, do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`, `project_license`
+Here's a blank template to get started. To avoid retyping too much info, do a search and replace with your text editor for the following: `monatemedia`, `dealership`, `MonateMedia`, `edwardbaitsewe`, `email_client`, `email`, `project_title`, `This project is a car selling platform designed to connect buyers and sellers through a user-friendly web application. It allows dealerships and individual sellers to list vehicles with detailed specifications, images, and pricing, while providing buyers with powerful search and filtering tools to find the right car. The application supports account management, inventory tracking, and secure communication between buyers and sellers, ensuring a streamlined and efficient vehicle marketplace experience.`, `project_license`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -180,7 +180,7 @@ php artisan queue:work
    ```
 5. Change git remote url to avoid accidental pushes to base project
    ```sh
-   git remote set-url origin github_username/repo_name
+   git remote set-url origin monatemedia/dealership
    git remote -v # confirm the changes
    ```
 
@@ -207,8 +207,14 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Compress images to webp
 - [X] Alpine Flash Messages
 - [X] Sortable Car Image List
+- [X] Create Branches
+  - [X] `main`
+  - [X] `dev`
 - [ ] Category Year Manufacturer Model API
     - [ ] Category
+      - [ ] Create Category Feature Branch
+      - [ ] Create Category Logic
+      - [ ] Create Category Views
     - [ ] Year
     - [ ] Manufacturer
     - [ ] Model
@@ -375,7 +381,7 @@ git push origin v<version+patch>
 ### Top contributors:
 
 <a href="https://github.com/monatemedia/dealership/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=github_username/repo_name" alt="contrib.rocks image" />
+  <img src="https://contrib.rocks/image?repo=monatemedia/dealership" alt="contrib.rocks image" />
 </a>
 
 
@@ -383,7 +389,7 @@ git push origin v<version+patch>
 <!-- LICENSE -->
 ## License
 
-Distributed under the project_license. See `LICENSE.txt` for more information.
+All rights reserved. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -392,7 +398,7 @@ Distributed under the project_license. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Edward Baitsewe - [@twitter_handle](https://twitter.com/twitter_handle) - edward@monatemedia.com
+Edward Baitsewe - [@MonateMedia](https://twitter.com/MonateMedia) - edward@monatemedia.com
 
 Project Link: [https://github.com/monatemedia/dealership](https://github.com/monatemedia/dealership)
 
@@ -413,18 +419,18 @@ Project Link: [https://github.com/monatemedia/dealership](https://github.com/mon
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/monatemedia/dealership.svg?style=for-the-badge
 [contributors-url]: https://github.com/monatemedia/dealership/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
+[forks-shield]: https://img.shields.io/github/forks/monatemedia/dealership.svg?style=for-the-badge
 [forks-url]: https://github.com/monatemedia/dealership/network/members
-[stars-shield]: https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge
+[stars-shield]: https://img.shields.io/github/stars/monatemedia/dealership.svg?style=for-the-badge
 [stars-url]: https://github.com/monatemedia/dealership/stargazers
-[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
+[issues-shield]: https://img.shields.io/github/issues/monatemedia/dealership.svg?style=for-the-badge
 [issues-url]: https://github.com/monatemedia/dealership/issues
-[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/monatemedia/dealership.svg?style=for-the-badge
 [license-url]: https://github.com/monatemedia/dealership/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/linkedin_username
+[linkedin-url]: https://linkedin.com/in/edwardbaitsewe
 [product-screenshot]: images/screenshot.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/

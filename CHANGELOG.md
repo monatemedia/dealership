@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.0.2
+
+### Added or Changed
+
+Added README, License and EULA
+
+### Removed
+
+- Nothing
+
 ## v0.0.1
 
 ### Added or Changed
@@ -20,8 +30,3 @@ Short-lived branches (temporary branches, deleted after merge):
   - `bugfix/<name>` → for fixing bugs. Created from `dev`, merged back into `dev`.
   - `release/<version>` → staging branch to prepare a version before tagging and merging to `main`. created from `dev`, merged into both `main` and `dev`.
   - `hotfix/<name>` → for urgent production fixes (branched off `main`, merged back to both `main` and `dev`).
-
-
-### Removed
-
-- Some packages/libraries from acknowledgements I no longer use
