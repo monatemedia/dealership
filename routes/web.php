@@ -21,10 +21,6 @@ Route::middleware(['auth'])->group(function () {
 
     // Verified user routes
     Route::middleware(['verified'])->group(function () {
-        Route::get('/watchlist', [WatchlistController::class, 'index'])
-            ->name('watchlist.index');
-        Route::post('/watchlist/{car}', [WatchlistController::class, 'storeDestroy'])
-            ->name('watchlist.storeDestroy');
         // Page that shows the images UI
         Route::resource('car', CarController::class)->except(['show']);
         Route::get('/car/{car}/images', [CarController::class, 'carImages'])
@@ -40,6 +36,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/api/car-image/status', [CarController::class, 'status'])
             ->name('api.car-image.status');
     });
+
+    // Watchlist routes
+    Route::get('/watchlist', [WatchlistController::class, 'index'])
+        ->name('watchlist.index');
+    Route::post('/watchlist/{car}', [WatchlistController::class, 'storeDestroy'])
+        ->name('watchlist.storeDestroy');
 
     // Profile management routes
     Route::get('/profile', [ProfileController::class, 'index'])

@@ -207,8 +207,15 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [ ] Category Year Manufacturer Model API
     - [ ] Category
       - [X] Create Category Feature Branch
-      - [ ] Create Category Logic
-      - [ ] Create Category Views
+      - [ ] Refactor Naming: Car → Vehicle
+      - [ ] Create Category Categories
+      - [ ] Vehicle Category Selection Page
+      - [ ] Display Vehicles by Category
+      - [ ] Next Steps / Considerations
+        - [ ] Update all factories, seeders, tests to use Vehicle instead of Car.
+        - [ ] Ensure form requests validate category field.
+        - [ ] Optional: add route model binding for cleaner code.
+        - [ ] Check all old /car/... URLs and update to /vehicle/.... 
     - [ ] Year
     - [ ] Manufacturer
     - [ ] Model
