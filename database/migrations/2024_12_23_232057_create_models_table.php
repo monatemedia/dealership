@@ -16,12 +16,4 @@ return new class extends Migration {
             $table->string('name', 45);
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('models');
-    }
 };

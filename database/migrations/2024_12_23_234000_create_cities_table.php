@@ -16,12 +16,4 @@ return new class extends Migration {
             $table->foreignId('province_id')->constrained('provinces');
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('cities');
-    }
 };
