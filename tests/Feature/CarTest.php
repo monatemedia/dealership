@@ -22,7 +22,7 @@ it('should be possible to access car create page as authenticated user', functio
     /** @var \Illuminate\Testing\TestResponse $response */
 
     // Create a user and authenticate
-    $user = \App\Models\User::factory()->create();
+    $user = User::factory()->create();
     // Act as the authenticated user
     $response = $this->actingAs($user)
         // Make a GET request to the car create route
@@ -48,7 +48,7 @@ it('should be possible to access my cars page as authenticated user', function (
     /** @var \Illuminate\Testing\TestResponse $response */
 
     // Create a user and authenticate
-    $user = \App\Models\User::factory()->create();
+    $user = User::factory()->create();
     // Act as the authenticated user
     $response = $this->actingAs($user)
         // Make a GET request to the car create route
@@ -70,7 +70,7 @@ it('should not be possible to create a car with empty data fields', function () 
     // due to missing user ID in the request
     // This simulates a real-world scenario where a user must be logged in
     // to create a car listing
-    $user = \App\Models\User::factory()->create();
+    $user = User::factory()->create();
 
     /** @var \Illuminate\Testing\TestResponse $response */
     // Make a POST request to the car store route with empty fields
@@ -255,7 +255,7 @@ it('should be possible to create a car with valid data', function () {
         ->assertSessionHas('success');
 
     // Get the last car created in the database
-    $lastCar = \App\Models\Car::latest('id')->first();
+    $lastCar = Car::latest('id')->first();
 
     // Add the car ID to the features array
     // This is necessary to associate the features with the car

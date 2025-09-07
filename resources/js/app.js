@@ -312,7 +312,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Which was displayed must be hidden
                 toHide.classList.add('hidden')
                 // Show alert to the user
-                alert(response.data.message)
+                // alert(response.data.message)
             })
             .catch(error => {
                 // If error happened, we can log it to console
@@ -320,9 +320,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 // If error exists, and it has response with status 401
                 if (error?.response?.status === 401) {
                     // Show alert to the user
-                    alert("Please log in first to add cars into your watchlist.")
+                    // alert("Please log in first to add cars into your watchlist.")
                 } else {
-                    alert("Internal Server Error. Please Try again later!")
+                    //alert("Internal Server Error. Please Try again later!")
                 }
             })
         })
