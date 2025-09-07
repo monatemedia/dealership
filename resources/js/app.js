@@ -401,7 +401,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // ----------------------------
   // Poll Images on Car Index Page
   // ----------------------------
-  function initPollCarImagesIndexPage() {
+  function initPollCarImagesMyCarsPage() {
       const myCarsPage = document.getElementById('my-cars-page');
       if (!myCarsPage) return;
 
@@ -741,87 +741,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // ----------------------------
-  // Load Thumbnail on "My Cars" Page
-  // ----------------------------
-  // const initImageLoader = () => {
-  //   const myCarsPage = document.getElementById('my-cars-page');
-  //   if (!myCarsPage || !myCarsPage.dataset.checkImages) {
-  //     return; // Not My Cars index page
-  //   }
-
-  //   let tries = 0;
-  //   const maxTries = 12; // e.g., poll for 1 minute max
-  //   let intervalId = null;
-
-  //   function showBusyMessage() {
-  //     const container = document.createElement('div');
-  //     container.className = 'alert alert-warning';
-  //     container.textContent = 'The website is very busy. Your images will be available soon.';
-  //     document.querySelector('.container')?.prepend(container);
-  //   }
-
-  //   function updateCarImages() {
-  //     console.log(`Polling attempt ${tries + 1}...`);
-
-  //     axios.get('/api/car-image/status')
-
-  //     .then(response => {
-  //       const cars = response.data;
-  //       let allLoaded = true;
-
-  //       cars.forEach(car => {
-  //         const imgEl = document.querySelector(`img.primary-image[data-car-id='${car.id}']`);
-
-  //         if (!imgEl) return;
-
-  //         if (car.primary_image_status === 'pending' || car.primary_image_status === 'processing') {
-  //           allLoaded = false;
-
-  //           if (!imgEl.src.includes('loading.gif')) {
-  //             imgEl.src = '/img/loading.gif';
-  //           }
-  //         }
-
-  //         else if (car.primary_image_status === 'completed') {
-  //           if (imgEl.src.includes('loading.gif') && car.primary_image_url) {
-  //             imgEl.src = car.primary_image_url;
-  //           }
-  //         }
-
-  //         else if (car.primary_image_status === 'failed') {
-  //           if (imgEl.src.includes('loading.gif')) {
-  //             imgEl.src = '/img/no_image.png';
-  //           }
-  //         }
-  //       });
-
-  //       if (allLoaded) {
-  //         console.log('✅ All images loaded, stopping polling.');
-  //         clearInterval(intervalId);
-  //       }
-
-  //       tries++;
-  //       if (tries >= maxTries && !allLoaded) {
-  //         console.log('⚠️ Max tries reached, stopping polling.');
-  //         clearInterval(intervalId);
-  //         showBusyMessage();
-  //       }
-  //     })
-
-  //     .catch(error => {
-  //       console.error('❌ Error fetching car images status:', error);
-  //       clearInterval(intervalId);
-  //     });
-  //   }
-
-  //   // First call immediately
-  //   updateCarImages();
-
-  //   // Then poll every 5 seconds
-  //   intervalId = setInterval(updateCarImages, 5000);
-  // };
-
-  // ----------------------------
   // Start Alpine
   // ----------------------------
   window.Alpine = Alpine;
@@ -840,7 +759,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initSortingDropdown();
   initAddToWatchlist();
   initShowPhoneNumber();
-  initPollCarImagesIndexPage();
+  initPollCarImagesMyCarsPage();
   // initImageLoader();
   // sortableCarImages();
 
