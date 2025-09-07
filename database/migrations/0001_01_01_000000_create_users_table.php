@@ -17,7 +17,7 @@ return new class extends Migration {
             // Add phone with string length of 45, unique and nullable for in case of Oauth
             $table->string('phone', 45)->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password')->nullable();
+            $table->string('password')->nullable()->default('password');
             // Add google ID with string length of 45, and can be nullable
             $table->string('google_id', 45)->nullable();
             // Add facebook ID with string length of 45, and can be nullable
