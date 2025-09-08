@@ -1,7 +1,7 @@
 <?php
 
-// Test for accessing the My Favourite Cars page as an unauthenticated user
-it('should not be possible to access my favourite cars page as guest user', function () {
+// Test for accessing the My Favourite Vehicles page as an unauthenticated user
+it('should not be possible to access my favourite vehicles page as guest user', function () {
     /** @var \Illuminate\Testing\TestResponse $response */
     $response = $this->get(route('watchlist.index'));
 
@@ -11,8 +11,8 @@ it('should not be possible to access my favourite cars page as guest user', func
     $response->assertStatus(302);
 });
 
-// Test for accessing the My Favourite Cars page as an authenticated user
-it('should be possible to access my favourite cars page as authenticated user', function () {
+// Test for accessing the My Favourite Vehicles page as an authenticated user
+it('should be possible to access my favourite vehicles page as authenticated user', function () {
     /** @var \Illuminate\Testing\TestResponse $response */
 
     // Create a user and authenticate
@@ -23,6 +23,6 @@ it('should be possible to access my favourite cars page as authenticated user', 
         ->get(route('watchlist.index'));
 
     $response->assertOK()
-        ->assertSee("My Favourite Cars");
+        ->assertSee("My Favourite Vehicles");
 });
 

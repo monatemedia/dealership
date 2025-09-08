@@ -100,10 +100,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ----------------------------
   // Image Upload Picker and Previews
-  // - On "New Car" and "Edit Car" Pages
+  // - On "New Vehicle" and "Edit Vehicle" Pages
   // ----------------------------
   const initImagePicker = () => {
-    const fileInput = document.querySelector("#carFormImageUpload");
+    const fileInput = document.querySelector("#vehicleFormImageUpload");
     const imagePreview = document.querySelector("#imagePreviews");
     if (!fileInput) {
       return;
@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function createImage(url) {
       const a = document.createElement("a");
-      a.classList.add("car-form-image-preview");
+      a.classList.add("vehicle-form-image-preview");
       a.innerHTML = `
         <img src="${url}" />
       `;
@@ -156,13 +156,13 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   // ----------------------------
-  // Image Carousel on "Show Car" Page
+  // Image Carousel on "Show Vehicle" Page
   // ----------------------------
   const imageCarousel = () => {
-    const carousel = document.querySelector('.car-images-carousel');
+    const carousel = document.querySelector('.vehicle-images-carousel');
     if (!carousel) return;
 
-    const thumbnails = document.querySelectorAll('.car-image-thumbnails img');
+    const thumbnails = document.querySelectorAll('.vehicle-image-thumbnails img');
     const activeImage = document.getElementById('activeImage');
     const prevButton = document.getElementById('prevButton');
     const nextButton = document.getElementById('nextButton');
@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // ----------------------------
   const initMobileFilters = () => {
     const filterButton = document.querySelector('.show-filters-button');
-    const sidebar = document.querySelector('.search-cars-sidebar');
+    const sidebar = document.querySelector('.search-vehicles-sidebar');
     const closeButton = document.querySelector('.close-filters-button');
 
     if (!filterButton || !sidebar) return; // ← Guard
@@ -287,7 +287,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ----------------------------
-  // Add Car To Watchlist
+  // Add Vehicle To Watchlist
   // - Used on "Listing" and "Search" Pages
   // ----------------------------
   const initAddToWatchlist = () => {
@@ -302,7 +302,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // We added data-url attribute to the button in blade file
             // get the url
             const url = button.dataset.url;
-            // Make request on the URL to add or remove the car from watchlist
+            // Make request on the URL to add or remove the vehicle from watchlist
             axios.post(url).then((response) => {
                 // Select both svg tags of the button
                 const toShow = button.querySelector('svg.hidden');
@@ -320,9 +320,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 // If error exists, and it has response with status 401
                 if (error?.response?.status === 401) {
                     // Show alert to the user
-                    // alert("Please log in first to add cars into your watchlist.")
+                    alert("Please log in first to add vehicles into your watchlist.")
                 } else {
-                    //alert("Internal Server Error. Please Try again later!")
+                    alert("Internal Server Error. Please Try again later!")
                 }
             })
         })
@@ -335,7 +335,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // ----------------------------
   const initShowPhoneNumber = () => {
     // Select the element we need to listen to click
-    const span = document.querySelector('.car-details-phone-view');
+    const span = document.querySelector('.vehicle-details-phone-view');
     if (!span) return; // ← Guard
 
     span.addEventListener('click', ev => {
@@ -365,20 +365,20 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ----------------------------
-  // Poll Car Images Helper
+  // Poll Vehicle Images Helper
   // ----------------------------
-  function initPollCarImages({ onUpdate, interval = 5000, maxTries = 12 }) {
+  function initPollVehicleImages({ onUpdate, interval = 5000, maxTries = 12 }) {
       let tries = 0;
       let intervalId = null;
 
       const fetchStatus = () => {
           tries++;
-          axios.get('/api/car-image/status')
+          axios.get('/api/vehicle-image/status')
               .then(response => {
                   onUpdate(response.data);
 
-                  const allLoaded = response.data.every(car => {
-                      const images = car.images.concat(car.primary_image ? [car.primary_image] : []);
+                  const allLoaded = response.data.every(vehicle => {
+                      const images = vehicle.images.concat(vehicle.primary_image ? [vehicle.primary_image] : []);
                       return images.every(img => img.status === 'completed' || img.status === 'failed');
                   });
 
@@ -388,7 +388,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   }
               })
               .catch(err => {
-                  console.error('Error fetching car images status:', err);
+                  console.error('Error fetching vehicle images status:', err);
                   clearInterval(intervalId);
               });
       };
@@ -399,22 +399,22 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ----------------------------
-  // Poll Images on Car Index Page
+  // Poll Images on Vehicle Index Page
   // ----------------------------
-  function initPollCarImagesMyCarsPage() {
-      const myCarsPage = document.getElementById('my-cars-page');
-      if (!myCarsPage) return;
+  function initPollVehicleImagesMyVehiclesPage() {
+      const myVehiclesPage = document.getElementById('my-vehicles-page');
+      if (!myVehiclesPage) return;
 
-      initPollCarImages({
-          onUpdate: cars => {
-              cars.forEach(car => {
-                  const imgEl = document.querySelector(`img.primary-image[data-car-id='${car.car_id}']`);
+      initPollVehicleImages({
+          onUpdate: vehicles => {
+              vehicles.forEach(vehicle => {
+                  const imgEl = document.querySelector(`img.primary-image[data-vehicle-id='${vehicle.vehicle_id}']`);
                   if (!imgEl) return;
 
                   // Only show real URL if completed
-                  if (car.primary_image.status === 'completed') {
-                      imgEl.src = car.primary_image.url || '/img/no_image.png';
-                  } else if (car.primary_image.status === 'pending' || car.primary_image.status === 'processing') {
+                  if (vehicle.primary_image.status === 'completed') {
+                      imgEl.src = vehicle.primary_image.url || '/img/no_image.png';
+                  } else if (vehicle.primary_image.status === 'pending' || vehicle.primary_image.status === 'processing') {
                       imgEl.src = '/img/loading.gif';
                   } else {
                       imgEl.src = '/img/no_image.png';
@@ -425,9 +425,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ----------------------------
-  // Sortable Car Images
+  // Sortable Vehicle Images
   // ----------------------------
-  function initSortableCarImages(wrapper) {
+  function initSortableVehicleImages(wrapper) {
       if (!wrapper) return;
 
       const MAX_VALID = 12;
@@ -440,7 +440,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Determine component mode
       const mode = wrapper.dataset.mode;
-      const currentCarId = wrapper.dataset.carId;
+      const currentVehicleId = wrapper.dataset.vehicleId;
       const initialImages = JSON.parse(wrapper.dataset.images || "[]");
 
       let draggedIndex = null;
@@ -461,13 +461,13 @@ document.addEventListener("DOMContentLoaded", function () {
               id: parseInt(img.id, 10),
               image: (img.status === 'completed' && img.url) ? img.url : '/img/loading.gif',
               uiState: 'valid',
-              car_id: img.car_id,
+              vehicle_id: img.vehicle_id,
               original_filename: img.original_filename,
               status: img.status
           }));
       } else { // mode === 'modal'
           mainFormImagePreviews = document.querySelector('#imagePreviews');
-          mainFormFileInput = document.querySelector('#carFormImageUpload');
+          mainFormFileInput = document.querySelector('#vehicleFormImageUpload');
 
           // NEW: More robust function to load files from the main form
           const loadFromMainForm = () => {
@@ -686,9 +686,9 @@ document.addEventListener("DOMContentLoaded", function () {
               let order = 1;
               const validItems = items.filter(i=>i.uiState==='valid' || i.uiState==='marked');
               validItems.forEach(item => {
-                  if(item.uiState==='marked' && item.car_id) payload.push({id:item.id, action:'delete'});
-                  else if(item.uiState==='valid' && !item.car_id) payload.push({id:item.id, action:'upload', tempId:item.id});
-                  else if(item.uiState==='valid' && item.car_id) payload.push({id:item.id, action:'keep'});
+                  if(item.uiState==='marked' && item.vehicle_id) payload.push({id:item.id, action:'delete'});
+                  else if(item.uiState==='valid' && !item.vehicle_id) payload.push({id:item.id, action:'upload', tempId:item.id});
+                  else if(item.uiState==='valid' && item.vehicle_id) payload.push({id:item.id, action:'keep'});
                   if(item.uiState==='valid') payload[payload.length-1].position=order++;
               });
 
@@ -704,10 +704,10 @@ document.addEventListener("DOMContentLoaded", function () {
       // Poll backend image status (only for 'normal' mode)
       // ----------------------------
       if (mode === 'normal') {
-          const updateImageStatusFromBackend = (cars) => {
-              cars.forEach(car => {
-                  if (car.car_id != currentCarId) return;
-                  car.images.forEach(img => {
+          const updateImageStatusFromBackend = (vehicles) => {
+              vehicles.forEach(vehicle => {
+                  if (vehicle.vehicle_id != currentVehicleId) return;
+                  vehicle.images.forEach(img => {
                       const item = items.find(i => i.id == img.id);
                       if (!item) return;
                       item.status = img.status;
@@ -722,10 +722,10 @@ document.addEventListener("DOMContentLoaded", function () {
               });
               renderList();
           };
-          // This assumes initPollCarImages is a globally available function
+          // This assumes initPollVehicleImages is a globally available function
           // If it's not, you may need to adjust how it's called.
-          if(typeof initPollCarImages !== 'undefined') {
-            initPollCarImages({ onUpdate: updateImageStatusFromBackend });
+          if(typeof initPollVehicleImages !== 'undefined') {
+            initPollVehicleImages({ onUpdate: updateImageStatusFromBackend });
           }
       }
 
@@ -737,7 +737,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize on page
   // ----------------------------
   document.querySelectorAll('.sortable-list-wrapper').forEach(wrapper => {
-      initSortableCarImages(wrapper);
+      initSortableVehicleImages(wrapper);
   });
 
   // ----------------------------
@@ -759,9 +759,9 @@ document.addEventListener("DOMContentLoaded", function () {
   initSortingDropdown();
   initAddToWatchlist();
   initShowPhoneNumber();
-  initPollCarImagesMyCarsPage();
+  initPollVehicleImagesMyVehiclesPage();
   // initImageLoader();
-  // sortableCarImages();
+  // sortableVehicleImages();
 
   // ----------------------------
   // Hero Slider Scroll Reveal

@@ -2,7 +2,7 @@
 
 // routes/web.php
 
-use App\Http\Controllers\CarController;
+use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\Route;
 // Home route
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Car Search Routes
-Route::get('/car/search', [CarController::class, 'search'])
-    ->name('car.search');
+// Vehicle Search Routes
+Route::get('/vehicle/search', [VehicleController::class, 'search'])
+    ->name('vehicle.search');
 
 // Routes for authenticated users
 Route::middleware(['auth'])->group(function () {
@@ -22,25 +22,25 @@ Route::middleware(['auth'])->group(function () {
     // Verified user routes
     Route::middleware(['verified'])->group(function () {
         // Page that shows the images UI
-        Route::resource('car', CarController::class)->except(['show']);
-        Route::get('/car/{car}/images', [CarController::class, 'carImages'])
-            ->name('car.images');
-        Route::put('/car/{car}/images', [CarController::class, 'updateImages'])
-            ->name('car.updateImages');
-        Route::post('/car/{car}/images', [CarController::class, 'addImages'])
-            ->name('car.addImages');
+        Route::resource('vehicle', VehicleController::class)->except(['show']);
+        Route::get('/vehicle/{vehicle}/images', [VehicleController::class, 'vehicleImages'])
+            ->name('vehicle.images');
+        Route::put('/vehicle/{vehicle}/images', [VehicleController::class, 'updateImages'])
+            ->name('vehicle.updateImages');
+        Route::post('/vehicle/{vehicle}/images', [VehicleController::class, 'addImages'])
+            ->name('vehicle.addImages');
         // Single endpoint that handles deletions + reordering + new uploads
-        Route::post('/car/{car}/images/sync', [CarController::class, 'syncImages'])
-            ->name('car.syncImages');
-        // API to fetch status of Cars Images
-        Route::get('/api/car-image/status', [CarController::class, 'status'])
-            ->name('api.car-image.status');
+        Route::post('/vehicle/{vehicle}/images/sync', [VehicleController::class, 'syncImages'])
+            ->name('vehicle.syncImages');
+        // API to fetch status of Vehicles Images
+        Route::get('/api/vehicle-image/status', [VehicleController::class, 'status'])
+            ->name('api.vehicle-image.status');
     });
 
     // Watchlist routes
     Route::get('/watchlist', [WatchlistController::class, 'index'])
         ->name('watchlist.index');
-    Route::post('/watchlist/{car}', [WatchlistController::class, 'storeDestroy'])
+    Route::post('/watchlist/{vehicle}', [WatchlistController::class, 'storeDestroy'])
         ->name('watchlist.storeDestroy');
 
     // Profile management routes
@@ -54,9 +54,9 @@ Route::middleware(['auth'])->group(function () {
         ->name('logout');
 });
 
-// Public car details route
-Route::get('/car/{car}', [CarController::class, 'show'])->name('car.show');
-Route::post('/car/phone/{car}', [CarController::class, 'showPhone'])->name('car.showPhone');
+// Public vehicle details route
+Route::get('/vehicle/{vehicle}', [VehicleController::class, 'show'])->name('vehicle.show');
+Route::post('/vehicle/phone/{vehicle}', [VehicleController::class, 'showPhone'])->name('vehicle.showPhone');
 
 // Include the authentication routes
 require __DIR__ . '/auth.php';

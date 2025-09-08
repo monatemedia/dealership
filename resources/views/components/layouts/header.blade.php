@@ -10,14 +10,14 @@
             </svg>
         </button>
         <div class="navbar-auth">
-            <a href="{{ route('car.create') }}" class="btn btn-add-new-car">
+            <a href="{{ route('vehicle.create') }}" class="btn btn-add-new-vehicle">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" style="width: 18px; margin-right: 4px">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
 
-                Add new Car
+                Add new Vehicle
             </a>
             @auth()
             <div class="navbar-menu" tabindex="-1">
@@ -39,10 +39,10 @@
                         <a href="{{ route('profile.index') }}">My Profile</a>
                     </li>
                     <li>
-                        <a href="{{ route('car.index') }}">My Cars</a>
+                        <a href="{{ route('vehicle.index') }}">My Vehicles</a>
                     </li>
                     <li>
-                        <a href="{{ route('watchlist.index') }}">My Favourite Cars</a>
+                        <a href="{{ route('watchlist.index') }}">My Favourite Vehicles</a>
                     </li>
                     <li>
                         <form action="{{ route('logout') }}" method="post">

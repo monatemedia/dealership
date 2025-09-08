@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Car;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -12,15 +12,15 @@ class HomeController extends Controller
     {
         $page = $request->get('page', 1);
 
-        $cacheKey = "home-cars-page-{$page}";
+        $cacheKey = "home-vehicles-page-{$page}";
 
-        $cars = Cache::remember($cacheKey, 60, function () use ($page) {
-            return Car::where('published_at', '<', now())
-                ->with(['primaryImage', 'city', 'carType', 'fuelType', 'manufacturer', 'model', 'favouredUsers'])
+        $vehicles = Cache::remember($cacheKey, 60, function () use ($page) {
+            return Vehicle::where('published_at', '<', now())
+                ->with(['primaryImage', 'city', 'vehicleType', 'fuelType', 'manufacturer', 'model', 'favouredUsers'])
                 ->orderBy('published_at', 'desc')
                 ->paginate(30, ['*'], 'page', $page);
         });
 
-        return view('home.index', ['cars' => $cars]);
+        return view('home.index', ['vehicles' => $vehicles]);
     }
 }

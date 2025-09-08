@@ -1,34 +1,34 @@
 <x-app-layout>
     <main>
-        <!-- New Cars -->
+        <!-- New Vehicles -->
         <section>
           <div class="container">
             <div class="flex justify-between items-center">
-                <h2>My Favourite Cars</h2>
-                @if ($cars->total() > 0)
+                <h2>My Favourite Vehicles</h2>
+                @if ($vehicles->total() > 0)
                 <div class="pagination-summary">
                     <p>
-                        Showing {{ $cars->firstItem() }} to {{ $cars->lastItem() }} of {{ $cars->total() }} results
+                        Showing {{ $vehicles->firstItem() }} to {{ $vehicles->lastItem() }} of {{ $vehicles->total() }} results
                     </p>
                 </div>
                 @endif
             </div>
 
-            <div class="car-items-listing">
-                @foreach($cars as $car)
-                    <x-car-item :car="$car" :isInWatchlist="true"/>
+            <div class="vehicle-items-listing">
+                @foreach($vehicles as $vehicle)
+                    <x-vehicle-item :vehicle="$vehicle" :isInWatchlist="true"/>
                 @endforeach
             </div>
 
-            @if ($cars->count() === 0)
+            @if ($vehicles->count() === 0)
                 <div class="text-center p-large">
-                    You don't have any favourite cars.
+                    You don't have any favourite vehicles.
                 </div>
             @endif
 
-            {{ $cars->onEachSide(1)->links() }}
+            {{ $vehicles->onEachSide(1)->links() }}
           </div>
         </section>
-        <!--/ New Cars -->
+        <!--/ New Vehicles -->
       </main>
 </x-app-layout>

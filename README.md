@@ -37,7 +37,7 @@
 <h3 align="center">Dealership</h3>
 
   <p align="center">
-    This project is a car selling platform designed to connect buyers and sellers through a user-friendly web application. It allows dealerships and individual sellers to list vehicles with detailed specifications, images, and pricing, while providing buyers with powerful search and filtering tools to find the right car. The application supports account management, inventory tracking, and secure communication between buyers and sellers, ensuring a streamlined and efficient vehicle marketplace experience.
+    This project is a vehicle selling platform designed to connect buyers and sellers through a user-friendly web application. It allows dealerships and individual sellers to list vehicles with detailed specifications, images, and pricing, while providing buyers with powerful search and filtering tools to find the right vehicle. The application supports account management, inventory tracking, and secure communication between buyers and sellers, ensuring a streamlined and efficient vehicle marketplace experience.
     <br />
     <a href="https://github.com/monatemedia/dealership"><strong>Explore the docs »</strong></a>
     <br />
@@ -200,22 +200,22 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Create Background Job
   - [X] Compress images to webp
 - [X] Alpine Flash Messages
-- [X] Sortable Car Image List
+- [X] Sortable Vehicle Image List
 - [X] Create Branches
   - [X] `main`
   - [X] `dev`
 - [ ] Category Year Manufacturer Model API
     - [ ] Category
       - [X] Create Category Feature Branch
-      - [ ] Refactor Naming: Car → Vehicle
+      - [ ] Refactor Naming: Vehicle → Vehicle
       - [ ] Create Category Categories
       - [ ] Vehicle Category Selection Page
       - [ ] Display Vehicles by Category
       - [ ] Next Steps / Considerations
-        - [ ] Update all factories, seeders, tests to use Vehicle instead of Car.
+        - [ ] Update all factories, seeders, tests to use Vehicle instead of Vehicle.
         - [ ] Ensure form requests validate category field.
         - [ ] Optional: add route model binding for cleaner code.
-        - [ ] Check all old /car/... URLs and update to /vehicle/.... 
+        - [ ] Check all old /vehicle/... URLs and update to /vehicle/.... 
     - [ ] Year
     - [ ] Manufacturer
     - [ ] Model

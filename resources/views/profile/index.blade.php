@@ -2,7 +2,7 @@
 <x-app-layout title="My Profile">
     <main>
         <div class="container-small">
-            <h1 class="car-details-page-title">My Profile</h1>
+            <h1 class="vehicle-details-page-title">My Profile</h1>
             <form action="{{ route('profile.update') }}" method="POST"
                     class="card p-large my-large">
                 @csrf

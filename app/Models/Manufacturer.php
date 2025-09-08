@@ -12,9 +12,9 @@ class Manufacturer extends Model
     use HasFactory;
     public $timestamps = false;
 
-    public function cars(): HasMany
+    public function vehicles(): HasMany
     {
-        return $this->hasMany(Car::class);
+        return $this->hasMany(Vehicle::class);
     }
 
     public function models(): HasMany

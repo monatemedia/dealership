@@ -20,8 +20,8 @@ class Model extends EloquentModel
         return $this->belongsTo(Manufacturer::class);
     }
 
-    public function cars(): HasMany
+    public function vehicles(): HasMany
     {
-        return $this->hasMany(Car::class);
+        return $this->hasMany(Vehicle::class);
     }
 }

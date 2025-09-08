@@ -22,10 +22,10 @@ class EmailVerifyController extends Controller
         $request->fulfill();
         // Redirect the user to the home page with a success message
         // This message will be shown to the user after they verify their email
-        // and will inform them that they can now add cars
+        // and will inform them that they can now add vehicles
         // to their watchlist
         return redirect()->route('home')
-            ->with('success', 'Your Email was verified. You can now add cars!');
+            ->with('success', 'Your Email was verified. You can now add vehicles!');
     }
     public function notice()
     {

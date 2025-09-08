@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Car;
-use App\Models\CarImage;
-use App\Models\CarType;
+use App\Models\Vehicle;
+use App\Models\VehicleImage;
+use App\Models\VehicleType;
 use App\Models\City;
 use App\Models\FuelType;
 use App\Models\Manufacturer;
@@ -21,14 +21,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Car Types from config
-        CarType::factory()
-            ->count(count(config('lookups.car_types')))
+        // Vehicle Types from config
+        VehicleType::factory()
+            ->count(count(config('lookups.vehicle_types')))
             ->sequence(
                 ...array_map(
                     fn($type) =>
                     ['name' => $type],
-                    config('lookups.car_types')
+                    config('lookups.vehicle_types')
                 )
             )
             ->create();
@@ -69,16 +69,16 @@ class DatabaseSeeder extends Seeder
                 ->create();
         }
 
-        // Users, Cars, Images, Features
+        // Users, Vehicles, Images, Features
         User::factory()->count(3)->create();
 
         User::factory()
             ->count(2)
             ->has(
-                Car::factory()
+                Vehicle::factory()
                     ->count(50)
                     ->has(
-                        CarImage::factory()
+                        VehicleImage::factory()
                             ->count(5)
                             ->sequence(fn(Sequence $sequence) => [
                                 'position' => ($sequence->index % 5) + 1,
@@ -86,7 +86,7 @@ class DatabaseSeeder extends Seeder
                         'images'
                     )
                     ->hasFeatures(),
-                'favouriteCars'
+                'favouriteVehicles'
             )
             ->create();
     }

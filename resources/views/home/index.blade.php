@@ -9,16 +9,16 @@
                 <div class="container">
                     <div class="slide-content">
                         <h1 class="hero-slider-title">
-                            Buy <strong>The Best Cars</strong> <br />
+                            Buy <strong>The Best Vehicles</strong> <br />
                             in your region
                         </h1>
                         <div class="hero-slider-content">
                             <p>
-                                Use the powerful search tool to find your desired cars based on
-                                multiple search criteria: Manufacturer, Model, Year, Price Range, Car
+                                Use the powerful search tool to find your desired vehicles based on
+                                multiple search criteria: Manufacturer, Model, Year, Price Range, Vehicle
                                 Type, etc...
                             </p>
-                            <a href="{{ route('car.search') }}" class="btn btn-hero-slider">Find A Car</a>
+                            <a href="{{ route('vehicle.search') }}" class="btn btn-hero-slider">Find A Vehicle</a>
                         </div>
                     </div>
                     <div class="slide-image">
@@ -32,14 +32,14 @@
                     <div class="slide-content">
                         <h2 class="hero-slider-title">
                             Do you want to <br />
-                            <strong>sell your car?</strong>
+                            <strong>sell your vehicle?</strong>
                         </h2>
                         <div class="hero-slider-content">
                             <p>
-                                Submit your car in our user friendly interface, describe it,
+                                Submit your vehicle in our user friendly interface, describe it,
                                 upload photos and the perfect buyer will find it...
                             </p>
-                            <a href="{{ route('car.create') }}" class="btn btn-hero-slider">Add Your Car</a>
+                            <a href="{{ route('vehicle.create') }}" class="btn btn-hero-slider">Add Your Vehicle</a>
                         </div>
                     </div>
                     <div class="slide-image">
@@ -69,28 +69,28 @@
 
     <main>
         <x-search-form />
-        <!-- New Cars -->
+        <!-- New Vehicles -->
         <section>
             <div class="container">
-                <h2>Latest Added Cars</h2>
-                @if ($cars->count() > 0)
-                <div class="car-items-listing">
-                    @foreach($cars as $car)
-                        <x-car-item :$car
-                        :is-in-watchlist="$car->favouredUsers->contains(
+                <h2>Latest Added Vehicles</h2>
+                @if ($vehicles->count() > 0)
+                <div class="vehicle-items-listing">
+                    @foreach($vehicles as $vehicle)
+                        <x-vehicle-item :$vehicle
+                        :is-in-watchlist="$vehicle->favouredUsers->contains(
                         \Illuminate\Support\Facades\Auth::user()
                         )"/>
                     @endforeach
                 </div>
                 @else
                     <div class="text-center p-large">
-                        There are no published cars.
+                        There are no published vehicles.
                     </div>
                 @endif
-                {{ $cars->onEachSide(1)->links() }}
+                {{ $vehicles->onEachSide(1)->links() }}
             </div>
         </section>
-        <!--/ New Cars -->
+        <!--/ New Vehicles -->
     </main>
 
 </x-app-layout>

@@ -16,7 +16,7 @@ return [
             'vehicle_types' => ['Standard', 'Cruiser', 'Touring', 'Sport', 'Off-road', 'Dual-purpose'],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
-        'Cars' => [
+        'Vehicles' => [
             'vehicle_types' => ['Sedan', 'Hatchback', 'SUV', 'Bakkie', 'Minivan', '4X4'],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
@@ -64,6 +64,6 @@ return [
     ],
 ];
 
-// Category is attached to cars in the cars table
+// Category is attached to vehicles in the vehicles table
 // Types are specific to each category
 // Features can be common or specific to each category

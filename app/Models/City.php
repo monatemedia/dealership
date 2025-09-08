@@ -21,9 +21,9 @@ class City extends Model
         return $this->belongsTo(Province::class);
     }
 
-    public function cars(): HasMany
+    public function vehicles(): HasMany
     {
-        // This car type has many cars
-        return $this->hasMany(Car::class);
+        // This vehicle type has many vehicles
+        return $this->hasMany(Vehicle::class);
     }
 }

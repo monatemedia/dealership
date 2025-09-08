@@ -1,8 +1,8 @@
-        <!-- Find a car form -->
-        <section class="find-a-car">
+        <!-- Find a vehicle form -->
+        <section class="find-a-vehicle">
             <div class="container">
-                <form action={{ route('car.search') }} method="GET" class="find-a-car-form card flex p-medium">
-                    <div class="find-a-car-inputs">
+                <form action={{ route('vehicle.search') }} method="GET" class="find-a-vehicle-form card flex p-medium">
+                    <div class="find-a-vehicle-inputs">
                         <div>
                             <x-select-manufacturer />
                         </div>
@@ -16,7 +16,7 @@
                             <x-select-city />
                         </div>
                         <div>
-                            <x-select-car-type />
+                            <x-select-vehicle-type />
                         </div>
                         <div>
                             <input type="number" placeholder="Year From" name="year_from" />
@@ -35,14 +35,14 @@
                         </div>
                     </div>
                     <div>
-                        <button type="button" class="btn btn-find-a-car-reset">
+                        <button type="button" class="btn btn-find-a-vehicle-reset">
                             Reset
                         </button>
-                        <button class="btn btn-primary btn-find-a-car-submit">
+                        <button class="btn btn-primary btn-find-a-vehicle-submit">
                             Search
                         </button>
                     </div>
                 </form>
             </div>
         </section>
-        <!--/ Find a car form -->
+        <!--/ Find a vehicle form -->

@@ -6,12 +6,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Car Types
+    | Vehicle Types
     |--------------------------------------------------------------------------
-    | A static list of car types used across the application.
+    | A static list of vehicle types used across the application.
     |
     */
-    'car_types' => [
+    'vehicle_types' => [
         'Sedan',
         'Hatchback',
         'SUV',
@@ -20,7 +20,7 @@ return [
         '4X4',
         'Coupe',
         'Crossover',
-        'Sports Car',
+        'Sports Vehicle',
     ],
 
     /*

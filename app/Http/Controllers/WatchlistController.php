@@ -2,38 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Car;
+use App\Models\Vehicle;
 use Illuminate\Support\Facades\Auth;
 
 class WatchlistController extends Controller
 {
     public function index()
     {
-        $cars = Auth::user()
-            ->favouriteCars()
-            ->with(['primaryImage', 'city', 'carType', 'fuelType', 'manufacturer', 'model'])
+        $vehicles = Auth::user()
+            ->favouriteVehicles()
+            ->with(['primaryImage', 'city', 'vehicleType', 'fuelType', 'manufacturer', 'model'])
             ->paginate(15);
-        return view('watchlist.index', ['cars' => $cars]);
+        return view('watchlist.index', ['vehicles' => $vehicles]);
     }
-    public function storeDestroy(Car $car)
+    public function storeDestroy(Vehicle $vehicle)
     {
         // Get the authenticated user
         $user = Auth::user();
-        // Check if the current car is already added into favourite cars
-        $carExists = $user->favouriteCars()->where('car_id', $car->id)->exists();
+        // Check if the current vehicle is already added into favourite vehicles
+        $vehicleExists = $user->favouriteVehicles()->where('vehicle_id', $vehicle->id)->exists();
         // Remove if it exists
-        if ($carExists) {
-            $user->favouriteCars()->detach($car);
+        if ($vehicleExists) {
+            $user->favouriteVehicles()->detach($vehicle);
             return response()->json([
                 'added' => false,
-                'message' => 'Car was removed from watchlist'
+                'message' => 'Vehicle was removed from watchlist'
             ]);
         }
-        // Add the car into favourite cars of the user
-        $user->favouriteCars()->attach($car);
+        // Add the vehicle into favourite vehicles of the user
+        $user->favouriteVehicles()->attach($vehicle);
         return response()->json([
             'added' => true,
-            'message' => 'Car was added to watchlist'
+            'message' => 'Vehicle was added to watchlist'
         ]);
     }
 }

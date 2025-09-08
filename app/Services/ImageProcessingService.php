@@ -4,7 +4,7 @@
 
 namespace App\Services;
 
-use App\Models\CarImage;
+use App\Models\VehicleImage;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Intervention\Image\Laravel\Facades\Image;
@@ -23,19 +23,19 @@ class ImageProcessingService
     }
 
     /**
-     * Process a car image: resize, convert to WebP, optimize, and store.
+     * Process a vehicle image: resize, convert to WebP, optimize, and store.
      *
-     * @param  CarImage  $carImage
+     * @param  VehicleImage  $vehicleImage
      * @return void
      * @throws Exception if file does not exist or processing fails
      */
-    public function process(CarImage $carImage): void
+    public function process(VehicleImage $vehicleImage): void
     {
-        $filePath = str_replace('\\', '/', $carImage->temp_file_path);
+        $filePath = str_replace('\\', '/', $vehicleImage->temp_file_path);
 
         // Ensure the file exists before proceeding
         if (empty($filePath) || !file_exists($filePath)) {
-            Log::error("ImageProcessingService: Missing file for CarImage ID {$carImage->id}", [
+            Log::error("ImageProcessingService: Missing file for VehicleImage ID {$vehicleImage->id}", [
                 'temp_file_path' => $filePath,
             ]);
             throw new Exception("File does not exist at path: {$filePath}");
@@ -43,7 +43,7 @@ class ImageProcessingService
 
         $width = 600;
         $filename = Str::uuid() . ".webp";
-        $path = "images/cars/" . $filename;
+        $path = "images/vehicles/" . $filename;
 
         try {
             // Read and resize the image
@@ -57,13 +57,13 @@ class ImageProcessingService
             // Optimize the stored file
             $this->optimizer->optimize(Storage::disk('public')->path($path));
 
-            // Update the CarImage record with the new image path
-            $carImage->update([
+            // Update the VehicleImage record with the new image path
+            $vehicleImage->update([
                 'image_path' => $path
             ]);
 
         } catch (Exception $e) {
-            Log::error("ImageProcessingService: Failed to process CarImage ID {$carImage->id}", [
+            Log::error("ImageProcessingService: Failed to process VehicleImage ID {$vehicleImage->id}", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

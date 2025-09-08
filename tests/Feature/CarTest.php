@@ -1,15 +1,15 @@
 <?php
 
-use App\Models\Car;
-use App\Models\CarImage;
+use App\Models\Vehicle;
+use App\Models\VehicleImage;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use function PHPUnit\Framework\assertEquals;
 
-// Test for accessing the car create page as an unauthenticated user
-it('should not be possible to access car create page as guest user', function () {
+// Test for accessing the vehicle create page as an unauthenticated user
+it('should not be possible to access vehicle create page as guest user', function () {
     /** @var \Illuminate\Testing\TestResponse $response */
-    $response = $this->get(route('car.create'));
+    $response = $this->get(route('vehicle.create'));
 
     // Assert that the response is a redirect to the login route
     $response->assertRedirectToRoute('login');
@@ -17,25 +17,25 @@ it('should not be possible to access car create page as guest user', function ()
     $response->assertStatus(302);
 });
 
-// Test for accessing the car create page as an authenticated user
-it('should be possible to access car create page as authenticated user', function () {
+// Test for accessing the vehicle create page as an authenticated user
+it('should be possible to access vehicle create page as authenticated user', function () {
     /** @var \Illuminate\Testing\TestResponse $response */
 
     // Create a user and authenticate
     $user = User::factory()->create();
     // Act as the authenticated user
     $response = $this->actingAs($user)
-        // Make a GET request to the car create route
-        ->get(route('car.create'));
+        // Make a GET request to the vehicle create route
+        ->get(route('vehicle.create'));
 
     $response->assertOK()
-        ->assertSee('Add new car');
+        ->assertSee('Add new vehicle');
 });
 
-// Test for accessing the My Cars page as an unauthenticated user
-it('should not be possible to access my cars page as guest user', function () {
+// Test for accessing the My Vehicles page as an unauthenticated user
+it('should not be possible to access my vehicles page as guest user', function () {
     /** @var \Illuminate\Testing\TestResponse $response */
-    $response = $this->get(route('car.index'));
+    $response = $this->get(route('vehicle.index'));
 
     // Assert that the response is a redirect to the login route
     $response->assertRedirectToRoute('login');
@@ -43,50 +43,50 @@ it('should not be possible to access my cars page as guest user', function () {
     $response->assertStatus(302);
 });
 
-// Test for accessing the My Cars page as an authenticated user
-it('should be possible to access my cars page as authenticated user', function () {
+// Test for accessing the My Vehicles page as an authenticated user
+it('should be possible to access my vehicles page as authenticated user', function () {
     /** @var \Illuminate\Testing\TestResponse $response */
 
     // Create a user and authenticate
     $user = User::factory()->create();
     // Act as the authenticated user
     $response = $this->actingAs($user)
-        // Make a GET request to the car create route
-        ->get(route('car.index'));
+        // Make a GET request to the vehicle create route
+        ->get(route('vehicle.index'));
 
     $response->assertOK()
-        ->assertSee("My Cars");
+        ->assertSee("My Vehicles");
 });
 
-// Test for creating a car with empty data fields
-it('should not be possible to create a car with empty data fields', function () {
+// Test for creating a vehicle with empty data fields
+it('should not be possible to create a vehicle with empty data fields', function () {
     // Seed the database with necessary data
     $this->seed();
 
-    // Create a user to associate with the car
-    // This is necessary because the car creation form requires a user ID
-    // and the user must be authenticated to create a car
+    // Create a user to associate with the vehicle
+    // This is necessary because the vehicle creation form requires a user ID
+    // and the user must be authenticated to create a vehicle
     // If the user is not authenticated, the request will fail
     // due to missing user ID in the request
     // This simulates a real-world scenario where a user must be logged in
-    // to create a car listing
+    // to create a vehicle listing
     $user = User::factory()->create();
 
     /** @var \Illuminate\Testing\TestResponse $response */
-    // Make a POST request to the car store route with empty fields
+    // Make a POST request to the vehicle store route with empty fields
     // This simulates submitting the form with empty data
     // The fields are set to null to test the validation rules
     // that require these fields to be filled out
     // This will help ensure that the validation rules are working correctly
-    // and that the application does not allow creating a car with empty fields
-    $response = $this->actingAs($user)->post(route('car.store'), [
+    // and that the application does not allow creating a vehicle with empty fields
+    $response = $this->actingAs($user)->post(route('vehicle.store'), [
         'manufacturer_id' => null,
         'model_id' => null,
         'year' => null,
         'price' => null,
         'vin' => null,
         'mileage' => null,
-        'car_type_id' => null,
+        'vehicle_type_id' => null,
         'fuel_type_id' => null,
         'province_id' => null,
         'city_id' => null,
@@ -108,7 +108,7 @@ it('should not be possible to create a car with empty data fields', function () 
         'price',
         'vin',
         'mileage',
-        'car_type_id',
+        'vehicle_type_id',
         'fuel_type_id',
         'city_id',
         'address',
@@ -116,36 +116,36 @@ it('should not be possible to create a car with empty data fields', function () 
     ]);
 });
 
-// Test for creating a car with invalid data fields
-it('should not be possible to create a car with invalid data fields', function () {
+// Test for creating a vehicle with invalid data fields
+it('should not be possible to create a vehicle with invalid data fields', function () {
     // Seed the database with necessary data
     $this->seed();
 
-    // Create a user to associate with the car
-    // This is necessary because the car creation form requires a user ID
-    // and the user must be authenticated to create a car
+    // Create a user to associate with the vehicle
+    // This is necessary because the vehicle creation form requires a user ID
+    // and the user must be authenticated to create a vehicle
     // If the user is not authenticated, the request will fail
     // due to missing user ID in the request
     // This simulates a real-world scenario where a user must be logged in
-    // to create a car listing
+    // to create a vehicle listing
     $user = \App\Models\User::factory()->create();
 
     /** @var \Illuminate\Testing\TestResponse $response */
-    // Make a POST request to the car store route with invalid data
+    // Make a POST request to the vehicle store route with invalid data
     // This simulates submitting the form with invalid data
     // The fields are set to values that do not meet the validation rules
     // This will help ensure that the validation rules are working correctly
-    // and that the application does not allow creating a car with invalid data
+    // and that the application does not allow creating a vehicle with invalid data
     // The fields are set to values that are outside the acceptable range
     // or format, such as negative prices, invalid years, etc.
-    $response = $this->actingAs($user)->post(route('car.store'), [
+    $response = $this->actingAs($user)->post(route('vehicle.store'), [
         'manufacturer_id' => 100,
         'model_id' => 100,
         'year' => 1800,
         'price' => -100,
         'vin' => '123',
         'mileage' => -1000,
-        'car_type_id' => 100,
+        'vehicle_type_id' => 100,
         'fuel_type_id' => 100,
         'province_id' => 100,
         'city_id' => 100,
@@ -165,34 +165,34 @@ it('should not be possible to create a car with invalid data fields', function (
         'price',
         'vin',
         'mileage',
-        'car_type_id',
+        'vehicle_type_id',
         'fuel_type_id',
         'city_id',
         'phone',
     ]);
 });
 
-// Test for creating a car with valid data
-it('should be possible to create a car with valid data', function () {
+// Test for creating a vehicle with valid data
+it('should be possible to create a vehicle with valid data', function () {
     // Seed the database with necessary data
     $this->seed();
 
-    // Count the number of cars and images in the database before the test
-    // This is useful to verify that a new car is created after the test
-    $countCars = Car::count();
-    $countImages = CarImage::count();
+    // Count the number of vehicles and images in the database before the test
+    // This is useful to verify that a new vehicle is created after the test
+    $countVehicles = Vehicle::count();
+    $countImages = VehicleImage::count();
 
-    // Create a user to associate with the car
-    // This is necessary because the car creation form requires a user ID
-    // and the user must be authenticated to create a car
+    // Create a user to associate with the vehicle
+    // This is necessary because the vehicle creation form requires a user ID
+    // and the user must be authenticated to create a vehicle
     // If the user is not authenticated, the request will fail
     // due to missing user ID in the request
     // This simulates a real-world scenario where a user must be logged in
-    // to create a car listing
+    // to create a vehicle listing
     $user = User::factory()->create();
 
     // Create fake images to upload
-    // This simulates uploading images for the car listing
+    // This simulates uploading images for the vehicle listing
     // The images are created using the UploadedFile::fake() method
     // This allows us to test the file upload functionality without needing actual image files
     $images = [
@@ -203,8 +203,8 @@ it('should be possible to create a car with valid data', function () {
         UploadedFile::fake()->image('5.jpg'),
     ];
 
-    // Create features for the car
-    // This simulates selecting features for the car listing
+    // Create features for the vehicle
+    // This simulates selecting features for the vehicle listing
     // The features are set to values that are valid according to the validation rules
     $features = [
         'abs' => '1',
@@ -215,18 +215,18 @@ it('should be possible to create a car with valid data', function () {
         'bluetooth_connectivity' => '1',
     ];
 
-    // Create the car data to be submitted
-    // This simulates filling out the car creation form with valid data
+    // Create the vehicle data to be submitted
+    // This simulates filling out the vehicle creation form with valid data
     // The fields are set to values that meet the validation rules
-    // This will help ensure that the car is created successfully
-    $carData = [
+    // This will help ensure that the vehicle is created successfully
+    $vehicleData = [
         'manufacturer_id' => 1,
         'model_id' => 1,
         'year' => 2020,
         'price' => 10000,
         'vin' => '11111111111111111',
         'mileage' => 10000,
-        'car_type_id' => 1,
+        'vehicle_type_id' => 1,
         'fuel_type_id' => 1,
         'province_id' => 1,
         'city_id' => 1,
@@ -237,85 +237,85 @@ it('should be possible to create a car with valid data', function () {
     ];
 
     /** @var \Illuminate\Testing\TestResponse $response */
-    // Make a POST request to the car store route with invalid data
+    // Make a POST request to the vehicle store route with invalid data
     // This simulates submitting the form with invalid data
     // The fields are set to values that do not meet the validation rules
     // This will help ensure that the validation rules are working correctly
-    // and that the application does not allow creating a car with invalid data
+    // and that the application does not allow creating a vehicle with invalid data
     // The fields are set to values that are outside the acceptable range
     // or format, such as negative prices, invalid years, etc.
-    $response = $this->actingAs($user)->post(route('car.store'), $carData);
+    $response = $this->actingAs($user)->post(route('vehicle.store'), $vehicleData);
 
     // Debugging: Check the session data to see what was submitted
     // This can help identify what data was sent in the request
     // $response->ddSession();
 
     // Assert that the response has validation errors for the required fields
-    $response->assertRedirectToRoute('car.index')
+    $response->assertRedirectToRoute('vehicle.index')
         ->assertSessionHas('success');
 
-    // Get the last car created in the database
-    $lastCar = Car::latest('id')->first();
+    // Get the last vehicle created in the database
+    $lastVehicle = Vehicle::latest('id')->first();
 
-    // Add the car ID to the features array
-    // This is necessary to associate the features with the car
-    // The car ID is used to link the features to the specific car listing
-    $features['car_id'] = $lastCar->id;
+    // Add the vehicle ID to the features array
+    // This is necessary to associate the features with the vehicle
+    // The vehicle ID is used to link the features to the specific vehicle listing
+    $features['vehicle_id'] = $lastVehicle->id;
 
-    // Add the car ID to the car data
-    // This is necessary to associate the car data with the car
-    // The car ID is used to link the car data to the specific car listing
-    // This allows us to assert the car data in the database later
-    // This is important for ensuring that the car data is correctly associated
-    $carData['id'] = $lastCar->id;
+    // Add the vehicle ID to the vehicle data
+    // This is necessary to associate the vehicle data with the vehicle
+    // The vehicle ID is used to link the vehicle data to the specific vehicle listing
+    // This allows us to assert the vehicle data in the database later
+    // This is important for ensuring that the vehicle data is correctly associated
+    $vehicleData['id'] = $lastVehicle->id;
 
-    // Unset the features and images from the car data
+    // Unset the features and images from the vehicle data
     // This is necessary because the features and images are stored in separate tables
-    // and should not be included in the car data when asserting the database
-    // The car data should only contain the fields that are directly related to the car
-    unset($carData['features']);
-    unset($carData['images']);
-    unset($carData['province_id']);
+    // and should not be included in the vehicle data when asserting the database
+    // The vehicle data should only contain the fields that are directly related to the vehicle
+    unset($vehicleData['features']);
+    unset($vehicleData['images']);
+    unset($vehicleData['province_id']);
 
-    // Assert that the car was created in the database
-    // And that the count of cars in the database is now 101
-    $this->assertDatabaseCount('cars', $countCars + 1);
+    // Assert that the vehicle was created in the database
+    // And that the count of vehicles in the database is now 101
+    $this->assertDatabaseCount('vehicles', $countVehicles + 1);
     // Assert that the count of images in the database is now 505
-    $this->assertDatabaseCount('car_images', $countImages + count($images));
-    // Assert that the car features were created in the database
-    $this->assertDatabaseCount('car_features', $countCars + 1);
-    // Assert that the car was created in the database with the correct values
-    $this->assertDatabaseHas('cars', $carData);
-    // Assert that the car features were created in the database with the correct values
-    $this->assertDatabaseHas('car_features', $features);
+    $this->assertDatabaseCount('vehicle_images', $countImages + count($images));
+    // Assert that the vehicle features were created in the database
+    $this->assertDatabaseCount('vehicle_features', $countVehicles + 1);
+    // Assert that the vehicle was created in the database with the correct values
+    $this->assertDatabaseHas('vehicles', $vehicleData);
+    // Assert that the vehicle features were created in the database with the correct values
+    $this->assertDatabaseHas('vehicle_features', $features);
 });
 
-// Test for displaying the update car page with correct data
-it('should display update car page with correct data', function () {
+// Test for displaying the update vehicle page with correct data
+it('should display update vehicle page with correct data', function () {
     // Seed the database with necessary data
     $this->seed();
 
     // Select he first user from the database
     $user = User::first();
 
-    // Select the first car associated with the user
-    $firstCar = $user->cars()->first();
+    // Select the first vehicle associated with the user
+    $firstVehicle = $user->vehicles()->first();
 
-    // Access the car edit page as the authenticated user
+    // Access the vehicle edit page as the authenticated user
     /** @var \Illuminate\Testing\TestResponse $response */
     $response = $this->actingAs($user)
-        ->get(route('car.edit', $firstCar->id));
+        ->get(route('vehicle.edit', $firstVehicle->id));
 
-    // Assert that we can see the car edit page
-    $response->assertSee("Edit Car:");
+    // Assert that we can see the vehicle edit page
+    $response->assertSee("Edit Vehicle:");
 
-    // Assert that the response contains the car's manufacturer select dropdown
+    // Assert that the response contains the vehicle's manufacturer select dropdown
     // and that it has the correct manufacturer ID selected
     // Assert that the model select dropdown is rendered
     $response->assertSee('<select id="manufacturerSelect" name="manufacturer_id">', false);
     // Use regex to confirm the correct manufacturer is selected in the correct option tag
     preg_match(
-        '/<option\s+value="' . $firstCar->manufacturer_id . '"\s+selected[^>]*>\s*' . preg_quote($firstCar->manufacturer->name, '/') . '\s*<\/option>/',
+        '/<option\s+value="' . $firstVehicle->manufacturer_id . '"\s+selected[^>]*>\s*' . preg_quote($firstVehicle->manufacturer->name, '/') . '\s*<\/option>/',
         $response->getContent(),
         $matches
     );
@@ -324,13 +324,13 @@ it('should display update car page with correct data', function () {
     // OR
     // $this->assertNotEmpty($matches); // PHPUnit
 
-    // Assert that the response contains the car's model select dropdown
+    // Assert that the response contains the vehicle's model select dropdown
     // and that it has the correct model ID selected
     // Assert that the model select dropdown is rendered
     $response->assertSee('<select id="modelSelect" name="model_id">', false);
     // Use regex to confirm the correct model is selected in the correct option tag
     preg_match(
-        '/<option\s+value="' . $firstCar->model_id . '"[^>]*selected[^>]*>\s*' . preg_quote($firstCar->model->name, '/') . '\s*<\/option>/',
+        '/<option\s+value="' . $firstVehicle->model_id . '"[^>]*selected[^>]*>\s*' . preg_quote($firstVehicle->model->name, '/') . '\s*<\/option>/',
         $response->getContent(),
         $matches
     );
@@ -339,11 +339,11 @@ it('should display update car page with correct data', function () {
     // OR
     // $this->assertNotEmpty($matches); // PHPUnit
 
-    // Assert that the response contains the car's year select dropdown
+    // Assert that the response contains the vehicle's year select dropdown
     $response->assertSee('<select name="year">', false);
     // Use regex to confirm the correct year is selected
     preg_match(
-        '/<option\s+value="' . preg_quote($firstCar->year, '/') . '"[^>]*selected[^>]*>\s*' . preg_quote($firstCar->year, '/') . '\s*<\/option>/',
+        '/<option\s+value="' . preg_quote($firstVehicle->year, '/') . '"[^>]*selected[^>]*>\s*' . preg_quote($firstVehicle->year, '/') . '\s*<\/option>/',
         $response->getContent(),
         $matches
     );
@@ -352,11 +352,11 @@ it('should display update car page with correct data', function () {
     // PHPUnit alternative:
     // $this->assertNotEmpty($matches);
 
-    // Assert that the response contains the car's type radio button
+    // Assert that the response contains the vehicle's type radio button
     // and that at least one exists
-    // Use regex to confirm the correct car type radio button is checked
+    // Use regex to confirm the correct vehicle type radio button is checked
     preg_match(
-        '/<label[^>]*>\s*<input\s+[^>]*name="car_type_id"[^>]*value="' . preg_quote($firstCar->car_type_id, '/') . '"[^>]*checked[^>]*>\s*' . preg_quote($firstCar->carType->name, '/') . '\s*<\/label>/i',
+        '/<label[^>]*>\s*<input\s+[^>]*name="vehicle_type_id"[^>]*value="' . preg_quote($firstVehicle->vehicle_type_id, '/') . '"[^>]*checked[^>]*>\s*' . preg_quote($firstVehicle->vehicleType->name, '/') . '\s*<\/label>/i',
         $response->getContent(),
         $matches
     );
@@ -365,29 +365,29 @@ it('should display update car page with correct data', function () {
     // PHPUnit alternative:
     // $this->assertNotEmpty($matches);
 
-    // Assert that the response contains the car's price
+    // Assert that the response contains the vehicle's price
     $response->assertSeeInOrder([
         'name="price"',
-        ' value="' . $firstCar->price . '"',
+        ' value="' . $firstVehicle->price . '"',
     ], false);
 
-    // Assert that the response contains the car's VIN
+    // Assert that the response contains the vehicle's VIN
     $response->assertSeeInOrder([
         'name="vin"',
-        ' value="' . $firstCar->vin . '"',
+        ' value="' . $firstVehicle->vin . '"',
     ], false);
 
-    // Assert that the response contains the car's mileage
+    // Assert that the response contains the vehicle's mileage
     $response->assertSeeInOrder([
         'name="mileage"',
-        ' value="' . $firstCar->mileage . '"',
+        ' value="' . $firstVehicle->mileage . '"',
     ], false);
 
-    // Assert that the response contains the car's fuel type radio button
+    // Assert that the response contains the vehicle's fuel type radio button
     // and that at least one exists
     // Use regex to confirm the correct fuel type radio button is checked
     preg_match(
-        '/<label[^>]*>\s*<input\s+[^>]*name="fuel_type_id"[^>]*value="' . preg_quote($firstCar->fuel_type_id, '/') . '"[^>]*checked[^>]*>\s*' . preg_quote($firstCar->fuelType->name, '/') . '\s*<\/label>/i',
+        '/<label[^>]*>\s*<input\s+[^>]*name="fuel_type_id"[^>]*value="' . preg_quote($firstVehicle->fuel_type_id, '/') . '"[^>]*checked[^>]*>\s*' . preg_quote($firstVehicle->fuelType->name, '/') . '\s*<\/label>/i',
         $response->getContent(),
         $matches
     );
@@ -396,13 +396,13 @@ it('should display update car page with correct data', function () {
     // PHPUnit alternative:
     // $this->assertNotEmpty($matches);
 
-    // Assert that the response contains the car's province select dropdown
+    // Assert that the response contains the vehicle's province select dropdown
     // and that it has the correct province ID selected
     // Assert that the model select dropdown is rendered
     $response->assertSee('<select id="provinceSelect" name="province_id">', false);
     // Use regex to confirm the correct province is selected in the correct option tag
     preg_match(
-        '/<option\s+value="' . $firstCar->city->province_id . '"\s+selected[^>]*>\s*' . preg_quote($firstCar->city->province->name, '/') . '\s*<\/option>/',
+        '/<option\s+value="' . $firstVehicle->city->province_id . '"\s+selected[^>]*>\s*' . preg_quote($firstVehicle->city->province->name, '/') . '\s*<\/option>/',
         $response->getContent(),
         $matches
     );
@@ -411,14 +411,14 @@ it('should display update car page with correct data', function () {
     // OR
     // $this->assertNotEmpty($matches); // PHPUnit
 
-    // Assert that the response contains the car's city select dropdown
+    // Assert that the response contains the vehicle's city select dropdown
     // and that it has the correct city ID selected
     // Assert that the city dropdown is rendered
     $response->assertSee('<select id="citySelect" name="city_id">', false);
     // Confirm the correct city option is selected and structured properly
     preg_match(
-        '/<option[^>]*value="' . $firstCar->city_id . '"[^>]*data-parent="' . $firstCar->city->province_id . '"[^>]*selected[^>]*>\s*' .
-        preg_quote($firstCar->city->name, '/') .
+        '/<option[^>]*value="' . $firstVehicle->city_id . '"[^>]*data-parent="' . $firstVehicle->city->province_id . '"[^>]*selected[^>]*>\s*' .
+        preg_quote($firstVehicle->city->name, '/') .
         '\s*<\/option>/i',
         $response->getContent(),
         $matches
@@ -428,16 +428,16 @@ it('should display update car page with correct data', function () {
     // OR
     // $this->assertNotEmpty($matches); // PHPUnit
 
-    // Assert that the response contains the car's address
+    // Assert that the response contains the vehicle's address
     $response->assertSeeInOrder([
         'name="address"',
-        ' value="' . $firstCar->address . '"',
+        ' value="' . $firstVehicle->address . '"',
     ], false);
 
-    // Assert that the response contains the car's phone
+    // Assert that the response contains the vehicle's phone
     $response->assertSeeInOrder([
         'name="phone"',
-        ' value="' . $firstCar->phone . '"',
+        ' value="' . $firstVehicle->phone . '"',
     ], false);
 
     // Create an array of feature keys to check
@@ -456,13 +456,13 @@ it('should display update car page with correct data', function () {
         'rear_parking_sensors',
         'leather_seats',
     ];
-    // Assert that the response contains the car's features checkboxes
+    // Assert that the response contains the vehicle's features checkboxes
     // Loop through each feature key and check if the checkbox is present
     foreach ($featureKeys as $key) {
         $featureName = 'name="features[' . $key . ']"';
         $featureValue = 'value="1"';
-        // If the feature is present in the car's features
-        if (!empty($firstCar->features[$key])) {
+        // If the feature is present in the vehicle's features
+        if (!empty($firstVehicle->features[$key])) {
             // Assert the feature checkbox is checked
             $response->assertSeeInOrder([
                 '<label class="checkbox">',
@@ -487,59 +487,59 @@ it('should display update car page with correct data', function () {
         }
     }
 
-    // Assert that the response contains the car's description textarea
+    // Assert that the response contains the vehicle's description textarea
     // Assert that the label is present
     $response->assertSee('<label>Detailed Description</label>', false);
-    // Assert that the textarea is present with the car's description
+    // Assert that the textarea is present with the vehicle's description
     $response->assertSeeInOrder([
         '<textarea',
-        'name="description">' . $firstCar->description . '</textarea>',
+        'name="description">' . $firstVehicle->description . '</textarea>',
     ], false);
 
-    // Assert that the response contains the car's published_at label
+    // Assert that the response contains the vehicle's published_at label
     // Assert that the label is present
     $response->assertSee('<label>Publish Date</label>', false);
 
     // dd([
-    //     '$firstCar->published_at = ' . $firstCar->published_at,
-    //     '$firstCar->published_at->format("Y-m-d") = ' . $firstCar->published_at->format('Y-m-d'),
+    //     '$firstVehicle->published_at = ' . $firstVehicle->published_at,
+    //     '$firstVehicle->published_at->format("Y-m-d") = ' . $firstVehicle->published_at->format('Y-m-d'),
     // ]);
 
-    // Assert that the response contains the car's published_at input
+    // Assert that the response contains the vehicle's published_at input
     $response->assertSeeInOrder([
         '<input',
         'type="date"',
         'name="published_at"',
-        'value="' . optional($firstCar->published_at)->format('Y-m-d') . '"',
+        'value="' . optional($firstVehicle->published_at)->format('Y-m-d') . '"',
     ], false);
 });
 
-// Test for successfully updating car details
-it('should successfully update car details', function () {
+// Test for successfully updating vehicle details
+it('should successfully update vehicle details', function () {
     // Seed the database with necessary data
     $this->seed();
 
-    // Count the number of cars in the database before the test
-    // This is useful to verify that no new car is created after the test
-    // and that the existing car is updated
-    $countCars = Car::count();
+    // Count the number of vehicles in the database before the test
+    // This is useful to verify that no new vehicle is created after the test
+    // and that the existing vehicle is updated
+    $countVehicles = Vehicle::count();
 
-    // Create a user to associate with the car
-    // This is necessary because the car update form requires a user ID
-    // and the user must be authenticated to update a car
+    // Create a user to associate with the vehicle
+    // This is necessary because the vehicle update form requires a user ID
+    // and the user must be authenticated to update a vehicle
     // If the user is not authenticated, the request will fail
     // due to missing user ID in the request
     $user = User::first();
 
     // dd($user)
 
-    // Select the first car associated with the user
-    // This is necessary to ensure that the car being updated belongs to the user
-    // If the user does not have any cars, this will return null
+    // Select the first vehicle associated with the user
+    // This is necessary to ensure that the vehicle being updated belongs to the user
+    // If the user does not have any vehicles, this will return null
     // and the test will fail
-    $firstCar = $user->cars()->first();
+    $firstVehicle = $user->vehicles()->first();
 
-    // dd($firstCar);
+    // dd($firstVehicle);
 
     $features = [
         'abs' => '1',
@@ -550,18 +550,18 @@ it('should successfully update car details', function () {
         'bluetooth_connectivity' => '1',
     ];
 
-    // Create the car data to be submitted
-    // This simulates filling out the car creation form with valid data
+    // Create the vehicle data to be submitted
+    // This simulates filling out the vehicle creation form with valid data
     // The fields are set to values that meet the validation rules
-    // This will help ensure that the car is created successfully
-    $carData = [
+    // This will help ensure that the vehicle is created successfully
+    $vehicleData = [
         'manufacturer_id' => 1,
         'model_id' => 1,
         'year' => 2020,
         'price' => 10000,
         'vin' => '11111111111111111',
         'mileage' => 10000,
-        'car_type_id' => 1,
+        'vehicle_type_id' => 1,
         'fuel_type_id' => 1,
         'province_id' => 1,
         'city_id' => 1,
@@ -571,110 +571,110 @@ it('should successfully update car details', function () {
     ];
 
     /** @var \Illuminate\Testing\TestResponse $response */
-    // Make a PUT request to the car store route with invalid data
+    // Make a PUT request to the vehicle store route with invalid data
     // This simulates submitting the form with invalid data
     // The fields are set to values that do not meet the validation rules
     // This will help ensure that the validation rules are working correctly
-    // and that the application does not allow creating a car with invalid data
+    // and that the application does not allow creating a vehicle with invalid data
     // The fields are set to values that are outside the acceptable range
     // or format, such as negative prices, invalid years, etc.
-    $response = $this->actingAs($user)->put(route('car.update', $firstCar), $carData);
+    $response = $this->actingAs($user)->put(route('vehicle.update', $firstVehicle), $vehicleData);
 
     // Debugging: Check the session data to see what was submitted
     // This can help identify what data was sent in the request
     // $response->ddSession();
 
     // Assert that the response has validation errors for the required fields
-    $response->assertRedirectToRoute('car.index')
+    $response->assertRedirectToRoute('vehicle.index')
         ->assertSessionHas('success');
 
-    // Add the car ID to the car data
-    // This is necessary to associate the car data with the car
-    // The car ID is used to link the car data to the specific car listing
-    // This allows us to assert the car data in the database later
-    $carData['id'] = $firstCar->id;
+    // Add the vehicle ID to the vehicle data
+    // This is necessary to associate the vehicle data with the vehicle
+    // The vehicle ID is used to link the vehicle data to the specific vehicle listing
+    // This allows us to assert the vehicle data in the database later
+    $vehicleData['id'] = $firstVehicle->id;
 
-    // Add the car ID to the features array
-    // This is necessary to associate the features with the car
-    // The car ID is used to link the features to the specific car listing
-    // This allows us to assert the car features in the database later
-    // This is important for ensuring that the car features are correctly associated
-    // with the car being updated
-    $features['car_id'] = $firstCar->id;
+    // Add the vehicle ID to the features array
+    // This is necessary to associate the features with the vehicle
+    // The vehicle ID is used to link the features to the specific vehicle listing
+    // This allows us to assert the vehicle features in the database later
+    // This is important for ensuring that the vehicle features are correctly associated
+    // with the vehicle being updated
+    $features['vehicle_id'] = $firstVehicle->id;
 
     // Remove non-db fields before DB check
-    unset($carData['features'], $carData['province_id']);
+    unset($vehicleData['features'], $vehicleData['province_id']);
 
-    // Assert that the car was updated in the database
-    // And that the count of cars in the database is still the same
-    // This is important to ensure that no new car was created
-    // and that the existing car was updated with the new data
-    $this->assertDatabaseCount('cars', $countCars);
+    // Assert that the vehicle was updated in the database
+    // And that the count of vehicles in the database is still the same
+    // This is important to ensure that no new vehicle was created
+    // and that the existing vehicle was updated with the new data
+    $this->assertDatabaseCount('vehicles', $countVehicles);
 
-    // Assert that the car features were created in the database
-    $this->assertDatabaseCount('car_features', $countCars);
-    // Assert that the car was created in the database with the correct values
-    $this->assertDatabaseHas('cars', $carData);
-    // Assert that the car features is equal to the number of cars
-    $this->assertDatabaseCount('car_features', $countCars);
-    // Assert that the car features were created in the database with the correct values
-    $this->assertDatabaseHas('car_features', $features);
+    // Assert that the vehicle features were created in the database
+    $this->assertDatabaseCount('vehicle_features', $countVehicles);
+    // Assert that the vehicle was created in the database with the correct values
+    $this->assertDatabaseHas('vehicles', $vehicleData);
+    // Assert that the vehicle features is equal to the number of vehicles
+    $this->assertDatabaseCount('vehicle_features', $countVehicles);
+    // Assert that the vehicle features were created in the database with the correct values
+    $this->assertDatabaseHas('vehicle_features', $features);
 });
 
-// Test for successfully deleting a car
-it('should successfully delete a car', function () {
+// Test for successfully deleting a vehicle
+it('should successfully delete a vehicle', function () {
     // Seed the database with necessary data
     $this->seed();
 
-    // Count the number of cars in the database before the test
-    // This is useful to verify that the car is deleted after the test
-    $countCars = Car::count();
+    // Count the number of vehicles in the database before the test
+    // This is useful to verify that the vehicle is deleted after the test
+    $countVehicles = Vehicle::count();
 
     // Select the first user from the database
-    // This is necessary because the car deletion requires a user ID
-    // and the user must be authenticated to delete a car
+    // This is necessary because the vehicle deletion requires a user ID
+    // and the user must be authenticated to delete a vehicle
     // If the user is not authenticated, the request will fail
     // due to missing user ID in the request
     $user = User::first();
 
     // dd($user)
 
-    // Select the first car associated with the user
-    // This is necessary to ensure that the car being deleted belongs to the user
-    // If the user does not have any cars, this will return null
+    // Select the first vehicle associated with the user
+    // This is necessary to ensure that the vehicle being deleted belongs to the user
+    // If the user does not have any vehicles, this will return null
     // and the test will fail
-    $firstCar = $user->cars()->first();
+    $firstVehicle = $user->vehicles()->first();
 
     /** @var \Illuminate\Testing\TestResponse $response */
     $response = $this->actingAs($user)
-        ->delete(route('car.destroy', $firstCar));
+        ->delete(route('vehicle.destroy', $firstVehicle));
 
-    $response->assertRedirectToRoute('car.index')
+    $response->assertRedirectToRoute('vehicle.index')
         ->assertSessionHas('success');
 
-    // Assert that the car was deleted from the database
-    // And that the count of cars in the database is now one less than before
-    $this->assertDatabaseHas('cars', [
-        'id' => $firstCar->id,
+    // Assert that the vehicle was deleted from the database
+    // And that the count of vehicles in the database is now one less than before
+    $this->assertDatabaseHas('vehicles', [
+        'id' => $firstVehicle->id,
         'deleted_at' => now(),
     ]);
 });
 
-// Test for uploading more images to a car
-it('should upload more images on the car', function () {
+// Test for uploading more images to a vehicle
+it('should upload more images on the vehicle', function () {
     // Seed the database with necessary data
     $this->seed();
 
     // Select the first user from the database
     $user = User::first();
 
-    // Select the first car associated with the user
-    $firstCar = $user->cars()->first();
+    // Select the first vehicle associated with the user
+    $firstVehicle = $user->vehicles()->first();
 
-    $oldCount = $firstCar->images()->count();
+    $oldCount = $firstVehicle->images()->count();
 
     // Create fake images to upload
-    // This simulates uploading images for the car listing
+    // This simulates uploading images for the vehicle listing
     // The images are created using the UploadedFile::fake() method
     // This allows us to test the file upload functionality without needing actual image files
     $images = [
@@ -687,68 +687,68 @@ it('should upload more images on the car', function () {
 
     /** @var \Illuminate\Testing\TestResponse $response */
     $response = $this->actingAs($user)
-        ->post(route('car.addImages', $firstCar), [
+        ->post(route('vehicle.addImages', $firstVehicle), [
             'images' => $images,
         ]);
 
-    $response->assertRedirectToRoute('car.images', $firstCar)
+    $response->assertRedirectToRoute('vehicle.images', $firstVehicle)
         ->assertSessionHas('success');
 
-    $newCount = $firstCar->images()->count();
+    $newCount = $firstVehicle->images()->count();
 
     $this->assertEquals($newCount, $oldCount + count($images));
 });
 
-// Test for successfully deleting images on the car
-it('should successfully delete images on the car', function () {
+// Test for successfully deleting images on the vehicle
+it('should successfully delete images on the vehicle', function () {
     // Seed the database with necessary data
     $this->seed();
 
     // Select the first user from the database
     $user = User::first();
 
-    // Select the first car associated with the user
-    $firstCar = $user->cars()->first();
+    // Select the first vehicle associated with the user
+    $firstVehicle = $user->vehicles()->first();
 
-    // Count the number of images associated with the car before deletion
-    $oldCount = $firstCar->images()->count();
+    // Count the number of images associated with the vehicle before deletion
+    $oldCount = $firstVehicle->images()->count();
 
-    // Get the IDs of the first two images associated with the car
-    $ids = $firstCar->images()->limit(2)->pluck('id')->toArray();
+    // Get the IDs of the first two images associated with the vehicle
+    $ids = $firstVehicle->images()->limit(2)->pluck('id')->toArray();
 
     /** @var \Illuminate\Testing\TestResponse $response */
     $response = $this->actingAs($user)
-        ->put(route('car.updateImages', $firstCar), [
+        ->put(route('vehicle.updateImages', $firstVehicle), [
             'delete_images' => $ids,
         ]);
 
     // Assert that the response is a redirect
     // This indicates that the images were successfully deleted
-    // and the user is redirected to the car images route
+    // and the user is redirected to the vehicle images route
     $response->assertStatus(302);
 
-    // Count the number of images associated with the car after deletion
-    $newCount = $firstCar->images()->count();
+    // Count the number of images associated with the vehicle after deletion
+    $newCount = $firstVehicle->images()->count();
 
     // Assert that the number of images after deletion is equal to the
     // old count minus the number of deleted images
     $this->assertEquals($newCount, $oldCount - 2);
 
-    // Assert that the response redirects to the car images route with
-    // the first car
-    $response->assertRedirectToRoute('car.images', $firstCar)
+    // Assert that the response redirects to the vehicle images route with
+    // the first vehicle
+    $response->assertRedirectToRoute('vehicle.images', $firstVehicle)
         ->assertSessionHas('success');
 
     // Assert that the number of images in the database is equal to
     // the new count
-    $newCount = $firstCar->images()->count();
+    $newCount = $firstVehicle->images()->count();
 
     // Assert that the number of images after deletion is equal to
     // the old count minus the number of deleted images
     $this->assertEquals($newCount, $oldCount - 2);
 });
 
-// Test for successfully updating image positions on the car
+// Test for successfully updating image positions on the vehicle
 it('should successfully update image positions', function () {
     // Seed the database with necessary data
     $this->seed();
@@ -756,14 +756,14 @@ it('should successfully update image positions', function () {
     // Select the first user from the database
     $user = User::first();
 
-    // Select the first car associated with the user
-    $firstCar = $user->cars()->first();
+    // Select the first vehicle associated with the user
+    $firstVehicle = $user->vehicles()->first();
 
-    // Get all the images associated with the car
+    // Get all the images associated with the vehicle
     // and reorder them by position in descending order
     // This is useful to ensure that the images are in the correct order
     // before updating their positions
-    $images = $firstCar->images()->reorder('position', 'desc')->get();
+    $images = $firstVehicle->images()->reorder('position', 'desc')->get();
 
     // Create an array to hold the new positions
     $data = [];
@@ -779,34 +779,34 @@ it('should successfully update image positions', function () {
     // Debugging: Check the data array to see the new positions
     // dump($data);
 
-    // Make a PUT request to the car update images route with the new positions
+    // Make a PUT request to the vehicle update images route with the new positions
     // This simulates submitting the form with the new image positions
     // The positions are set to the values in the $data array
     /** @var \Illuminate\Testing\TestResponse $response */
     $response = $this->actingAs($user)
-        ->put(route('car.updateImages', $firstCar), [
+        ->put(route('vehicle.updateImages', $firstVehicle), [
             'positions' => $data,
         ]);
 
     // Assert that the response is a redirect
     // This indicates that the image positions were successfully updated
-    // and the user is redirected to the car images route
+    // and the user is redirected to the vehicle images route
     // This is important to ensure that the user is informed of the successful update
-    $response->assertRedirectToRoute('car.images', $firstCar)
+    $response->assertRedirectToRoute('vehicle.images', $firstVehicle)
         ->assertSessionHas('success');
 
     // Assert that the database has the updated image positions
     // This checks that each image ID in the $data array has the correct position
     foreach ($data as $id => $position) {
-        $this->assertDatabaseHas('car_images', [
+        $this->assertDatabaseHas('vehicle_images', [
             'id' => $id,
             'position' => $position,
         ]);
     }
 });
 
-// Test for ensuring that a user cannot access other users' cars
-it('should test that the user can\'t access other users\' cars', function () {
+// Test for ensuring that a user cannot access other users' vehicles
+it('should test that the user can\'t access other users\' vehicles', function () {
     // Seed the database with necessary data
     $this->seed();
 
@@ -819,13 +819,13 @@ it('should test that the user can\'t access other users\' cars', function () {
     // This can help identify if the users are correctly selected
     // dump($user1, $user2);
 
-    // Select the first car associated with user1
-    $car = $user1->cars()->first();
+    // Select the first vehicle associated with user1
+    $vehicle = $user1->vehicles()->first();
 
-    // Act as user2 and try to access user1's car
+    // Act as user2 and try to access user1's vehicle
     /** @var \Illuminate\Testing\TestResponse $response */
     $response = $this->actingAs($user2)
-        ->get(route('car.edit', $car));
+        ->get(route('vehicle.edit', $vehicle));
 
     // Assert that the response is a 404 Not Found status
     $response->assertStatus(404);
