@@ -1,7 +1,10 @@
 <?php
 
+// database/factories/VehicleFactory.php
+
 namespace Database\Factories;
 
+use App\Models\VehicleCategory;
 use App\Models\VehicleType;
 use App\Models\City;
 use App\Models\FuelType;
@@ -29,7 +32,13 @@ class VehicleFactory extends Factory
         // Fetch a random manufacturer
         $manufacturer = Manufacturer::inRandomOrder()->first();
 
+        // Pick a random vehicle category from DB
+        $category = VehicleCategory::inRandomOrder()->first();
+
         return [
+            // Vehicle category
+            'vehicle_category_id' => $category->id,
+
             // Manufacturer
             'manufacturer_id' => $manufacturer->id, // Assign the manufacturer ID
 

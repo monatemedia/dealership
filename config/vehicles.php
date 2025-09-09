@@ -16,7 +16,7 @@ return [
             'vehicle_types' => ['Standard', 'Cruiser', 'Touring', 'Sport', 'Off-road', 'Dual-purpose'],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
-        'Vehicles' => [
+        'Cars' => [
             'vehicle_types' => ['Sedan', 'Hatchback', 'SUV', 'Bakkie', 'Minivan', '4X4'],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],

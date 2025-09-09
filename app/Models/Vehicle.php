@@ -1,5 +1,7 @@
 <?php
 
+// app/Models/Vehicle.php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -38,6 +40,12 @@ class Vehicle extends Model
     ];
 
     # Define the relationships
+
+    // Define method for `VehicleCategory` and the return type
+    public function vehicleCategory(): BelongsTo
+    {
+        return $this->belongsTo(VehicleCategory::class, 'vehicle_category_id');
+    }
 
     // Define method for `VehicleType` and the return type
     public function vehicleType(): BelongsTo

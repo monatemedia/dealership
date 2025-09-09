@@ -46,8 +46,9 @@
         <p class="vehicle-item-price">{{ $vehicle->price }}</p>
         <hr />
         <p class="m-0">
-            <span class="vehicle-item-badge">{{ $vehicle->vehicleType->name }}</span>
-            <span class="vehicle-item-badge">{{ $vehicle->fuelType->name }}</span>
+            <span class="vehicle-item-badge">{{ $vehicle->vehicleCategory?->name }}</span>
+            <span class="vehicle-item-badge">{{ $vehicle->vehicleType?->name }}</span>
+            <span class="vehicle-item-badge">{{ $vehicle->fuelType?->name }}</span>
         </p>
     </div>
 </div>

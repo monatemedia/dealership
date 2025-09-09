@@ -26,7 +26,8 @@ class VehicleController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * Display the index page
+     * VehicleController::index
      */
     public function index(Request $request)
     {

@@ -16,10 +16,12 @@ class HomeController extends Controller
 
         $vehicles = Cache::remember($cacheKey, 60, function () use ($page) {
             return Vehicle::where('published_at', '<', now())
-                ->with(['primaryImage', 'city', 'vehicleType', 'fuelType', 'manufacturer', 'model', 'favouredUsers'])
+                ->with(['primaryImage', 'city', 'vehicleCategory', 'vehicleType', 'fuelType', 'manufacturer', 'model', 'favouredUsers'])
                 ->orderBy('published_at', 'desc')
                 ->paginate(30, ['*'], 'page', $page);
         });
+
+        dump($vehicles->toArray());
 
         return view('home.index', ['vehicles' => $vehicles]);
     }

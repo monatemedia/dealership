@@ -1,8 +1,11 @@
 <?php
 
+// database/seeders/DatabaseSeeder.php
+
 namespace Database\Seeders;
 
 use App\Models\Vehicle;
+use App\Models\VehicleCategory;
 use App\Models\VehicleImage;
 use App\Models\VehicleType;
 use App\Models\City;
@@ -21,6 +24,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Call Seeders
+        $this->call([
+            VehicleCategorySeeder::class,
+        ]);
+
+
         // Vehicle Types from config
         VehicleType::factory()
             ->count(count(config('lookups.vehicle_types')))
