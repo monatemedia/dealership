@@ -59,7 +59,6 @@ class SignupController extends Controller
         Auth::login($user);
         // Redirect to home page with flash message
         return redirect()->route('home')
-            ->with('success', 'Account created Successfully. Please check your email
-        to verify your account');
+            ->with('success', 'Account successful. Please check your email.');
     }
 }

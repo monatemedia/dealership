@@ -13,6 +13,7 @@ return new class extends Migration {
         Schema::create('vehicle_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name', 45)->unique();
+            $table->string('slug')->unique();
         });
 
         // Add category_id to vehicles table

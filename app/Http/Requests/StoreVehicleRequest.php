@@ -24,6 +24,7 @@ class StoreVehicleRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'vehicle_category_id' => 'required|exists:vehicle_categories,id',
             'manufacturer_id' => 'required|exists:manufacturers,id',
             'model_id' => 'required|exists:models,id',
             'year' => ['required', 'integer', 'min:1900', 'max:' . date('Y')],

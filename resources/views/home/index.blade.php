@@ -1,3 +1,5 @@
+{{-- resource/views/home/index.blade.php --}}
+
 <x-app-layout title="Home Page">
 
     <!-- Home Slider -->
@@ -9,16 +11,18 @@
                 <div class="container">
                     <div class="slide-content">
                         <h1 class="hero-slider-title">
-                            Buy <strong>The Best Vehicles</strong> <br />
+                            Buy <strong>{{ $category->name ?? 'The Best Vehicles' }}</strong> <br />
                             in your region
                         </h1>
                         <div class="hero-slider-content">
                             <p>
-                                Use the powerful search tool to find your desired vehicles based on
-                                multiple search criteria: Manufacturer, Model, Year, Price Range, Vehicle
-                                Type, etc...
+                                Use the powerful search tool to find your
+                                {{ $category->name ?? 'vehicles' }} based on multiple search criteria:
+                                Manufacturer, Model, Year, Price Range, Vehicle Type, etc...
                             </p>
-                            <a href="{{ route('vehicle.search') }}" class="btn btn-hero-slider">Find A Vehicle</a>
+                            <a href="{{ route('vehicle.search') }}" class="btn btn-hero-slider">
+                                Find A Vehicle
+                            </a>
                         </div>
                     </div>
                     <div class="slide-image">
@@ -32,14 +36,16 @@
                     <div class="slide-content">
                         <h2 class="hero-slider-title">
                             Do you want to <br />
-                            <strong>sell your vehicle?</strong>
+                            <strong>sell your {{ $category->name ?? 'vehicle' }}?</strong>
                         </h2>
                         <div class="hero-slider-content">
                             <p>
-                                Submit your vehicle in our user friendly interface, describe it,
+                                Submit your {{ $category->name ?? 'vehicle' }} in our user friendly interface, describe it,
                                 upload photos and the perfect buyer will find it...
                             </p>
-                            <a href="{{ route('vehicle.create') }}" class="btn btn-hero-slider">Add Your Vehicle</a>
+                            <a href="{{ route('vehicle.create') }}" class="btn btn-hero-slider">
+                                Add Your Vehicle
+                            </a>
                         </div>
                     </div>
                     <div class="slide-image">
@@ -47,6 +53,7 @@
                     </div>
                 </div>
             </div>
+            <!-- Carousel Controls -->
             <button type="button" class="hero-slide-prev">
                 <svg style="width: 18px" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                     viewBox="0 0 6 10">
@@ -67,12 +74,19 @@
     </section>
     <!--/ Home Slider -->
 
+
     <main>
         <x-search-form />
         <!-- New Vehicles -->
         <section>
             <div class="container">
-                <h2>Latest Added Vehicles</h2>
+                <h2>
+                    @isset($category)
+                        Vehicles in {{ $category->name }} Category
+                    @else
+                        Latest Vehicles Added
+                    @endisset
+                </h2>
                 @if ($vehicles->count() > 0)
                 <div class="vehicle-items-listing">
                     @foreach($vehicles as $vehicle)

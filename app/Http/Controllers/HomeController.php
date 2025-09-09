@@ -21,7 +21,7 @@ class HomeController extends Controller
                 ->paginate(30, ['*'], 'page', $page);
         });
 
-        dump($vehicles->toArray());
+        // dump($vehicles->toArray());
 
         return view('home.index', ['vehicles' => $vehicles]);
     }

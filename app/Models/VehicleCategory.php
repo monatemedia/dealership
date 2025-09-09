@@ -15,6 +15,7 @@ class VehicleCategory extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         // 'vehicle_types',
         // 'fuel_types'
     ];
@@ -23,6 +24,11 @@ class VehicleCategory extends Model
         // 'vehicle_types' => 'array',
         // 'fuel_types' => 'array',
     ];
+
+    public function getRouteKeyName()
+    {
+        return 'slug'; // use slug instead of id for route binding
+    }
 
     // A category has many vehicles
     public function vehicles(): HasMany

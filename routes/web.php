@@ -2,6 +2,7 @@
 
 // routes/web.php
 
+use App\Http\Controllers\VehicleCategoryController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
@@ -57,6 +58,10 @@ Route::middleware(['auth'])->group(function () {
 // Public vehicle details route
 Route::get('/vehicle/{vehicle}', [VehicleController::class, 'show'])->name('vehicle.show');
 Route::post('/vehicle/phone/{vehicle}', [VehicleController::class, 'showPhone'])->name('vehicle.showPhone');
+
+// Category route (keep at the very end)
+Route::get('/{category:slug}', [VehicleCategoryController::class, 'show'])
+    ->name('category.show');
 
 // Include the authentication routes
 require __DIR__ . '/auth.php';

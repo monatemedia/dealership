@@ -16,6 +16,17 @@
                     <div class="form-details">
                         <div class="row">
                             <div class="col">
+                                <div class="form-group @error('vehicle_category_id') has-error @enderror">
+                                    <label>Vehicle Category</label>
+                                    <x-select-vehicle-category :value="old('vehicle_category_id', $vehicle->vehicle_category_id)"/>
+                                    <p class="error-message">
+                                        {{ $errors->first('vehicle_category_id') }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
                                 <div class="form-group @error('year') has-error @enderror">
                                     <label>Year</label>
                                     <x-select-year :value="old('year', $vehicle->year)"/>

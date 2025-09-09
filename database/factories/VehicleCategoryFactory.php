@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\VehicleCategory>
@@ -26,6 +27,7 @@ class VehicleCategoryFactory extends Factory
 
         return [
             'name' => $name,
+            'slug' => Str::slug($name),
             // 'vehicle_types' => $categories[$name]['vehicle_types'],
             // 'fuel_types' => $categories[$name]['fuel_types'],
         ];

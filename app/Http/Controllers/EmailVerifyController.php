@@ -25,7 +25,7 @@ class EmailVerifyController extends Controller
         // and will inform them that they can now add vehicles
         // to their watchlist
         return redirect()->route('home')
-            ->with('success', 'Your Email was verified. You can now add vehicles!');
+            ->with('success', 'Email verified. You can now add vehicles!');
     }
     public function notice()
     {

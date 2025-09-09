@@ -6,6 +6,7 @@ namespace Database\Seeders;
 use App\Models\VehicleCategory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class VehicleCategorySeeder extends Seeder
 {
@@ -19,10 +20,13 @@ class VehicleCategorySeeder extends Seeder
         foreach ($categories as $name => $data) {
             VehicleCategory::updateOrCreate(
                 ['name' => $name],
-                // [
-                //     'vehicle_types' => $data['vehicle_types'],
-                //     'fuel_types' => $data['fuel_types'],
-                // ]
+                [
+                    'slug' => Str::slug($name),
+                    // [
+                    //     'vehicle_types' => $data['vehicle_types'],
+                    //     'fuel_types' => $data['fuel_types'],
+                    // ]
+                ]
             );
         }
     }
