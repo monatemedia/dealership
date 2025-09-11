@@ -513,9 +513,9 @@ body.page-signup {
   transition: all 0.3s;
 }
 
-main {
+/* main {
   padding: 1rem;
-}
+} */
 
 .card {
   background-color: white;
@@ -1812,4 +1812,12 @@ a.pagination-item:hover {
     aspect-ratio: 1 / 1;
     border-radius: 8px; /* Matches the modal's styling */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Adds a subtle shadow */
+}
+
+/* Category CSS */
+.category-content {
+    display: flex;
+    justify-content: center; /* horizontal center */
+    text-align: center;
+    margin: 3rem;
 }

@@ -8,7 +8,11 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WatchlistController;
+use App\Models\VehicleCategory;
 use Illuminate\Support\Facades\Route;
+
+// Get all category slugs for route constraint
+$slugs = VehicleCategory::pluck('slug')->implode('|');
 
 // Home route
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -61,6 +65,7 @@ Route::post('/vehicle/phone/{vehicle}', [VehicleController::class, 'showPhone'])
 
 // Category route (keep at the very end)
 Route::get('/{category:slug}', [VehicleCategoryController::class, 'show'])
+    ->where('category', $slugs) // restrict to valid slugs only
     ->name('category.show');
 
 // Include the authentication routes
