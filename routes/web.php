@@ -59,6 +59,10 @@ Route::middleware(['auth'])->group(function () {
         ->name('logout');
 });
 
+// Categories index page
+Route::get('/categories', [VehicleCategoryController::class, 'index'])
+    ->name('categories.index');
+
 // Public vehicle details route
 Route::get('/vehicle/{vehicle}', [VehicleController::class, 'show'])->name('vehicle.show');
 Route::post('/vehicle/phone/{vehicle}', [VehicleController::class, 'showPhone'])->name('vehicle.showPhone');

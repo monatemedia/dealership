@@ -1,5 +1,7 @@
 <?php
 
+// app/Http/Controllers/VehicleCategoryController.php
+
 namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
@@ -8,6 +10,15 @@ use Illuminate\Http\Request;
 
 class VehicleCategoryController extends Controller
 {
+    public function index()
+    {
+        $categories = VehicleCategory::all();
+
+        return view('categories.index', [
+            'categories' => $categories,
+        ]);
+    }
+
     public function show(VehicleCategory $category)
     {
         $vehicles = Vehicle::with(['primaryImage', 'manufacturer', 'model'])
