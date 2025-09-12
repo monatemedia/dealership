@@ -736,6 +736,11 @@ body.page-signup {
   object-fit: cover;
 }
 
+.vehicle-item-badges {
+  display: flex;
+  flex-wrap: wrap;   /* allow wrapping to new line */
+  gap: 0.5rem;       /* spacing between badges */
+}
 .vehicle-item-badge {
   background-color: #e5e5e5;
   padding: 0.25rem 0.5rem;

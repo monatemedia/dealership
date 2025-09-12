@@ -43,12 +43,12 @@
         <h2 class="vehicle-item-title">
             {{ $vehicle->getTitle() }}
         </h2>
-        <p class="vehicle-item-price">{{ $vehicle->price }}</p>
+        <p class="vehicle-item-price">R {{ number_format($vehicle->price, 0, '.', ' ') }}</p>
         <hr />
-        <p class="m-0">
+        <div class="vehicle-item-badges">
             <span class="vehicle-item-badge">{{ $vehicle->vehicleCategory?->name }}</span>
             <span class="vehicle-item-badge">{{ $vehicle->vehicleType?->name }}</span>
             <span class="vehicle-item-badge">{{ $vehicle->fuelType?->name }}</span>
-        </p>
+        </div>
     </div>
 </div>

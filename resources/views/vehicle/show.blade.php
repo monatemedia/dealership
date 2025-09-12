@@ -90,7 +90,7 @@
                 </div>
                 <div class="vehicle-details card">
                     <div class="flex items-center justify-between">
-                        <p class="vehicle-details-price">${{ $vehicle->price}}</p>
+                        <p class="vehicle-details-price">R {{ number_format($vehicle->price, 0, '.', ' ') }}</p>
                         <button
                             class="btn-heart text-primary"
                             data-url="{{ route('watchlist.storeDestroy', $vehicle) }}"
