@@ -1,6 +1,6 @@
-{{-- resource/views/home/index.blade.php --}}
+{{-- resource/views/categories/index.blade.php --}}
 
-<x-app-layout title="Home Page">
+<x-app-layout title="Categories Page">
     <main>
 
         <!-- Category Boxes -->
@@ -101,67 +101,20 @@
         </style>
         <section class="services-section">
             <div>
-                <h2 class="hero-slider-title text-center">Popular <strong>Categories</strong></h2>
+                <h2 class="hero-slider-title text-center">All <strong>Categories</strong></h2>
                 <p class="hero-slider-content text-center">Experience the pinnacle of quality
                     <br>with our carefully curated vehicle categories.</p>
             </div>
 
             <div class="services-grid container">
-                <!-- Passenger Cars -->
-                <div class="service-card">
-                    <a href="/cars">
-                        <img src="https://images.unsplash.com/photo-1702141583381-68d8b34a2898?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Passenger Cars">
-                        <div class="service-overlay"></div>
-                        <div class="service-content">
-                            <h3>Passenger Cars</h3>
-                            <p>Comfortable and efficient options for everyday travel.</p>
-                            <div class="service-link">
-                                Learn more
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Bakkies -->
-                <div class="service-card">
-                    <a href="/bakkies">
-                        <img src="https://images.pexels.com/photos/8438569/pexels-photo-8438569.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Bakkies">
-                        <div class="service-overlay"></div>
-                        <div class="service-content">
-                            <h3>Bakkies</h3>
-                            <p>Reliable pickups built for work, travel, and adventure.</p>
-                            <div class="service-link">
-                                Learn more
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Motorcycles -->
-                <div class="service-card">
-                    <a href="/motorcycles">
-                        <img src="https://images.unsplash.com/photo-1609630875171-b1321377ee65?q=80&w=680&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Motorcycles">
-                        <div class="service-overlay"></div>
-                        <div class="service-content">
-                            <h3>Motorcycles</h3>
-                            <p>Two-wheel freedom for speed, style, and exploration.</p>
-                            <div class="service-link">
-                                Learn more
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-
+                @foreach ($categories as $category)
+                    <x-service-card
+                        :href="route('category.show', $category->slug)"
+                        :image="$category->image_path"
+                        :title="$category->long_name ?? $category->name"
+                        :description="$category->description"
+                    />
+                @endforeach
             </div>
         </section>
         <!-- /Category Boxes -->

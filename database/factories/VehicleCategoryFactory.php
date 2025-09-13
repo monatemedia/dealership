@@ -27,6 +27,9 @@ class VehicleCategoryFactory extends Factory
 
         return [
             'name' => $name,
+            'long_name' => $categories[$name]['long_name'] ?? null,
+            'description' => $categories[$name]['description'] ?? null,
+            'image_path' => $categories[$name]['image_path'] ?? null,
             'slug' => Str::slug($name),
             // 'vehicle_types' => $categories[$name]['vehicle_types'],
             // 'fuel_types' => $categories[$name]['fuel_types'],

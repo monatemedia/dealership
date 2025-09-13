@@ -17,11 +17,16 @@ class VehicleCategory extends Model
 
     protected $fillable = [
         'name',
+        'long_name',
+        'description',
+        'image_path',
         'slug',
         // 'vehicle_types',
         // 'fuel_types'
     ];
 
+    // If you want to cast vehicle_types and fuel_types as arrays
+    // (uncomment if you decide to store them as JSON)
     protected $casts = [
         // 'vehicle_types' => 'array',
         // 'fuel_types' => 'array',

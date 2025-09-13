@@ -13,6 +13,9 @@ return new class extends Migration {
         Schema::create('vehicle_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name', 45)->unique();
+            $table->string('long_name')->nullable();
+            $table->string('description')->nullable();
+            $table->string('image_path')->nullable();
             $table->string('slug')->unique();
         });
 
