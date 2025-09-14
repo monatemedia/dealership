@@ -10,8 +10,12 @@ export default defineConfig({
     ],
     server: {
         proxy: {
-            // Proxy all /api requests to Laravel backend
             '/api': 'http://127.0.0.1:8000',
+        },
+        watch: {
+            // watch all CSS files in resources/css
+            usePolling: true,
+            interval: 100,
         },
     },
 });
