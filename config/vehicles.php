@@ -17,18 +17,18 @@ return [
             'description' => 'Two-wheel freedom for speed, style, and adventure.',
             'image_path' => 'https://images.unsplash.com/photo-1609630875171-b1321377ee65?q=80&w=680&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
             'vehicle_types' => ['Standard', 'Cruiser', 'Touring', 'Sport', 'Off-road', 'Dual-purpose'],
-            'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
+            'fuel_types' => ['Gasoline', 'Electric', 'Hybrid', 'Diesel'],
         ],
         'Cars' => [
             'long_name' => 'Passenger Cars',
-            'description' => 'Four-wheeled vehicles for personal and family use.',
+            'description' => 'Vehicles for personal and family use.',
             'image_path' => 'https://images.unsplash.com/photo-1702141583381-68d8b34a2898?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
             'vehicle_types' => ['Sedan', 'Hatchback', 'SUV', 'Bakkie', 'Minivan', '4X4'],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
         'Bakkies' => [
-            'long_name' => 'Bakkies & LDVs',
-            'description' => 'Versatile vehicles for both work and play.',
+            'long_name' => 'Bakkies',
+            'description' => 'Versatile bakkies for both work and play.',
             'image_path' => 'https://images.pexels.com/photos/8438569/pexels-photo-8438569.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             'vehicle_types' => ['Single Cab', 'Double Cab', 'King Cab', 'Chassis Cab', 'Tow Truck', 'Service Body'],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
@@ -38,13 +38,13 @@ return [
             'description' => 'Versatile vehicles for both work and play.',
             'image_path' => 'https://images.pexels.com/photos/19170449/pexels-photo-19170449/free-photo-of-trailer-parked-in-yard.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             'vehicle_types' => ['Single Axle', 'Double Axle', 'Gooseneck', 'Fifth Wheel', 'Toy Hauler', 'Pop-up'],
-            'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
+            'fuel_types' => [],
         ],
         'Motorhomes' => [
             'long_name' => 'Motorhomes & RVs',
             'description' => 'Comfortable vehicles for long-distance travel.',
             'image_path' => 'https://images.unsplash.com/photo-1712765124506-67e68c30e90f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fG9yYW5nZSUyMG1vdG9yaG9tZXxlbnwwfHwwfHx8MA%3D%3D',
-            'vehicle_types' => ['Single Cab', 'Double Cab', 'King Cab', 'Chassis Cab', 'Tow Truck', 'Service Body'],
+            'vehicle_types' => ['Class A', 'Class B', 'Class C', 'Fifth Wheel', 'Travel Trailer', 'Pop-up Camper'],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
         'Watercraft' => [
@@ -55,7 +55,7 @@ return [
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
         'Minibuses' => [
-            'long_name' => 'Minibuses & Transporters',
+            'long_name' => 'Minibuses',
             'description' => 'Spacious vehicles for group travel and transport.',
             'image_path' => 'https://c.anibis.ch/big/7596426995.jpg',
             'vehicle_types' => ['Standard', 'High Roof', 'Luxury', 'Cargo', 'Passenger'],
@@ -68,33 +68,33 @@ return [
             'vehicle_types' => ['Cargo Van', 'Passenger Van', 'Crew Van', 'Camper Van'],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
-        'Lorries' => [
-            'long_name' => 'Lorries',
-            'description' => 'Heavy-duty vehicles for transporting goods.',
-            'image_path' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Freightliner_M2_106_6x4_2014_%2814240376744%29.jpg/1024px-Freightliner_M2_106_6x4_2014_%2814240376744%29.jpg',
-            'vehicle_types' => ['Flatbed', 'Box', 'Tanker', 'Reefer', 'Dump', 'Car Carrier'],
-            'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
-        ],
         'Busses' => [
-            'long_name' => 'Heavy Commercial Busses',
+            'long_name' => 'Bus & Coach',
             'description' => 'Busses for heavy-duty tasks.',
             'image_path' => 'https://images.unsplash.com/photo-1731448591600-22bbcb360f69?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-            'vehicle_types' => ['Bus', 'Coach'],
+            'vehicle_types' => ['Bus', 'Coach', 'Double Decker', 'Shuttle Bus', 'School Bus'],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
-        'Trucks' => [
-            'long_name' => 'Heavy Commercial Trucks',
+        'Rigid-Trucks' => [
+            'long_name' => 'Rigid Trucks',
+            'description' => 'Heavy-duty vehicles for transporting goods.',
+            'image_path' => 'https://images.pexels.com/photos/9280464/pexels-photo-9280464.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+            'vehicle_types' => ['Flatbed', 'Box', 'Tanker', 'Reefer', 'Dump', 'Car Carrier'],
+            'fuel_types' => ['Diesel', 'Electric', 'Hybrid'],
+        ],
+        'Articulated-Trucks' => [
+            'long_name' => 'Articulated Truck Tractors',
             'description' => 'Trucks and lorries for heavy-duty tasks.',
             'image_path' => 'https://images.pexels.com/photos/18982322/pexels-photo-18982322/free-photo-of-golden-renault-trucks-t.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             'vehicle_types' => ['Truck', 'Lorry', 'Bus', 'Tractor', 'Trailer', 'Tipper'],
-            'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
+            'fuel_types' => ['Diesel', 'Electric', 'Hybrid'],
         ],
-        'Trucktrailers' => [
-            'long_name' => 'Heavy Commercial Trailers',
+        'Truck-trailers' => [
+            'long_name' => 'Articulated Truck Trailers',
             'description' => 'Trailers for heavy-duty tasks.',
             'image_path' => 'https://images.unsplash.com/photo-1712185908636-c5762a4f558a?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-            'vehicle_types' => ['Flatbed', 'Box Trailer', 'Refrigerated Trailer', 'Tanker', 'Lowboy', 'Container'],
-            'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
+            'vehicle_types' => ['Tautliner', 'Flatbed', 'Box Trailer', 'Refrigerated Trailer', 'Tanker', 'Lowboy', 'Lowbed', 'Flatdeck', 'Chassis', 'Car Carrier'],
+            'fuel_types' => ['No Fuel', 'Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
         'Plant' => [
             'long_name' => 'Plant Machinery',
@@ -103,15 +103,8 @@ return [
             'vehicle_types' => ['Excavator', 'Backhoe', 'Loader', 'Roller', 'Crane', 'Scraper', 'Forklift', 'Grader', 'BOMAG Roller', 'Bulldozer', 'Compactor', 'Telehandler', ''],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
-        // 'Equipment' => [
-        //     'long_name' => 'Heavy Equipment',
-        //     'description' => 'Versatile vehicles for both work and play.',
-        //     'image_path' => 'https://images.pexels.com/photos/14704776/pexels-photo-14704776.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-        //     'vehicle_types' => ['Excavator', 'Bulldozer', 'Backhoe', 'Dump Truck', 'Crane', 'Forklift'],
-        //     'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
-        // ],
         'Agri' => [
-            'long_name' => 'Agricultural Vehicles',
+            'long_name' => 'Agri Plant Machinery',
             'description' => 'Robust vehicles designed for farming and agricultural tasks.',
             'image_path' => 'https://images.pexels.com/photos/32958981/pexels-photo-32958981/free-photo-of-high-powered-ace-tractor-in-faridabad-india.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             'vehicle_types' => ['Tractor', 'Combine Harvester', 'Plough', 'Seeder', 'Baler', 'Sprayer'],
@@ -122,7 +115,7 @@ return [
             'description' => 'Aircraft designed for various purposes.',
             'image_path' => 'https://images.pexels.com/photos/17485431/pexels-photo-17485431/free-photo-of-light-aircraft-on-field.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             'vehicle_types' => ['Single Engine', 'Multi Engine', 'Helicopter', 'Glider', 'Seaplane', 'Jet'],
-            'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
+            'fuel_types' => ['AvGas', 'Jet Fuel', 'Electric', 'Hybrid'],
         ],
     ],
 
@@ -133,35 +126,35 @@ return [
     | A list of common and category-specific features.
     |
     */
-    'features' => [
-        'common' => [
-            'ABS',
-            'Bluetooth Connectivity',
-            'GPS Navigation',
-        ],
-        'Motorcycles' => [
-            'Heated Grips',
-            'Saddlebags',
-            'Windshield',
-        ],
-        'Cars' => [
-            'Air Conditioning',
-            'Power Windows',
-            'Power Door Locks',
-            'Cruise Control',
-            'Remote Start',
-            'Heated Seats',
-            'Climate Control',
-            'Rear Parking Sensors',
-            'Leather Seats',
-        ],
-        'Bakkies' => [
-            'Tow Hitch',
-            'Bed Liner',
-            '4x4 Drivetrain',
-            'Running Boards',
-        ],
-    ],
+    // 'features' => [
+    //     'common' => [
+    //         'ABS',
+    //         'Bluetooth Connectivity',
+    //         'GPS Navigation',
+    //     ],
+    //     'Motorcycles' => [
+    //         'Heated Grips',
+    //         'Saddlebags',
+    //         'Windshield',
+    //     ],
+    //     'Cars' => [
+    //         'Air Conditioning',
+    //         'Power Windows',
+    //         'Power Door Locks',
+    //         'Cruise Control',
+    //         'Remote Start',
+    //         'Heated Seats',
+    //         'Climate Control',
+    //         'Rear Parking Sensors',
+    //         'Leather Seats',
+    //     ],
+    //     'Bakkies' => [
+    //         'Tow Hitch',
+    //         'Bed Liner',
+    //         '4x4 Drivetrain',
+    //         'Running Boards',
+    //     ],
+    // ],
 ];
 
 // Category is attached to vehicles in the vehicles table
