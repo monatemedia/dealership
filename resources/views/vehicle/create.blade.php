@@ -1,5 +1,12 @@
 {{-- resources/views/vehicle/create.blade.php --}}
 
+@php
+    // If $category is set, pull its config info
+    $categoryConfig = $category ? config('vehicles.categories.' . $category->name) : null;
+    // Use the singular from config, fallback to $category->name, fallback to 'vehicle'
+    $singular = $categoryConfig['singular'] ?? ($category->name ?? 'vehicle');
+@endphp
+
 <x-app-layout title="Add New">
     <main>
         {{-- Add Alpine.js data store for modal management --}}
@@ -18,7 +25,13 @@
                 </div>
             </div>
 
-            <h1 class="vehicle-details-page-title">Add new vehicle</h1>
+            {{-- Debugging dump --}}
+            {{-- @dump($category) --}}
+
+            {{-- Form --}}
+            <h1 class="vehicle-details-page-title">
+            Sell {{ $singular }}
+            </h1>
             <form
                 id="createVehicleForm"
                 action="{{ route('vehicle.store') }}"

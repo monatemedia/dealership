@@ -1,3 +1,5 @@
+{{-- resources/views/components/layouts/header.blade.php --}}
+
 <header class="navbar">
     <div class="container navbar-content">
         <a href="/" class="logo-wrapper">
@@ -10,15 +12,7 @@
             </svg>
         </button>
         <div class="navbar-auth">
-            <a href="{{ route('vehicle.create') }}" class="btn btn-add-new-vehicle">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" style="width: 18px; margin-right: 4px">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
-
-                Add new Vehicle
-            </a>
+            <x-add-vehicle-button />
             @auth()
             <div class="navbar-menu" tabindex="-1">
                 <a href="javascript:void(0)" class="navbar-menu-handler">

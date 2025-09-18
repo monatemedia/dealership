@@ -51,10 +51,12 @@ class VehicleController extends Controller
     }
 
     /**
+     * app/Http/Controllers/VehicleController::create
      * Show the form for creating a new resource.
      */
     public function create(Request $request)
     {
+        // Get the user from the request object
         $user = $request->user();
 
         // Check if user has a phone number
@@ -66,8 +68,23 @@ class VehicleController extends Controller
             return redirect()->route('profile.index')
                 ->with('warning', 'Please provide a phone number before adding a vehicle');
         }
+
+        // Get category from query string if present
+        $categorySlug = request()->query('category');
+        $category = null;
+
+        // Find the category by slug if present
+        if ($categorySlug) {
+            $category = \App\Models\VehicleCategory::where('slug', $categorySlug)->first();
+        }
+
+        // Authorize user to create a vehicle (policy check)
         Gate::authorize('create', Vehicle::class);
-        return view('vehicle.create');
+
+        // Render the create vehicle view
+        return view('vehicle.create', [
+            'category' => $category,
+        ]);
     }
 
     /**
