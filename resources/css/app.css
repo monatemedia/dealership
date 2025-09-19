@@ -1,9 +1,5 @@
 /* resources/css/app.css */
 
-/* @tailwind base;
-@tailwind components;
-@tailwind utilities; */
-
 :root {
   --primary-font: "Ubuntu", sans-serif;
   --primary-color: #e9580c;
@@ -1555,12 +1551,94 @@ a.pagination-item:hover {
   }
 }
 
+/* Category section */
 .category-section {
     margin-bottom: 1rem;
     padding: 5rem 0;
     background: #fff;
 }
 
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.category-card {
+    position: relative;
+    height: 24rem;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    cursor: pointer;
+}
+
+.category-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+    display: block;
+}
+
+.category-card:hover img {
+    transform: scale(1.1);
+}
+
+.category-card .category-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.3), transparent);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.category-card .category-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    color: #fff;
+}
+
+.category-card .category-content h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+}
+
+.category-card .category-content p {
+    margin: 0 0 1.5rem;
+    color: #ddd;
+}
+
+.category-card .category-link {
+    display: inline-flex;
+    align-items: center;
+    font-weight: 500;
+    color: #fbbf24; /* amber-400 */
+    text-decoration: none;
+    z-index: 3;
+    transition: color 0.2s;
+}
+
+.category-card .category-link:hover {
+    color: #f59e0b; /* amber-300 */
+}
+
+.category-card .category-link svg {
+    margin-left: 0.5rem;
+    width: 1rem;
+    height: 1rem;
+    fill: currentColor;
+}
+
+/* Sortable List */
 .sortable-list-wrapper {
     max-width: 700px;
     margin: auto;
@@ -1827,12 +1905,4 @@ a.pagination-item:hover {
     aspect-ratio: 1 / 1;
     border-radius: 8px; /* Matches the modal's styling */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Adds a subtle shadow */
-}
-
-/* Category CSS */
-.category-content {
-    display: flex;
-    justify-content: center; /* horizontal center */
-    text-align: center;
-    margin: 3rem;
 }
