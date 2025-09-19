@@ -31,6 +31,12 @@ class AppServiceProvider extends ServiceProvider
         // Share the year with all views
         View::share('year', date('Y'));
 
+        // Share the category with all views
+        View::composer('*', function ($view) {
+            $category = request()->route('category') ?? null;
+            $view->with('category', $category);
+        });
+
         // // Define a gate to check if the user can update a vehicle
         // Gate::define('update-vehicle', function (User $user, Vehicle $vehicle) {
         //     // Allow the user to update the vehicle if they are the owner

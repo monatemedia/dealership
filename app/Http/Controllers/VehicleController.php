@@ -69,6 +69,9 @@ class VehicleController extends Controller
                 ->with('warning', 'Please provide a phone number before adding a vehicle');
         }
 
+        // Authorize user to create a vehicle (policy check)
+        Gate::authorize('create', Vehicle::class);
+
         // Get category from query string if present
         $categorySlug = request()->query('category');
         $category = null;
@@ -77,9 +80,6 @@ class VehicleController extends Controller
         if ($categorySlug) {
             $category = \App\Models\VehicleCategory::where('slug', $categorySlug)->first();
         }
-
-        // Authorize user to create a vehicle (policy check)
-        Gate::authorize('create', Vehicle::class);
 
         // Render the create vehicle view
         return view('vehicle.create', [
