@@ -13,16 +13,16 @@ return new class extends Migration {
         Schema::create('vehicle_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name', 45)->unique();
-            $table->string('long_name')->nullable();
-            $table->string('description')->nullable();
-            $table->string('image_path')->nullable();
+            $table->string('singular', 30);
+            $table->string('long_name');
+            $table->string('description');
+            $table->string('image_path');
             $table->string('slug')->unique();
         });
 
         // Add category_id to vehicles table
         Schema::table('vehicles', function (Blueprint $table) {
             $table->foreignId('vehicle_category_id')
-                ->nullable()
                 ->after('id')
                 ->constrained('vehicle_categories');
         });

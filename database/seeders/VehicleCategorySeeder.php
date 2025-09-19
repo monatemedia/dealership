@@ -21,9 +21,10 @@ class VehicleCategorySeeder extends Seeder
             VehicleCategory::updateOrCreate(
                 ['name' => $name],
                 [
-                    'long_name' => $data['long_name'] ?? null,
-                    'description' => $data['description'] ?? null,
-                    'image_path' => $data['image_path'] ?? null,
+                    'singular' => $data['singular'],
+                    'long_name' => $data['long_name'],
+                    'description' => $data['description'],
+                    'image_path' => $data['image_path'],
                     'slug' => Str::slug($name),
                     // [
                     //     'vehicle_types' => $data['vehicle_types'],

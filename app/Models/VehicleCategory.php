@@ -17,6 +17,7 @@ class VehicleCategory extends Model
 
     protected $fillable = [
         'name',
+        'singular',
         'long_name',
         'description',
         'image_path',

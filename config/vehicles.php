@@ -36,7 +36,7 @@ return [
             'vehicle_types' => ['Single Cab', 'Double Cab', 'King Cab', 'Chassis Cab', 'Tow Truck', 'Service Body'],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
-        'Personal-Trailers' => [
+        'Personal Trailers' => [
             'singular' => 'Personal Trailer',
             'long_name' => 'Personal Trailers & Caravans',
             'description' => 'Versatile vehicles for both work and play.',
@@ -44,7 +44,7 @@ return [
             'vehicle_types' => ['Single Axle', 'Double Axle', 'Gooseneck', 'Fifth Wheel', 'Toy Hauler', 'Pop-up'],
             'fuel_types' => [],
         ],
-        'Motorhomes' => [
+        'Motor Homes' => [
             'singular' => 'Motor Home',
             'long_name' => 'Motorhomes & Powered RVs',
             'description' => 'Comfortable vehicles for long-distance travel.',
@@ -68,7 +68,7 @@ return [
             'vehicle_types' => ['Standard', 'High Roof', 'Luxury', 'Cargo', 'Passenger'],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
-        'Panelvans' => [
+        'Panel Vans' => [
             'singular' => 'Panel Van',
             'long_name' => 'Panel Vans',
             'description' => 'Practical vehicles for business and cargo needs.',
@@ -76,15 +76,15 @@ return [
             'vehicle_types' => ['Cargo Van', 'Passenger Van', 'Crew Van', 'Camper Van'],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
-        'Busses' => [
+        'Buses' => [
             'singular' => 'Bus',
             'long_name' => 'Bus & Coach',
-            'description' => 'Busses for heavy-duty tasks.',
+            'description' => 'Buses for heavy-duty tasks.',
             'image_path' => 'https://images.unsplash.com/photo-1731448591600-22bbcb360f69?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
             'vehicle_types' => ['Bus', 'Coach', 'Double Decker', 'Shuttle Bus', 'School Bus'],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
-        'Truck-Rigid' => [
+        'Rigid Trucks' => [
             'singular' => 'Rigid Truck',
             'long_name' => 'Rigid Trucks',
             'description' => 'Heavy-duty vehicles for transporting goods.',
@@ -92,7 +92,7 @@ return [
             'vehicle_types' => ['Flatbed', 'Box', 'Tanker', 'Reefer', 'Dump', 'Car Carrier'],
             'fuel_types' => ['Diesel', 'Electric', 'Hybrid'],
         ],
-        'Truck-Tractors' => [
+        'Truck Tractors' => [
             'singular' => 'Truck Tractor',
             'long_name' => 'Articulated Truck Tractors',
             'description' => 'Trucks and lorries for heavy-duty tasks.',
@@ -100,7 +100,7 @@ return [
             'vehicle_types' => ['Truck', 'Lorry', 'Bus', 'Tractor', 'Trailer', 'Tipper'],
             'fuel_types' => ['Diesel', 'Electric', 'Hybrid'],
         ],
-        'Truck-Trailers' => [
+        'Truck Trailers' => [
             'singular' => 'Truck Trailer',
             'long_name' => 'Articulated Truck Trailers',
             'description' => 'Trailers for heavy-duty tasks.',
@@ -108,7 +108,7 @@ return [
             'vehicle_types' => ['Tautliner', 'Flatbed', 'Box Trailer', 'Refrigerated Trailer', 'Tanker', 'Lowboy', 'Lowbed', 'Flatdeck', 'Chassis', 'Car Carrier'],
             'fuel_types' => ['No Fuel', 'Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
-        'Plant-Machinery' => [
+        'Plant Machinery' => [
             'singular' => 'Plant Machinery',
             'long_name' => 'Plant Machinery',
             'description' => 'Plant and machinery for various industrial applications.',
@@ -116,7 +116,7 @@ return [
             'vehicle_types' => ['Excavator', 'Backhoe', 'Loader', 'Roller', 'Crane', 'Scraper', 'Forklift', 'Grader', 'BOMAG Roller', 'Bulldozer', 'Compactor', 'Telehandler', ''],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
-        'Plant-Agri' => [
+        'Plant Agri' => [
             'singular' => 'Agri Machinery',
             'long_name' => 'Agri Plant Machinery',
             'description' => 'Robust vehicles designed for farming and agricultural tasks.',
@@ -142,18 +142,18 @@ return [
     | Only include irregular forms here that do not pluralize by simply adding 's'.
     |
     */
-    'singular' => [
-        'Bakkies' => 'Bakkie',
-        'Personal-Trailers' => 'Trailer',
-        'Motorhomes' => 'Motor Home',
-        'Busses' => 'Bus',
-        'Panelvans' => 'Panel Van',
-        'Truck-Rigid' => 'Rigid Truck',
-        'Truck-Tractors' => 'Truck Tractor',
-        'Truck-Trailers' => 'Truck Trailer',
-        'Plant-Machinery' => 'Plant Machinery',
-        'Plant-Agri' => 'Agri Machinery',
-    ],
+    // 'singular' => [
+    //     'Bakkies' => 'Bakkie',
+    //     'Personal-Trailers' => 'Trailer',
+    //     'Motorhomes' => 'Motor Home',
+    //     'Busses' => 'Bus',
+    //     'Panelvans' => 'Panel Van',
+    //     'Truck-Rigid' => 'Rigid Truck',
+    //     'Truck-Tractors' => 'Truck Tractor',
+    //     'Truck-Trailers' => 'Truck Trailer',
+    //     'Plant-Machinery' => 'Plant Machinery',
+    //     'Plant-Agri' => 'Agri Machinery',
+    // ],
 
     /*
     |--------------------------------------------------------------------------
