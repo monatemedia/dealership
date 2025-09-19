@@ -12,16 +12,25 @@
 
     $hide = $hideOnRoute ? Route::currentRouteNamed($hideOnRoute) : false;
 
-    // Prioritize slot text if provided
+    // Resolve the category singular from config
+    $singular = null;
+    if ($category) {
+    $categoryConfig = config('vehicles.categories.' . $category->name, []);
+    $singular = $categoryConfig['singular'] ?? $category->name;
+    $label = 'Sell ' . ucfirst($singular); // or "Find {singular}" if you want
+    }
+
+    // Determine label and href
     if (! $slot->isEmpty()) {
+        // Use slot text if provided
         $label = trim($slot);
         $href = $href ?? route($routeName);
     } elseif ($category) {
-        $categoryConfig = config('vehicles.categories.' . $category->name, []);
-        $singular = $categoryConfig['singular'] ?? $category->name;
+        // Category-aware default
         $label = 'Sell ' . ucfirst($singular);
         $href = route($routeName, ['category' => $category->slug]);
     } else {
+        // Fallback
         $label = 'Sell Your Vehicle';
         $href = $href ?? route($routeName);
     }
