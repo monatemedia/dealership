@@ -105,7 +105,7 @@
             fill: currentColor;
             }
         </style>
-        <section class="services-section">
+        <section class="services-section no-padding">
             <div>
                 <h2 class="hero-slider-title text-center">Popular <strong>Categories</strong></h2>
                 <p class="hero-slider-content text-center">Experience the pinnacle of quality

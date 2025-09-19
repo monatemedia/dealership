@@ -109,7 +109,7 @@ return [
             'fuel_types' => ['No Fuel', 'Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
         'Plant Machinery' => [
-            'singular' => 'Plant Machinery',
+            'singular' => 'Plant Machine',
             'long_name' => 'Plant Machinery',
             'description' => 'Plant and machinery for various industrial applications.',
             'image_path' => 'https://images.pexels.com/photos/14704776/pexels-photo-14704776.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
@@ -117,7 +117,7 @@ return [
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
         'Plant Agri' => [
-            'singular' => 'Agri Machinery',
+            'singular' => 'Agri Machine',
             'long_name' => 'Agri Plant Machinery',
             'description' => 'Robust vehicles designed for farming and agricultural tasks.',
             'image_path' => 'https://images.pexels.com/photos/32958981/pexels-photo-32958981/free-photo-of-high-powered-ace-tractor-in-faridabad-india.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',

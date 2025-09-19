@@ -513,9 +513,13 @@ body.page-signup {
   transition: all 0.3s;
 }
 
-/* main {
+main {
   padding: 1rem;
-} */
+}
+
+main.no-padding {
+    padding: 0;
+}
 
 .card {
   background-color: white;
@@ -1549,6 +1553,12 @@ a.pagination-item:hover {
   .search-vehicles-results .vehicle-items-listing {
     grid-template-columns: repeat(1, minmax(0, 1fr));
   }
+}
+
+.category-section {
+    margin-bottom: 1rem;
+    padding: 5rem 0;
+    background: #fff;
 }
 
 .sortable-list-wrapper {

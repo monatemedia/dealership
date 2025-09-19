@@ -1,23 +1,16 @@
 {{-- resource/views/categories/index.blade.php --}}
 
 <x-app-layout title="Categories Page">
-    <main>
+    <main class="no-padding">
 
         <!-- Category Boxes -->
         <style>
 
-            .services-section {
+            /* .services-section {
                 margin-bottom: 1rem;
                 padding: 5rem 0;
                 background: #fff;
-
-                /* width: 100vw;
-                position: relative;
-                left: 50%;
-                right: 50%;
-                margin-left: -50vw;
-                margin-right: -50vw; */
-            }
+            } */
 
             .services-grid {
             display: grid;
@@ -99,12 +92,12 @@
             fill: currentColor;
             }
         </style>
-        <section class="services-section">
-            <div>
-                <h2 class="hero-slider-title text-center">All <strong>Categories</strong></h2>
-                <p class="hero-slider-content text-center">Experience the pinnacle of quality
-                    <br>with our carefully curated vehicle categories.</p>
-            </div>
+        <section class="category-section">
+            <x-title
+                tag="h2"
+                title="All <strong>Categories</strong>"
+                paragraph="Experience the pinnacle of quality <br> with our carefully curated vehicle categories."
+            />
 
             <div class="services-grid container">
                 @foreach ($categories as $category)
