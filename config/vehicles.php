@@ -116,7 +116,7 @@ return [
             'vehicle_types' => ['Excavator', 'Backhoe', 'Loader', 'Roller', 'Crane', 'Scraper', 'Forklift', 'Grader', 'BOMAG Roller', 'Bulldozer', 'Compactor', 'Telehandler', ''],
             'fuel_types' => ['Gasoline', 'Diesel', 'Electric', 'Hybrid'],
         ],
-        'Plant Agri' => [
+        'Agri Plant Machinery' => [
             'singular' => 'Agri Machine',
             'long_name' => 'Agri Plant Machinery',
             'description' => 'Robust vehicles designed for farming and agricultural tasks.',
