@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
+use App\Models\VehicleCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -23,6 +24,11 @@ class HomeController extends Controller
 
         // dump($vehicles->toArray());
 
-        return view('home.index', ['vehicles' => $vehicles]);
+        $categories = VehicleCategory::take(3)->get();
+
+        return view('home.index', [
+            'vehicles' => $vehicles,
+            'categories' => $categories,
+        ]);
     }
 }

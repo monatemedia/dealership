@@ -1558,6 +1558,12 @@ a.pagination-item:hover {
     background: #fff;
 }
 
+.category-section-no-padding {
+  margin-top: -1rem;
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
+
 .category-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

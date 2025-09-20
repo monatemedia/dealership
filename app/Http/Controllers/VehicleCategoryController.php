@@ -26,9 +26,11 @@ class VehicleCategoryController extends Controller
             ->latest()
             ->paginate(15);
 
+        $categories = VehicleCategory::take(3)->get();
+
         return view('home.index', [   // reuse resources/views/home.blade.php
             'vehicles' => $vehicles,
-            'category' => $category,
+            'categories' => $categories,
         ]);
     }
 }
