@@ -1638,6 +1638,13 @@ a.pagination-item:hover {
     fill: currentColor;
 }
 
+.category-button {
+    display: flex;
+    justify-content: center; /* horizontal center */
+    text-align: center;
+    margin: 3rem;
+}
+
 /* Sortable List */
 .sortable-list-wrapper {
     max-width: 700px;
