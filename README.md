@@ -204,23 +204,26 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [X] Create Branches
   - [X] `main`
   - [X] `dev`
-- [ ] Category Year Manufacturer Model API
-    - [ ] Category
+- [ ] Category
+    - [X] Category
       - [X] Create Category Feature Branch
-      - [ ] Refactor Naming: Vehicle → Vehicle
-      - [ ] Create Category Categories
-      - [ ] Vehicle Category Selection Page
-      - [ ] Display Vehicles by Category
-      - [ ] Next Steps / Considerations
-        - [ ] Update all factories, seeders, tests to use Vehicle instead of Vehicle.
-        - [ ] Ensure form requests validate category field.
-        - [ ] Optional: add route model binding for cleaner code.
-        - [ ] Check all old /vehicle/... URLs and update to /vehicle/.... 
-    - [ ] Year
-    - [ ] Manufacturer
-    - [ ] Model
-    - [ ] Spec
-    - [ ] API
+      - [X] Refactor Naming: Vehicle → Vehicle
+      - [X] Create Categories
+      - [X] Vehicle Category Selection Page
+      - [X] Display Vehicles by Category 
+- [ ] Year Manufacturer Model API
+    - [ ] Normalize `vehicle_features` table into a proper many-to-many relationship
+      - [ ] Create New Tables
+        - [ ] `create_features_table`
+        - [ ] `create_feature_listing_table`
+      - [ ] Create a seeder to move data to the new structure
+      - [ ] `make:migration drop_vehicle_features_table`
+    - [ ] Create `variants` table to define a specific vehicle type
+      - [ ] Create the `variants` Table
+      - [ ] Populate the `variants` Table
+    - [ ] Rename `vehicles` table to `listings` to represent an actual item for sale
+      - [ ] Modify and Rename the Table
+    - [ ] Final Step: Update Your Eloquent Models
 
 See the [open issues](https://github.com/monatemedia/dealership/issues) for a full list of proposed features (and known issues).
 
