@@ -204,13 +204,14 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [X] Create Branches
   - [X] `main`
   - [X] `dev`
-- [ ] Category
+- [X] Category
     - [X] Category
       - [X] Create Category Feature Branch
       - [X] Refactor Naming: Vehicle → Vehicle
       - [X] Create Categories
       - [X] Vehicle Category Selection Page
       - [X] Display Vehicles by Category 
+      - [ ] Testing
 - [ ] Year Manufacturer Model API
     - [ ] Normalize `vehicle_features` table into a proper many-to-many relationship
       - [ ] Create New Tables
