@@ -334,6 +334,9 @@ git push origin feature/<name>
 # MERGE FEATURE BRANCH
 # --------------------
 
+# List all branches that contain the tip commit of your feature branch
+git branch --contains feature/<name>
+
 # Make sure all your work is committed on the feature branch
 git status
 git add .
@@ -353,6 +356,12 @@ git merge feature/<name>
 
 # Push the merged result
 git push origin dev
+
+# List all branches that contain the tip commit of your feature branch
+git branch --contains feature/<name>
+
+# View recent history on dev, check for your commits
+git log --oneline --graph --decorate -20
 
 # Delete the local feature branch 
 # Use -D to force if branch isn't merged
