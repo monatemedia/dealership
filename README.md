@@ -210,8 +210,18 @@ _For more examples, please refer to the [Documentation](https://example.com)_
       - [X] Refactor Naming: Vehicle → Vehicle
       - [X] Create Categories
       - [X] Vehicle Category Selection Page
-      - [X] Display Vehicles by Category 
-      - [ ] Testing
+      - [X] Display Vehicles by Category
+- [ ] Convert Seeders in Individual Classes 
+  - [X] VehicleCategorySeeder
+  - [ ] VehicleTypeSeeder
+  - [ ] FuelTypeSeeder
+  - [ ] LocationSeeder (for Provinces & Cities)
+  - [ ] ManufacturerSeeder (for Manufacturers & Models)
+  - [ ] DemoDataSeeder (for fake Users, Vehicles, Images, etc.)
+- [ ] Import Make & Model From NHTSA VPIC database
+  - [X] Strip Data with `strip_make_model_from_vpic.py` script
+  - [ ] Insert Data Into DB
+  - [ ] Update Seeders
 - [ ] Year Manufacturer Model API
     - [ ] Normalize `vehicle_features` table into a proper many-to-many relationship
       - [ ] Create New Tables
@@ -235,22 +245,18 @@ See the [open issues](https://github.com/monatemedia/dealership/issues) for a fu
 <!-- CONTRIBUTING -->
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-Here’s everything consolidated into a **single markdown document** you can drop into your repo (`BRANCHING_MODEL.md` or similar):
+We use the `GitFlow Branching Model`. To make a contribution, please fork the repo and create a pull request. You can also <a href="https://github.com/monatemedia/dealership/issues/new?labels=bug&template=bug-report---.md">report a bug</a>, or <a href="https://github.com/monatemedia/dealership/issues/new?labels=enhancement&template=feature-request---.md">request a feature</a>.
 
 ### GitFlow Branching Model
 
 This project follows the **GitFlow branching strategy**.  
+
 The goal is to keep `main` always production-ready while using `dev` as an integration branch.  
 All work happens in short-lived branches that are deleted after merge. 
 
 Core branches:
-1. `main` (or `master`) → always production-ready, deployed code.
-2. `dev` (or `develop`) → integration branch where features and fixes are merged before going to main.
+1. `main` → always production-ready, deployed code.
+2. `dev`  → integration branch where features and fixes are merged before going to main.
 
 Short-lived branches (temporary branches, deleted after merge):
   - `feature/<name>` → for new functionality. Created from `dev`, merged back into `dev`.
@@ -262,11 +268,11 @@ Short-lived branches (temporary branches, deleted after merge):
 ---
 
 ### Core Branches
-1. **`main` (or `master`)**  
+1. **`main`**  
    - Always production-ready.  
    - Code here is what’s deployed.  
 
-2. **`dev` (or `develop`)**  
+2. **`dev`**
    - Integration branch.  
    - Features and bugfixes merge here before going to `main`.  
 
@@ -279,11 +285,42 @@ Short-lived branches (temporary branches, deleted after merge):
 - Created from `dev`, merged back into `dev`.  
 
 ```bash
+# CREATE A FEATURE BRANCH
+# ---------------------
+
+# Make sure you're on dev
 git checkout dev
+
+# Update dev with latest remote
 git pull origin dev
+
+# Create the new feature branch
 git checkout -b feature/<name>
+
 # work, commit
 git push origin feature/<name>
+
+# MERGE FEATURE BRANCH
+# --------------------
+
+# make sure you're on dev
+git checkout dev
+
+# Update dev with latest remote
+git pull origin dev
+
+# Merge the feature branch
+git merge feature/<name>
+
+# Push the merged result
+git push origin dev
+
+# Delete the local feature branch 
+# Use -D to force if branch isn't merged
+git branch -d feature/<name>
+
+# Delete the remote feature branch
+git push origin --delete feature/<name>
 ```
 
 Merge via Pull Request into `dev`.
