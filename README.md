@@ -110,16 +110,22 @@ To get a local copy up and running follow these simple example steps.
 
 - In the first terminal run
 ```sh
+# Seed the data
+php artisan migrate:fresh --seed
+
+# Start the PHP server
 php artisan serve
 ```
 
 - In a second terminal run
 ```sh
+# Start the Vite dev server
 npm run dev
 ```
 
 - In a third terminal run
 ```sh
+# Start the queue worker
 php artisan queue:work
 ```
 
