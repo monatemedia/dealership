@@ -95,6 +95,7 @@ Here's a blank template to get started.
 
 * [![Laravel][Laravel.com]][Laravel-url]
 * [![AlpineJS][Alpine.js]][Alpine.js-url]
+* [![Python][Python.org]][Python.org-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -106,13 +107,37 @@ Here's a blank template to get started.
 This is an example of how you may give instructions on setting up your project locally.
 To get a local copy up and running follow these simple example steps.
 
+## Running The Seeders
+
+**For local development:** Just run the standard command. This will execute DatabaseSeeder, which in turn runs your DevelopmentSeeder.
+
+```sh
+# Seed the data
+php artisan migrate:fresh --seed
+```
+
+**For production deployment:** Explicitly specify the ProductionSeeder in your deployment script. This ensures no fake data ever touches your live database.
+
+```sh
+php artisan db:seed --class=ProductionSeeder --force
+```
+
+(The --force flag is required to run seeders in a production environment).
+
+**For testing or specific tasks:** You can run any individual seeder you need.
+
+```sh
+# Just refresh the locations
+php artisan db:seed --class=LocationSeeder
+
+# Or refresh only the demo data after a migration
+php artisan migrate:fresh --seed --seeder=DemoDataSeeder
+```
+
 ### How to Start The App Locally
 
 - In the first terminal run
 ```sh
-# Seed the data
-php artisan migrate:fresh --seed
-
 # Start the PHP server
 php artisan serve
 ```
@@ -217,13 +242,13 @@ _For more examples, please refer to the [Documentation](https://example.com)_
       - [X] Create Categories
       - [X] Vehicle Category Selection Page
       - [X] Display Vehicles by Category
-- [ ] Convert Seeders in Individual Classes 
+- [X] Convert Seeders into Individual Classes 
   - [X] VehicleCategorySeeder
-  - [ ] VehicleTypeSeeder
-  - [ ] FuelTypeSeeder
-  - [ ] LocationSeeder (for Provinces & Cities)
-  - [ ] ManufacturerSeeder (for Manufacturers & Models)
-  - [ ] DemoDataSeeder (for fake Users, Vehicles, Images, etc.)
+  - [X] VehicleTypeSeeder
+  - [X] FuelTypeSeeder
+  - [X] LocationSeeder (for Provinces & Cities)
+  - [X] ManufacturerSeeder (for Manufacturers & Models)
+  - [X] DemoDataSeeder (for fake Users, Vehicles, Images, etc.)
 - [ ] Import Make & Model From NHTSA VPIC database
   - [X] Strip Data with `strip_make_model_from_vpic.py` script
   - [ ] Insert Data Into DB
@@ -308,6 +333,11 @@ git push origin feature/<name>
 
 # MERGE FEATURE BRANCH
 # --------------------
+
+# Make sure all your work is committed on the feature branch
+git status
+git add .
+git commit -m "Meaningful Message"   # if needed
 
 # make sure you're on dev
 git checkout dev
@@ -484,4 +514,6 @@ Project Link: [https://github.com/monatemedia/dealership](https://github.com/mon
 [Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
 [Laravel-url]: https://laravel.com
 [Alpine.js]: https://img.shields.io/badge/alpinejs-white.svg?style=for-the-badge&logo=alpinedotjs&logoColor=%238BC0D0
-[Alpine.js-url]: https://alpinejs.dev/
+[Alpine.org-url]: https://alpinejs.dev/
+[Python.org]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54
+[Python.org-url]: https://www.python.org/
