@@ -1,4 +1,4 @@
-<?php
+<?php // database/migrations/2024_12_23_231757_create_manufacturers_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('manufacturers', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 45);
+            $table->string('name', 255);
         });
     }
 };

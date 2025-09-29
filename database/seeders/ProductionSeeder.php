@@ -21,7 +21,9 @@ class ProductionSeeder extends Seeder
             VehicleTypeSeeder::class,
             FuelTypeSeeder::class,
             LocationSeeder::class, // Assuming you created this for provinces/cities
-            ManufacturerSeeder::class,
+
+            // ManufacturerSeeder::class, // This is for development (uses config)
+            ProductionManufacturerSeeder::class, // This is for production (uses SQLite)
         ]);
     }
 }
