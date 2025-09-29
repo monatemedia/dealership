@@ -107,24 +107,22 @@ Here's a blank template to get started.
 This is an example of how you may give instructions on setting up your project locally.
 To get a local copy up and running follow these simple example steps.
 
-## Running The Seeders
+### Running The Seeders
 
-**For local development:** Just run the standard command. This will execute DatabaseSeeder, which in turn runs your DevelopmentSeeder.
+- **For local development:** Just run the standard command. This will execute DatabaseSeeder, which in turn runs your DevelopmentSeeder.
 
 ```sh
 # Seed the data
 php artisan migrate:fresh --seed
 ```
 
-**For production deployment:** Explicitly specify the ProductionSeeder in your deployment script. This ensures no fake data ever touches your live database.
+- **For production deployment:** Explicitly specify the ProductionSeeder in your deployment script. This ensures no fake data ever touches your live database. The `--force` flag is required to run seeders in a production environment.
 
 ```sh
 php artisan db:seed --class=ProductionSeeder --force
 ```
 
-(The --force flag is required to run seeders in a production environment).
-
-**For testing or specific tasks:** You can run any individual seeder you need.
+- **For testing or specific tasks:** You can run any individual seeder you need.
 
 ```sh
 # Just refresh the locations
