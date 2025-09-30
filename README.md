@@ -247,10 +247,17 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] LocationSeeder (for Provinces & Cities)
   - [X] ManufacturerSeeder (for Manufacturers & Models)
   - [X] DemoDataSeeder (for fake Users, Vehicles, Images, etc.)
-- [ ] Import Make & Model From NHTSA VPIC database
+- [X] Import Make & Model From NHTSA VPIC database
   - [X] Strip Data with `strip_make_model_from_vpic.py` script
+  - [X] Insert Data Into DB
+  - [X] Update Seeders
+  - [X] Update Manufacturer and Model Components
+- [ ] Import South Africa Locations
+  - [ ] Update Migrations, Seeders, Models, and Components
+  - [ ] Import Locations From https://github.com/dirkstrauss/SouthAfrica/
   - [ ] Insert Data Into DB
   - [ ] Update Seeders
+  - [ ] Update Location Components
 - [ ] Year Manufacturer Model API
     - [ ] Normalize `vehicle_features` table into a proper many-to-many relationship
       - [ ] Create New Tables
