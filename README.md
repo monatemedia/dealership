@@ -348,7 +348,7 @@ git add .
 git commit -m "Meaningful Message"   # if needed
 
 # Push the feature branch to remote (first time)
-git push -u origin feature/make_individual_seeders
+git push -u origin feature/<name>
 
 # make sure you're on dev
 git checkout dev
