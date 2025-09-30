@@ -2,6 +2,7 @@
 
 // routes/web.php
 
+use Illuminate\Http\Request;
 use App\Http\Controllers\VehicleCategoryController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\HomeController;
@@ -66,6 +67,68 @@ Route::get('/categories', [VehicleCategoryController::class, 'index'])
 // Public vehicle details route
 Route::get('/vehicle/{vehicle}', [VehicleController::class, 'show'])->name('vehicle.show');
 Route::post('/vehicle/phone/{vehicle}', [VehicleController::class, 'showPhone'])->name('vehicle.showPhone');
+
+Route::get('/api/manufacturers/search', function(Request $request) {
+    try {
+        $search = $request->get('q', '');
+
+        if (strlen($search) < 2) {
+            return response()->json([]);
+        }
+
+        $manufacturers = \App\Models\Manufacturer::where('name', 'LIKE', "%{$search}%")
+            ->orderBy('name')
+            ->limit(50)
+            ->get(['id', 'name']);
+
+        return response()->json($manufacturers);
+    } catch (\Exception $e) {
+        \Log::error('Manufacturer search error: ' . $e->getMessage());
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+})->name('api.manufacturers.search');
+
+Route::get('/api/models/search', function(Request $request) {
+    try {
+        $search = $request->get('q', '');
+        $manufacturerId = $request->get('manufacturer_id');
+
+        if (strlen($search) < 2) {
+            return response()->json([]);
+        }
+
+        $query = \App\Models\Model::where('name', 'LIKE', "%{$search}%");
+
+        if ($manufacturerId) {
+            $query->where('manufacturer_id', $manufacturerId);
+        }
+
+        $models = $query->orderBy('name')->limit(50)->get(['id', 'name', 'manufacturer_id']);
+
+        return response()->json($models);
+    } catch (\Exception $e) {
+        \Log::error('Model search error: ' . $e->getMessage());
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+})->name('api.models.search');
+
+Route::get('/api/manufacturers/{id}', function($id) {
+    try {
+        $manufacturer = \App\Models\Manufacturer::findOrFail($id);
+        return response()->json(['id' => $manufacturer->id, 'name' => $manufacturer->name]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Manufacturer not found'], 404);
+    }
+});
+
+Route::get('/api/models/{id}', function($id) {
+    try {
+        $model = \App\Models\Model::findOrFail($id);
+        return response()->json(['id' => $model->id, 'name' => $model->name]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Model not found'], 404);
+    }
+});
 
 // Category route (keep at the very end)
 Route::get('/{category:slug}', [VehicleCategoryController::class, 'show'])

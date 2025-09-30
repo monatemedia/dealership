@@ -1,28 +1,19 @@
-<?php
-
-// app/View/Components/SelectManufacturer.php
+<?php // app/View/Components/SelectManufacturer.php
 
 namespace App\View\Components;
 
-use App\Models\Manufacturer;
 use Closure;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\Component;
 
 class SelectManufacturer extends Component
 {
-    public ?Collection $manufacturers;
-
     /**
      * Create a new component instance.
      */
     public function __construct()
     {
-        $this->manufacturers = Cache::rememberForever('manufacturers', function () {
-            return Manufacturer::orderBy('name')->get();
-        });
+        //
     }
 
     /**
