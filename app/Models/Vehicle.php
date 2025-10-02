@@ -92,7 +92,12 @@ class Vehicle extends Model
         return $this->belongsTo(City::class);
     }
 
-    // Define the features function and define the return type
+    /**
+     * app/Models/Vehicle::features
+     * Summary of features
+     * Define the features function and define the return type
+     * @return HasOne<VehicleFeatures, Vehicle>
+     */
     public function features(): HasOne
     {
         // Return that the `Vehicle` object has one `VehicleFeatures` object relationship

@@ -252,12 +252,34 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Insert Data Into DB
   - [X] Update Seeders
   - [X] Update Manufacturer and Model Components
-- [ ] Import South Africa Locations
-  - [ ] Update Migrations, Seeders, Models, and Components
-  - [ ] Import Locations From https://github.com/dirkstrauss/SouthAfrica/
-  - [ ] Insert Data Into DB
-  - [ ] Update Seeders
-  - [ ] Update Location Components
+- [X] Import South Africa Locations
+  - [X] Update Migrations, Seeders, Models, and Components
+  - [X] Import Locations From https://github.com/dirkstrauss/SouthAfrica/
+  - [X] Insert Data Into DB
+  - [X] Update Seeders
+  - [X] Update Location Components
+- [ ] Refactor Vehicles to Listings
+  - [ ] Refactor Controller
+  - [ ] Refactor Routes
+  - [ ] Refactor Migrations
+  - [ ] Refactor Seeders
+  - [ ] Refactor Factories
+  - [ ] Refactor Views
+  - [ ] Refactor View Components
+  - [ ] Refactor Models
+  - [ ] Refactor JS
+  - [ ] Refactor Jobs
+  - [ ] Refactor Policies
+  - [ ] Refactor Services
+  - [ ] Refactor `config/vehicles` to `config/categories`
+- [ ] Change Features Table From Wide Table vs. Narrow Table
+  - [ ] Update `features` Table
+  - [ ] Create `feature_vehicle` Pivot Table
+  - [ ] Update `Feature` Model
+  - [ ] Update `Vehicle` Model
+  - [ ] Update Feature Factory
+  - [ ] Create Config With Default Data
+- [ ] Category Aware Create Form
 - [ ] Year Manufacturer Model API
     - [ ] Normalize `vehicle_features` table into a proper many-to-many relationship
       - [ ] Create New Tables
