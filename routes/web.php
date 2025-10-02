@@ -1,16 +1,20 @@
-<?php
+<?php // routes/web.php
 
-// routes/web.php
-
-use Illuminate\Http\Request;
 use App\Http\Controllers\VehicleCategoryController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WatchlistController;
+use App\Http\Controllers\VehicleImageController;
 use App\Models\VehicleCategory;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
 // Get all category slugs for route constraint
 $slugs = VehicleCategory::pluck('slug')->implode('|');
@@ -22,23 +26,28 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/vehicle/search', [VehicleController::class, 'search'])
     ->name('vehicle.search');
 
+// Categories
+Route::get('/categories', [VehicleCategoryController::class, 'index'])
+    ->name('categories.index');
+
 // Routes for authenticated users
 Route::middleware(['auth'])->group(function () {
 
     // Verified user routes
     Route::middleware(['verified'])->group(function () {
-        // Page that shows the images UI
+
+        // Vehicle management
         Route::resource('vehicle', VehicleController::class)->except(['show']);
+
+        // Vehicle images management
         Route::get('/vehicle/{vehicle}/images', [VehicleController::class, 'vehicleImages'])
             ->name('vehicle.images');
         Route::put('/vehicle/{vehicle}/images', [VehicleController::class, 'updateImages'])
             ->name('vehicle.updateImages');
         Route::post('/vehicle/{vehicle}/images', [VehicleController::class, 'addImages'])
             ->name('vehicle.addImages');
-        // Single endpoint that handles deletions + reordering + new uploads
         Route::post('/vehicle/{vehicle}/images/sync', [VehicleController::class, 'syncImages'])
             ->name('vehicle.syncImages');
-        // API to fetch status of Vehicles Images
         Route::get('/api/vehicle-image/status', [VehicleController::class, 'status'])
             ->name('api.vehicle-image.status');
     });
@@ -56,79 +65,17 @@ Route::middleware(['auth'])->group(function () {
         ->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])
         ->name('profile.updatePassword');
+
+    // Logout
     Route::post('/logout', [LoginController::class, 'logout'])
         ->name('logout');
 });
 
-// Categories index page
-Route::get('/categories', [VehicleCategoryController::class, 'index'])
-    ->name('categories.index');
-
-// Public vehicle details route
-Route::get('/vehicle/{vehicle}', [VehicleController::class, 'show'])->name('vehicle.show');
-Route::post('/vehicle/phone/{vehicle}', [VehicleController::class, 'showPhone'])->name('vehicle.showPhone');
-
-Route::get('/api/manufacturers/search', function(Request $request) {
-    try {
-        $search = $request->get('q', '');
-
-        if (strlen($search) < 2) {
-            return response()->json([]);
-        }
-
-        $manufacturers = \App\Models\Manufacturer::where('name', 'LIKE', "%{$search}%")
-            ->orderBy('name')
-            ->limit(50)
-            ->get(['id', 'name']);
-
-        return response()->json($manufacturers);
-    } catch (\Exception $e) {
-        \Log::error('Manufacturer search error: ' . $e->getMessage());
-        return response()->json(['error' => $e->getMessage()], 500);
-    }
-})->name('api.manufacturers.search');
-
-Route::get('/api/models/search', function(Request $request) {
-    try {
-        $search = $request->get('q', '');
-        $manufacturerId = $request->get('manufacturer_id');
-
-        if (strlen($search) < 2) {
-            return response()->json([]);
-        }
-
-        $query = \App\Models\Model::where('name', 'LIKE', "%{$search}%");
-
-        if ($manufacturerId) {
-            $query->where('manufacturer_id', $manufacturerId);
-        }
-
-        $models = $query->orderBy('name')->limit(50)->get(['id', 'name', 'manufacturer_id']);
-
-        return response()->json($models);
-    } catch (\Exception $e) {
-        \Log::error('Model search error: ' . $e->getMessage());
-        return response()->json(['error' => $e->getMessage()], 500);
-    }
-})->name('api.models.search');
-
-Route::get('/api/manufacturers/{id}', function($id) {
-    try {
-        $manufacturer = \App\Models\Manufacturer::findOrFail($id);
-        return response()->json(['id' => $manufacturer->id, 'name' => $manufacturer->name]);
-    } catch (\Exception $e) {
-        return response()->json(['error' => 'Manufacturer not found'], 404);
-    }
-});
-
-Route::get('/api/models/{id}', function($id) {
-    try {
-        $model = \App\Models\Model::findOrFail($id);
-        return response()->json(['id' => $model->id, 'name' => $model->name]);
-    } catch (\Exception $e) {
-        return response()->json(['error' => 'Model not found'], 404);
-    }
-});
+// Public vehicle details route (AFTER authenticated routes)
+Route::get('/vehicle/{vehicle}', [VehicleController::class, 'show'])
+    ->name('vehicle.show');
+Route::post('/vehicle/phone/{vehicle}', [VehicleController::class, 'showPhone'])
+    ->name('vehicle.showPhone');
 
 // Category route (keep at the very end)
 Route::get('/{category:slug}', [VehicleCategoryController::class, 'show'])

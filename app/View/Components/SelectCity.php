@@ -2,25 +2,21 @@
 
 namespace App\View\Components;
 
-use App\Models\City;
 use Closure;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\View\Component;
 
 class SelectCity extends Component
 {
-    public Collection $cities;
-
     /**
      * Create a new component instance.
+     *
+     * Note: We don't load cities here anymore.
+     * The Alpine.js component handles data loading via API search.
      */
     public function __construct()
     {
-        $this->cities = Cache::rememberForever('cities', function () {
-            return City::orderBy('name')->get();
-        });
+        // Empty - data is loaded via API on search
     }
 
     /**

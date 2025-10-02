@@ -1,4 +1,5 @@
 <?php // database/seeders/ProductionManufacturerSeeder.php
+
 namespace Database\Seeders;
 
 use App\Models\Manufacturer;
@@ -21,10 +22,20 @@ class ProductionManufacturerSeeder extends Seeder
             ->distinct()
             ->get();
 
+        $totalManufacturers = $manufacturers->count();
+        $processedManufacturers = 0;
+
         foreach ($manufacturers as $make) {
             Manufacturer::firstOrCreate(
                 ['name' => $make->name]
             );
+
+            $processedManufacturers++;
+
+            // Show progress every 500 manufacturers
+            if ($processedManufacturers % 500 === 0 || $processedManufacturers === $totalManufacturers) {
+                $this->command->info("      Processed {$processedManufacturers}/{$totalManufacturers} manufacturers...");
+            }
         }
 
         // Clear any cached data
@@ -36,6 +47,13 @@ class ProductionManufacturerSeeder extends Seeder
         // Step 2: Build a manufacturer ID lookup map to avoid repeated queries
         $manufacturerMap = Manufacturer::pluck('id', 'name')->all();
 
+        // Get total count for progress tracking
+        $totalModels = DB::connection('vpic')
+            ->table('Make_Model AS mm')
+            ->count();
+
+        $processedModels = 0;
+
         // Step 3: Import models in chunks
         DB::connection('vpic')
             ->table('Make_Model AS mm')
@@ -43,7 +61,7 @@ class ProductionManufacturerSeeder extends Seeder
             ->join('Model AS mo', 'mm.ModelId', '=', 'mo.Id')
             ->select('m.Name as make_name', 'mo.Name as model_name', 'mm.Id as chunk_id')
             ->orderBy('mm.Id')
-            ->chunk(1000, function ($rows) use ($manufacturerMap) {
+            ->chunk(1000, function ($rows) use ($manufacturerMap, &$processedModels, $totalModels) {
                 $modelsToInsert = [];
 
                 foreach ($rows as $row) {
@@ -63,6 +81,9 @@ class ProductionManufacturerSeeder extends Seeder
                 if (!empty($modelsToInsert)) {
                     DB::table('models')->insertOrIgnore($modelsToInsert);
                 }
+
+                $processedModels += count($rows);
+                $this->command->info("      Processed {$processedModels}/{$totalModels} models...");
 
                 // Force garbage collection
                 unset($modelsToInsert);

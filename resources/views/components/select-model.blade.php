@@ -16,7 +16,7 @@
 
         this.loading = true;
         try {
-            let url = `{{ route('api.models.search') }}?q=${encodeURIComponent(this.search)}`;
+            let url = `/api/models/search?q=${encodeURIComponent(this.search)}`;
             if (this.manufacturerId) {
                 url += `&manufacturer_id=${this.manufacturerId}`;
             }

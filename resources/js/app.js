@@ -1,7 +1,7 @@
 // resources/js/app.js
 
 import axios from 'axios';
-import './bootstrap';
+// import './bootstrap';
 import Alpine from 'alpinejs';
 
 document.addEventListener("DOMContentLoaded", function () {

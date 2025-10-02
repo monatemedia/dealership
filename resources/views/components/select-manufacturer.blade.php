@@ -15,7 +15,7 @@
 
         this.loading = true;
         try {
-            const response = await fetch(`{{ route('api.manufacturers.search') }}?q=${encodeURIComponent(this.search)}`);
+            const response = await fetch(`/api/manufacturers/search?q=${encodeURIComponent(this.search)}`);
             this.manufacturers = await response.json();
         } catch (error) {
             console.error('Error fetching manufacturers:', error);
