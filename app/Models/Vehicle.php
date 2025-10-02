@@ -98,10 +98,10 @@ class Vehicle extends Model
      * Define the features function and define the return type
      * @return HasOne<VehicleFeatures, Vehicle>
      */
-    public function features(): HasOne
+
+    public function features(): BelongsToMany
     {
-        // Return that the `Vehicle` object has one `VehicleFeatures` object relationship
-        return $this->hasOne(VehicleFeatures::class, 'vehicle_id');
+        return $this->belongsToMany(Feature::class, 'feature_vehicle');
     }
 
     // Define the primaryImage function and define the return type

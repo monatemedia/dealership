@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleImage;
+use App\Models\Feature;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
 
@@ -19,15 +20,18 @@ class DemoDataSeeder extends Seeder
      */
     public function run(): void
     {
-        // Users
+        // Basic users
         User::factory()->count(3)->create(); // Create some basic users
 
+        // Users with vehicles
         User::factory()
             ->count(2) // Create users with vehicles
             ->has(
+                // Each user has 50 vehicles
                 Vehicle::factory()
                     ->count(50)
                     ->has(
+                        // Each vehicle has 5 images with positions 1 to 5
                         VehicleImage::factory()
                             ->count(5)
                             ->sequence(fn(Sequence $sequence) => [
@@ -35,7 +39,14 @@ class DemoDataSeeder extends Seeder
                             ]),
                         'images'
                     )
-                    ->hasFeatures(),
+                    ->afterCreating(function (Vehicle $vehicle) {
+                        // Random features
+                        $featureIds = Feature::inRandomOrder()
+                            ->take(rand(2, 6))
+                            ->pluck('id');
+
+                        $vehicle->features()->attach($featureIds);
+                    }),
                 'favouriteVehicles'
             )
             ->create();

@@ -1,3 +1,5 @@
+{{-- resource/views/vehicle/show.blade.php --}}
+
 @php
     $isInWatchlist = $vehicle->isInWatchlist(\Illuminate\Support\Facades\Auth::user())
 @endphp
@@ -49,42 +51,12 @@
                         <h2 class="vehicle-details-title">Vehicle Specifications</h2>
 
                         <ul class="vehicle-specifications">
-                            <x-vehicle-specification :value="$vehicle->features->abs">
-                                ABS
-                            </x-vehicle-specification>
-                            <x-vehicle-specification :value="$vehicle->features->air_conditioning">
-                                Air Conditioning
-                            </x-vehicle-specification>
-                            <x-vehicle-specification :value="$vehicle->features->power_windows">
-                                Power Windows
-                            </x-vehicle-specification>
-                            <x-vehicle-specification :value="$vehicle->features->power_door_locks">
-                                Power Door Locks
-                            </x-vehicle-specification>
-                            <x-vehicle-specification :value="$vehicle->features->cruise_control">
-                                Cruise Control
-                            </x-vehicle-specification>
-                            <x-vehicle-specification :value="$vehicle->features->bluetooth_connectivity">
-                                Bluetooth Connectivity
-                            </x-vehicle-specification>
-                            <x-vehicle-specification :value="$vehicle->features->remote_start">
-                                Remote Start
-                            </x-vehicle-specification>
-                            <x-vehicle-specification :value="$vehicle->features->gps_navigation">
-                                GPS Navigation System
-                            </x-vehicle-specification>
-                            <x-vehicle-specification :value="$vehicle->features->heated_seats">
-                                Heated Seats
-                            </x-vehicle-specification>
-                            <x-vehicle-specification :value="$vehicle->features->climate_control">
-                                Climate Control
-                            </x-vehicle-specification>
-                            <x-vehicle-specification :value="$vehicle->features->rear_parking_sensors">
-                                Rear Parking Sensors
-                            </x-vehicle-specification>
-                            <x-vehicle-specification :value="$vehicle->features->leather_seats">
-                                Leather Seats
-                            </x-vehicle-specification>
+                            @foreach(config('features') as $featureName)
+                                <x-vehicle-specification
+                                    :value="$vehicle->features->contains('name', $featureName)">
+                                    {{ $featureName }}
+                                </x-vehicle-specification>
+                            @endforeach
                         </ul>
                     </div>
                 </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreVehicleRequest;
+use App\Models\Feature;
 use App\Models\Vehicle;
 use App\Services\VehicleImage\VehicleImageService;
 use Illuminate\Http\JsonResponse;
@@ -115,7 +116,7 @@ class VehicleController extends Controller
 
         // Get validated request data
         $data = $request->validated();
-        $featuresData = $data['features']; // Extract features data
+        $selectedFeatures = $data['features'] ?? []; // Extract array of feature names
         $images = $request->file('images') ?: []; // Extract uploaded images
 
         // Limit images to a maximum of 12
@@ -129,8 +130,9 @@ class VehicleController extends Controller
         // Create the Vehicle record
         $vehicle = Vehicle::create($data);
 
-        // Create associated features record
-        $vehicle->features()->create($featuresData);
+        // Map feature names to IDs
+        $featureIds = \App\Models\Feature::whereIn('name', $selectedFeatures)->pluck('id');
+        $vehicle->features()->sync($featureIds);
 
         /**
          * Handle image uploads:
@@ -202,32 +204,26 @@ class VehicleController extends Controller
     }
 
     /**
+     * app/Http/Controllers/VehicleController::update
      * Update the specified resource in storage.
      */
     public function update(StoreVehicleRequest $request, Vehicle $vehicle)
     {
         Gate::authorize('update', $vehicle);
+
         $data = $request->validated(); // Get request data
-        $features = array_merge([
-            'abs' => 0,
-            'air_conditioning' => 0,
-            'power_windows' => 0,
-            'power_door_locks' => 0,
-            'cruise_control' => 0,
-            'bluetooth_connectivity' => 0,
-            'remote_start' => 0,
-            'gps_navigation' => 0,
-            'heated_seats' => 0,
-            'climate_control' => 0,
-            'rear_parking_sensors' => 0,
-            'leather_seats' => 0,
-        ], $data['features'] ?? []);
+        $selectedFeatures = $data['features'] ?? []; // array of feature names
+
         // Update vehicle details
         $vehicle->update($data);
-        // Update Vehicle features
-        $vehicle->features()->update($features);
+
+        // Update pivot features
+        $featureIds = Feature::whereIn('name', $selectedFeatures)->pluck('id');
+        $vehicle->features()->sync($featureIds);
+
         // Flash success message
         $request->session()->flash('success', 'Vehicle was updated');
+
         // Redirect user back to vehicle listing page with success message
         return redirect()->route('vehicle.index')
             ->with('success', 'Vehicle was updated');
