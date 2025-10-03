@@ -272,13 +272,14 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [ ] Refactor Policies
   - [ ] Refactor Services
   - [ ] Refactor `config/vehicles` to `config/categories`
-- [ ] Change Features Table From Wide Table vs. Narrow Table
-  - [ ] Update `features` Table
-  - [ ] Create `feature_vehicle` Pivot Table
-  - [ ] Update `Feature` Model
-  - [ ] Update `Vehicle` Model
-  - [ ] Update Feature Factory
-  - [ ] Create Config With Default Data
+- [X] Change Features Table From Wide Table vs. Narrow Table
+  - [X] Update `features` Table
+  - [X] Create `feature_vehicle` Pivot Table
+  - [X] Update `Feature` Model
+  - [X] Update `Vehicle` Model
+  - [X] Update Feature Factory
+  - [X] Create Config With Default Data
+- [ ] Make Create Form Category Aware
 - [ ] Category Aware Create Form
   - [ ] Create BreadCrumb Component
 - [ ] Year Manufacturer Model API
@@ -388,7 +389,7 @@ git push origin dev
 # List all branches that contain the tip commit of your feature branch
 git branch --contains feature/<name>
 
-# View recent history on dev, check for your commits
+# View recent history on dev, check for your commits, `q` to quit
 git log --oneline --graph --decorate -20
 
 # Delete the local feature branch 
@@ -397,6 +398,9 @@ git branch -d feature/<name>
 
 # Delete the remote feature branch
 git push origin --delete feature/<name>
+
+# Get existing local and remote branches
+git branch --all
 ```
 
 Merge via Pull Request into `dev`.
