@@ -2,8 +2,6 @@
 
 <x-app-layout title="Categories Page">
     <main class="no-padding">
-        {{-- Debug: Check if variable is reaching the view --}}
-        @dump($selectingForCreate)
 
         {{-- Category Section --}}
         <x-category.category-section

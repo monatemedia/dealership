@@ -1,9 +1,6 @@
 {{-- resources/views/components/category/category-section.blade.php --}}
 @props(['categories', 'selectingForCreate' => false])
 
-{{-- Debug: Check if prop is received --}}
-@dump($selectingForCreate)
-
 @php
     use Illuminate\Support\Facades\Route;
 

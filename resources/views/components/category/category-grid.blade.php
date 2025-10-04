@@ -1,9 +1,6 @@
 {{-- resources/views/components/category-grid.blade.php --}}
 @props(['categories', 'selectingForCreate' => false])
 
-{{-- Debug: Check if prop is received --}}
-@dump($selectingForCreate)
-
 <div class="category-grid container">
     @foreach ($categories as $category)
         @php
