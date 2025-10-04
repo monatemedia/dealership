@@ -1,12 +1,9 @@
-<?php
-
-// app/Http/Controllers/VehicleCategoryController.php
+<?php // app/Http/Controllers/VehicleCategoryController.php
 
 namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
 use App\Models\VehicleCategory;
-use Illuminate\Http\Request;
 
 class VehicleCategoryController extends Controller
 {
@@ -14,8 +11,13 @@ class VehicleCategoryController extends Controller
     {
         $categories = VehicleCategory::all();
 
+        // Check if redirected from vehicle.create for category selection
+        // Use session()->get() to retrieve flashed data
+        $selectingForCreate = session()->has('selecting_category_for_create');
+
         return view('categories.index', [
             'categories' => $categories,
+            'selectingForCreate' => $selectingForCreate,
         ]);
     }
 

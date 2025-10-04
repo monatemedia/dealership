@@ -76,15 +76,24 @@ class VehicleController extends Controller
 
         // Get category from query string if present
         $categorySlug = request()->query('category');
-
-        // Get category from query string if present
-        $categorySlug = request()->query('category');
         $category = null;
 
         // Find the category by slug if present
         if ($categorySlug) {
             $category = VehicleCategory::where('slug', $categorySlug)->first();
         }
+
+        // If no category selected, redirect to categories page
+        if (!$category) {
+            // Use put() instead of flash() so it persists beyond one request
+            session()->put('selecting_category_for_create', true);
+
+            return redirect()->route('categories.index')
+                ->with('info', 'Please select a vehicle category to continue');
+        }
+
+        // Clear the session flag if we got here with a category
+        session()->forget('selecting_category_for_create');
 
         // Render the create vehicle view
         return view('vehicle.create', [

@@ -1,4 +1,8 @@
 {{-- resources/views/components/category/category-section.blade.php --}}
+@props(['categories', 'selectingForCreate' => false])
+
+{{-- Debug: Check if prop is received --}}
+@dump($selectingForCreate)
 
 @php
     use Illuminate\Support\Facades\Route;
@@ -24,7 +28,10 @@
         :paragraph="$paragraph"
     />
 
-    <x-category.category-grid :categories="$categories" />
+    <x-category.category-grid
+        :categories="$categories"
+        :selectingForCreate="$selectingForCreate ?? false"
+    />
 
     <x-category.category-button />
 </section>

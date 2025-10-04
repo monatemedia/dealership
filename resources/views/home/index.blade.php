@@ -10,7 +10,10 @@
     <main>
 
         {{-- Category Section --}}
-        <x-category.category-section :categories=$categories />
+        <x-category.category-section
+            :categories="$categories"
+            :selectingForCreate="false"
+        />
         {{-- /Category Section --}}
 
         <!-- Search Form -->
