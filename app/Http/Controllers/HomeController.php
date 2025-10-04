@@ -24,6 +24,7 @@ class HomeController extends Controller
 
         // dump($vehicles->toArray());
 
+        // Get three vehicle categories for display
         $categories = VehicleCategory::take(3)->get();
 
         return view('home.index', [

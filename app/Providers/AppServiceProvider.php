@@ -33,7 +33,12 @@ class AppServiceProvider extends ServiceProvider
 
         // Share the category with all views
         View::composer('*', function ($view) {
-            $category = request()->route('category') ?? null;
+            $category = request()->route('category') ?? request()->query('category');
+
+            if ($category && is_string($category)) {
+                $category = \App\Models\VehicleCategory::where('slug', $category)->first();
+            }
+
             $view->with('category', $category);
         });
 

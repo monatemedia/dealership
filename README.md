@@ -360,11 +360,11 @@ git checkout -b feature/<name>
 # work, commit
 git push origin feature/<name>
 
-# MERGE FEATURE BRANCH
-# --------------------
-
 # List all branches that contain the tip commit of your feature branch
 git branch --contains feature/<name>
+
+# MERGE FEATURE BRANCH
+# --------------------
 
 # Make sure all your work is committed on the feature branch
 git status
@@ -374,7 +374,7 @@ git commit -m "Meaningful Message"   # if needed
 # Push the feature branch to remote (first time)
 git push -u origin feature/<name>
 
-# make sure you're on dev
+# Switch to dev
 git checkout dev
 
 # Update dev with latest remote

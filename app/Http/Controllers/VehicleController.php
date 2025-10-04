@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreVehicleRequest;
 use App\Models\Feature;
 use App\Models\Vehicle;
+use App\Models\VehicleCategory;
 use App\Services\VehicleImage\VehicleImageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -75,11 +76,14 @@ class VehicleController extends Controller
 
         // Get category from query string if present
         $categorySlug = request()->query('category');
+
+        // Get category from query string if present
+        $categorySlug = request()->query('category');
         $category = null;
 
         // Find the category by slug if present
         if ($categorySlug) {
-            $category = \App\Models\VehicleCategory::where('slug', $categorySlug)->first();
+            $category = VehicleCategory::where('slug', $categorySlug)->first();
         }
 
         // Render the create vehicle view
@@ -131,7 +135,7 @@ class VehicleController extends Controller
         $vehicle = Vehicle::create($data);
 
         // Map feature names to IDs
-        $featureIds = \App\Models\Feature::whereIn('name', $selectedFeatures)->pluck('id');
+        $featureIds = Feature::whereIn('name', $selectedFeatures)->pluck('id');
         $vehicle->features()->sync($featureIds);
 
         /**

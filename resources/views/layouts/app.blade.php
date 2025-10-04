@@ -1,3 +1,5 @@
+{{-- resources/views/layouts/app.blade.php --}}
+
 @props(['title' => '', 'bodyClass' => null, 'footerLinks' => ''])
 
 <x-base-layout :$title :$bodyClass>

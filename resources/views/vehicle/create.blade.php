@@ -9,6 +9,9 @@
 
 <x-app-layout title="Add New">
     <main>
+        {{-- dump category --}}
+        {{-- @dump($category) --}}
+
         {{-- Add Alpine.js data store for modal management --}}
         <div class="container-small" x-data="{ isModalOpen: false }" @close-modal.window="isModalOpen = false">
 
@@ -47,7 +50,9 @@
                             <div class="col">
                                 <div class="form-group @error('vehicle_category_id') has-error @enderror">
                                     <label>Vehicle Category</label>
-                                    <x-select-vehicle-category :value="old('vehicle_category_id')"/>
+                                    <x-select-vehicle-category
+                                        :value="old('vehicle_category_id', $category?->id)"
+                                    />
                                     <p class="error-message">
                                         {{ $errors->first('vehicle_category_id') }}
                                     </p>
