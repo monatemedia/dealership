@@ -279,9 +279,11 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Update `Vehicle` Model
   - [X] Update Feature Factory
   - [X] Create Config With Default Data
-- [ ] Make Create Form Category Aware
-- [ ] Category Aware Create Form
-  - [ ] Create BreadCrumb Component
+- [X] Category Aware Create Form
+  - [X] Accept Categories into Create Form
+  - [X] Set Up Categories on create forms
+  - [X] Update Categories Title and Paragraph
+  - [X] Update Flash Messages
 - [ ] Year Manufacturer Model API
     - [ ] Normalize `vehicle_features` table into a proper many-to-many relationship
       - [ ] Create New Tables
