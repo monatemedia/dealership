@@ -1,4 +1,4 @@
-<?php
+<?php // app/View/Components/FlashMessages.php
 
 namespace App\View\Components;
 
@@ -18,6 +18,7 @@ class FlashMessages extends Component
         // Convert Laravel session flashes into a consistent array format
         $this->messages = collect([
             session('success') ? ['type' => 'success', 'text' => session('success')] : null,
+            session('info') ? ['type' => 'info', 'text' => session('info')] : null,
             session('warning') ? ['type' => 'warning', 'text' => session('warning')] : null,
             session('error') ? ['type' => 'error', 'text' => session('error')] : null,
         ])->filter()->values()->all();

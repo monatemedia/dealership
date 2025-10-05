@@ -1301,6 +1301,9 @@ a.pagination-item:hover {
 .flash-success-message {
   background: linear-gradient(135deg, #00b956, #00a14d);
 }
+.flash-info-message {
+  background: linear-gradient(135deg, #448eef, #3a7dd6);
+}
 .flash-warning-message {
   background: linear-gradient(135deg, #ffb200, #e89a00);
 }

@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
     moveToSlide(0);
   };
 
-  // ----------------------------
+// ----------------------------
   // Flash Messages Alpine Setup
   // ----------------------------
   function flashMessages(initialMessages = []) {
@@ -70,11 +70,15 @@ document.addEventListener("DOMContentLoaded", function () {
         text: m.text,
         icon: m.type === 'success'
           ? 'fa-solid fa-flag-checkered'
+          : m.type === 'info'
+          ? 'fa-solid fa-circle-info'
           : m.type === 'warning'
           ? 'fa-solid fa-triangle-exclamation'
           : 'fa-solid fa-car-burst',
-          cssClass: m.type === 'success'
+        cssClass: m.type === 'success'
           ? 'flash-success-message'
+          : m.type === 'info'
+          ? 'flash-info-message'
           : m.type === 'warning'
           ? 'flash-warning-message'
           : 'flash-error-message',
@@ -95,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Make it flashMessages globally available for Alpine
+  // Make flashMessages globally available for Alpine
   window.flashMessages = flashMessages;
 
   // ----------------------------
