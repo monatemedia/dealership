@@ -264,19 +264,19 @@ const initMileageInputs = () => {
         label: 'Odometer Reading (km)',
         helper: 'Click (km) to change unit',
         next: 'mi',
-        max: 999999
+        max: 99999999
       },
       mi: {
         label: 'Odometer Reading (mi)',
         helper: 'Click (mi) to change unit',
         next: 'hrs',
-        max: 999999
+        max: 99999999
       },
       hrs: {
         label: 'Hour Meter Reading (hrs)',
         helper: 'Click (hrs) to change unit',
         next: 'km',
-        max: 99999
+        max: 999999
       },
     };
 
