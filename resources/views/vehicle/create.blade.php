@@ -117,10 +117,22 @@
                                 </div>
                             </div>
                             <div class="col">
-                                <div class="form-group @error('mileage') has-error @enderror">
-                                    <label>Mileage (km)</label>
-                                    <input type="number" min="0" step="1000" placeholder="Mileage" name="mileage"
-                                        value="{{ old('mileage') }}"/>
+                                <div class="form-group mileage-input-group @error('mileage') has-error @enderror">
+                                    <label class="mileage-label">Odometer Reading (km)</label>
+                                    <div class="mileage-input-wrapper">
+                                        <input
+                                            type="text"
+                                            inputmode="numeric"
+                                            class="mileage-input"
+                                            placeholder="Enter reading"
+                                            name="mileage"
+                                            value="{{ old('mileage') }}"
+                                            data-unit="km"
+                                        />
+                                        <span class="unit-toggle" data-unit="km">km</span>
+                                    </div>
+                                    <p class="helper-text">Click (km) unit to change to (mi) or (hrs)</p>
+                                    <input type="hidden" name="mileage_unit" value="km" class="mileage-unit-input">
                                     <p class="error-message">
                                         {{ $errors->first('mileage') }}
                                     </p>

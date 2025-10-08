@@ -89,6 +89,66 @@ hr {
   font-weight: 500;
 }
 
+/* Odometer input selector */
+.mileage-input-group {
+    position: relative;
+}
+
+.mileage-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.mileage-input {
+    width: 100%;
+    padding-right: 50px; /* Space for the unit text */
+}
+
+.unit-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ff6b35;
+    user-select: none;
+    transition: opacity 0.2s ease;
+}
+
+.unit-toggle:hover {
+    opacity: 0.7;
+}
+
+.unit-toggle:active {
+    opacity: 0.5;
+}
+
+.helper-text {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #718096;
+    font-style: italic;
+}
+
+.form-group.has-error .helper-text {
+    color: var(--input-border-error-color);
+}
+
+/* Remove spinner arrows from number input */
+.mileage-input::-webkit-outer-spin-button,
+.mileage-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.mileage-input {
+    -moz-appearance: textfield;
+}
+/* end odometer input selector */
+
 .gap-1 {
   gap: 1rem;
 }
