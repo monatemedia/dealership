@@ -32,7 +32,7 @@
         this.selected = id;
         this.selectedName = name;
         this.open = false;
-        this.search = '';
+        this.search = name;
     },
 
     async init() {
@@ -43,58 +43,41 @@
         }
     }
 }"
-@province-selected.window="provinceId = $event.detail.id; selected = null; selectedName = ''"
+@province-selected.window="provinceId = $event.detail.id; selected = null; selectedName = ''; search = ''"
 @click.away="open = false"
-class="relative">
-
+class="select-container">
     <input type="hidden" name="city_id" x-model="selected">
-
-    <div class="relative">
-        <button
-            type="button"
-            @click="open = !open"
-            class="w-full text-left border rounded px-3 py-2 bg-white"
-        >
-            <span x-text="selectedName || 'Select City'"></span>
-        </button>
-
-        <div
-            x-show="open"
-            x-transition
-            class="absolute z-50 w-full mt-1 bg-white border rounded shadow-lg"
-        >
-            <div class="p-2">
-                <input
-                    type="text"
-                    x-model="search"
-                    @input.debounce.300ms="searchCities()"
-                    placeholder="Type to search..."
-                    class="w-full border rounded px-3 py-2"
-                >
-            </div>
-
-            <div class="max-h-60 overflow-y-auto">
-                <template x-if="loading">
-                    <div class="px-3 py-2 text-gray-500">Loading...</div>
-                </template>
-
-                <template x-if="!loading && search.length < 2">
-                    <div class="px-3 py-2 text-gray-500">Type at least 2 characters to search</div>
-                </template>
-
-                <template x-if="!loading && cities.length === 0 && search.length >= 2">
-                    <div class="px-3 py-2 text-gray-500">No cities found</div>
-                </template>
-
-                <template x-for="city in cities" :key="city.id">
-                    <button
-                        type="button"
-                        @click="selectCity(city.id, city.name)"
-                        class="w-full text-left px-3 py-2 hover:bg-gray-100"
-                        x-text="city.name"
-                    ></button>
-                </template>
-            </div>
+    <input
+        type="text"
+        x-model="search"
+        @input.debounce.300ms="searchCities()"
+        @focus="open = true"
+        placeholder="Select City"
+        class="select-input"
+    >
+    <div
+        x-show="open"
+        x-transition
+        class="select-dropdown"
+    >
+        <div class="select-list">
+            <template x-if="loading">
+                <div class="select-info">Loading...</div>
+            </template>
+            <template x-if="!loading && search.length < 2">
+                <div class="select-info">Type at least 2 characters to search</div>
+            </template>
+            <template x-if="!loading && cities.length === 0 && search.length >= 2">
+                <div class="select-info">No cities found</div>
+            </template>
+            <template x-for="city in cities" :key="city.id">
+                <button
+                    type="button"
+                    @click="selectCity(city.id, city.name)"
+                    class="select-item"
+                    x-text="city.name"
+                ></button>
+            </template>
         </div>
     </div>
 </div>

@@ -285,11 +285,13 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Update Categories Title and Paragraph
   - [X] Update Flash Messages
 - [X] Make Multipurpose "Mileage" Component
-- [ ] Style Dropdowns
-  - [ ] Style Manufacturer Component
-  - [ ] Style Model Component
-  - [ ] Style Province Component
-  - [ ] Style City Component
+- [X] Style Dropdowns
+  - [X] Style Manufacturer Component
+  - [X] Style Model Component
+  - [X] Style Province Component
+  - [X] Style City Component
+- [ ] Make Dynamic Radioboxes
+- [ ] Make Dynamic Tickboxes
 - [ ] Add Countries to Database
 - [ ] Add Flags to Database
   - [ ] https://github.com/hampusborgos/country-flags 

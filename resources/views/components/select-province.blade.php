@@ -27,7 +27,7 @@
         this.selected = id;
         this.selectedName = name;
         this.open = false;
-        this.search = '';
+        this.search = name;
         this.$dispatch('province-selected', { id });
     },
 
@@ -36,60 +36,44 @@
             const response = await fetch(`/api/provinces/${this.selected}`);
             const data = await response.json();
             this.selectedName = data.name;
+            this.search = data.name;
         }
     }
 }"
 @click.away="open = false"
-class="relative">
-
+class="select-container">
     <input type="hidden" name="province_id" x-model="selected">
-
-    <div class="relative">
-        <button
-            type="button"
-            @click="open = !open"
-            class="w-full text-left border rounded px-3 py-2 bg-white"
-        >
-            <span x-text="selectedName || 'Select Province'"></span>
-        </button>
-
-        <div
-            x-show="open"
-            x-transition
-            class="absolute z-50 w-full mt-1 bg-white border rounded shadow-lg"
-        >
-            <div class="p-2">
-                <input
-                    type="text"
-                    x-model="search"
-                    @input.debounce.300ms="searchProvinces()"
-                    placeholder="Type to search..."
-                    class="w-full border rounded px-3 py-2"
-                >
-            </div>
-
-            <div class="max-h-60 overflow-y-auto">
-                <template x-if="loading">
-                    <div class="px-3 py-2 text-gray-500">Loading...</div>
-                </template>
-
-                <template x-if="!loading && search.length < 1">
-                    <div class="px-3 py-2 text-gray-500">Type to search provinces</div>
-                </template>
-
-                <template x-if="!loading && provinces.length === 0 && search.length >= 1">
-                    <div class="px-3 py-2 text-gray-500">No provinces found</div>
-                </template>
-
-                <template x-for="province in provinces" :key="province.id">
-                    <button
-                        type="button"
-                        @click="selectProvince(province.id, province.name)"
-                        class="w-full text-left px-3 py-2 hover:bg-gray-100"
-                        x-text="province.name"
-                    ></button>
-                </template>
-            </div>
+    <input
+        type="text"
+        x-model="search"
+        @input.debounce.300ms="searchProvinces()"
+        @focus="open = true"
+        placeholder="Select Province"
+        class="select-input"
+    >
+    <div
+        x-show="open"
+        x-transition
+        class="select-dropdown"
+    >
+        <div class="select-list">
+            <template x-if="loading">
+                <div class="select-info">Loading...</div>
+            </template>
+            <template x-if="!loading && search.length < 1">
+                <div class="select-info">Type to search provinces</div>
+            </template>
+            <template x-if="!loading && provinces.length === 0 && search.length >= 1">
+                <div class="select-info">No provinces found</div>
+            </template>
+            <template x-for="province in provinces" :key="province.id">
+                <button
+                    type="button"
+                    @click="selectProvince(province.id, province.name)"
+                    class="select-item"
+                    x-text="province.name"
+                ></button>
+            </template>
         </div>
     </div>
 </div>
