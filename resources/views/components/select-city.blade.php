@@ -37,9 +37,15 @@
 
     async init() {
         if (this.selected) {
-            const response = await fetch(`/api/cities/${this.selected}`);
-            const data = await response.json();
-            this.selectedName = data.name;
+            try {
+                const response = await fetch(`/api/cities/${this.selected}`);
+                const data = await response.json();
+                this.selectedName = data.name;
+                this.search = data.name;
+                this.provinceId = data.province_id;
+            } catch (error) {
+                console.error('Error fetching initial city:', error);
+            }
         }
     }
 }"

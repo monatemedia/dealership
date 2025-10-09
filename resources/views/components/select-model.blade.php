@@ -37,9 +37,15 @@
 
     async init() {
         if (this.selected) {
-            const response = await fetch(`/api/models/${this.selected}`);
-            const data = await response.json();
-            this.selectedName = data.name;
+            try {
+                const response = await fetch(`/api/models/${this.selected}`);
+                const data = await response.json();
+                this.selectedName = data.name;
+                this.search = data.name;
+                this.manufacturerId = data.manufacturer_id;
+            } catch (error) {
+                console.error('Error fetching initial model:', error);
+            }
         }
     }
 }"

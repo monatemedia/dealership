@@ -13,6 +13,7 @@
                 @csrf
                 @method('PUT')
                 <div class="form-content">
+                    {{-- @dump($vehicle) --}}
                     <div class="form-details">
                         <div class="row">
                             <div class="col">
