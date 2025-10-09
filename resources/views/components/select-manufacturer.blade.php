@@ -8,6 +8,12 @@
     loading: false,
 
     async searchManufacturers() {
+        // If the search term is the currently selected name, do nothing.
+        if (this.search === this.selectedName) {
+            this.manufacturers = [];
+            return;
+        }
+
         if (this.search.length < 2) {
             this.manufacturers = [];
             return;
@@ -27,69 +33,60 @@
         this.selected = id;
         this.selectedName = name;
         this.open = false;
-        this.search = '';
+        this.search = name; // Update input value to the selected name
         this.$dispatch('manufacturer-selected', { id });
     },
 
     async init() {
         if (this.selected) {
-            const response = await fetch(`/api/manufacturers/${this.selected}`);
-            const data = await response.json();
-            this.selectedName = data.name;
+            try {
+                const response = await fetch(`/api/manufacturers/${this.selected}`);
+                const data = await response.json();
+                this.selectedName = data.name;
+                this.search = data.name; // Set initial input value
+            } catch (error) {
+                console.error('Error fetching initial manufacturer:', error);
+            }
         }
     }
 }"
 @click.away="open = false"
-class="relative">
+class="select-manufacturer-container">
 
     <input type="hidden" name="manufacturer_id" x-model="selected">
 
-    <div class="relative">
-        <button
-            type="button"
-            @click="open = !open"
-            class="w-full text-left border rounded px-3 py-2 bg-white"
-        >
-            <span x-text="selectedName || 'Select Manufacturer'"></span>
-        </button>
+    <input
+        type="text"
+        x-model="search"
+        @input.debounce.300ms="searchManufacturers()"
+        @focus="open = true"
+        placeholder="Select Manufacturer"
+        class="select-manufacturer-input"
+    >
 
-        <div
-            x-show="open"
-            x-transition
-            class="absolute z-50 w-full mt-1 bg-white border rounded shadow-lg"
-        >
-            <div class="p-2">
-                <input
-                    type="text"
-                    x-model="search"
-                    @input.debounce.300ms="searchManufacturers()"
-                    placeholder="Type to search..."
-                    class="w-full border rounded px-3 py-2"
-                >
-            </div>
-
-            <div class="max-h-60 overflow-y-auto">
-                <template x-if="loading">
-                    <div class="px-3 py-2 text-gray-500">Loading...</div>
-                </template>
-
-                <template x-if="!loading && search.length < 2">
-                    <div class="px-3 py-2 text-gray-500">Type at least 2 characters to search</div>
-                </template>
-
-                <template x-if="!loading && manufacturers.length === 0 && search.length >= 2">
-                    <div class="px-3 py-2 text-gray-500">No manufacturers found</div>
-                </template>
-
-                <template x-for="manufacturer in manufacturers" :key="manufacturer.id">
-                    <button
-                        type="button"
-                        @click="selectManufacturer(manufacturer.id, manufacturer.name)"
-                        class="w-full text-left px-3 py-2 hover:bg-gray-100"
-                        x-text="manufacturer.name"
-                    ></button>
-                </template>
-            </div>
+    <div
+        x-show="open"
+        x-transition
+        class="select-manufacturer-dropdown"
+    >
+        <div class="select-manufacturer-list">
+            <template x-if="loading">
+                <div class="select-manufacturer-info">Loading...</div>
+            </template>
+            <template x-if="!loading && search.length < 2 && search !== selectedName">
+                <div class="select-manufacturer-info">Type at least 2 characters to search</div>
+            </template>
+            <template x-if="!loading && manufacturers.length === 0 && search.length >= 2">
+                <div class="select-manufacturer-info">No manufacturers found</div>
+            </template>
+            <template x-for="manufacturer in manufacturers" :key="manufacturer.id">
+                <button
+                    type="button"
+                    @click="selectManufacturer(manufacturer.id, manufacturer.name)"
+                    class="select-manufacturer-item"
+                    x-text="manufacturer.name"
+                ></button>
+            </template>
         </div>
     </div>
 </div>

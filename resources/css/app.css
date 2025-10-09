@@ -1982,3 +1982,80 @@ a.pagination-item:hover {
     border-radius: 8px; /* Matches the modal's styling */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Adds a subtle shadow */
 }
+
+/*
+ * Styles for the custom Select Manufacturer component
+ */
+
+/* Main container to position the dropdown correctly */
+.select-manufacturer-container {
+    position: relative;
+    width: 100%;
+}
+
+/* The main text input field */
+.select-manufacturer-input {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    background-color: #ffffff;
+    box-sizing: border-box;
+    /* font-size: 1rem; */
+    /* line-height: 1.5rem; */
+}
+
+.select-manufacturer-input:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    /* border-color: #60a5fa; */
+    /* box-shadow: 0 0 0 2px #bfdbfe; */
+}
+
+/* The dropdown panel that appears */
+.select-manufacturer-dropdown {
+    position: absolute;
+    z-index: 50;
+    width: 100%;
+    margin-top: 0.25rem;
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* The scrollable list inside the dropdown */
+.select-manufacturer-list {
+    max-height: 15rem; /* 240px */
+    overflow-y: auto;
+
+    /* Hide scrollbar but keep scroll functionality */
+    scrollbar-width: none;       /* Firefox */
+    -ms-overflow-style: none;    /* IE and Edge Legacy */
+}
+
+.select-manufacturer-list::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+/* Each selectable item in the list */
+.select-manufacturer-item {
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    /* font-size: 1rem; */
+}
+
+.select-manufacturer-item:hover {
+    background-color: #f3f4f6; /* gray-100 */
+}
+
+/* The informational text (e.g., "Loading...", "No results") */
+.select-manufacturer-info {
+    padding: 0.5rem 0.75rem;
+    color: #6b7280; /* gray-500 */
+    font-size: 90%;
+}

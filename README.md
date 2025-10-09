@@ -284,7 +284,12 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Set Up Categories on create forms
   - [X] Update Categories Title and Paragraph
   - [X] Update Flash Messages
-- [ ] Make Multipurpose "Mileage" Component
+- [X] Make Multipurpose "Mileage" Component
+- [ ] Style Dropdowns
+  - [ ] Style Manufacturer Component
+  - [ ] Style Model Component
+  - [ ] Style Province Component
+  - [ ] Style City Component
 - [ ] Add Countries to Database
 - [ ] Add Flags to Database
   - [ ] https://github.com/hampusborgos/country-flags 

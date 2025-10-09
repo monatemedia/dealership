@@ -1,3 +1,5 @@
+{{-- resources/views/components/select-year.blade.php --}}
+
 @php
     // Declare Current Year
     $year = date('Y');
