@@ -14,7 +14,7 @@ class VehicleCategorySeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = config('vehicles.categories');
+        $categories = config('categories.categories');
 
         foreach ($categories as $name => $data) {
             VehicleCategory::updateOrCreate(

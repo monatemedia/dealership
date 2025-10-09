@@ -1,4 +1,4 @@
-<?php
+<?php // app/Http/Requests/StoreVehicleRequest.php
 
 namespace App\Http\Requests;
 

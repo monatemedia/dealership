@@ -1,6 +1,4 @@
-<?php
-
-// config/vehicles.php
+<?php // config/vehicles.php
 
 return [
 
@@ -133,66 +131,4 @@ return [
             'fuel_types' => ['AvGas', 'Jet Fuel', 'Electric', 'Hybrid'],
         ],
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Singular Forms of Categories
-    |--------------------------------------------------------------------------
-    | Mapping of plural category names to their singular forms.
-    | Only include irregular forms here that do not pluralize by simply adding 's'.
-    |
-    */
-    // 'singular' => [
-    //     'Bakkies' => 'Bakkie',
-    //     'Personal-Trailers' => 'Trailer',
-    //     'Motorhomes' => 'Motor Home',
-    //     'Busses' => 'Bus',
-    //     'Panelvans' => 'Panel Van',
-    //     'Truck-Rigid' => 'Rigid Truck',
-    //     'Truck-Tractors' => 'Truck Tractor',
-    //     'Truck-Trailers' => 'Truck Trailer',
-    //     'Plant-Machinery' => 'Plant Machinery',
-    //     'Plant-Agri' => 'Agri Machinery',
-    // ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Vehicle Features
-    |--------------------------------------------------------------------------
-    | A list of common and category-specific features.
-    |
-    */
-    // 'features' => [
-    //     'common' => [
-    //         'ABS',
-    //         'Bluetooth Connectivity',
-    //         'GPS Navigation',
-    //     ],
-    //     'Motorcycles' => [
-    //         'Heated Grips',
-    //         'Saddlebags',
-    //         'Windshield',
-    //     ],
-    //     'Cars' => [
-    //         'Air Conditioning',
-    //         'Power Windows',
-    //         'Power Door Locks',
-    //         'Cruise Control',
-    //         'Remote Start',
-    //         'Heated Seats',
-    //         'Climate Control',
-    //         'Rear Parking Sensors',
-    //         'Leather Seats',
-    //     ],
-    //     'Bakkies' => [
-    //         'Tow Hitch',
-    //         'Bed Liner',
-    //         '4x4 Drivetrain',
-    //         'Running Boards',
-    //     ],
-    // ],
 ];
-
-// Category is attached to vehicles in the vehicles table
-// Types are specific to each category
-// Features can be common or specific to each category
