@@ -1,4 +1,4 @@
-<?php // config/vehicles.php
+<?php // config/categories.php
 
 return [
 
