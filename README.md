@@ -425,11 +425,39 @@ git branch -D feature/<name>
 
 # Delete the branch remotely
 git push origin --delete feature/<name>
-
 ```
 
 Merge via Pull Request into `dev`.
 
+---
+
+#### Undo Last Commit
+- For undoing your last commit.    
+
+```bash
+# UNDO THE LAST COMMIT BUT KEEP YOUR CODE CHANGES (UNCOMMITTED)
+# - The commit is undone
+# - All your changes stay staged and ready to recommit
+# ---------------------
+git reset --soft HEAD~1
+
+# UNDO THE LAST COMMIT AND UNSTAGE THE FILES (KEEP IN WORKING DIRECTORY)
+# - The commit is undone
+# - Files are unstaged but still modified in your working directory.
+# ---------------------
+git reset --mixed HEAD~1
+
+# COMPLETELY DISCARD THE LAST COMMIT AND ALL ITS CHANGES
+# - The commit and all associated changes are deleted.
+# - Your local dev matches the state before that commit.
+# ---------------------
+git reset --hard HEAD~1
+
+# OPTIONAL CLEANUP
+# - If you want to discard both commits and exactly match remote origin/dev
+# ---------------------
+git reset --hard origin/dev
+```
 ---
 
 #### Bugfix Branches
