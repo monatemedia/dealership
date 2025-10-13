@@ -408,6 +408,23 @@ git push origin --delete feature/<name>
 
 # Get existing local and remote branches
 git branch --all
+
+# DELETE AN UNWANTED FEATURE BRANCH
+# --------------------
+
+# Switch back to dev
+git checkout dev
+
+# Reset dev to match remote (optional but recommended)
+# This ensures dev is exactly as it was before the branch was created.
+git fetch origin
+git reset --hard origin/dev
+
+# Delete the unwanted branch locally
+git branch -D feature/<name>
+
+# Delete the branch remotely
+git push origin --delete feature/<name>
 ```
 
 Merge via Pull Request into `dev`.
