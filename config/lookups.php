@@ -340,29 +340,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Vehicle Types by Category
-    |--------------------------------------------------------------------------
-    | A static list of vehicle types used across the application.
-    |
-    */
-    'vehicle_types_by_category' => [
-        'Cars' => [
-            'Sedan',
-            'Hatchback',
-            'SUV',
-            'Coupe',
-            'Crossover',
-            'Sports Vehicle',
-        ],
-        'Trucks' => [
-            'Pickup Truck',
-            'Minivan',
-            '4X4',
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Fuel Types
     |--------------------------------------------------------------------------
     | A static list of fuel types used across the application.
