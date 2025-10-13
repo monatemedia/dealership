@@ -425,6 +425,7 @@ git branch -D feature/<name>
 
 # Delete the branch remotely
 git push origin --delete feature/<name>
+
 ```
 
 Merge via Pull Request into `dev`.
