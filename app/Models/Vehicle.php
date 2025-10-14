@@ -1,6 +1,4 @@
-<?php
-
-// app/Models/Vehicle.php
+<?php // app/Models/Vehicle.php
 
 namespace App\Models;
 
@@ -23,7 +21,7 @@ class Vehicle extends Model
     ];
 
     protected $fillable = [
-        'vehicle_category_id',
+        'sub_category_id',
         'manufacturer_id',
         'model_id',
         'year',
@@ -42,18 +40,28 @@ class Vehicle extends Model
 
     # Define the relationships
 
-    // Define method for `VehicleCategory` and the return type
+    /**
+     * Define method for `SubCategory` (renamed from vehicleCategory)
+     * The vehicle belongs to a sub-category
+     */
+    public function subCategory(): BelongsTo
+    {
+        return $this->belongsTo(VehicleCategory::class, 'sub_category_id');
+    }
+
+    /**
+     * Alias for backwards compatibility
+     * Keep the old name pointing to the new relationship
+     */
     public function vehicleCategory(): BelongsTo
     {
-        return $this->belongsTo(VehicleCategory::class, 'vehicle_category_id');
+        return $this->subCategory();
     }
 
     // Define method for `VehicleType` and the return type
     public function vehicleType(): BelongsTo
     {
-        // This vehicle belongs to a vehicle type
         return $this->belongsTo(VehicleType::class, 'vehicle_type_id');
-        // vehicle_type_id is optional
     }
 
     // Define method for `FuelType` and the return type
