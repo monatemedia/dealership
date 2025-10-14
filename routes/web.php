@@ -6,7 +6,6 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WatchlistController;
-use App\Http\Controllers\VehicleImageController;
 use App\Models\VehicleCategory;
 use Illuminate\Support\Facades\Route;
 
@@ -16,8 +15,8 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Get all category slugs for route constraint
-$slugs = VehicleCategory::pluck('slug')->implode('|');
+// Get all category slugs for route constraint (both main and sub)
+$categorySlugs = VehicleCategory::pluck('slug')->implode('|');
 
 // Home route
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -26,9 +25,12 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/vehicle/search', [VehicleController::class, 'search'])
     ->name('vehicle.search');
 
-// Categories
-Route::get('/categories', [VehicleCategoryController::class, 'index'])
-    ->name('categories.index');
+// Multi-step vehicle creation flow routes
+Route::get('/vehicle/create/main-categories', [VehicleCategoryController::class, 'indexMainCategories'])
+    ->name('vehicle.main-categories');
+
+Route::get('/vehicle/create/sub-categories/{mainCategory:slug}', [VehicleCategoryController::class, 'indexSubCategories'])
+    ->name('vehicle.sub-categories');
 
 // Routes for authenticated users
 Route::middleware(['auth'])->group(function () {
@@ -77,9 +79,19 @@ Route::get('/vehicle/{vehicle}', [VehicleController::class, 'show'])
 Route::post('/vehicle/phone/{vehicle}', [VehicleController::class, 'showPhone'])
     ->name('vehicle.showPhone');
 
-// Category route (keep at the very end)
+// Category routes - Main category view
+Route::get('/{mainCategory:slug}', [VehicleCategoryController::class, 'showMainCategory'])
+    ->where('mainCategory', $categorySlugs)
+    ->name('category.main-show');
+
+// Category routes - Main category / Sub-category view
+Route::get('/{mainCategory:slug}/{subCategory:slug}', [VehicleCategoryController::class, 'showSubCategory'])
+    ->where(['mainCategory' => $categorySlugs, 'subCategory' => $categorySlugs])
+    ->name('category.sub-show');
+
+// Fallback for direct sub-category slug access (maintains backwards compatibility)
 Route::get('/{category:slug}', [VehicleCategoryController::class, 'show'])
-    ->where('category', $slugs) // restrict to valid slugs only
+    ->where('category', $categorySlugs)
     ->name('category.show');
 
 // Include the authentication routes
