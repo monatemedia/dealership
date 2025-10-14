@@ -324,17 +324,17 @@ return [
     | A static list of vehicle types used across the application.
     |
     */
-    'vehicle_types' => [
-        'Sedan',
-        'Hatchback',
-        'SUV',
-        'Pickup Truck',
-        'Minivan',
-        '4X4',
-        'Coupe',
-        'Crossover',
-        'Sports Vehicle',
-    ],
+    // 'vehicle_types' => [
+    //     'Sedan',
+    //     'Hatchback',
+    //     'SUV',
+    //     'Pickup Truck',
+    //     'Minivan',
+    //     '4X4',
+    //     'Coupe',
+    //     'Crossover',
+    //     'Sports Vehicle',
+    // ],
 
     /*
     |--------------------------------------------------------------------------
