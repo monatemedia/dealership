@@ -1,6 +1,5 @@
-<?php
+<?php // app/View/Components/AddVehicleButton.php
 
-// app/View/Components/AddVehicleButton.php
 namespace App\View\Components;
 
 use App\Models\VehicleCategory;

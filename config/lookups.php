@@ -1,6 +1,4 @@
-<?php
-
-// config/lookups.php
+<?php // config/lookups.php
 
 return [
 
@@ -351,5 +349,4 @@ return [
         'Electric',
         'Hybrid',
     ],
-
 ];

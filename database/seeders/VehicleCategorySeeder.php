@@ -1,6 +1,5 @@
-<?php
+<?php // database/seeders/VehicleCategorySeeder.php
 
-// database/seeders/VehicleCategorySeeder.php
 namespace Database\Seeders;
 
 use App\Models\VehicleCategory;
