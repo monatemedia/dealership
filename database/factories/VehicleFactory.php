@@ -1,10 +1,9 @@
-<?php
-
-// database/factories/VehicleFactory.php
+<?php // database/factories/VehicleFactory.php
 
 namespace Database\Factories;
 
-use App\Models\VehicleCategory;
+use App\Models\MainCategory;
+use App\Models\SubCategory;
 use App\Models\VehicleType;
 use App\Models\City;
 use App\Models\FuelType;
@@ -31,13 +30,22 @@ class VehicleFactory extends Factory
 
         // Fetch a random manufacturer
         $manufacturer = Manufacturer::inRandomOrder()->first();
+        // Pick a random main category
+        $mainCategory = MainCategory::inRandomOrder()->first();
 
-        // Pick a random vehicle category from DB
-        $category = VehicleCategory::inRandomOrder()->first();
+        // Pick a random sub-category belonging to the main category (nullable)
+        $subCategory = SubCategory::where('main_category_id', $mainCategory->id)
+            ->inRandomOrder()
+            ->first();
+
+        // Pick a random vehicle type for this sub-category
+        $vehicleType = VehicleType::where('sub_category_id', $subCategory->id)
+            ->inRandomOrder()
+            ->first();
 
         return [
-            // Vehicle category
-            'vehicle_category_id' => $category->id,
+            'main_category_id' => $mainCategory->id,
+            'sub_category_id' => $subCategory?->id, // nullable if no sub-category exists
 
             // Manufacturer
             'manufacturer_id' => $manufacturer->id, // Assign the manufacturer ID
@@ -69,9 +77,7 @@ class VehicleFactory extends Factory
                 * 1000, // Multiply by 1000
 
             // Vehicle type
-            'vehicle_type_id' => VehicleType::inRandomOrder() // Get random vehicle type
-                ->first() // Get first vehicle type
-                ->id, // Get vehicle type id
+            'vehicle_type_id' => $vehicleType?->id,
 
             // Fuel type
             'fuel_type_id' => FuelType::inRandomOrder() // Get random fuel type

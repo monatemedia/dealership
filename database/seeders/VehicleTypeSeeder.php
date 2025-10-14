@@ -3,30 +3,37 @@
 namespace Database\Seeders;
 
 use App\Models\VehicleType;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\SubCategory;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
-/**
- * Summary of VehicleTypeSeeder
- * This seeder populates the vehicle types from configuration
- */
 class VehicleTypeSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Vehicle Types from config
-        VehicleType::factory()
-            ->count(count(config('lookups.vehicle_types')))
-            ->sequence(
-                ...array_map(
-                    fn($type) =>
-                    ['name' => $type],
-                    config('lookups.vehicle_types')
-                )
-            )
-            ->create();
+        $vehicleTypesConfig = config('categories.vehicle_types_by_category');
+
+        foreach ($vehicleTypesConfig as $subCategoryName => $types) {
+            $subCategory = SubCategory::where('name', $subCategoryName)->first();
+
+            if (!$subCategory) continue;
+
+            foreach ($types as $typeData) {
+                $slug = Str::slug($typeData['name'] . '-' . $subCategory->name);
+
+                VehicleType::updateOrCreate(
+                    [
+                        'name' => $typeData['name'],
+                        'sub_category_id' => $subCategory->id,
+                    ],
+                    [
+                        'long_name' => $typeData['long_name'] ?? $typeData['name'],
+                        'description' => $typeData['description'] ?? null,
+                        'image_path' => $typeData['image_path'] ?? null,
+                        'slug' => $slug,
+                    ]
+                );
+            }
+        }
     }
 }
