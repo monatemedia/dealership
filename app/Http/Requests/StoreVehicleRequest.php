@@ -24,7 +24,8 @@ class StoreVehicleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'vehicle_category_id' => 'required|exists:vehicle_categories,id',
+            'main_category_id' => 'required|exists:main_categories,id',
+            'sub_category_id' => 'required|exists:sub_categories,id',
             'manufacturer_id' => 'required|exists:manufacturers,id',
             'model_id' => 'required|exists:models,id',
             'year' => ['required', 'integer', 'min:1900', 'max:' . date('Y')],
@@ -51,7 +52,10 @@ class StoreVehicleRequest extends FormRequest
     {
         return [
             'required' => 'This field is required',
-            'manufacturer_id.required' => 'Please Select Manufacturer'
+            'manufacturer_id.required' => 'Please select a manufacturer',
+            'main_category_id.required' => 'Please select a main category',
+            'sub_category_id.required' => 'Please select a sub-category',
+            'vehicle_type_id.required' => 'Please select a vehicle type',
         ];
     }
 
@@ -62,7 +66,9 @@ class StoreVehicleRequest extends FormRequest
             'model_id' => 'model',
             'vehicle_type_id' => 'vehicle type',
             'fuel_type_id' => 'fuel type',
-            'city_id' => 'city'
+            'city_id' => 'city',
+            'main_category_id' => 'main category',
+            'sub_category_id' => 'sub-category',
         ];
     }
 }
