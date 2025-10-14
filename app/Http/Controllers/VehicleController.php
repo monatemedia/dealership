@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreVehicleRequest;
 use App\Models\Feature;
+use App\Models\SubCategory;
 use App\Models\Vehicle;
-use App\Models\VehicleCategory;
 use App\Services\VehicleImage\VehicleImageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Jobs\ProcessVehicleImage;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 // Add Implement HasMiddleware to the VehicleController
@@ -53,8 +52,11 @@ class VehicleController extends Controller
     }
 
     /**
-     * app/Http/Controllers/VehicleController::create
      * Show the form for creating a new resource.
+     *
+     * Multi-step flow:
+     * - If sub_category provided in query string: show create form (prefilled with vehicle types)
+     * - If no sub_category: redirect to main categories selection
      */
     public function create(Request $request)
     {
@@ -74,30 +76,37 @@ class VehicleController extends Controller
         // Authorize user to create a vehicle (policy check)
         Gate::authorize('create', Vehicle::class);
 
-        // Get category from query string if present
-        $categorySlug = request()->query('category');
-        $category = null;
+        // Get sub_category from query string if present
+        $subCategorySlug = request()->query('sub_category');
+        $subCategory = null;
 
-        // Find the category by slug if present
-        if ($categorySlug) {
-            $category = VehicleCategory::where('slug', $categorySlug)->first();
+        if ($subCategorySlug) {
+            $subCategory = SubCategory::where('slug', $subCategorySlug)->first();
+
+            if (!$subCategory) {
+                return redirect()->route('main-categories.index')
+                    ->with('error', 'Invalid category selected');
+            }
         }
 
-        // If no category selected, redirect to categories page
-        if (!$category) {
-            // Use put() instead of flash() so it persists beyond one request
+        // If no sub_category selected, redirect to main categories selection
+        if (!$subCategory) {
             session()->put('selecting_category_for_create', true);
-
-            return redirect()->route('categories.index')
+            return redirect()->route('main-categories.index')
                 ->with('info', 'Please select a vehicle category to continue');
         }
 
         // Clear the session flag if we got here with a category
         session()->forget('selecting_category_for_create');
 
+        // Get vehicle types for this sub-category
+        $vehicleTypes = $subCategory->vehicleTypes()->get();
+
         // Render the create vehicle view
         return view('vehicle.create', [
-            'category' => $category,
+            'subCategory' => $subCategory,
+            'mainCategory' => $subCategory->mainCategory,
+            'vehicleTypes' => $vehicleTypes,
         ]);
     }
 
