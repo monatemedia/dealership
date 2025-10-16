@@ -4,9 +4,14 @@
     <main class="no-padding">
 
         {{-- Category Section --}}
-        <x-category.category-section
+        {{-- Category Section --}}
+        <x-category.section
             :categories="$categories"
-            selectingForCreate="{{ $selectingForCreate }}"
+            type="Main Category"
+            pluralType="Main Categories"
+            indexRouteName="main-categories.index"
+            showRouteName="main-categories.show"
+            :selectingForCreate="$selectingForCreate"
         />
 
     </main>

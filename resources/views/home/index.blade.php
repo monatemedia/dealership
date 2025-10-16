@@ -10,8 +10,12 @@
     <main>
 
         {{-- Category Section --}}
-        <x-category.category-section
+        <x-category.section
             :categories="$categories"
+            type="Main Category"
+            pluralType="Main Categories"
+            indexRouteName="main-categories.index"
+            showRouteName="main-categories.show"
             :selectingForCreate="false"
         />
         {{-- /Category Section --}}

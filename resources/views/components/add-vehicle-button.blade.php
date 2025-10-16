@@ -1,25 +1,25 @@
 {{-- resources/views/components/add-vehicle-button.blade.php --}}
-
 @php
     use Illuminate\Support\Facades\Route;
 
-    // Don’t show button on vehicle.create route
+    // Don't show button on vehicle.create route
     $hide = Route::currentRouteNamed('vehicle.create');
 
     // Default text and link
     $label = 'Sell Your Vehicle';
-    $href = route('vehicle.create');
+    $href = route('main-categories.index');
 
-    // If on category page, override text + add query string
-    if ($category) {
-        // Pull category info directly from config
-        $categoryConfig = config('vehicles.categories.' . $category->name);
-
-        // Use the singular from config, fallback to $category->name
-        $singular = $categoryConfig['singular'] ?? $category->name;
-
-        $label = 'Sell ' . ucfirst($singular);
-        $href = route('vehicle.create', ['category' => $category->slug]);
+    // If on sub-category page, go directly to create
+    if (isset($subCategory) && $subCategory) {
+        $singular = $subCategory->singular ?? $subCategory->name;
+        $label = 'Sell Your ' . $singular;
+        $href = route('vehicle.create', ['sub_category' => $subCategory->slug]);
+    }
+    // If on main category page (but not sub-category), go to main categories
+    elseif (isset($mainCategory) && $mainCategory && !isset($subCategory)) {
+        $singular = $mainCategory->singular ?? $mainCategory->name;
+        $label = 'Sell Your ' . $singular;
+        $href = route('main-categories.index');
     }
 @endphp
 

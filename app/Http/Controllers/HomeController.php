@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MainCategory;
 use App\Models\Vehicle;
 use App\Models\VehicleCategory;
 use Illuminate\Http\Request;
@@ -25,7 +26,8 @@ class HomeController extends Controller
         // dump($vehicles->toArray());
 
         // Get three vehicle categories for display
-        $categories = VehicleCategory::take(3)->get();
+        $categories = MainCategory::take(3)->get();
+        // dd($categories);
 
         return view('home.index', [
             'vehicles' => $vehicles,

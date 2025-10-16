@@ -1,8 +1,9 @@
 {{-- resources/views/components/hero/button.blade.php --}}
-
 @props([
     'href' => null,
-    'category' => null,
+    'mainCategory' => null,
+    'subCategory' => null,
+    'vehicleType' => null,
     'routeName' => 'vehicle.create',
     'hideOnRoute' => null,
 ])
@@ -17,12 +18,20 @@
         // Use slot text if provided
         $label = trim($slot);
         $href = $href ?? route($routeName);
-    } elseif ($category) {
-        // Category-aware default (uses DB singular column)
-        $singular = $category->singular ?? $category->name;
-        // Category-aware default
-        $label = 'Sell ' . ucfirst($singular);
-        $href = route($routeName, ['category' => $category->slug]);
+    } elseif ($subCategory) {
+        // Sub-category aware
+        $singular = $subCategory->singular ?? $subCategory->name;
+        $label = 'Sell Your ' . $singular;
+        $href = route($routeName, ['sub_category' => $subCategory->slug]);
+    } elseif ($mainCategory) {
+        // Main category aware
+        $singular = $mainCategory->singular ?? $mainCategory->name;
+        $label = 'Sell Your ' . $singular;
+        $href = route($routeName, ['main_category' => $mainCategory->slug]);
+    } elseif ($vehicleType) {
+        // Vehicle type aware
+        $label = 'Sell Your ' . $vehicleType->name;
+        $href = $href ?? route($routeName);
     } else {
         // Fallback
         $label = 'Sell Your Vehicle';

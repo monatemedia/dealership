@@ -199,13 +199,13 @@ return [
             'singular' => 'ATV',
             'long_name' => 'All-Terrain Vehicles',
             'description' => 'Off-road vehicles for various terrains.',
-            'image_path' => 'https://images.unsplash.com/photo-1609630875171-b1321377ee65?q=80&w=680&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+            'image_path' => 'https://images.pexels.com/photos/26570063/pexels-photo-26570063/free-photo-of-quad-on-barren-desert-at-sunset.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
         ],
         'Side by Sides' => [
             'singular' => 'Side by Side',
             'long_name' => 'Side by Side Vehicles',
             'description' => 'Side by side vehicles for utility tasks.',
-            'image_path' => 'https://images.unsplash.com/photo-1609630875171-b1321377ee65?q=80&w=680&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+            'image_path' => 'https://images.pexels.com/photos/30932918/pexels-photo-30932918/free-photo-of-dynamic-orange-off-road-buggy-on-asphalt-track.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
         ],
         'Cars' => [
             'singular' => 'Car',

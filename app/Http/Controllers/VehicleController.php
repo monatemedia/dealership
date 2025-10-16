@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreVehicleRequest;
 use App\Models\Feature;
+use App\Models\MainCategory;
 use App\Models\SubCategory;
 use App\Models\Vehicle;
 use App\Services\VehicleImage\VehicleImageService;
@@ -32,23 +33,23 @@ class VehicleController extends Controller
      */
     public function index(Request $request)
     {
-        // Find vehicles for authenticated user
-        $vehicles = $request->user()
-            ->vehicles()
-            ->with([
-                'primaryImage',
-                'manufacturer',
-                'model'
-            ])
-            ->orderBy('created_at', 'desc')
+        // Get latest published vehicles
+        $vehicles = Vehicle::with(['primaryImage', 'manufacturer', 'model'])
+            ->whereNotNull('published_at')
+            ->latest('published_at')
             ->paginate(15);
 
-        return view(
-            'vehicle.index', // Return the view
-            [
-                'vehicles' => $vehicles // Pass the vehicles to the view
-            ]
-        );
+        // Get 3 main categories for the homepage
+        $categories = MainCategory::take(3)->get();
+
+        dd('Reached home.index', MainCategory::take(3)->get());
+
+
+
+        return view('home.index', [
+            'vehicles' => $vehicles,
+            'categories' => $categories, // Changed from 'mainCategories' to 'categories'
+        ]);
     }
 
     /**

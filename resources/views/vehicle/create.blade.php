@@ -2,12 +2,10 @@
 
 @php
     // If $category is set, pull its config info
-    $categoryConfig = $category ? config('vehicles.categories.' . $category->name) : null;
-    // Use the singular from config, fallback to $category->name, fallback to 'vehicle'
-    $singular = $categoryConfig['singular'] ?? ($category->name ?? 'vehicle');
+    $singular = $subCategory->singular ?? 'Vehicle';
 @endphp
 
-<x-app-layout title="Add New">
+<x-app-layout title="Add New Vehicle">
     <main>
         {{-- dump category --}}
         {{-- @dump($category) --}}
@@ -46,6 +44,20 @@
                 {{-- @dump($errors) --}}
                 <div class="form-content">
                     <div class="form-details">
+                        {{-- Category fields (hidden) --}}
+                        <input type="hidden" name="main_category_id" value="{{ $mainCategory->id }}" />
+                        <input type="hidden" name="sub_category_id" value="{{ $subCategory->id }}" />
+                        {{-- End Category fields (hidden) --}}
+
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <input type="text" readonly value="{{ $subCategory->long_name }}" />
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="col">
                                 <div class="form-group @error('vehicle_category_id') has-error @enderror">
