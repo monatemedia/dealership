@@ -40,13 +40,14 @@ class Vehicle extends Model
 
     # Define the relationships
 
-    /**
-     * Define method for `SubCategory` (renamed from vehicleCategory)
-     * The vehicle belongs to a sub-category
-     */
-    public function subCategory(): BelongsTo
+    public function mainCategory()
     {
-        return $this->belongsTo(VehicleCategory::class, 'sub_category_id');
+        return $this->belongsTo(MainCategory::class, 'main_category_id');
+    }
+
+    public function subCategory()
+    {
+        return $this->belongsTo(SubCategory::class, 'sub_category_id');
     }
 
     /**

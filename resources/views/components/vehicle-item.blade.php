@@ -10,7 +10,7 @@
     </a>
     <div class="p-medium">
         <div class="flex items-center justify-between">
-            <small class="m-0 text-muted">{{ $vehicle->city->name }}</small>
+            <small class="m-0 text-muted">{{ $vehicle->city->name }}, {{ $vehicle->city->province->name }}</small>
                 <button
                     class="btn-heart text-primary"
                     data-url="{{ route('watchlist.storeDestroy', $vehicle) }}"
@@ -46,7 +46,9 @@
         <p class="vehicle-item-price">R {{ number_format($vehicle->price, 0, '.', ' ') }}</p>
         <hr />
         <div class="vehicle-item-badges">
-            <span class="vehicle-item-badge">{{ $vehicle->vehicleCategory?->name }}</span>
+            {{-- @dd($vehicle) --}}
+            <span class="vehicle-item-badge">{{ $vehicle->mainCategory->name }}</span>
+            <span class="vehicle-item-badge">{{ $vehicle->subCategory->name }}</span>
             <span class="vehicle-item-badge">{{ $vehicle->vehicleType?->name }}</span>
             <span class="vehicle-item-badge">{{ $vehicle->fuelType?->name }}</span>
         </div>
