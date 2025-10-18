@@ -8,7 +8,7 @@ use App\Models\VehicleType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
-class VehicleCategorySeeder extends Seeder
+class CategorySeeder extends Seeder
 {
     /**
      * Run the database seeds.

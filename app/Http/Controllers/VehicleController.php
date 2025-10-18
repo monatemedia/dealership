@@ -53,6 +53,7 @@ class VehicleController extends Controller
     }
 
     /**
+     * VehicleController::create
      * Show the form for creating a new resource.
      *
      * Multi-step flow:

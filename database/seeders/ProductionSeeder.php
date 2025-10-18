@@ -17,7 +17,7 @@ class ProductionSeeder extends Seeder
     {
         $this->call([
             // Core application data ONLY
-            VehicleCategorySeeder::class,
+            CategorySeeder::class,
             VehicleTypeSeeder::class,
             FuelTypeSeeder::class,
             FeatureSeeder::class,

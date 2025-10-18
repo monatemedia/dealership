@@ -7,8 +7,7 @@
 
 <x-app-layout title="Add New Vehicle">
     <main>
-        {{-- dump category --}}
-        {{-- @dump($category) --}}
+        {{-- @dump($singular) --}}
 
         {{-- Add Alpine.js data store for modal management --}}
         <div class="container-small" x-data="{ isModalOpen: false }" @close-modal.window="isModalOpen = false">
