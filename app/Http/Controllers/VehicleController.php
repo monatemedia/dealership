@@ -33,23 +33,23 @@ class VehicleController extends Controller
      */
     public function index(Request $request)
     {
-        // Get latest published vehicles
-        $vehicles = Vehicle::with(['primaryImage', 'manufacturer', 'model'])
-            ->whereNotNull('published_at')
-            ->latest('published_at')
+        // Find vehicles for authenticated user
+        $vehicles = $request->user()
+            ->vehicles()
+            ->with([
+                'primaryImage',
+                'manufacturer',
+                'model'
+            ])
+            ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        // Get 3 main categories for the homepage
-        $categories = MainCategory::take(3)->get();
-
-        dd('Reached home.index', MainCategory::take(3)->get());
-
-
-
-        return view('home.index', [
-            'vehicles' => $vehicles,
-            'categories' => $categories, // Changed from 'mainCategories' to 'categories'
-        ]);
+        return view(
+            'vehicle.index', // Return the view
+            [
+                'vehicles' => $vehicles // Pass the vehicles to the view
+            ]
+        );
     }
 
     /**

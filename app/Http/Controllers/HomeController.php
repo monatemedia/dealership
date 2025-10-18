@@ -1,4 +1,4 @@
-<?php
+<?php // app/Http/Controllers/HomeController
 
 namespace App\Http\Controllers;
 

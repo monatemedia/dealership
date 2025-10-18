@@ -28,6 +28,10 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // AUTHENTICATED ROUTES (Specific paths first)
 // -------------------------------
 Route::middleware(['auth', 'verified'])->group(function () {
+
+    // Vehicle management
+    Route::resource('vehicle', VehicleController::class)->except(['show']);
+
     // Vehicle management - specific paths
     Route::get('/vehicle/create', [VehicleController::class, 'create'])->name('vehicle.create');
     Route::post('/vehicle', [VehicleController::class, 'store'])->name('vehicle.store');
