@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\MainCategoryController;
 use App\Http\Controllers\SubCategoryController;
-use App\Http\Controllers\VehicleCategoryController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
@@ -40,9 +39,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/vehicle/{vehicle}', [VehicleController::class, 'destroy'])->name('vehicle.destroy');
 
     // Multi-step vehicle creation flow
-    Route::get('/vehicle/create/main-categories', [VehicleCategoryController::class, 'indexMainCategories'])
+    Route::get('/vehicle/create/main-categories', [MainCategoryController::class, 'indexMainCategories'])
         ->name('vehicle.main-categories');
-    Route::get('/vehicle/create/sub-categories/{mainCategory:slug}', [VehicleCategoryController::class, 'indexSubCategories'])
+    Route::get('/vehicle/create/sub-categories/{mainCategory:slug}', [SubCategoryController::class, 'indexSubCategories'])
         ->name('vehicle.sub-categories');
 
     // Vehicle images management

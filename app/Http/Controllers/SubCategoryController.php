@@ -8,9 +8,6 @@ use App\Models\VehicleType;
 
 class SubCategoryController extends Controller
 {
-    /**
-     * Show all subcategories
-     */
     public function index()
     {
         $subCategories = SubCategory::with('mainCategory')->get();
@@ -18,19 +15,16 @@ class SubCategoryController extends Controller
 
         return view('categories.index', [
             'categories' => $subCategories,
+            'type' => 'Sub-Category',
             'selectingForCreate' => $selectingForCreate,
         ]);
     }
 
-    /**
-     * Show vehicles and vehicle types for a subcategory
-     */
     public function show(MainCategory $mainCategory, SubCategory $subCategory)
     {
-        // Already scoped, no need to check main_category_id manually
         $subCategory->load('mainCategory');
 
-        $vehicles = Vehicle::with(['primaryImage','manufacturer','model'])
+        $vehicles = Vehicle::with(['primaryImage', 'manufacturer', 'model'])
             ->where('sub_category_id', $subCategory->id)
             ->latest()
             ->paginate(15);
@@ -39,16 +33,12 @@ class SubCategoryController extends Controller
             ->take(3)
             ->get();
 
-        $subCategories = SubCategory::take(3)->get();
-
         return view('categories.show', [
             'category' => $subCategory,
             'vehicles' => $vehicles,
-            'categories' => $subCategories,
             'childCategories' => $vehicleTypes,
             'childCategoryType' => 'Vehicle Type',
             'parentCategory' => $mainCategory,
         ]);
     }
-
 }

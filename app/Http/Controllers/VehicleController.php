@@ -62,23 +62,16 @@ class VehicleController extends Controller
      */
     public function create(Request $request)
     {
-        // Get the user from the request object
         $user = $request->user();
 
-        // Check if user has a phone number
         if (!$user->phone) {
-            // Store intended route
             session(['url.intended' => route('vehicle.create')]);
-            // Redirect to profile.index with a warning message
-            // to provide a phone number before adding a vehicle
             return redirect()->route('profile.index')
                 ->with('warning', 'Please provide a phone number before adding a vehicle');
         }
 
-        // Authorize user to create a vehicle (policy check)
         Gate::authorize('create', Vehicle::class);
 
-        // Get sub_category from query string if present
         $subCategorySlug = request()->query('sub_category');
         $subCategory = null;
 
@@ -86,25 +79,25 @@ class VehicleController extends Controller
             $subCategory = SubCategory::where('slug', $subCategorySlug)->first();
 
             if (!$subCategory) {
+                // Better error message showing what slug was attempted
                 return redirect()->route('main-categories.index')
-                    ->with('error', 'Invalid category selected');
+                    ->with('error', "Invalid category selected: '{$subCategorySlug}' not found. Please select a valid category.");
             }
         }
 
-        // If no sub_category selected, redirect to main categories selection
         if (!$subCategory) {
             session()->put('selecting_category_for_create', true);
             return redirect()->route('main-categories.index')
                 ->with('info', 'Please select a vehicle category to continue');
         }
 
-        // Clear the session flag if we got here with a category
         session()->forget('selecting_category_for_create');
 
-        // Get vehicle types for this sub-category
+        // Load the main category relationship
+        $subCategory->load('mainCategory');
+
         $vehicleTypes = $subCategory->vehicleTypes()->get();
 
-        // Render the create vehicle view
         return view('vehicle.create', [
             'subCategory' => $subCategory,
             'mainCategory' => $subCategory->mainCategory,

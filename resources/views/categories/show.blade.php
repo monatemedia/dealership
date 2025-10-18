@@ -3,63 +3,86 @@
     'category',
     'vehicles',
     'childCategories' => null,
-    'childCategoryType' => null, // e.g., 'Sub-Category' or 'Vehicle Type'
+    'childCategoryType' => null,
     'parentCategory' => null,
 ])
 
-<x-app-layout :title="$category->name">
+@php
+$taxonomyService = app('App\Services\TaxonomyRouteService');
+$config = [];
+$typeKey = null;
 
-    <!-- Home Slider -->
+if ($childCategoryType) {
+    // Convert to kebab-case for config lookup
+    $typeKey = Str::kebab(Str::lower($childCategoryType));
+    $config = $taxonomyService->getTaxonomyConfig($typeKey);
+}
+@endphp
+
+<x-app-layout :title="$category->name">
     <x-hero.home-slider />
-    <!--/ Home Slider -->
 
     <main>
-        {{-- Conditionally display the child category section --}}
-        @if ($childCategories && $childCategories->isNotEmpty())
-            @php
-                // Determine the plural slug for route names
-                $pluralSlug = Str::of($childCategoryType)
-                    ->replace('-', ' ')
-                    ->plural()
-                    ->kebab();
+        {{-- DEBUG: Remove this section after troubleshooting --}}
+        @if(config('app.debug'))
+            <div style="background: #f0f0f0; padding: 20px; margin: 20px; border: 2px solid #ccc; font-family: monospace; font-size: 12px;">
+                <h3 style="margin-top: 0;">🔍 Debug Info for Taxonomy Section</h3>
+                <ul style="list-style: none; padding: 0;">
+                    <li>✓ <strong>childCategoryType:</strong> <code>{{ var_export($childCategoryType, true) }}</code></li>
+                    <li>✓ <strong>typeKey (computed):</strong> <code>{{ var_export($typeKey, true) }}</code></li>
+                    <li>✓ <strong>config found:</strong> <code>{{ empty($config) ? '❌ NO' : '✅ YES' }}</code></li>
+                    @if(!empty($config))
+                        <li style="margin-left: 20px;">→ <strong>type:</strong> {{ $config['type'] ?? 'N/A' }}</li>
+                        <li style="margin-left: 20px;">→ <strong>pluralType:</strong> {{ $config['pluralType'] ?? 'N/A' }}</li>
+                        <li style="margin-left: 20px;">→ <strong>showRouteName:</strong> {{ $config['showRouteName'] ?? 'N/A' }}</li>
+                    @endif
+                    <li>✓ <strong>childCategories exists:</strong> <code>{{ $childCategories ? '✅ YES' : '❌ NO' }}</code></li>
+                    <li>✓ <strong>childCategories count:</strong> <code>{{ $childCategories?->count() ?? 0 }}</code></li>
+                    <li>✓ <strong>parentCategory:</strong> <code>{{ $parentCategory?->name ?? 'NULL' }}</code></li>
+                    <li style="margin-top: 10px; padding: 10px; background: {{ ($childCategories && $childCategories->isNotEmpty() && !empty($config)) ? '#d4edda' : '#f8d7da' }}; border-radius: 4px;">
+                        <strong>🎯 Section will render:</strong>
+                        <strong>{{ ($childCategories && $childCategories->isNotEmpty() && !empty($config)) ? '✅ YES' : '❌ NO' }}</strong>
+                    </li>
+                </ul>
+            </div>
+        @endif
+        {{-- END DEBUG --}}
 
-                // Determine which show route to use
-                if ($childCategoryType === 'Sub-Category') {
-                    $showRoute = 'sub-categories.show'; // Needs both mainCategory + subCategory
-                } elseif ($childCategoryType === 'Vehicle Type') {
-                    $showRoute = 'vehicle-types.show'; // Needs both subCategory + vehicleType
-                } else {
-                    $showRoute = $pluralSlug . '.show'; // fallback
-                }
-            @endphp
-
-            <x-category.section
+        {{-- Child taxonomy section (vehicle types, fuel types, etc.) --}}
+        @if ($childCategories && $childCategories->isNotEmpty() && !empty($config))
+            <x-taxonomy.section
                 :categories="$childCategories"
-                :type="$childCategoryType"
-                :pluralType="Str::plural($childCategoryType)"
-                :indexRouteName="$pluralSlug . '.index'"
-                :showRouteName="$showRoute"
+                :type="$config['type']"
+                :pluralType="$config['pluralType']"
+                :indexRouteName="$config['indexRouteName']"
+                :showRouteName="$config['showRouteName']"
                 :selectingForCreate="false"
+                :parentCategory="$parentCategory"
             />
         @endif
 
         <x-search-form />
+
+        {{-- Vehicle listing section --}}
         <section>
             <div class="container">
-                {{-- Handle the special title for Vehicle Types --}}
-                @if ($parentCategory)
-                    <h2>{{ $category->name }} - {{ $parentCategory->name }}</h2>
-                @else
-                    <h2>Latest {{ $category->name }}</h2>
-                @endif
+                <h2>
+                    @if ($parentCategory)
+                        {{ $category->name }} - {{ $parentCategory->name }}
+                    @else
+                        Latest {{ $category->name }}
+                    @endif
+                </h2>
 
                 @if ($vehicles->count() > 0)
                     <div class="vehicle-items-listing">
                         @foreach($vehicles as $vehicle)
-                            <x-vehicle-item :$vehicle
+                            <x-vehicle-item
+                                :$vehicle
                                 :is-in-watchlist="$vehicle->favouredUsers->contains(
                                     \Illuminate\Support\Facades\Auth::user()
-                                )"/>
+                                )"
+                            />
                         @endforeach
                     </div>
                 @else
@@ -67,7 +90,9 @@
                         There are no published vehicles in this category.
                     </div>
                 @endif
+
                 {{ $vehicles->onEachSide(1)->links() }}
             </div>
         </section>
+    </main>
 </x-app-layout>

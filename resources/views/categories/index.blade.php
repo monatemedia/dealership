@@ -1,19 +1,27 @@
-{{-- resource/views/categories/index.blade.php --}}
+{{-- resources/views/categories/index.blade.php --}}
+@props([
+    'categories',
+    'type' => 'Main Category',
+    'selectingForCreate' => false,
+    'parentCategory' => null,
+])
 
-<x-app-layout title="Categories Page">
+@php
+$taxonomyService = app('App\Services\TaxonomyRouteService');
+$config = $taxonomyService->getTaxonomyConfig(Str::kebab($type));
+@endphp
+
+<x-app-layout :title="$config['pluralType'] ?? 'Categories'">
     <main class="no-padding">
-
-        {{-- Category Section --}}
-        {{-- Category Section --}}
-        <x-category.section
+        <x-taxonomy.section
             :categories="$categories"
-            type="Main Category"
-            pluralType="Main Categories"
-            indexRouteName="main-categories.index"
-            showRouteName="main-categories.show"
+            :type="$config['type']"
+            :pluralType="$config['pluralType']"
+            :indexRouteName="$config['indexRouteName']"
+            :showRouteName="$config['showRouteName']"
+            :createRouteParam="$config['createRouteParam']"
             :selectingForCreate="$selectingForCreate"
+            :parentCategory="$parentCategory"
         />
-
     </main>
-
 </x-app-layout>

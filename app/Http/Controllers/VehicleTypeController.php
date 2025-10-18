@@ -1,5 +1,4 @@
-<?php
-
+<?php // app/Http/Controllers/VehicleTypeController.php
 namespace App\Http\Controllers;
 
 use App\Models\MainCategory;
@@ -10,28 +9,30 @@ use App\Models\Vehicle;
 class VehicleTypeController extends Controller
 {
     /**
-     * List all vehicle types for a given subcategory
+     * Route: /{mainCategory:slug}/{subCategory:slug}/vehicle-types
+     * Both parameters are required by the route
      */
-    public function index(SubCategory $subCategory)
+    public function index(MainCategory $mainCategory, SubCategory $subCategory)
     {
+        // Verify relationship
+        if ($subCategory->main_category_id !== $mainCategory->id) {
+            abort(404);
+        }
+
         // Eager load mainCategory for route generation in Blade
         $subCategory->load('mainCategory');
 
         $vehicleTypes = VehicleType::where('sub_category_id', $subCategory->id)
-            ->with('subCategory')
+            ->with('subCategory.mainCategory')
             ->get();
 
         $selectingForCreate = session()->has('selecting_category_for_create');
 
         return view('categories.index', [
             'categories' => $vehicleTypes,
-            'selectingForCreate' => $selectingForCreate,
-            'parentCategory' => $subCategory,   // Required for route parameters
-            'childCategoryType' => 'Vehicle Type',
-            'indexRouteName' => 'vehicle-types.index', // Pass explicitly for Blade links
-            'showRouteName' => 'vehicle-types.show',   // Pass explicitly
             'type' => 'Vehicle Type',
-            'pluralType' => 'Vehicle Types',
+            'selectingForCreate' => $selectingForCreate,
+            'parentCategory' => $subCategory,
         ]);
     }
 
@@ -49,16 +50,11 @@ class VehicleTypeController extends Controller
             ->latest()
             ->paginate(15);
 
-        // Child categories for section
-        $childCategories = VehicleType::where('sub_category_id', $subCategory->id)
-            ->with('subCategory')
-            ->get();
-
         return view('categories.show', [
             'category' => $vehicleType,
             'vehicles' => $vehicles,
-            'childCategories' => $childCategories,
-            'childCategoryType' => 'Vehicle Type',
+            'childCategories' => collect(), // No children for vehicle types
+            'childCategoryType' => null,
             'parentCategory' => $subCategory,
         ]);
     }

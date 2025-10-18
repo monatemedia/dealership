@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\TaxonomyRouteService;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -10,7 +11,10 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        // Register TaxonomyRouteService as singleton
+        $this->app->singleton(TaxonomyRouteService::class, function ($app) {
+            return new TaxonomyRouteService();
+        });
     }
 
     public function boot(): void

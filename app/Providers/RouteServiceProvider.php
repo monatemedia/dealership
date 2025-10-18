@@ -1,5 +1,4 @@
 <?php // app/Providers/RouteServiceProvider.php
-
 namespace App\Providers;
 
 use App\Models\MainCategory;
@@ -17,7 +16,6 @@ class RouteServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Prevents abuse by limiting how many requests users can make:
         $this->configureRateLimiting();
 
         $this->routes(function () {
@@ -34,16 +32,27 @@ class RouteServiceProvider extends ServiceProvider
         // -------------------------------
 
         /**
+         * MainCategory Binding
+         * Resolve MainCategory by slug first
+         */
+        Route::bind('mainCategory', function ($value) {
+            return MainCategory::where('slug', $value)->firstOrFail();
+        });
+
+        /**
          * SubCategory Binding
          * Bind SubCategory under MainCategory
-         * When Laravel sees `{mainCategory}/{subCategory}` in a route:
-         * - Finds the main category by slug (`transport`)
-         * - Then finds the subcategory **only within that main category** (`motorcycles`)
-         * - Returns 404 if the subcategory doesn't belong to that main category
+         * The mainCategory parameter is now already resolved to a model
          */
         Route::bind('subCategory', function ($value, $route) {
-            $mainCategorySlug = $route->parameter('mainCategory');
-            $mainCategory = MainCategory::where('slug', $mainCategorySlug)->firstOrFail();
+            // Get the already-resolved MainCategory model
+            $mainCategory = $route->parameter('mainCategory');
+
+            // If mainCategory is still a string (shouldn't happen but safety check)
+            if (is_string($mainCategory)) {
+                $mainCategory = MainCategory::where('slug', $mainCategory)->firstOrFail();
+            }
+
             return SubCategory::where('slug', $value)
                 ->where('main_category_id', $mainCategory->id)
                 ->firstOrFail();
@@ -52,32 +61,29 @@ class RouteServiceProvider extends ServiceProvider
         /**
          * VehicleType Binding
          * Bind VehicleType under SubCategory
-         * When Laravel sees `{subCategory}/{vehicleType}` in a route:
-         * - Finds the subcategory by slug (`motorcycles`)
-         * - Then finds the vehicle type **only within that subcategory** (`sport-bikes`)
-         * - Returns 404 if the vehicle type doesn't belong to that subcategory
+         * The subCategory parameter is now already resolved to a model
          */
         Route::bind('vehicleType', function ($value, $route) {
-            $subCategorySlug = $route->parameter('subCategory');
-            $subCategory = SubCategory::where('slug', $subCategorySlug)->firstOrFail();
+            // Get the already-resolved SubCategory model
+            $subCategory = $route->parameter('subCategory');
+
+            // If subCategory is still a string (shouldn't happen but safety check)
+            if (is_string($subCategory)) {
+                $subCategory = SubCategory::where('slug', $subCategory)->firstOrFail();
+            }
+
             return VehicleType::where('slug', $value)
                 ->where('sub_category_id', $subCategory->id)
                 ->firstOrFail();
         });
     }
 
-
-    // -------------------------------
-    // Configure Rate Limiting
-    // -------------------------------
     protected function configureRateLimiting(): void
     {
-        // API routes: 60 requests per minute (tracked by user ID or IP address)
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
-        // Web routes: 120 requests per minute (tracked by IP address)
         RateLimiter::for('web', function (Request $request) {
             return Limit::perMinute(120)->by($request->ip());
         });

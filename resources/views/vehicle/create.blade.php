@@ -1,7 +1,21 @@
 {{-- resources/views/vehicle/create.blade.php --}}
 
 @php
-    // If $category is set, pull its config info
+    // DEBUG: Check what we have
+    if (!isset($subCategory)) {
+        dd('$subCategory is not set');
+    }
+    if (is_null($subCategory)) {
+        dd('$subCategory is null');
+    }
+    if (!isset($mainCategory)) {
+        dd('$mainCategory is not set');
+    }
+    if (is_null($mainCategory)) {
+        dd('$mainCategory is null', compact('subCategory'));
+    }
+
+    // If we get here, both exist
     $singular = $subCategory->singular ?? 'Vehicle';
 @endphp
 
@@ -57,19 +71,19 @@
                             </div>
                         </div>
 
-                        <div class="row">
+                        {{-- <div class="row">
                             <div class="col">
                                 <div class="form-group @error('vehicle_category_id') has-error @enderror">
                                     <label>Vehicle Category</label>
                                     <x-select-vehicle-category
-                                        :value="old('vehicle_category_id', $category?->id)"
+                                        :value="old('vehicle_category_id', $subCategory?->id)"
                                     />
                                     <p class="error-message">
                                         {{ $errors->first('vehicle_category_id') }}
                                     </p>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
                         <div class="row">
                             <div class="col">
                                 <div class="form-group @error('year') has-error @enderror">
