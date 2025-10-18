@@ -10,25 +10,38 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group.
-|
+| All routes are automatically prefixed with /api
+| All routes automatically use the 'api' middleware group
 */
 
-// Manufacturer routes
-Route::get('/manufacturers/search', [ManufacturerController::class, 'search'])->name('api.manufacturers.search');
-Route::get('/manufacturers/{id}', [ManufacturerController::class, 'show'])->name('api.manufacturers.show');
+// Manufacturers
+Route::prefix('manufacturers')->group(function () {
+    Route::get('/search', [ManufacturerController::class, 'search'])
+        ->name('api.manufacturers.search');
+    Route::get('/{id}', [ManufacturerController::class, 'show'])
+        ->name('api.manufacturers.show');
+});
 
-// Model routes
-Route::get('/models/search', [ModelController::class, 'search'])->name('api.models.search');
-Route::get('/models/{id}', [ModelController::class, 'show'])->name('api.models.show');
+// Models
+Route::prefix('models')->group(function () {
+    Route::get('/search', [ModelController::class, 'search'])
+        ->name('api.models.search');
+    Route::get('/{id}', [ModelController::class, 'show'])
+        ->name('api.models.show');
+});
 
-// Province routes
-Route::get('/provinces/search', [ProvinceController::class, 'search'])->name('api.provinces.search');
-Route::get('/provinces/{id}', [ProvinceController::class, 'show'])->name('api.provinces.show');
+// Provinces
+Route::prefix('provinces')->group(function () {
+    Route::get('/search', [ProvinceController::class, 'search'])
+        ->name('api.provinces.search');
+    Route::get('/{id}', [ProvinceController::class, 'show'])
+        ->name('api.provinces.show');
+});
 
-// City routes
-Route::get('/cities/search', [CityController::class, 'search'])->name('api.cities.search');
-Route::get('/cities/{id}', [CityController::class, 'show'])->name('api.cities.show');
+// Cities
+Route::prefix('cities')->group(function () {
+    Route::get('/search', [CityController::class, 'search'])
+        ->name('api.cities.search');
+    Route::get('/{id}', [CityController::class, 'show'])
+        ->name('api.cities.show');
+});

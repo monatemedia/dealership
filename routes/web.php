@@ -15,67 +15,29 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
+| Routes are organized from MOST SPECIFIC to LEAST SPECIFIC
+| This prevents slug-based routes from catching everything
 */
 
-// Home route
+// -------------------------------
+// HOME
+// -------------------------------
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // -------------------------------
-// CATEGORY HIERARCHY ROUTES
+// AUTHENTICATED ROUTES (Specific paths first)
 // -------------------------------
-
-// 1️⃣ MAIN CATEGORIES
-Route::get('/main-categories', [MainCategoryController::class, 'index'])
-    ->name('main-categories.index');
-
-Route::get('/{mainCategory:slug}', [MainCategoryController::class, 'show'])
-    ->name('main-categories.show');
-
-// 2️⃣ SUBCATEGORIES (nested under main category)
-Route::get('/{mainCategory:slug}/{subCategory:slug}', [SubCategoryController::class, 'show'])
-    ->name('sub-categories.show');
-
-//  Listing all subcategories
-Route::get('/sub-categories', [SubCategoryController::class, 'index'])
-    ->name('sub-categories.index');
-
-// 3️⃣ VEHICLE TYPES (nested under subcategory)
-Route::get('/{mainCategory:slug}/{subCategory:slug}/{vehicleType:slug}', [VehicleTypeController::class, 'show'])
-    ->name('vehicle-types.show');
-
-// List all vehicle types for a subcategory
-Route::get('/{mainCategory:slug}/{subCategory:slug}/vehicle-types', [VehicleTypeController::class, 'index'])
-    ->name('vehicle-types.index');
-
-Route::get('/{mainCategory:slug}/{subCategory:slug}/{vehicleType:slug}', [VehicleTypeController::class, 'show'])
-    ->name('vehicle-types.show');
-
-// -------------------------------
-// VEHICLE ROUTES
-// -------------------------------
-
-Route::get('/vehicle/search', [VehicleController::class, 'search'])
-    ->name('vehicle.search');
-
-Route::get('/vehicle/{vehicle}', [VehicleController::class, 'show'])
-    ->name('vehicle.show');
-
-Route::post('/vehicle/phone/{vehicle}', [VehicleController::class, 'showPhone'])
-    ->name('vehicle.showPhone');
-
-// -------------------------------
-// AUTHENTICATED ROUTES
-// -------------------------------
-
 Route::middleware(['auth', 'verified'])->group(function () {
-
-    // Vehicle management
-    Route::resource('vehicle', VehicleController::class)->except(['show']);
+    // Vehicle management - specific paths
+    Route::get('/vehicle/create', [VehicleController::class, 'create'])->name('vehicle.create');
+    Route::post('/vehicle', [VehicleController::class, 'store'])->name('vehicle.store');
+    Route::get('/vehicle/{vehicle}/edit', [VehicleController::class, 'edit'])->name('vehicle.edit');
+    Route::put('/vehicle/{vehicle}', [VehicleController::class, 'update'])->name('vehicle.update');
+    Route::delete('/vehicle/{vehicle}', [VehicleController::class, 'destroy'])->name('vehicle.destroy');
 
     // Multi-step vehicle creation flow
     Route::get('/vehicle/create/main-categories', [VehicleCategoryController::class, 'indexMainCategories'])
         ->name('vehicle.main-categories');
-
     Route::get('/vehicle/create/sub-categories/{mainCategory:slug}', [VehicleCategoryController::class, 'indexSubCategories'])
         ->name('vehicle.sub-categories');
 
@@ -102,5 +64,49 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
 
-// Include authentication routes
+// -------------------------------
+// AUTHENTICATION ROUTES (Include before slug routes)
+// -------------------------------
 require __DIR__ . '/auth.php';
+
+// -------------------------------
+// PUBLIC SPECIFIC ROUTES
+// -------------------------------
+
+// Vehicle search (must come before vehicle show)
+Route::get('/vehicle/search', [VehicleController::class, 'search'])
+    ->name('vehicle.search');
+
+// Vehicle show with phone
+Route::post('/vehicle/phone/{vehicle}', [VehicleController::class, 'showPhone'])
+    ->name('vehicle.showPhone');
+
+// Vehicle show (specific path)
+Route::get('/vehicle/{vehicle}', [VehicleController::class, 'show'])
+    ->name('vehicle.show');
+
+// Category listing pages (specific paths)
+Route::get('/main-categories', [MainCategoryController::class, 'index'])
+    ->name('main-categories.index');
+
+Route::get('/sub-categories', [SubCategoryController::class, 'index'])
+    ->name('sub-categories.index');
+
+// -------------------------------
+// CATEGORY HIERARCHY ROUTES (Slug-based - MUST BE LAST)
+// -------------------------------
+
+// 3️⃣ VEHICLE TYPES (most specific slug route - 3 segments)
+Route::get('/{mainCategory:slug}/{subCategory:slug}/vehicle-types', [VehicleTypeController::class, 'index'])
+    ->name('vehicle-types.index');
+
+Route::get('/{mainCategory:slug}/{subCategory:slug}/{vehicleType:slug}', [VehicleTypeController::class, 'show'])
+    ->name('vehicle-types.show');
+
+// 2️⃣ SUBCATEGORIES (2 segments)
+Route::get('/{mainCategory:slug}/{subCategory:slug}', [SubCategoryController::class, 'show'])
+    ->name('sub-categories.show');
+
+// 1️⃣ MAIN CATEGORIES (least specific - single segment, MUST BE LAST!)
+Route::get('/{mainCategory:slug}', [MainCategoryController::class, 'show'])
+    ->name('main-categories.show');
