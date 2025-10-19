@@ -1,4 +1,4 @@
-<?php
+<?php // app/Http/Controllers/SubCategoryController.php
 namespace App\Http\Controllers;
 
 use App\Models\MainCategory;
@@ -8,15 +8,23 @@ use App\Models\VehicleType;
 
 class SubCategoryController extends Controller
 {
-    public function index()
+    /**
+     * Show all sub-categories for a main category
+     * Route: /{mainCategory}/sub-categories
+     */
+    public function index(MainCategory $mainCategory)
     {
-        $subCategories = SubCategory::with('mainCategory')->get();
+        $subCategories = SubCategory::with('mainCategory')
+            ->where('main_category_id', $mainCategory->id)
+            ->get();
+
         $selectingForCreate = session()->has('selecting_category_for_create');
 
         return view('categories.index', [
             'categories' => $subCategories,
             'type' => 'Sub-Category',
             'selectingForCreate' => $selectingForCreate,
+            'parentCategory' => $mainCategory,
         ]);
     }
 
@@ -38,7 +46,7 @@ class SubCategoryController extends Controller
             'vehicles' => $vehicles,
             'childCategories' => $vehicleTypes,
             'childCategoryType' => 'Vehicle Type',
-            'parentCategory' => $mainCategory,
+            'parentCategory' => $subCategory, // Pass subCategory as parent for button
         ]);
     }
 }

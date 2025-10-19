@@ -37,6 +37,7 @@ class MainCategoryController extends Controller
             'vehicles' => $vehicles,
             'childCategories' => $subCategories,
             'childCategoryType' => 'Sub-Category',
+            'parentCategory' => $mainCategory, // Pass mainCategory as parent for button
         ]);
     }
 }

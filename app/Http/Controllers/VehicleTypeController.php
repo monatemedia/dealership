@@ -10,7 +10,7 @@ class VehicleTypeController extends Controller
 {
     /**
      * Route: /{mainCategory:slug}/{subCategory:slug}/vehicle-types
-     * Both parameters are required by the route
+     * Both parameters are route model binding by slug
      */
     public function index(MainCategory $mainCategory, SubCategory $subCategory)
     {
@@ -19,7 +19,6 @@ class VehicleTypeController extends Controller
             abort(404);
         }
 
-        // Eager load mainCategory for route generation in Blade
         $subCategory->load('mainCategory');
 
         $vehicleTypes = VehicleType::where('sub_category_id', $subCategory->id)
@@ -36,6 +35,9 @@ class VehicleTypeController extends Controller
         ]);
     }
 
+    /**
+     * Route: /{mainCategory:slug}/{subCategory:slug}/{vehicleType:slug}
+     */
     public function show(MainCategory $mainCategory, SubCategory $subCategory, VehicleType $vehicleType)
     {
         // Verify relationships

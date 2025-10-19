@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class TaxonomyRouteService
 {
@@ -47,11 +48,27 @@ class TaxonomyRouteService
      */
     public function resolveIndexParams(string $routeName, ?Model $parentCategory = null): array
     {
+        // Routes that don't need parameters (show all items globally)
+        if (in_array($routeName, ['main-categories.index'])) {
+            return [];
+        }
+
         if (!$parentCategory) {
             return [];
         }
 
+        // Handle main-category.sub-categories.index route
+        // Route: /{mainCategory}/sub-categories
+        // Parent is a MainCategory
+        if ($routeName === 'main-category.sub-categories.index') {
+            return [
+                'mainCategory' => $parentCategory->slug,
+            ];
+        }
+
         // Handle vehicle-types.index route
+        // Route: /{mainCategory}/{subCategory}/vehicle-types
+        // Parent is a SubCategory
         if ($routeName === 'vehicle-types.index') {
             if (isset($parentCategory->mainCategory)) {
                 return [
@@ -62,8 +79,8 @@ class TaxonomyRouteService
         }
 
         // Handle fuel-types.index route (when you build it)
+        // Route: /{mainCategory}/{subCategory}/fuel-types
         if ($routeName === 'fuel-types.index') {
-            // Similar pattern for fuel types
             if (isset($parentCategory->mainCategory)) {
                 return [
                     'mainCategory' => $parentCategory->mainCategory->slug,
@@ -94,7 +111,7 @@ class TaxonomyRouteService
             'sub-category' => [
                 'type' => 'Sub-Category',
                 'pluralType' => 'Sub-Categories',
-                'indexRouteName' => 'sub-categories.index',
+                'indexRouteName' => 'main-category.sub-categories.index',
                 'showRouteName' => 'sub-categories.show',
                 'createRouteParam' => 'sub_category',
             ],
@@ -115,8 +132,16 @@ class TaxonomyRouteService
         ];
 
         // Normalize the type to kebab-case lowercase
-        $normalizedType = \Illuminate\Support\Str::kebab(\Illuminate\Support\Str::lower($type));
+        $normalizedType = Str::kebab(Str::lower($type));
 
         return $configs[$normalizedType] ?? [];
+    }
+
+    /**
+     * Alias for getTaxonomyConfig (for backwards compatibility)
+     */
+    public function getConfig(string $type): array
+    {
+        return $this->getTaxonomyConfig($type);
     }
 }
