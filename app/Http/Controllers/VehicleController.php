@@ -166,6 +166,23 @@ class VehicleController extends Controller
         // Assign the authenticated user ID to the vehicle record
         $data['user_id'] = Auth::id();
 
+        // Ensure sub_category_id exists and is valid
+        if (empty($data['sub_category_id'])) {
+            return redirect('vehicle.create')
+                ->with('error', 'Please select a valid subcategory before creating a vehicle.');
+        }
+
+        $subCategory = SubCategory::find($data['sub_category_id']);
+        if (!$subCategory) {
+            return redirect('vehicle.create')
+                ->with('error', 'The selected subcategory no longer exists. Please choose another.');
+        }
+
+        // Automatically assign main_category_id
+        $data['main_category_id'] = $subCategory->main_category_id;
+        // dd($subCategory->toArray());
+        // dd($data);
+
         // Create the Vehicle record
         $vehicle = Vehicle::create($data);
 
