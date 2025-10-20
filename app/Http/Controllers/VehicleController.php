@@ -52,13 +52,14 @@ class VehicleController extends Controller
         );
     }
 
-    /**
+/**
      * VehicleController::create
      * Show the form for creating a new resource.
      *
      * Multi-step flow:
-     * - If sub_category provided in query string: show create form (prefilled with vehicle types)
-     * - If no sub_category: redirect to main categories selection
+     * - If sub_category provided: show create form
+     * - If main_category provided: redirect to sub_category selection
+     * - If nothing provided: redirect to main_category selection
      */
     public function create(Request $request)
     {
@@ -67,43 +68,54 @@ class VehicleController extends Controller
         if (!$user->phone) {
             session(['url.intended' => route('vehicle.create')]);
             return redirect()->route('profile.index')
-                ->with('warning', 'Please provide a phone number before adding a vehicle');
+                ->with('info', 'Please provide a phone number before adding a vehicle');
         }
 
         Gate::authorize('create', Vehicle::class);
 
-        $subCategorySlug = request()->query('sub_category');
-        $subCategory = null;
+        $subCategorySlug = $request->query('sub_category');
+        $mainCategorySlug = $request->query('main_category');
 
+        // --- CASE 1: sub_category present ---
         if ($subCategorySlug) {
             $subCategory = SubCategory::where('slug', $subCategorySlug)->first();
 
             if (!$subCategory) {
-                // Better error message showing what slug was attempted
                 return redirect()->route('main-categories.index')
-                    ->with('error', "Invalid category selected: '{$subCategorySlug}' not found. Please select a valid category.");
+                    ->with('error', "Invalid sub-category '{$subCategorySlug}'. Please select a valid one.");
             }
+
+            $subCategory->load('mainCategory');
+            $vehicleTypes = $subCategory->vehicleTypes()->get();
+
+            return view('vehicle.create', [
+                'subCategory' => $subCategory,
+                'mainCategory' => $subCategory->mainCategory,
+                'vehicleTypes' => $vehicleTypes,
+            ]);
         }
 
-        if (!$subCategory) {
+        // --- CASE 2: main_category present, but no sub_category ---
+        if ($mainCategorySlug) {
+            $mainCategory = MainCategory::where('slug', $mainCategorySlug)->first();
+
+            if (!$mainCategory) {
+                return redirect()->route('main-categories.index')
+                    ->with('error', "Invalid main category '{$mainCategorySlug}'.");
+            }
+
             session()->put('selecting_category_for_create', true);
-            return redirect()->route('main-categories.index')
-                ->with('info', 'Please select a vehicle category to continue');
+            return redirect()->route('main-category.sub-categories.index', [
+                'mainCategory' => $mainCategory->slug,
+            ]);
         }
 
-        session()->forget('selecting_category_for_create');
-
-        // Load the main category relationship
-        $subCategory->load('mainCategory');
-
-        $vehicleTypes = $subCategory->vehicleTypes()->get();
-
-        return view('vehicle.create', [
-            'subCategory' => $subCategory,
-            'mainCategory' => $subCategory->mainCategory,
-            'vehicleTypes' => $vehicleTypes,
-        ]);
+        // --- CASE 3: neither present ---
+        session()->put('selecting_category_for_create', true);
+        return redirect()->route('main-categories.index')
+            ->with('info', 'Please select a vehicle category to continue');
     }
+
 
     /**
      * app/Http/Controllers/VehicleController::store
