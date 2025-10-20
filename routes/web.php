@@ -32,7 +32,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('vehicle', VehicleController::class)->except(['show']);
 
     // Vehicle management - specific paths
-    Route::get('/vehicle/create', [VehicleController::class, 'create'])->name('vehicle.create');
     Route::post('/vehicle', [VehicleController::class, 'store'])->name('vehicle.store');
     Route::get('/vehicle/{vehicle}/edit', [VehicleController::class, 'edit'])->name('vehicle.edit');
     Route::put('/vehicle/{vehicle}', [VehicleController::class, 'update'])->name('vehicle.update');

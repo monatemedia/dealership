@@ -3,6 +3,7 @@
 namespace App\View\Components;
 
 use App\Models\VehicleType;
+use App\Models\SubCategory;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -15,9 +16,10 @@ class RadioListVehicleType extends Component
     /**
      * Create a new component instance.
      */
-    public function __construct()
+    public function __construct(SubCategory $subCategory)
     {
-        $this->types = VehicleType::orderBy('name')->get();
+        // Only get vehicle types for the given sub-category
+        $this->types = $subCategory->vehicleTypes()->orderBy('name')->get();
     }
 
     /**

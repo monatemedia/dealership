@@ -52,7 +52,7 @@ class VehicleController extends Controller
         );
     }
 
-/**
+    /**
      * VehicleController::create
      * Show the form for creating a new resource.
      *
@@ -79,6 +79,7 @@ class VehicleController extends Controller
         // --- CASE 1: sub_category present ---
         if ($subCategorySlug) {
             $subCategory = SubCategory::where('slug', $subCategorySlug)->first();
+            // dd($subCategory);
 
             if (!$subCategory) {
                 return redirect()->route('main-categories.index')
@@ -87,6 +88,7 @@ class VehicleController extends Controller
 
             $subCategory->load('mainCategory');
             $vehicleTypes = $subCategory->vehicleTypes()->get();
+            // dd($vehicleTypes);
 
             return view('vehicle.create', [
                 'subCategory' => $subCategory,

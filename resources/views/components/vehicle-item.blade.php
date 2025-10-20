@@ -47,13 +47,13 @@
         <hr />
         <div class="vehicle-item-badges">
             {{-- @dd($vehicle) --}}
-            <span class="vehicle-item-badge">{{ $vehicle->mainCategory->name }}</span>
-            <span class="vehicle-item-badge">{{ $vehicle->subCategory->name }}</span>
+            <span class="vehicle-item-badge">{{ $vehicle->mainCategory?->name }}</span>
+            <span class="vehicle-item-badge">{{ $vehicle->subCategory?->name }}</span>
             @if (!empty($vehicle->vehicleType?->name))
-                <span class="vehicle-item-badge">{{ $vehicle->vehicleType->name }}</span>
+                <span class="vehicle-item-badge">{{ $vehicle->vehicleType?->name }}</span>
             @endif
             @if (!empty($vehicle->fuelType?->name))
-                <span class="vehicle-item-badge">{{ $vehicle->fuelType->name }}</span>
+                <span class="vehicle-item-badge">{{ $vehicle->fuelType?->name }}</span>
             @endif
         </div>
     </div>

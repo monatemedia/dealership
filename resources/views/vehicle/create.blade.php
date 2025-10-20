@@ -2,18 +2,18 @@
 
 @php
     // DEBUG: Check what we have
-    if (!isset($subCategory)) {
-        dd('$subCategory is not set');
-    }
-    if (is_null($subCategory)) {
-        dd('$subCategory is null');
-    }
-    if (!isset($mainCategory)) {
-        dd('$mainCategory is not set');
-    }
-    if (is_null($mainCategory)) {
-        dd('$mainCategory is null', compact('subCategory'));
-    }
+    // if (!isset($subCategory)) {
+    //     dd('$subCategory is not set');
+    // }
+    // if (is_null($subCategory)) {
+    //     dd('$subCategory is null');
+    // }
+    // if (!isset($mainCategory)) {
+    //     dd('$mainCategory is not set');
+    // }
+    // if (is_null($mainCategory)) {
+    //     dd('$mainCategory is null', compact('subCategory'));
+    // }
 
     // If we get here, both exist
     $singular = $subCategory->singular ?? 'Vehicle';
@@ -102,7 +102,10 @@
                         </div>
                         <div class="form-group @error('vehicle_type_id') has-error @enderror">
                             <label>Vehicle Type</label>
-                            <x-radio-list-vehicle-type :value="old('vehicle_type_id')" />
+                            <x-radio-list-vehicle-type
+                                :sub-category="$subCategory"
+                                :value="old('vehicle_type_id')"
+                            />
                             <p class="error-message">
                                 {{ $errors->first('vehicle_type_id') }}
                             </p>
