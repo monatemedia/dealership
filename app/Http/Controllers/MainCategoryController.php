@@ -11,7 +11,7 @@ class MainCategoryController extends Controller
     public function index()
     {
         $mainCategories = MainCategory::all();
-        $selectingForCreate = session()->has('selecting_category_for_create');
+        $selectingForCreate = session('selecting_category_for_create', false);
 
         // **FIX:** When selecting, the "create" route is the *next step* // (the sub-category list), not the *final* step (vehicle.create).
 

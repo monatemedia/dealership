@@ -18,7 +18,7 @@ class SubCategoryController extends Controller
             ->where('main_category_id', $mainCategory->id)
             ->get();
 
-        $selectingForCreate = session()->has('selecting_category_for_create');
+        $selectingForCreate = session('selecting_category_for_create', false);
 
         return view('categories.index', [
             'categories' => $subCategories,

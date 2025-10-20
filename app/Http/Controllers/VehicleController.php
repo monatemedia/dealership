@@ -79,7 +79,6 @@ class VehicleController extends Controller
         // --- CASE 1: sub_category present ---
         if ($subCategorySlug) {
             $subCategory = SubCategory::where('slug', $subCategorySlug)->first();
-            // dd($subCategory);
 
             if (!$subCategory) {
                 return redirect()->route('main-categories.index')
@@ -88,7 +87,6 @@ class VehicleController extends Controller
 
             $subCategory->load('mainCategory');
             $vehicleTypes = $subCategory->vehicleTypes()->get();
-            // dd($vehicleTypes);
 
             return view('vehicle.create', [
                 'subCategory' => $subCategory,
@@ -106,17 +104,27 @@ class VehicleController extends Controller
                     ->with('error', "Invalid main category '{$mainCategorySlug}'.");
             }
 
-            session()->put('selecting_category_for_create', true);
+            // Mark session: selecting sub-category for vehicle creation
+            session([
+                'selecting_category_for_create' => true,
+                'from_vehicle_create' => true, // <-- one-time flag
+            ]);
+
             return redirect()->route('main-category.sub-categories.index', [
                 'mainCategory' => $mainCategory->slug,
             ]);
         }
 
         // --- CASE 3: neither present ---
-        session()->put('selecting_category_for_create', true);
+        session([
+            'selecting_category_for_create' => true,
+            'from_vehicle_create' => true, // <-- one-time flag
+        ]);
+
         return redirect()->route('main-categories.index')
             ->with('info', 'Please select a vehicle category to continue');
     }
+
 
 
     /**
