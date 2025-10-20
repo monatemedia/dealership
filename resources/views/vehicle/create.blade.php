@@ -214,12 +214,13 @@
                             </p>
                         </div>
                         <div class="form-group @error('published_at') has-error @enderror">
-                            <label>Publish Date</label>
-                            <input type="date" name="published_at"
-                                value="{{ old('published_at') }}">
-                            <p class="error-message">
-                                {{ $errors->first('published_at') }}
-                            </p>
+                            <label>Publish Date & Time</label>
+                            <input
+                                type="datetime-local"
+                                name="published_at"
+                                value="{{ old('published_at') }}"
+                            >
+                            <p class="error-message">{{ $errors->first('published_at') }}</p>
                         </div>
                     </div>
                     <div class="form-images">

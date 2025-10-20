@@ -10,6 +10,7 @@ use App\Models\Vehicle;
 use App\Services\VehicleImage\VehicleImageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -182,6 +183,16 @@ class VehicleController extends Controller
         $data['main_category_id'] = $subCategory->main_category_id;
         // dd($subCategory->toArray());
         // dd($data);
+
+        // Convert to server timezone before saving
+        if (!empty($data['published_at'])) {
+            // Parse the input as local (Africa/Johannesburg) time
+            $data['published_at'] = Carbon::createFromFormat(
+                'Y-m-d\TH:i',
+                $data['published_at'],
+                config('app.timezone')
+            );
+        }
 
         // Create the Vehicle record
         $vehicle = Vehicle::create($data);
