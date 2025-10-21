@@ -1,28 +1,27 @@
-{{-- resources/views/components/add-vehicle-button.blade.php --}}
 @php
 use Illuminate\Support\Facades\Route;
 
-// Don't show button on vehicle.create route
-$hide = Route::currentRouteNamed('vehicle.create');
+// Determine if user is in the create flow
+$inCreateFlow = Route::currentRouteNamed('vehicle.create')
+    || (session('selecting_category_for_create', false) && session('from_vehicle_create', false));
 
-// Default link and label
-$href = route('vehicle.create'); // Always start the flow
+// Default text and link
 $label = 'Sell Your Vehicle';
+$href = route('vehicle.create');
 
-// If on a main category page, pass it as query parameter
-if (isset($mainCategory) && $mainCategory) {
-    $href = route('vehicle.create', ['main_category' => $mainCategory->slug]);
-    $label = 'Sell Your ' . ($mainCategory->singular ?? $mainCategory->name);
-}
-
-// If on a sub-category page, pass it as query parameter
+// If on sub-category page
 if (isset($subCategory) && $subCategory) {
-    $href = route('vehicle.create', ['sub_category' => $subCategory->slug]);
     $label = 'Sell Your ' . ($subCategory->singular ?? $subCategory->name);
+    $href = route('vehicle.create', ['sub_category' => $subCategory->slug]);
+}
+// If on main category page
+elseif (isset($mainCategory) && $mainCategory) {
+    $label = 'Sell Your ' . ($mainCategory->singular ?? $mainCategory->name);
+    $href = route('vehicle.create', ['main_category' => $mainCategory->slug]);
 }
 @endphp
 
-@if (!$hide)
+@if (! $inCreateFlow)
     <a href="{{ $href }}" class="btn btn-add-new-vehicle">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
             stroke="currentColor" style="width: 18px; margin-right: 4px">
