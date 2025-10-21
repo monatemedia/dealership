@@ -1,5 +1,7 @@
 <x-app-layout title="Edit {{ $vehicle->getTitle() }}">
     <main>
+        {{-- @dd($vehicleTypes); --}}
+        {{-- @dd($subCategory); --}}
         <div class="container-small">
             <h1 class="vehicle-details-page-title">
                 Edit Vehicle: {{ $vehicle->getTitle() }}
@@ -14,18 +16,22 @@
                 @method('PUT')
                 <div class="form-content">
                     {{-- @dump($vehicle) --}}
+
                     <div class="form-details">
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group @error('vehicle_category_id') has-error @enderror">
-                                    <label>Vehicle Category</label>
-                                    <x-select-vehicle-category :value="old('vehicle_category_id', $vehicle->vehicle_category_id)"/>
-                                    <p class="error-message">
-                                        {{ $errors->first('vehicle_category_id') }}
-                                    </p>
-                                </div>
+                    {{-- Hidden inputs --}}
+                    <input type="hidden" name="main_category_id" value="{{ $vehicle->subCategory->mainCategory->id ?? '' }}" />
+                    <input type="hidden" name="sub_category_id" value="{{ $vehicle->subCategory->id ?? '' }}" />
+
+                    {{-- Display category --}}
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <input type="text" readonly value="{{ $vehicle->subCategory->long_name ?? 'N/A' }}" />
                             </div>
                         </div>
+                    </div>
+
                         <div class="row">
                             <div class="col">
                                 <div class="form-group @error('year') has-error @enderror">
@@ -57,7 +63,14 @@
                         </div>
                         <div class="form-group @error('vehicle_type_id') has-error @enderror">
                             <label>Vehicle Type</label>
-                            <x-radio-list-vehicle-type :value="old('vehicle_type_id', $vehicle->vehicle_type_id)" />
+                                @if($subCategory)
+                                    <x-radio-list-vehicle-type
+                                        :sub-category="$subCategory"
+                                        :value="old('vehicle_type_id', $vehicle->vehicle_type_id)"
+                                    />
+                                @else
+                                    <p class="text-warning">No subcategory found for this vehicle.</p>
+                                @endif
                             <p class="error-message">
                                 {{ $errors->first('vehicle_type_id') }}
                             </p>
@@ -151,12 +164,14 @@
                             </p>
                         </div>
                         <div class="form-group @error('published_at') has-error @enderror">
-                            <label>Publish Date</label>
-                            <input type="date" name="published_at"
-                            value="{{ old('published_at', $vehicle->published_at?->toDateString()) }}">
-                            <p class="error-message">
-                                {{ $errors->first('published_at') }}
-                            </p>
+                            <label>Publish Date & Time</label>
+                            {{-- Datetime-local input --}}
+                            <input
+                                type="datetime-local"
+                                name="published_at"
+                                value="{{ old('published_at', $vehicle->published_at?->format('Y-m-d\TH:i')) }}"
+                            >
+                            <p class="error-message">{{ $errors->first('published_at') }}</p>
                         </div>
                     </div>
                     <div class="form-images">

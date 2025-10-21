@@ -264,11 +264,37 @@ class VehicleController extends Controller
     public function edit(Vehicle $vehicle)
     {
         Gate::authorize('update', $vehicle);
-        // dump($vehicle->images->toArray());
+
+        // Eager load vehicleType -> subCategory -> mainCategory
+        $vehicle->load([
+            'vehicleType.subCategory.mainCategory',
+            'subCategory.mainCategory',
+            'manufacturer',
+            'model',
+        ]);
+
+        // Prefer vehicleType's subCategory if it exists; fallback to vehicle->subCategory
+        $subCategory = $vehicle->vehicleType?->subCategory ?? $vehicle->subCategory;
+
+        if (!$subCategory) {
+            abort(404, 'No subcategory found for this vehicle.');
+        }
+
+        $mainCategory = $subCategory->mainCategory;
+
+        if (!$mainCategory) {
+            abort(404, 'No main category found for this subcategory.');
+        }
+
         return view('vehicle.edit', [
-            'vehicle' => $vehicle
+            'vehicle' => $vehicle,
+            'subCategory' => $subCategory,
+            'mainCategory' => $mainCategory,
         ]);
     }
+
+
+
 
     /**
      * app/Http/Controllers/VehicleController::update
@@ -284,12 +310,12 @@ class VehicleController extends Controller
         // Update vehicle details
         $vehicle->update($data);
 
-        // Update pivot features
+        // Update pivot table for features
         $featureIds = Feature::whereIn('name', $selectedFeatures)->pluck('id');
         $vehicle->features()->sync($featureIds);
 
         // Flash success message
-        $request->session()->flash('success', 'Vehicle was updated');
+        // $request->session()->flash('success', 'Vehicle was updated');
 
         // Redirect user back to vehicle listing page with success message
         return redirect()->route('vehicle.index')

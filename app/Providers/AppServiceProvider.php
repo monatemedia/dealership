@@ -27,7 +27,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Share main and sub categories with all views
         View::composer('*', function ($view) {
-            if ($view->getName() === 'vehicle.create') {
+            // Skip these views
+            if (in_array($view->getName(), [
+                'vehicle.create',
+                'vehicle.edit'])) {
                 return; // prevent overriding on create page
             }
 

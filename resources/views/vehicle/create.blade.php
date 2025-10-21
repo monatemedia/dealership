@@ -104,7 +104,7 @@
                             <label>Vehicle Type</label>
                             <x-radio-list-vehicle-type
                                 :sub-category="$subCategory"
-                                :value="old('vehicle_type_id')"
+                                :value="old('vehicle_type_id', $vehicle->vehicle_type_id)"
                             />
                             <p class="error-message">
                                 {{ $errors->first('vehicle_type_id') }}
