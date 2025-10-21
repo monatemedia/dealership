@@ -23,14 +23,14 @@ if ($childCategoryType) {
 
     <main>
         {{-- DEBUG: Remove later --}}
-        @if(config('app.debug'))
+        {{-- @if(config('app.debug'))
             <div style="background:#f9f9f9;padding:10px;border:1px solid #ddd;font-family:monospace;font-size:12px;">
                 <p>childCategoryType: {{ $childCategoryType }}</p>
                 <p>config found: {{ empty($config) ? '❌' : '✅' }}</p>
                 <p>childCategories: {{ $childCategories?->count() ?? 0 }}</p>
                 <p>parentCategory: {{ $parentCategory?->name ?? 'NULL' }}</p>
             </div>
-        @endif
+        @endif --}}
 
         {{-- Child taxonomy section --}}
         @if ($childCategories && $childCategories->isNotEmpty() && !empty($config))

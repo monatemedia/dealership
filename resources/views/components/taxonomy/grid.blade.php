@@ -32,13 +32,13 @@
             }
         @endphp
 
-        @if(config('app.debug') && $selectingForCreate)
+        {{-- @if(config('app.debug') && $selectingForCreate)
             <div style="background: lightblue; padding: 10px; margin: 10px;">
                 Category: {{ $category->name }}<br>
                 Class: {{ $categoryClass ?? 'not set' }}<br>
                 Href: {{ $href }}
             </div>
-        @endif
+        @endif --}}
 
 
         <x-taxonomy.card
