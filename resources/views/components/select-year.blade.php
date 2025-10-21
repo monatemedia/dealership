@@ -9,7 +9,7 @@
     {{-- Default Option --}}
     <option value="">Year</option>
     {{-- iterate from the given $year down to 1970, decrementing by 1 each time  --}}
-    @for ($i = $year; $i >= 1970; $i--)
+    @for ($i = $year; $i >= 1885; $i--)
         <option value="{{ $i }}" {{-- set the value of the option to the current year --}}
             {{-- Check if the current year is selected --}}
             {{-- @selected() is a Blade directive that checks if the given condition is true --}}
