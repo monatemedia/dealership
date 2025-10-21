@@ -5,33 +5,23 @@ use Illuminate\Support\Facades\Route;
 // Don't show button on vehicle.create route
 $hide = Route::currentRouteNamed('vehicle.create');
 
-// Default text and link
+// Default link and label
+$href = route('vehicle.create'); // Always start the flow
 $label = 'Sell Your Vehicle';
-$href = route('vehicle.create'); // ← Always start with vehicle.create to trigger the flow
 
-// Determine button behavior based on current context
-// If on sub-category page, go directly to create with that sub-category pre-selected
+// If on a main category page, pass it as query parameter
+if (isset($mainCategory) && $mainCategory) {
+    $href = route('vehicle.create', ['main_category' => $mainCategory->slug]);
+    $label = 'Sell Your ' . ($mainCategory->singular ?? $mainCategory->name);
+}
+
+// If on a sub-category page, pass it as query parameter
 if (isset($subCategory) && $subCategory) {
-    $singular = $subCategory->singular ?? $subCategory->name;
-    $label = 'Sell Your ' . $singular;
     $href = route('vehicle.create', ['sub_category' => $subCategory->slug]);
-}
-// If on main category page (but not sub-category), go to sub-categories for selection
-elseif (isset($mainCategory) && $mainCategory && !isset($subCategory)) {
-    $singular = $mainCategory->singular ?? $mainCategory->name;
-    $label = 'Sell Your ' . $singular;
-    // Go to sub-categories for this main category in selection mode
-    session()->put('selecting_category_for_create', true);
-    $href = route('main-category.sub-categories.index', ['mainCategory' => $mainCategory->slug]);
-}
-// Otherwise (home page, etc), start the flow through vehicle.create
-else {
-    $label = 'Sell Your Vehicle';
-    $href = route('vehicle.create'); // Will redirect to main-categories with session set
+    $label = 'Sell Your ' . ($subCategory->singular ?? $subCategory->name);
 }
 @endphp
 
-{{-- Hide button on vehicle.create route --}}
 @if (!$hide)
     <a href="{{ $href }}" class="btn btn-add-new-vehicle">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
