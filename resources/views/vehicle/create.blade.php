@@ -22,6 +22,7 @@
 <x-app-layout title="Add New Vehicle">
     <main>
         {{-- @dump($singular) --}}
+        {{-- @dd($vehicleTypes); --}}
 
         {{-- Add Alpine.js data store for modal management --}}
         <div class="container-small" x-data="{ isModalOpen: false }" @close-modal.window="isModalOpen = false">
@@ -104,7 +105,7 @@
                             <label>Vehicle Type</label>
                             <x-radio-list-vehicle-type
                                 :sub-category="$subCategory"
-                                :value="old('vehicle_type_id', $vehicle->vehicle_type_id)"
+                                :value="old('vehicle_type_id')"
                             />
                             <p class="error-message">
                                 {{ $errors->first('vehicle_type_id') }}
