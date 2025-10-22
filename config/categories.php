@@ -7,6 +7,7 @@ return [
     | Vehicle Categories and Body Types
     |--------------------------------------------------------------------------
     | A list of vehicle categories and their corresponding body types.
+    | NO LONGER IN USE
     |
     */
     'categories' => [
@@ -158,20 +159,28 @@ return [
             'image_path' => 'https://images.pexels.com/photos/11095885/pexels-photo-11095885.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             'sub_categories' => [
                 'Cars',
-                'Bakkies',
                 'Personal Trailers',
                 'Caravans',
                 'Motor Homes',
             ],
         ],
-        'Commercials' => [
-            'singular' => 'Commercial',
-            'long_name' => 'Commercial Vehicles',
+        'Light Commercials' => [
+            'singular' => 'Light Commercial',
+            'long_name' => 'Light Commercial Vehicles',
+            'description' => 'Bakkies, Minibuses and Panel Vans.',
+            'image_path' => 'https://images.pexels.com/photos/16058147/pexels-photo-16058147/free-photo-of-ford-ranger-pickup-truck.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+            'sub_categories' => [
+                'Bakkies',
+                'Minibuses',
+                'Panel Vans',
+            ],
+        ],
+        'Heavy Commercials' => [
+            'singular' => 'Heavy Commercial',
+            'long_name' => 'Buses, Trucks and Truck Trailers.',
             'description' => 'Vehicles designed for transporting goods and people.',
             'image_path' => 'https://images.pexels.com/photos/33095902/pexels-photo-33095902/free-photo-of-orange-truck-parked-by-industrial-building.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             'sub_categories' => [
-                'Minibuses',
-                'Panel Vans',
                 'Buses',
                 'Rigid Trucks',
                 'Truck Tractors',
@@ -761,6 +770,94 @@ return [
                 'description' => 'A container trailer for intermodal transport.',
                 'image_path' => 'https://placehold.co/600x400/d6d6d6/e9580c/svg?font=open-sans&text=Container',
             ],
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Fuel Types by Category
+    |--------------------------------------------------------------------------
+    | Maps sub-categories to their allowed fuel type groups from config/lookups.php
+    | Each sub-category includes:
+    | - 'groups': Array of fuel type group names from lookups.fuel_types
+    | - 'default': Default fuel type value for the category
+    | - 'can_edit': Boolean indicating if the user can change the fuel type
+    |
+    */
+    'fuel_types_by_category' => [
+        // Powersport vehicles - only Powersport fuel types
+        'Motorcycles' => [
+            'groups' => ['Powersport'],
+            'default' => 'Petrol',
+            'can_edit' => true,
+        ],
+        'ATVs' => [
+            'groups' => ['Powersport'],
+            'default' => 'Petrol',
+            'can_edit' => true,
+        ],
+        'Side by Sides' => [
+            'groups' => ['Powersport'],
+            'default' => 'Petrol',
+            'can_edit' => true,
+        ],
+
+        // Non-powered vehicles - no fuel types
+        'Personal Trailers' => [
+            'groups' => ['None'],
+            'default' => 'None',
+            'can_edit' => false,
+        ],
+        'Caravans' => [
+            'groups' => ['None'],
+            'default' => 'None',
+            'can_edit' => false,
+        ],
+
+        // Passenger vehicles - Petrol default
+        'Cars' => [
+            'groups' => ['Internal Combustion', 'Electric', 'High Pressure Gas', 'None'],
+            'can_edit' => true,
+        ],
+        'Motor Homes' => [
+            'groups' => ['Internal Combustion', 'Electric', 'High Pressure Gas', 'None'],
+            'can_edit' => true,
+        ],
+
+        // Commercial vehicles - Diesel default
+        'Bakkies' => [
+            'groups' => ['Internal Combustion', 'Electric', 'High Pressure Gas', 'None'],
+            'can_edit' => true,
+        ],
+        'Minibuses' => [
+            'groups' => ['Internal Combustion', 'Electric', 'High Pressure Gas', 'None'],
+            'can_edit' => true,
+        ],
+        'Panel Vans' => [
+            'groups' => ['Internal Combustion', 'Electric', 'High Pressure Gas', 'None'],
+            'can_edit' => true,
+        ],
+        'Buses' => [
+            'groups' => ['Internal Combustion', 'Electric', 'High Pressure Gas', 'None'],
+            'default' => 'Diesel',
+            'can_edit' => true,
+        ],
+        'Rigid Trucks' => [
+            'groups' => ['Internal Combustion', 'Electric', 'High Pressure Gas', 'None'],
+            'default' => 'Diesel',
+            'can_edit' => true,
+        ],
+        'Truck Tractors' => [
+            'groups' => ['Internal Combustion', 'Electric', 'High Pressure Gas', 'None'],
+            'default' => 'Diesel',
+            'can_edit' => true,
+        ],
+
+        // Truck trailers - None default
+        'Truck Trailers' => [
+            'groups' => ['Internal Combustion', 'Electric', 'High Pressure Gas', 'None'],
+            'default' => 'None',
+            'can_edit' => true,
         ],
     ],
 ];

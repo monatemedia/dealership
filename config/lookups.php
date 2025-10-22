@@ -7,6 +7,7 @@ return [
     | Vehicle Main Categories
     |--------------------------------------------------------------------------
     | A list of the main vehicle categories
+    | NO LONGER IN USE
     |
     */
     'main_categories' => [
@@ -88,6 +89,7 @@ return [
     | Vehicle Sub-categories
     |--------------------------------------------------------------------------
     | A list of vehicle sub-categories
+    | NO LONGER IN USE
     |
     */
     'sub_categories' => [
@@ -319,34 +321,361 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Vehicle Types
-    |--------------------------------------------------------------------------
-    | A static list of vehicle types used across the application.
-    |
-    */
-    // 'vehicle_types' => [
-    //     'Sedan',
-    //     'Hatchback',
-    //     'SUV',
-    //     'Pickup Truck',
-    //     'Minivan',
-    //     '4X4',
-    //     'Coupe',
-    //     'Crossover',
-    //     'Sports Vehicle',
-    // ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Fuel Types
     |--------------------------------------------------------------------------
     | A static list of fuel types used across the application.
     |
     */
     'fuel_types' => [
-        'Petrol',
-        'Diesel',
-        'Electric',
-        'Hybrid',
+        'Powersport' => [
+            'Petrol',
+            'Battery Electric',
+            'Diesel',
+            'Flex-Fuel(FFV)',
+        ],
+        'Internal Combustion' => [
+            'Petrol',
+            'Diesel',
+            'Dual Fuel',
+            'Flex-Fuel(FFV)',
+        ],
+        'Electric' => [
+            'Battery Electric',
+            'Hybrid Electric(HEV)',
+            'Hydrogen Fuel Cell Electric(FCEV)',
+            'Plug-in Hybrid Electric(PHEV)',
+        ],
+        'High Pressure Gas' => [
+            'Compressed Natural Gas(CNG)',
+            'Liquid Petrolium Gas(LPG)',
+        ],
+        'None' => [],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Transmissions
+    |--------------------------------------------------------------------------
+    | A static list of transmission types
+    |
+    */
+    'transmissions' => [
+        'Manual' => [
+            '3-Speed Manual',
+            '4-Speed Manual',
+            '5-Speed Manual',
+            '6-Speed Manual',
+        ],
+        'Automatic' => [
+            '3-Speed Automatic',
+            '4-Speed Automatic',
+            '5-Speed Automatic',
+            '6-Speed Automatic',
+            '8-Speed Automatic',
+            '10-Speed Automatic',
+        ],
+        'Advanced' => [
+            'Continuously Variable Transmission (CVT)',
+            'Dual-Clutch Transmission (DCT)',
+            'Automated Manual Transmission (AMT)',
+            'Direct-Drive'
+        ],
+        'None' => [],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Drive Train
+    |--------------------------------------------------------------------------
+    | A static list of drive train types
+    |
+    */
+    'drive_train' => [
+        'Standard' => [
+            'Front-Wheel Drive (FWD)',
+            'Rear-Wheel Drive (RWD)',
+        ],
+        'Advanced' => [
+            'All-Wheel Drive (AWD)',
+            'Four-Wheel Drive (4WD)',
+            'Part-Time 4WD',
+            'Full-Time 4WD',
+        ],
+        'Special' => [
+            'Six-Wheel Drive (6x6)',
+            'Tracked Drive',
+        ],
+        'None' => [],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Exterior Colours
+    |--------------------------------------------------------------------------
+    | A static list of exterior vehicle colours
+    |
+    */
+    'exterior_colors' => [
+        'Standard' => [
+            'White',
+            'Black',
+            'Silver',
+            'Grey',
+            'Blue',
+            'Red',
+        ],
+        'Metallic' => [
+            'Metallic Silver',
+            'Metallic Grey',
+            'Metallic Blue',
+            'Metallic Black',
+            'Metallic Red',
+            'Gunmetal',
+        ],
+        'Matte' => [
+            'Matte Black',
+            'Matte Grey',
+            'Matte Blue',
+            'Matte White',
+            'Matte Green',
+        ],
+        'Special' => [
+            'Pearl White',
+            'Champagne',
+            'Bronze',
+            'Burgundy',
+            'Forest Green',
+            'Navy Blue',
+            'Yellow',
+            'Orange',
+        ],
+        'Other' => [],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Interior Colours
+    |--------------------------------------------------------------------------
+    | A static list of interior vehicle colours
+    |
+    */
+    'interior_colors' => [
+        'Cloth' => [
+            'Colours' => [
+                'Black',
+                'Grey',
+                'Beige',
+                'Blue',
+                'Red',
+            ],
+        ],
+        'Premium Cloth' => [
+            'Colours' => [
+                'Black',
+                'Grey',
+                'Tan',
+                'Brown',
+            ],
+        ],
+        'Leather' => [
+            'Colours' => [
+                'Black',
+                'Beige',
+                'Brown',
+                'Tan',
+                'Grey',
+                'White',
+            ],
+        ],
+        'Synthetic Leather (Leatherette)' => [
+            'Colours' => [
+                'Black',
+                'Dark Grey',
+                'Beige',
+                'Brown',
+            ],
+        ],
+        'Nappa Leather' => [
+            'Colours' => [
+                'Black',
+                'Cognac',
+                'Ivory',
+                'Deep Red',
+            ],
+        ],
+        'Suede Leather' => [
+            'Colours' => [
+                'Black',
+                'Grey',
+                'Brown',
+                'Navy Blue',
+            ],
+        ],
+        'Alcantara' => [
+            'Colours' => [
+                'Black',
+                'Dark Grey',
+                'Light Grey',
+                'Burgundy',
+            ],
+        ],
+        'Vinyl' => [
+            'Colours' => [
+                'Black',
+                'Grey',
+                'Tan',
+            ],
+        ],
+        'None' => [],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Exterior Condition
+    |--------------------------------------------------------------------------
+    | A static list of the exterior condition
+    |
+    */
+    'exterior_condition' =>
+        [
+            'New,
+            Like New,
+            Excellent,
+            Good,
+            Fair,
+            Needs Work'
+        ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Interior Condition
+    |--------------------------------------------------------------------------
+    | A static list of the interior condition
+    |
+    */
+    'interior_condition' =>
+        [
+            'New,
+            Like New,
+            Excellent,
+            Good,
+            Fair,
+            Needs Work'
+        ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mechanical Condition
+    |--------------------------------------------------------------------------
+    | A static list of the mechanical condition
+    |
+    */
+    'Mechanical Condition' =>
+        [
+            'New',
+            'Like New',
+            'Excellent',
+            'Good',
+            'Fair',
+            'Needs Work'
+        ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Features
+    |--------------------------------------------------------------------------
+    | A static list of feature options
+    |
+    */
+    'features' => [
+        'Comfort and Convenience' => [
+            'Leather Seats',
+            'Heated Seats',
+            'Power Windows',
+            'Bluetooth'
+        ],
+        'Safety Features' => [
+            'Airbags',
+            'ABS',
+            'Backup Camera',
+            'Lane Departure Warning',
+        ],
+        'Technology' => [
+            'GPS Navigation',
+            'Premium Sound System',
+            'Apple CarPlay/Android Auto',
+        ],
+        'Modifications (Trucks)' => [
+            'Lift Kits',
+            'Custom Rims',
+            'Performance Upgrades',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Service History
+    |--------------------------------------------------------------------------
+    | A static list of history and documentation
+    |
+    */
+    'Service History' =>[
+        'Full History',
+        'Partial History',
+        'No History'
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Accident History
+    |--------------------------------------------------------------------------
+    | A static list of history and documentation
+    |
+    */
+    'accident_history' => [
+        'None' => [],
+        'Minor' => [
+            'Scratch / Paint Damage',
+            'Small Dent',
+            'Windshield Crack',
+        ],
+        'Moderate' => [
+            'Front Bumper Repair',
+            'Rear Bumper Repair',
+            'Panel Replacement',
+            'Suspension Damage',
+        ],
+        'Severe' => [
+            'Structural Damage',
+            'Airbag Deployment',
+            'Chassis Repair',
+            'Flood or Fire Damage',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Ownership Paperwork
+    |--------------------------------------------------------------------------
+    | A multi-checkbox list of ownership paperwork
+    |
+    */
+    'ownership_paperwork' => [
+        'Required Documents' => [
+            'Vehicle Registration Certificate (Logbook)',
+            'Proof of Ownership',
+            'Valid Vehicle License Disc',
+            'Roadworthy Certificate',
+            'Import Permit (if applicable)',
+        ],
+        'Optional or Supporting Documents' => [
+            'Service History / Maintenance Record',
+            'Previous Owner Information',
+            'Insurance Certificate',
+            'Finance Settlement Letter',
+            'Spare Key Availability Certificate',
+        ],
+        'None' => [],
+    ],
+
 ];
