@@ -276,8 +276,14 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Style Model Component
   - [X] Style Province Component
   - [X] Style City Component
-- [ ] Make Dynamic Radioboxes
-- [ ] Make Dynamic Tickboxes
+- [ ] Make Dynamic FuelTypes
+  - [ ] Create Lookups
+  - [ ] Create Migrations
+  - [ ] Create Factory
+  - [ ] Create Seeder
+  - [ ] Update Model
+  - [ ] Make Reusable List Component
+  - [ ] Make Dynamic FuelType Component
 - [ ] Add Countries to Database
 - [ ] Add Flags to Database
   - [ ] https://github.com/hampusborgos/country-flags 
