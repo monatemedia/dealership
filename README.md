@@ -287,6 +287,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [ ] Add Countries to Database
 - [ ] Add Flags to Database
   - [ ] https://github.com/hampusborgos/country-flags 
+- [ ] Add Currencies To Database
 - [ ] Change `Provinces` to `Regions`
 - [ ] Add Currencies to Database
 - [ ] Add Group term: **Vehicle Categories**
@@ -295,19 +296,6 @@ _For more examples, please refer to the [Documentation](https://example.com)_
     - [ ] Aviation
     - [ ] Marine
 - [ ] Make Current Categories into **Sub-Categories**
-- [ ] Year Manufacturer Model API
-    - [ ] Normalize `vehicle_features` table into a proper many-to-many relationship
-      - [ ] Create New Tables
-        - [ ] `create_features_table`
-        - [ ] `create_feature_listing_table`
-      - [ ] Create a seeder to move data to the new structure
-      - [ ] `make:migration drop_vehicle_features_table`
-    - [ ] Create `variants` table to define a specific vehicle type
-      - [ ] Create the `variants` Table
-      - [ ] Populate the `variants` Table
-    - [ ] Rename `vehicles` table to `listings` to represent an actual item for sale
-      - [ ] Modify and Rename the Table
-    - [ ] Final Step: Update Eloquent Models
 
 See the [open issues](https://github.com/monatemedia/dealership/issues) for a full list of proposed features (and known issues).
 

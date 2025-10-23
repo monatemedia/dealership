@@ -649,6 +649,7 @@ return [
             'Structural Damage',
             'Airbag Deployment',
             'Chassis Repair',
+            'Stolen and Recovered',
             'Flood or Fire Damage',
         ],
     ],
@@ -662,13 +663,15 @@ return [
     */
     'ownership_paperwork' => [
         'Required Documents' => [
-            'Vehicle Registration Certificate (Logbook)',
-            'Proof of Ownership',
+            'I Own The Vehicle',
+            'Vehicle Is Registered In My Name',
+            'Vehicle Registration Certificate',
             'Valid Vehicle License Disc',
             'Roadworthy Certificate',
             'Import Permit (if applicable)',
         ],
         'Optional or Supporting Documents' => [
+            'Logbook',
             'Service History / Maintenance Record',
             'Previous Owner Information',
             'Insurance Certificate',
