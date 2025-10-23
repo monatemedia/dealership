@@ -3,6 +3,35 @@
 import axios from 'axios';
 import Alpine from 'alpinejs';
 
+// Add this before document.addEventListener
+window.fuelTypeSelector = function(config) {
+  return {
+    fuelTypes: config.fuelTypes || [],
+    selectedId: config.selectedId || null,
+    selectedName: config.selectedName || 'Select Fuel Type',
+    isOpen: false,
+
+    openModal() {
+      this.isOpen = true;
+      document.body.style.overflow = 'hidden';
+    },
+
+    closeModal() {
+      this.isOpen = false;
+      document.body.style.overflow = '';
+    },
+
+    selectFuelType(fuelType) {
+      this.selectedId = fuelType.id;
+      this.selectedName = fuelType.name;
+    },
+
+    confirmSelection() {
+      this.closeModal();
+    }
+  };
+};
+
 document.addEventListener("DOMContentLoaded", function () {
 
   // ----------------------------
@@ -239,110 +268,110 @@ document.addEventListener("DOMContentLoaded", function () {
   // ----------------------------
   // Mileage Input Component
   // ----------------------------
-const initMileageInputs = () => {
-  const mileageGroups = document.querySelectorAll('.mileage-input-group');
+  const initMileageInputs = () => {
+    const mileageGroups = document.querySelectorAll('.mileage-input-group');
 
-  // Exit early if no mileage inputs found on page
-  if (mileageGroups.length === 0) {
-    return;
-  }
-
-  mileageGroups.forEach(group => {
-    const input = group.querySelector('.mileage-input');
-    const toggle = group.querySelector('.unit-toggle');
-    const label = group.querySelector('.mileage-label');
-    const helperText = group.querySelector('.helper-text');
-    const errorMessage = group.querySelector('.error-message');
-    const hiddenInput = group.querySelector('.mileage-unit-input');
-
-    // Check if there's an error - if so, hide helper text
-    const hasError = group.classList.contains('has-error') && errorMessage.textContent.trim() !== '';
-
-    // Unit configuration
-    const units = {
-      km: {
-        label: 'Odometer Reading (km)',
-        helper: 'Click (km) to change unit',
-        next: 'mi',
-        max: 99999999
-      },
-      mi: {
-        label: 'Odometer Reading (mi)',
-        helper: 'Click (mi) to change unit',
-        next: 'hrs',
-        max: 99999999
-      },
-      hrs: {
-        label: 'Hour Meter Reading (hrs)',
-        helper: 'Click (hrs) to change unit',
-        next: 'km',
-        max: 999999
-      },
-    };
-
-    let currentUnit = input.dataset.unit || 'km';
-
-    // Update UI based on current unit
-    const updateUI = (unit) => {
-      const config = units[unit];
-      label.textContent = config.label;
-
-      // Only update helper text if there's no error
-      if (!hasError) {
-        helperText.textContent = config.helper;
-      }
-
-      toggle.textContent = unit;
-      toggle.dataset.unit = unit;
-      input.dataset.unit = unit;
-      hiddenInput.value = unit;
-      currentUnit = unit;
-    };
-
-    // Handle unit toggle click
-    toggle.addEventListener('click', (e) => {
-      e.preventDefault();
-      const nextUnit = units[currentUnit].next;
-      updateUI(nextUnit);
-    });
-
-    // Input validation
-    input.addEventListener('input', (e) => {
-      let value = e.target.value;
-
-      // Remove any non-numeric characters
-      value = value.replace(/[^\d]/g, '');
-
-      // Ensure positive numbers only
-      if (value && parseInt(value) < 0) {
-        value = '0';
-      }
-
-      // Enforce max value
-      const max = units[currentUnit].max;
-      if (value && parseInt(value) > max) {
-        value = max.toString();
-      }
-
-      e.target.value = value;
-    });
-
-    // Prevent decimal input
-    input.addEventListener('keypress', (e) => {
-      if (e.key === '.' || e.key === ',') {
-        e.preventDefault();
-      }
-    });
-
-    // Hide helper text if there's an error
-    if (hasError) {
-      helperText.style.display = 'none';
+    // Exit early if no mileage inputs found on page
+    if (mileageGroups.length === 0) {
+      return;
     }
 
-    // Initialize with default unit
-    updateUI(currentUnit);
-  });
-};
+    mileageGroups.forEach(group => {
+      const input = group.querySelector('.mileage-input');
+      const toggle = group.querySelector('.unit-toggle');
+      const label = group.querySelector('.mileage-label');
+      const helperText = group.querySelector('.helper-text');
+      const errorMessage = group.querySelector('.error-message');
+      const hiddenInput = group.querySelector('.mileage-unit-input');
+
+      // Check if there's an error - if so, hide helper text
+      const hasError = group.classList.contains('has-error') && errorMessage.textContent.trim() !== '';
+
+      // Unit configuration
+      const units = {
+        km: {
+          label: 'Odometer Reading (km)',
+          helper: 'Click (km) to change unit',
+          next: 'mi',
+          max: 99999999
+        },
+        mi: {
+          label: 'Odometer Reading (mi)',
+          helper: 'Click (mi) to change unit',
+          next: 'hrs',
+          max: 99999999
+        },
+        hrs: {
+          label: 'Hour Meter Reading (hrs)',
+          helper: 'Click (hrs) to change unit',
+          next: 'km',
+          max: 999999
+        },
+      };
+
+      let currentUnit = input.dataset.unit || 'km';
+
+      // Update UI based on current unit
+      const updateUI = (unit) => {
+        const config = units[unit];
+        label.textContent = config.label;
+
+        // Only update helper text if there's no error
+        if (!hasError) {
+          helperText.textContent = config.helper;
+        }
+
+        toggle.textContent = unit;
+        toggle.dataset.unit = unit;
+        input.dataset.unit = unit;
+        hiddenInput.value = unit;
+        currentUnit = unit;
+      };
+
+      // Handle unit toggle click
+      toggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        const nextUnit = units[currentUnit].next;
+        updateUI(nextUnit);
+    });
+
+      // Input validation
+      input.addEventListener('input', (e) => {
+        let value = e.target.value;
+
+        // Remove any non-numeric characters
+        value = value.replace(/[^\d]/g, '');
+
+        // Ensure positive numbers only
+        if (value && parseInt(value) < 0) {
+          value = '0';
+        }
+
+        // Enforce max value
+        const max = units[currentUnit].max;
+        if (value && parseInt(value) > max) {
+          value = max.toString();
+        }
+
+        e.target.value = value;
+      });
+
+      // Prevent decimal input
+      input.addEventListener('keypress', (e) => {
+        if (e.key === '.' || e.key === ',') {
+          e.preventDefault();
+        }
+      });
+
+      // Hide helper text if there's an error
+      if (hasError) {
+        helperText.style.display = 'none';
+      }
+
+      // Initialize with default unit
+      updateUI(currentUnit);
+    });
+  };
 
 
   // ----------------------------

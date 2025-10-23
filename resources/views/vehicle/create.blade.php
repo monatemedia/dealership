@@ -157,7 +157,25 @@
                         </div>
                         <div class="form-group @error('fuel_type_id') has-error @enderror">
                             <label>Fuel Type</label>
-                            <x-radio-list-fuel-type :value="old('fuel_type_id')"/>
+                            @if($canEditFuelType)
+                                <x-fuel-type-selector
+                                    :fuelTypes="$fuelTypes"
+                                    :defaultFuelType="$defaultFuelType"
+                                    :value="old('fuel_type_id')"
+                                />
+                            @else
+                                <input
+                                    type="text"
+                                    readonly
+                                    value="{{ $defaultFuelType }}"
+                                    class="readonly-input"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="fuel_type_id"
+                                    value="{{ $fuelTypes->firstWhere('name', $defaultFuelType)?->id }}"
+                                />
+                            @endif
                             <p class="error-message">
                                 {{ $errors->first('fuel_type_id') }}
                             </p>

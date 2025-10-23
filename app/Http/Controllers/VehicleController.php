@@ -89,10 +89,16 @@ class VehicleController extends Controller
             $subCategory->load('mainCategory');
             $vehicleTypes = $subCategory->vehicleTypes()->get();
 
+            // Get fuel type configuration for this sub-category
+            $fuelConfig = $subCategory->getFuelTypeConfig();
+
             return view('vehicle.create', [
                 'subCategory' => $subCategory,
                 'mainCategory' => $subCategory->mainCategory,
                 'vehicleTypes' => $vehicleTypes,
+                'fuelTypes' => $fuelConfig['fuel_types'],
+                'defaultFuelType' => $fuelConfig['default'],
+                'canEditFuelType' => $fuelConfig['can_edit'],
             ]);
         }
 
@@ -113,7 +119,8 @@ class VehicleController extends Controller
 
             return redirect()->route('main-category.sub-categories.index', [
                 'mainCategory' => $mainCategory->slug,
-            ]);
+            ])
+            ->with('info', 'Please select a vehicle category to continue');
         }
 
         // --- CASE 3: neither present ---
@@ -123,7 +130,7 @@ class VehicleController extends Controller
         ]);
 
         return redirect()->route('main-categories.index')
-            ->with('info', 'Please select a vehicle category to continue');
+            ->with('info', 'Please select a section category to continue');
     }
 
 

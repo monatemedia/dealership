@@ -1,3 +1,4 @@
+{{-- resources/views/components --}}
 <div class="row">
     @foreach ($fuelTypes as $fuelType)
         <div class="col">
