@@ -5,11 +5,23 @@
     // Determine selected fuel type
     $selectedId = $value ?? $fuelTypes->firstWhere('name', $defaultFuelType)?->id;
     $selectedName = $fuelTypes->firstWhere('id', $selectedId)?->name ?? 'Select Fuel Type';
+
+    // Group fuel types by their group
+    $groupedFuelTypes = [];
+    foreach($fuelTypes as $fuelType) {
+        $groupName = $fuelType->fuelTypeGroup->name ?? 'Other';
+        if (!isset($groupedFuelTypes[$groupName])) {
+            $groupedFuelTypes[$groupName] = [];
+        }
+        $groupedFuelTypes[$groupName][] = [
+            'value' => $fuelType->id,
+            'label' => $fuelType->name
+        ];
+    }
 @endphp
 
 <div
     x-data="fuelTypeSelector({
-        fuelTypes: {{ $fuelTypes->toJson() }},
         selectedId: {{ $selectedId ? "'{$selectedId}'" : 'null' }},
         selectedName: '{{ $selectedName }}'
     })"
@@ -22,57 +34,24 @@
     <div
         @click="openModal"
         class="fuel-type-input"
-        :class="{ 'has-value': selectedId }"
+        :class="{ 'has-selection': selectedId }"
     >
-        <span x-text="selectedName"></span>
-        <svg class="chevron-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <span x-text="selectedName" class="fuel-type-display"></span>
+        <i class="fa-solid fa-chevron-down"></i>
     </div>
 
-    {{-- Modal overlay --}}
-    <div
-        x-show="isOpen"
-        x-cloak
-        class="fuel-modal-backdrop"
-        @click="closeModal"
-    >
-        <div
-            class="fuel-modal-content"
-            @click.stop
-        >
-            <div class="fuel-modal-header">
-                <h3>Select Fuel Type</h3>
-                <button type="button" @click="closeModal" class="close-button">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </button>
-            </div>
+    {{-- Modal using the reusable component --}}
+    <x-modal-overlay title="Select Fuel Type" max-width="600px">
+        <x-grouped-radio-list
+            :groups="$groupedFuelTypes"
+            name="fuel_type_modal"
+            :selected="$selectedId"
+        />
 
-            <div class="fuel-modal-body">
-                <template x-for="fuelType in fuelTypes" :key="fuelType.id">
-                    <label class="fuel-option">
-                        <input
-                            type="radio"
-                            :value="fuelType.id"
-                            x-model="selectedId"
-                            @change="selectFuelType(fuelType)"
-                        />
-                        <span class="fuel-option-label" x-text="fuelType.name"></span>
-                        <span class="checkmark" x-show="selectedId == fuelType.id">✓</span>
-                    </label>
-                </template>
-            </div>
-
-            <div class="fuel-modal-footer">
-                <button type="button" @click="closeModal" class="btn-secondary">
-                    Cancel
-                </button>
-                <button type="button" @click="confirmSelection" class="btn-primary">
-                    Confirm
-                </button>
-            </div>
+        <div class="modal-footer">
+            <button type="button" @click="confirmSelection" class="btn btn-primary">
+                <i class="fa-solid fa-check"></i> Submit
+            </button>
         </div>
-    </div>
+    </x-modal-overlay>
 </div>

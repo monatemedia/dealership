@@ -2051,177 +2051,152 @@ a.pagination-item:hover {
     font-size: 90%;
 }
 
-/*
-| Styles for FuelType Component
-| resources/css/app.css or your main CSS file */
+
+
+/* ===========================
+   Fuel Type Selector
+   =========================== */
 
 .fuel-type-selector {
-  position: relative;
+    position: relative;
+    width: 100%;
 }
 
 .fuel-type-input {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  background-color: white;
-  cursor: pointer;
-  transition: border-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
 }
 
 .fuel-type-input:hover {
-  border-color: #9ca3af;
+    border-color: var(--border-hover-color);
+    background-color: var(--input-hover-bg);
 }
 
-.fuel-type-input:focus-within {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
+.fuel-type-input.has-selection .fuel-type-display {
+    color: var(--text-color);
 }
 
-.fuel-type-input.has-value {
-  color: #111827;
+.fuel-type-display {
+    flex: 1;
+    color: var(--text-muted);
 }
 
-.fuel-type-input:not(.has-value) {
-  color: #9ca3af;
+.fuel-type-input i {
+    color: var(--text-muted);
+    font-size: 14px;
 }
 
-.chevron-icon {
-  flex-shrink: 0;
-  color: #6b7280;
+/* ===========================
+   Grouped Radio List
+   =========================== */
+
+.grouped-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
+
+.grouped-list-section {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.grouped-list-section:hover {
+    border-color: #cbd5e1;
+}
+
+.grouped-list-header {
+    background-color: #f8fafc;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.grouped-list-header h3 {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #475569;
+}
+
+.grouped-list-items {
+    padding: 0.5rem;
+}
+
+.grouped-list-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 0;
+}
+
+.grouped-list-item:hover {
+    background-color: #f8fafc;
+}
+
+.grouped-list-item input[type="radio"] {
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    margin-right: 0.75rem;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.grouped-list-item-label {
+    flex: 1;
+    color: #334155;
+    font-weight: 500;
+}
+
+/* ===========================
+   Modal Enhancements
+   =========================== */
+
+.modal-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.modal-body {
+    margin-bottom: 1.5rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* ===========================
+   Readonly Input Style
+   =========================== */
 
 .readonly-input {
-  background-color: #f3f4f6;
-  cursor: not-allowed;
-}
-
-/* Modal styles */
-.fuel-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-  padding: 1rem;
-}
-
-.fuel-modal-content {
-  background-color: white;
-  border-radius: 0.5rem;
-  max-width: 32rem;
-  width: 100%;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.fuel-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.fuel-modal-header h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.close-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.25rem;
-  color: #6b7280;
-  transition: color 0.2s;
-}
-
-.close-button:hover {
-  color: #111827;
-}
-
-.fuel-modal-body {
-  padding: 1.5rem;
-  overflow-y: auto;
-  flex: 1;
-}
-
-.fuel-option {
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.375rem;
-  margin-bottom: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
-}
-
-.fuel-option:hover {
-  background-color: #f9fafb;
-  border-color: #3b82f6;
-}
-
-.fuel-option input[type="radio"] {
-  margin-right: 0.75rem;
-}
-
-.fuel-option-label {
-  flex: 1;
-  font-weight: 500;
-}
-
-.checkmark {
-  color: #3b82f6;
-  font-weight: bold;
-  font-size: 1.25rem;
-}
-
-.fuel-modal-footer {
-  display: flex;
-  gap: 0.75rem;
-  padding: 1.5rem;
-  border-top: 1px solid #e5e7eb;
-  justify-content: flex-end;
-}
-
-.btn-secondary {
-  padding: 0.5rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  background-color: white;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn-secondary:hover {
-  background-color: #f9fafb;
-}
-
-.btn-primary {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 0.375rem;
-  background-color: #3b82f6;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn-primary:hover {
-  background-color: #2563eb;
-}
-
-/* Alpine.js cloak */
-[x-cloak] {
-  display: none !important;
+    background-color: #f3f4f6;
+    color: #6b7280;
+    cursor: not-allowed;
 }

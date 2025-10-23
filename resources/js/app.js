@@ -6,7 +6,6 @@ import Alpine from 'alpinejs';
 // Add this before document.addEventListener
 window.fuelTypeSelector = function(config) {
   return {
-    fuelTypes: config.fuelTypes || [],
     selectedId: config.selectedId || null,
     selectedName: config.selectedName || 'Select Fuel Type',
     isOpen: false,
@@ -21,12 +20,15 @@ window.fuelTypeSelector = function(config) {
       document.body.style.overflow = '';
     },
 
-    selectFuelType(fuelType) {
-      this.selectedId = fuelType.id;
-      this.selectedName = fuelType.name;
-    },
-
     confirmSelection() {
+      // Get the selected radio button value from the modal
+      const selectedRadio = document.querySelector('input[name="fuel_type_modal"]:checked');
+
+      if (selectedRadio) {
+        this.selectedId = selectedRadio.value;
+        this.selectedName = selectedRadio.nextElementSibling.textContent;
+      }
+
       this.closeModal();
     }
   };
