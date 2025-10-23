@@ -19,7 +19,9 @@ class ProductionSeeder extends Seeder
             // Core application data ONLY
             CategorySeeder::class,
             VehicleTypeSeeder::class,
-            FuelTypeSeeder::class,
+            FuelTypeSeeder::class,  // Must run before SubCategoryFuelTypeSeeder
+            CategorySeeder::class,  // Must run before SubCategoryFuelTypeSeeder
+            SubCategoryFuelTypeSeeder::class,  // Run after both above
             FeatureSeeder::class,
 
             // LocationSeeder::class, // This is for development (uses config)

@@ -3,26 +3,30 @@
 namespace Database\Seeders;
 
 use App\Models\FuelType;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\FuelTypeGroup;
 use Illuminate\Database\Seeder;
 
 class FuelTypeSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Fuel Types from config
-        FuelType::factory()
-            ->count(count(config('lookups.fuel_types')))
-            ->sequence(
-                ...array_map(
-                    fn($fuel) =>
-                    ['name' => $fuel],
-                    config('lookups.fuel_types')
-                )
-            )
-            ->create();
+        $fuelTypesConfig = config('lookups.fuel_types');
+
+        foreach ($fuelTypesConfig as $groupName => $fuelTypes) {
+            // Create the fuel type group
+            $group = FuelTypeGroup::updateOrCreate(
+                ['name' => $groupName]
+            );
+
+            // Create fuel types for this group
+            foreach ($fuelTypes as $fuelTypeName) {
+                FuelType::updateOrCreate(
+                    [
+                        'name' => $fuelTypeName,
+                        'fuel_type_group_id' => $group->id
+                    ]
+                );
+            }
+        }
     }
 }

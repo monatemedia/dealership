@@ -277,11 +277,11 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Style Province Component
   - [X] Style City Component
 - [ ] Make Dynamic FuelTypes
-  - [ ] Create Lookups
-  - [ ] Create Migrations
-  - [ ] Create Factory
-  - [ ] Create Seeder
-  - [ ] Update Model
+  - [X] Create Lookups
+  - [X] Create Migrations
+  - [X] Create Factory
+  - [X] Create Seeder
+  - [X] Update Model
   - [ ] Make Reusable List Component
   - [ ] Make Dynamic FuelType Component
 - [ ] Add Countries to Database

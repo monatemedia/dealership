@@ -1,4 +1,4 @@
-<?php
+<?php // 2024_12_23_221852_create_fuel_types_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;

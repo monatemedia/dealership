@@ -1,4 +1,4 @@
-<?php
+<?php // FuelTypeFactory.php
 
 namespace Database\Factories;
 
