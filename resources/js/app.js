@@ -8,7 +8,6 @@ window.fuelTypeSelector = function(config) {
   return {
     selectedId: config.selectedId || null,
     selectedName: config.selectedName || 'Select Fuel Type',
-    hasNoneOption: config.hasNoneOption || false,
     isOpen: false,
 
     init() {

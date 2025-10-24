@@ -321,43 +321,8 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Fuel Types
-    |--------------------------------------------------------------------------
-    | A static list of fuel types used across the application.
-    |
-    */
-    'fuel_types' => [
-        'Powersport' => [
-            'Petrol',
-            'Battery Electric',
-            'Diesel',
-            'Flex-Fuel(FFV)',
-        ],
-        'Internal Combustion' => [
-            'Petrol',
-            'Diesel',
-            'Dual Fuel',
-            'Flex-Fuel(FFV)',
-        ],
-        'Electric' => [
-            'Battery Electric',
-            'Hybrid Electric(HEV)',
-            'Hydrogen Fuel Cell Electric(FCEV)',
-            'Plug-in Hybrid Electric(PHEV)',
-        ],
-        'High Pressure Gas' => [
-            'Compressed Natural Gas(CNG)',
-            'Liquid Petrolium Gas(LPG)',
-        ],
-        'None' => [],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Transmissions
     |--------------------------------------------------------------------------
-    | A static list of transmission types
-    |
     */
     'transmissions' => [
         'Manual' => [
@@ -380,15 +345,22 @@ return [
             'Automated Manual Transmission (AMT)',
             'Direct-Drive'
         ],
-        'None' => [],
+        'Truck Manual' => [
+            '5-Speed Manual',
+            '6-Speed Manual',
+            '10-Speed Manual',
+            '13-Speed Manual',
+            '18-Speed Manual',
+        ],
+        'None' => [
+            'None / Not Specified', // <-- UPDATED
+        ],
     ],
 
     /*
     |--------------------------------------------------------------------------
     | Drive Train
     |--------------------------------------------------------------------------
-    | A static list of drive train types
-    |
     */
     'drive_train' => [
         'Standard' => [
@@ -405,7 +377,39 @@ return [
             'Six-Wheel Drive (6x6)',
             'Tracked Drive',
         ],
-        'None' => [],
+        'None' => [
+            'None / Not Specified', // <-- UPDATED
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Features
+    |--------------------------------------------------------------------------
+    */
+    'features' => [
+        'Comfort and Convenience' => [
+            'Leather Seats',
+            'Heated Seats',
+            'Power Windows',
+            'Bluetooth'
+        ],
+        'Safety Features' => [
+            'Airbags',
+            'ABS',
+            'Backup Camera',
+            'Lane Departure Warning',
+        ],
+        'Technology' => [
+            'GPS Navigation',
+            'Premium Sound System',
+            'Apple CarPlay/Android Auto',
+        ],
+        'Modifications (Trucks)' => [
+            'Lift Kits',
+            'Custom Rims',
+            'Performance Upgrades',
+        ],
     ],
 
     /*
@@ -415,7 +419,7 @@ return [
     | A static list of exterior vehicle colours
     |
     */
-    'exterior_colors' => [
+    'colors' => [
         'Standard' => [
             'White',
             'Black',
@@ -454,12 +458,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Interior Colours
+    | Interior
     |--------------------------------------------------------------------------
-    | A static list of interior vehicle colours
+    | A static list of interior vehicle options
     |
     */
-    'interior_colors' => [
+    'interior' => [
         'Cloth' => [
             'Colours' => [
                 'Black',
@@ -531,6 +535,35 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Accident History
+    |--------------------------------------------------------------------------
+    | A static list of history and documentation
+    |
+    */
+    'accident_history' => [
+        'None' => ['No Accidents Reported'],
+        'Minor' => [
+            'Scratch / Paint Damage',
+            'Small Dent',
+            'Windshield Crack',
+        ],
+        'Moderate' => [
+            'Front Bumper Repair',
+            'Rear Bumper Repair',
+            'Panel Replacement',
+            'Suspension Damage',
+        ],
+        'Severe' => [
+            'Structural Damage',
+            'Airbag Deployment',
+            'Chassis Repair',
+            'Stolen and Recovered',
+            'Flood or Fire Damage',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Exterior Condition
     |--------------------------------------------------------------------------
     | A static list of the exterior condition
@@ -580,37 +613,7 @@ return [
             'Needs Work'
         ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Features
-    |--------------------------------------------------------------------------
-    | A static list of feature options
-    |
-    */
-    'features' => [
-        'Comfort and Convenience' => [
-            'Leather Seats',
-            'Heated Seats',
-            'Power Windows',
-            'Bluetooth'
-        ],
-        'Safety Features' => [
-            'Airbags',
-            'ABS',
-            'Backup Camera',
-            'Lane Departure Warning',
-        ],
-        'Technology' => [
-            'GPS Navigation',
-            'Premium Sound System',
-            'Apple CarPlay/Android Auto',
-        ],
-        'Modifications (Trucks)' => [
-            'Lift Kits',
-            'Custom Rims',
-            'Performance Upgrades',
-        ],
-    ],
+
 
     /*
     |--------------------------------------------------------------------------
@@ -627,56 +630,30 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Accident History
-    |--------------------------------------------------------------------------
-    | A static list of history and documentation
-    |
-    */
-    'accident_history' => [
-        'None' => [],
-        'Minor' => [
-            'Scratch / Paint Damage',
-            'Small Dent',
-            'Windshield Crack',
-        ],
-        'Moderate' => [
-            'Front Bumper Repair',
-            'Rear Bumper Repair',
-            'Panel Replacement',
-            'Suspension Damage',
-        ],
-        'Severe' => [
-            'Structural Damage',
-            'Airbag Deployment',
-            'Chassis Repair',
-            'Stolen and Recovered',
-            'Flood or Fire Damage',
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Ownership Paperwork
     |--------------------------------------------------------------------------
     | A multi-checkbox list of ownership paperwork
     |
     */
     'ownership_paperwork' => [
-        'Required Documents' => [
-            'I Own The Vehicle',
-            'Vehicle Is Registered In My Name',
-            'Vehicle Registration Certificate',
+        'Ownership Checklist' => [
+            'I Own the Vehicle',
+            'No Outstanding Finance',
+            'Vehicle Is Registered',
             'Valid Vehicle License Disc',
+            'Vehicle Registration Certificate',
             'Roadworthy Certificate',
             'Import Permit (if applicable)',
         ],
-        'Optional or Supporting Documents' => [
+        'Supporting Documents' => [
+            'Spare Keys',
             'Logbook',
-            'Service History / Maintenance Record',
+            'User Manual',
+            'Vehicle is Insured',
+            'Warranty is Active',
+            'Service Records Available',
+            'Motorplan or Service Contract',
             'Previous Owner Information',
-            'Insurance Certificate',
-            'Finance Settlement Letter',
-            'Spare Key Availability Certificate',
         ],
         'None' => [],
     ],

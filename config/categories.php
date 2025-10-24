@@ -860,4 +860,177 @@ return [
             'can_edit' => true,
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Transmissions by Category
+    |--------------------------------------------------------------------------
+    | Maps sub-categories to their allowed transmission groups.
+    */
+    'transmissions_by_category' => [
+        // Powersport
+        'Motorcycles' => [
+            'groups' => ['Manual', 'Advanced', 'None'],
+            'can_edit' => true,
+        ],
+        'ATVs' => [
+            'groups' => ['Manual', 'Automatic', 'Advanced', 'None'],
+            'can_edit' => true,
+        ],
+        'Side by Sides' => [
+            'groups' => ['Advanced'],
+            'default' => 'Continuously Variable Transmission (CVT)',
+            'can_edit' => true,
+        ],
+        // Non-powered
+        'Personal Trailers' => [
+            'groups' => ['None'],
+            'default' => 'None / Not Specified',
+            'can_edit' => false,
+        ],
+        'Caravans' => [
+            'groups' => ['None'],
+            'default' => 'None / Not Specified',
+            'can_edit' => false,
+        ],
+        // Passenger
+        'Cars' => [
+            'groups' => ['Manual', 'Automatic', 'Advanced', 'None'],
+            'can_edit' => true,
+        ],
+        'Motor Homes' => [
+            'groups' => ['Automatic', 'Manual', 'None'],
+            'default' => '6-Speed Automatic',
+            'can_edit' => true,
+        ],
+        // Commercial
+        'Bakkies' => [
+            'groups' => ['Manual', 'Automatic', 'Advanced', 'None'],
+            'can_edit' => true,
+        ],
+        'Minibuses' => [
+            'groups' => ['Manual', 'Automatic', 'None'],
+            'can_edit' => true,
+        ],
+        'Panel Vans' => [
+            'groups' => ['Manual', 'Automatic', 'None'],
+            'can_edit' => true,
+        ],
+        'Buses' => [
+            'groups' => ['Automatic', 'Truck Manual', 'None'],
+            'can_edit' => true,
+        ],
+        'Rigid Trucks' => [
+            'groups' => ['Truck Manual', 'Automatic', 'Advanced', 'None'],
+            'can_edit' => true,
+        ],
+        'Truck Tractors' => [
+            'groups' => ['Truck Manual', 'Automatic', 'Advanced', 'None'],
+            'can_edit' => true,
+        ],
+        'Truck Trailers' => [
+            'groups' => ['None'],
+            'default' => 'None / Not Specified',
+            'can_edit' => false,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Drive Train by Category
+    |--------------------------------------------------------------------------
+    | Maps sub-categories to their allowed drive train groups.
+    */
+    'drive_train_by_category' => [
+        // Powersport
+        'Motorcycles' => [
+            'groups' => ['Standard'],
+            'default' => 'Rear-Wheel Drive (RWD)',
+            'can_edit' => true,
+        ],
+        'ATVs' => [
+            'groups' => ['Standard', 'Advanced'],
+            'can_edit' => true,
+        ],
+        'Side by Sides' => [
+            'groups' => ['Standard', 'Advanced'],
+            'can_edit' => true,
+        ],
+        // Non-powered
+        'Personal Trailers' => [
+            'groups' => ['None'],
+            'default' => 'None / Not Specified',
+            'can_edit' => false,
+        ],
+        'Caravans' => [
+            'groups' => ['None'],
+            'default' => 'None / Not Specified',
+            'can_edit' => false,
+        ],
+        // Passenger
+        'Cars' => [
+            'groups' => ['Standard', 'Advanced', 'None'],
+            'can_edit' => true,
+        ],
+        'Motor Homes' => [
+            'groups' => ['Standard', 'Advanced', 'None'],
+            'default' => 'Rear-Wheel Drive (RWD)',
+            'can_edit' => true,
+        ],
+        // Commercial
+        'Bakkies' => [
+            'groups' => ['Standard', 'Advanced', 'None'],
+            'can_edit' => true,
+        ],
+        'Minibuses' => [
+            'groups' => ['Standard', 'None'],
+            'can_edit' => true,
+        ],
+        'Panel Vans' => [
+            'groups' => ['Standard', 'None'],
+            'can_edit' => true,
+        ],
+        'Buses' => [
+            'groups' => ['Standard', 'Advanced', 'Special', 'None'],
+            'default' => 'Rear-Wheel Drive (RWD)',
+            'can_edit' => true,
+        ],
+        'Rigid Trucks' => [
+            'groups' => ['Standard', 'Advanced', 'Special', 'None'],
+            'can_edit' => true,
+        ],
+        'Truck Tractors' => [
+            'groups' => ['Standard', 'Advanced', 'Special', 'None'],
+            'can_edit' => true,
+        ],
+        'Truck Trailers' => [
+            'groups' => ['None'],
+            'default' => 'None / Not Specified',
+            'can_edit' => false,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Features by Category
+    |--------------------------------------------------------------------------
+    | Maps sub-categories to their allowed feature groups.
+    | This is simpler because features are multi-select (checkboxes).
+    */
+    'features_by_category' => [
+        'Motorcycles' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
+        'ATVs' => ['Comfort and Convenience', 'Safety Features', 'Technology', 'Modifications (Trucks)'],
+        'Side by Sides' => ['Comfort and Convenience', 'Safety Features', 'Technology', 'Modifications (Trucks)'],
+        'Personal Trailers' => ['Comfort and Convenience', 'Technology'],
+        'Caravans' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
+        'Cars' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
+        'Motor Homes' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
+        'Bakkies' => ['Comfort and Convenience', 'Safety Features', 'Technology', 'Modifications (Trucks)'],
+        'Minibuses' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
+        'Panel Vans' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
+        'Buses' => ['Comfort and Convenience', 'Safety Features', 'Technology', 'Modifications (Trucks)'],
+        'Rigid Trucks' => ['Comfort and Convenience', 'Safety Features', 'Technology', 'Modifications (Trucks)'],
+        'Truck Tractors' => ['Comfort and Convenience', 'Safety Features', 'Technology', 'Modifications (Trucks)'],
+        'Truck Trailers' => ['Modifications (Trucks)'],
+    ],
 ];

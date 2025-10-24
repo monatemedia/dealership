@@ -1,15 +1,18 @@
 {{-- resources/views/components/fuel-type-selector.blade.php --}}
-@props(['fuelTypes', 'defaultFuelType' => null, 'value' => null, 'hasNoneOption' => false])
+@props(['fuelTypes', 'defaultFuelType' => null, 'value' => null]) {{-- Removed hasNoneOption --}}
 
 @php
     // Group fuel types by their group
     $groupedFuelTypes = [];
 
-    if ($hasNoneOption || $fuelTypes->isEmpty()) {
+    // We infer the "None" scenario if the fuelTypes collection is empty
+    $isNoneScenario = $fuelTypes->isEmpty();
+
+    if ($isNoneScenario) {
         // Handle "None" option case
         $selectedId = $value ?? '';
         $selectedName = $defaultFuelType ?? 'None / Not Specified';
-        $groupedFuelTypes['None'] = [];
+        $groupedFuelTypes['None'] = []; // This will render the "None / Not Specified" radio
     } else {
         // Normal grouping
         $selectedId = $value ?? $fuelTypes->firstWhere('name', $defaultFuelType)?->id;
@@ -25,44 +28,33 @@
                 'label' => $fuelType->name
             ];
         }
-
-        // Add "None" option if it exists in any fuel type's groups
-        foreach($fuelTypes as $fuelType) {
-            if ($fuelType->fuelTypeGroup->name === 'None') {
-                $groupedFuelTypes['None'] = [];
-                break;
-            }
-        }
     }
 @endphp
 
 <div
-    x-data="fuelTypeSelector({
+     x-data="fuelTypeSelector({
         selectedId: '{{ $selectedId }}',
-        selectedName: '{{ $selectedName }}',
-        hasNoneOption: {{ ($hasNoneOption || isset($groupedFuelTypes['None'])) ? 'true' : 'false' }}
+        selectedName: '{{ $selectedName }}'
+        {{-- hasNoneOption is gone --}}
     })"
-    class="fuel-type-selector"
->
-    {{-- Hidden input to store the actual value --}}
-    <input type="hidden" name="fuel_type_id" x-model="selectedId" />
+    class="fuel-type-selector">
 
-    {{-- Clickable display input --}}
+    {{-- ... rest of the component (no changes needed) ... --}}
+    <input type="hidden" name="fuel_type_id" x-model="selectedId" />
     <div
-        @click="openModal"
-        class="fuel-type-input"
+         @click="openModal"
+         class="fuel-type-input"
         :class="{ 'has-selection': selectedId !== null && selectedId !== '' }"
     >
         <span x-text="selectedName" class="fuel-type-display"></span>
         <i class="fa-solid fa-chevron-down"></i>
     </div>
 
-    {{-- Modal using the reusable component --}}
     <x-modal-overlay title="Select Fuel Type" max-width="600px">
         <p class="modal-subtitle">Choose the fuel type for your vehicle</p>
 
         <x-grouped-radio-list
-            :groups="$groupedFuelTypes"
+             :groups="$groupedFuelTypes"
             name="fuel_type_modal"
             :selected="$selectedId"
         />
