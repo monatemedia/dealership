@@ -89,16 +89,30 @@ class VehicleController extends Controller
             $subCategory->load('mainCategory');
             $vehicleTypes = $subCategory->vehicleTypes()->get();
 
-            // Get fuel type configuration for this sub-category
+            // Get all configs
             $fuelConfig = $subCategory->getFuelTypeConfig();
+            $transmissionConfig = $subCategory->getTransmissionConfig(); // <-- ADDED
+            $driveTrainConfig = $subCategory->getDriveTrainConfig();   // <-- ADDED
 
             return view('vehicle.create', [
                 'subCategory' => $subCategory,
                 'mainCategory' => $subCategory->mainCategory,
                 'vehicleTypes' => $vehicleTypes,
+
+                // Fuel Types
                 'fuelTypes' => $fuelConfig['fuel_types'],
                 'defaultFuelType' => $fuelConfig['default'],
                 'canEditFuelType' => $fuelConfig['can_edit'],
+
+                // Transmissions
+                'transmissions' => $transmissionConfig['transmissions'],        // <-- ADDED
+                'defaultTransmission' => $transmissionConfig['default'],       // <-- ADDED
+                'canEditTransmission' => $transmissionConfig['can_edit'],     // <-- ADDED
+
+                // Drive Trains
+                'driveTrains' => $driveTrainConfig['drive_trains'],          // <-- ADDED
+                'defaultDriveTrain' => $driveTrainConfig['default'],         // <-- ADDED
+                'canEditDriveTrain' => $driveTrainConfig['can_edit'],       // <-- ADDED
             ]);
         }
 
@@ -163,6 +177,7 @@ class VehicleController extends Controller
 
         // Get validated request data
         $data = $request->validated();
+
         $selectedFeatures = $data['features'] ?? []; // Extract array of feature names
         $images = $request->file('images') ?: []; // Extract uploaded images
 

@@ -162,7 +162,6 @@
                                     :fuelTypes="$fuelTypes"
                                     :defaultFuelType="$defaultFuelType"
                                     :value="old('fuel_type_id')"
-                                    {{-- :hasNoneOption="$hasNoneOption" --}} {{-- REMOVE THIS LINE --}}
                                 />
                             @else
                                 <input
@@ -174,12 +173,65 @@
                                 <input
                                     type="hidden"
                                     name="fuel_type_id"
-                                    {{-- Simplify this logic --}}
                                     value="{{ $fuelTypes->firstWhere('name', $defaultFuelType)?->id ?? '' }}"
                                 />
                             @endif
                             <p class="error-message">
                                 {{ $errors->first('fuel_type_id') }}
+                            </p>
+                        </div>
+
+                        {{-- ADD THIS: Transmission --}}
+                        <div class="form-group @error('transmission_id') has-error @enderror">
+                            <label>Transmission</label>
+                            @if($canEditTransmission)
+                                <x-transmission-selector
+                                    :transmissions="$transmissions"
+                                    :defaultTransmission="$defaultTransmission"
+                                    :value="old('transmission_id')"
+                                />
+                            @else
+                                <input
+                                    type="text"
+                                    readonly
+                                    value="{{ $defaultTransmission ?? 'None / Not Specified' }}"
+                                    class="readonly-input"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="transmission_id"
+                                    value="{{ $transmissions->firstWhere('name', $defaultTransmission)?->id ?? '' }}"
+                                />
+                            @endif
+                            <p class="error-message">
+                                {{ $errors->first('transmission_id') }}
+                            </p>
+                        </div>
+
+                        {{-- ADD THIS: Drive Train --}}
+                        <div class="form-group @error('drive_train_id') has-error @enderror">
+                            <label>Drive Train</label>
+                            @if($canEditDriveTrain)
+                                <x-drive-train-selector
+                                    :driveTrains="$driveTrains"
+                                    :defaultDriveTrain="$defaultDriveTrain"
+                                    :value="old('drive_train_id')"
+                                />
+                            @else
+                                <input
+                                    type="text"
+                                    readonly
+                                    value="{{ $defaultDriveTrain ?? 'None / Not Specified' }}"
+                                    class="readonly-input"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="drive_train_id"
+                                    value="{{ $driveTrains->firstWhere('name', $defaultDriveTrain)?->id ?? '' }}"
+                                />
+                            @endif
+                            <p class="error-message">
+                                {{ $errors->first('drive_train_id') }}
                             </p>
                         </div>
                         <div class="row">

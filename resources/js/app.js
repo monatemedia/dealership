@@ -4,27 +4,28 @@ import axios from 'axios';
 import Alpine from 'alpinejs';
 
 // Update the fuelTypeSelector function
-window.fuelTypeSelector = function(config) {
+window.itemSelector = function(config) {
   return {
     selectedId: config.selectedId || null,
-    selectedName: config.selectedName || 'Select Fuel Type',
+    selectedName: config.selectedName || 'Select an Option',
     isOpen: false,
 
     init() {
-      // Listen for radio button changes within the modal
+      // This listener is now generic and will work for any radio button name
       this.$nextTick(() => {
-        const radioButtons = document.querySelectorAll('input[name="fuel_type_modal"]');
+        // Find radio buttons within this component's modal
+        const modal = this.$el.querySelector('.modal-overlay');
+        if (!modal) return;
+
+        const radioButtons = modal.querySelectorAll('input[type="radio"]');
+
         radioButtons.forEach(radio => {
           radio.addEventListener('change', (e) => {
-            // Handle empty value for "None / Not Specified"
-            const value = e.target.value;
-            this.selectedId = value === '' ? '' : value;
+            this.selectedId = e.target.value;
 
-            // Get the label text
             const labelText = e.target.nextElementSibling.textContent.trim();
-            this.selectedName = labelText || 'Select Fuel Type';
+            this.selectedName = labelText || 'Select an Option';
 
-            // Close modal after selection
             this.closeModal();
           });
         });
