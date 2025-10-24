@@ -61,8 +61,8 @@ class SubCategory extends Model
     // ADD THIS
     public function driveTrainGroups(): BelongsToMany
     {
-        return $this->belongsToMany(DriveTrainGroup::class, 'drive_train_group_sub_category')
-            ->withPivot('default_drive_train', 'can_edit');
+        return $this->belongsToMany(DrivetrainGroup::class, 'drivetrain_group_sub_category')
+            ->withPivot('default_drivetrain', 'can_edit');
     }
 
     /**
@@ -133,32 +133,32 @@ class SubCategory extends Model
     /**
      * Get all available drive trains for this sub-category
      */
-    public function availableDriveTrains()
+    public function availableDrivetrains()
     {
-        $groupIds = $this->driveTrainGroups()->pluck('drive_train_groups.id');
-        return DriveTrain::whereIn('drive_train_group_id', $groupIds)->get();
+        $groupIds = $this->driveTrainGroups()->pluck('drivetrain_groups.id');
+        return Drivetrain::whereIn('drivetrain_group_id', $groupIds)->get();
     }
 
     // ADD THIS
     /**
      * Get the drive train configuration for this sub-category
      */
-    public function getDriveTrainConfig(): array
+    public function getDrivetrainConfig(): array
     {
         $groups = $this->driveTrainGroups()->get();
         if ($groups->isEmpty()) {
             return [
                 'can_edit' => true,
                 'default' => null,
-                'drive_trains' => collect([])
+                'drivetrains' => collect([])
             ];
         }
-        $driveTrains = $this->availableDriveTrains();
+        $driveTrains = $this->availableDrivetrains();
         $firstGroup = $groups->first();
         return [
             'can_edit' => $firstGroup->pivot->can_edit,
-            'default' => $firstGroup->pivot->default_drive_train,
-            'drive_trains' => $driveTrains
+            'default' => $firstGroup->pivot->default_drivetrain,
+            'drivetrains' => $driveTrains
         ];
     }
 }

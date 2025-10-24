@@ -22,14 +22,14 @@ class ProductionSeeder extends Seeder
 
             FuelTypeSeeder::class, // Seed FuelTypes
             TransmissionSeeder::class, // Seed Transmissions
-            DriveTrainSeeder::class, // Seed DriveTrains
+            DrivetrainSeeder::class, // Seed Drivetrains
             FeatureSeeder::class,
             OwnershipPaperworkSeeder::class, // Add this line
 
             // Linkers (must run after categories and types are seeded)
             SubCategoryFuelTypeSeeder::class,
             SubCategoryTransmissionSeeder::class, // Add new linker
-            SubCategoryDriveTrainSeeder::class, // Add new linker
+            SubCategoryDrivetrainSeeder::class, // Add new linker
 
             SouthAfricanCitySeeder::class,
             ProductionManufacturerSeeder::class,

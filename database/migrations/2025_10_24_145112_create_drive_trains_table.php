@@ -1,4 +1,4 @@
-<?php // database/migrations/2025_10_24_145112_create_drive_trains_table.php
+<?php // database/migrations/2025_10_24_145112_create_drivetrains_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('drive_trains', function (Blueprint $table) {
+        Schema::create('drivetrains', function (Blueprint $table) {
             $table->id();
             $table->string('name', 100); // Increased length for names like 'Front-Wheel Drive (FWD)'
         });
@@ -22,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('drive_trains');
+        Schema::dropIfExists('drivetrains');
     }
 };

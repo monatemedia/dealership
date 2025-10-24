@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('vehicles', function (Blueprint $table) {
-            $table->foreignId('drive_train_id')
+            $table->foreignId('drivetrain_id')
                 ->nullable()
-                ->constrained('drive_trains')
+                ->constrained('drivetrains')
                 ->nullOnDelete()
                 ->after('transmission_id');
         });
@@ -26,8 +26,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('vehicles', function (Blueprint $table) {
-            $table->dropForeign(['drive_train_id']);
-            $table->dropColumn('drive_train_id');
+            $table->dropForeign(['drivetrain_id']);
+            $table->dropColumn('drivetrain_id');
         });
     }
 };

@@ -93,7 +93,7 @@ class VehicleController extends Controller
             // Get all configs
             $fuelConfig = $subCategory->getFuelTypeConfig();
             $transmissionConfig = $subCategory->getTransmissionConfig(); // <-- ADDED
-            $driveTrainConfig = $subCategory->getDriveTrainConfig();   // <-- ADDED
+            $driveTrainConfig = $subCategory->getDrivetrainConfig();   // <-- ADDED
 
             return view('vehicle.create', [
                 'subCategory' => $subCategory,
@@ -110,10 +110,10 @@ class VehicleController extends Controller
                 'defaultTransmission' => $transmissionConfig['default'],       // <-- ADDED
                 'canEditTransmission' => $transmissionConfig['can_edit'],     // <-- ADDED
 
-                // Drive Trains
-                'driveTrains' => $driveTrainConfig['drive_trains'],          // <-- ADDED
-                'defaultDriveTrain' => $driveTrainConfig['default'],         // <-- ADDED
-                'canEditDriveTrain' => $driveTrainConfig['can_edit'],       // <-- ADDED
+                // Drivetrains
+                'driveTrains' => $driveTrainConfig['drivetrains'],          // <-- ADDED
+                'defaultDrivetrain' => $driveTrainConfig['default'],         // <-- ADDED
+                'canEditDrivetrain' => $driveTrainConfig['can_edit'],       // <-- ADDED
             ]);
         }
 

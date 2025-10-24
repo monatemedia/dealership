@@ -35,7 +35,7 @@ class StoreVehicleRequest extends FormRequest
             'vehicle_type_id' => 'required|exists:vehicle_types,id',
             'fuel_type_id' => 'required|exists:fuel_types,id',
             'transmission_id' => 'nullable|exists:transmissions,id',
-            'drive_train_id'  => 'nullable|exists:drive_trains,id',
+            'drivetrain_id'  => 'nullable|exists:drivetrains,id',
             'province_id' => 'required|exists:provinces,id',
             'city_id' => 'required|exists:cities,id',
             'address' => 'required|string',

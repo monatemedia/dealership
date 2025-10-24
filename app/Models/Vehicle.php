@@ -32,7 +32,7 @@ class Vehicle extends Model
         'vehicle_type_id',
         'fuel_type_id',
         'transmission_id',  // ADD THIS
-        'drive_train_id',   // ADD THIS
+        'drivetrain_id',   // ADD THIS
         'user_id',
         'city_id',
         'address',
@@ -83,7 +83,7 @@ class Vehicle extends Model
     // ADD THIS
     public function driveTrain(): BelongsTo
     {
-        return $this->belongsTo(DriveTrain::class);
+        return $this->belongsTo(Drivetrain::class);
     }
 
     // Define method for `Manufacturer` and the return type

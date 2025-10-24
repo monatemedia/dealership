@@ -1,28 +1,28 @@
-<?php // database/seeders/DriveTrainSeeder.php
+<?php // database/seeders/DrivetrainSeeder.php
 
 namespace Database\Seeders;
 
-use App\Models\DriveTrain;
-use App\Models\DriveTrainGroup;
+use App\Models\Drivetrain;
+use App\Models\DrivetrainGroup;
 use Illuminate\Database\Seeder;
 
-class DriveTrainSeeder extends Seeder
+class DrivetrainSeeder extends Seeder
 {
     public function run(): void
     {
-        // Note: config key is 'drive_train' not 'drive_trains'
-        $config = config('lookups.drive_train');
+        // Note: config key is 'drivetrain' not 'drivetrains'
+        $config = config('lookups.drivetrain');
 
         foreach ($config as $groupName => $driveTrains) {
-            $group = DriveTrainGroup::updateOrCreate(
+            $group = DrivetrainGroup::updateOrCreate(
                 ['name' => $groupName]
             );
 
             foreach ($driveTrains as $driveTrainName) {
-                DriveTrain::updateOrCreate(
+                Drivetrain::updateOrCreate(
                     [
                         'name' => $driveTrainName,
-                        'drive_train_group_id' => $group->id
+                        'drivetrain_group_id' => $group->id
                     ]
                 );
             }

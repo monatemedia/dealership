@@ -937,11 +937,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Drive Train by Category
+    | Drivetrain by Category
     |--------------------------------------------------------------------------
     | Maps sub-categories to their allowed drive train groups.
     */
-    'drive_train_by_category' => [
+    'drivetrain_by_category' => [
         // Powersport
         'Motorcycles' => [
             'groups' => ['Standard'],

@@ -208,30 +208,30 @@
                             </p>
                         </div>
 
-                        {{-- ADD THIS: Drive Train --}}
-                        <div class="form-group @error('drive_train_id') has-error @enderror">
-                            <label>Drive Train</label>
-                            @if($canEditDriveTrain)
+                        {{-- ADD THIS: Drivetrain --}}
+                        <div class="form-group @error('drivetrain_id') has-error @enderror">
+                            <label>Drivetrain</label>
+                            @if($canEditDrivetrain)
                                 <x-drive-train-selector
                                     :driveTrains="$driveTrains"
-                                    :defaultDriveTrain="$defaultDriveTrain"
-                                    :value="old('drive_train_id')"
+                                    :defaultDrivetrain="$defaultDrivetrain"
+                                    :value="old('drivetrain_id')"
                                 />
                             @else
                                 <input
                                     type="text"
                                     readonly
-                                    value="{{ $defaultDriveTrain ?? 'None / Not Specified' }}"
+                                    value="{{ $defaultDrivetrain ?? 'None / Not Specified' }}"
                                     class="readonly-input"
                                 />
                                 <input
                                     type="hidden"
-                                    name="drive_train_id"
-                                    value="{{ $driveTrains->firstWhere('name', $defaultDriveTrain)?->id ?? '' }}"
+                                    name="drivetrain_id"
+                                    value="{{ $driveTrains->firstWhere('name', $defaultDrivetrain)?->id ?? '' }}"
                                 />
                             @endif
                             <p class="error-message">
-                                {{ $errors->first('drive_train_id') }}
+                                {{ $errors->first('drivetrain_id') }}
                             </p>
                         </div>
                         <div class="row">

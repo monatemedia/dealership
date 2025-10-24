@@ -1,4 +1,4 @@
-<?php // app/Models/DriveTrainGroup.php
+<?php // app/Models/DrivetrainGroup.php
 
 namespace App\Models;
 
@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class DriveTrainGroup extends Model
+class DrivetrainGroup extends Model
 {
     use HasFactory;
     public $timestamps = false;
@@ -15,12 +15,12 @@ class DriveTrainGroup extends Model
 
     public function driveTrains(): HasMany
     {
-        return $this->hasMany(DriveTrain::class);
+        return $this->hasMany(Drivetrain::class);
     }
 
     public function subCategories(): BelongsToMany
     {
-        return $this->belongsToMany(SubCategory::class, 'drive_train_group_sub_category')
-            ->withPivot('default_drive_train', 'can_edit');
+        return $this->belongsToMany(SubCategory::class, 'drivetrain_group_sub_category')
+            ->withPivot('default_drivetrain', 'can_edit');
     }
 }
