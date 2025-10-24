@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreVehicleRequest;
 use App\Models\Feature;
 use App\Models\MainCategory;
+use App\Models\OwnershipPaperwork;
 use App\Models\SubCategory;
 use App\Models\Vehicle;
 use App\Services\VehicleImage\VehicleImageService;
@@ -179,6 +180,7 @@ class VehicleController extends Controller
         $data = $request->validated();
 
         $selectedFeatures = $data['features'] ?? []; // Extract array of feature names
+        $selectedPaperwork = $data['ownership_paperwork'] ?? []; // Extract array of ownership paperwork
         $images = $request->file('images') ?: []; // Extract uploaded images
 
         // Limit images to a maximum of 12
@@ -222,6 +224,10 @@ class VehicleController extends Controller
         // Map feature names to IDs
         $featureIds = Feature::whereIn('name', $selectedFeatures)->pluck('id');
         $vehicle->features()->sync($featureIds);
+
+        // Add ownership paperwork sync
+        $paperworkIds = OwnershipPaperwork::whereIn('name', $selectedPaperwork)->pluck('id');
+        $vehicle->ownershipPaperwork()->sync($paperworkIds);
 
         /**
          * Handle image uploads:
@@ -328,6 +334,7 @@ class VehicleController extends Controller
 
         $data = $request->validated(); // Get request data
         $selectedFeatures = $data['features'] ?? []; // array of feature names
+        $selectedPaperwork = $data['ownership_paperwork'] ?? []; // array of ownership paperwork
 
         // Update vehicle details
         $vehicle->update($data);
@@ -335,6 +342,10 @@ class VehicleController extends Controller
         // Update pivot table for features
         $featureIds = Feature::whereIn('name', $selectedFeatures)->pluck('id');
         $vehicle->features()->sync($featureIds);
+
+        // Add ownership paperwork sync
+        $paperworkIds = OwnershipPaperwork::whereIn('name', $selectedPaperwork)->pluck('id');
+        $vehicle->ownershipPaperwork()->sync($paperworkIds);
 
         // Flash success message
         // $request->session()->flash('success', 'Vehicle was updated');

@@ -155,7 +155,11 @@
                                 </div>
                             </div>
                         </div>
-                            <x-checkbox-vehicle-features :$vehicle/>
+
+                        <x-checkbox-vehicle-features :$vehicle/>
+
+                        <x-checkbox-ownership-paperwork :$vehicle />
+
                         <div class="form-group @error('description') has-error @enderror">
                             <label>Detailed Description</label>
                             <textarea rows="10" name="description">{{ old('description', $vehicle->description) }}</textarea>

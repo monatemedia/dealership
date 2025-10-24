@@ -128,6 +128,11 @@ class Vehicle extends Model
         return $this->belongsToMany(Feature::class, 'feature_vehicle');
     }
 
+    public function ownershipPaperwork()
+    {
+        return $this->belongsToMany(OwnershipPaperwork::class, 'ownership_paperwork_vehicle');
+    }
+
     // Define the primaryImage function and define the return type
     public function primaryImage(): HasOne
     {

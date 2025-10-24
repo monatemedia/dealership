@@ -24,6 +24,7 @@ class ProductionSeeder extends Seeder
             TransmissionSeeder::class, // Seed Transmissions
             DriveTrainSeeder::class, // Seed DriveTrains
             FeatureSeeder::class,
+            OwnershipPaperworkSeeder::class, // Add this line
 
             // Linkers (must run after categories and types are seeded)
             SubCategoryFuelTypeSeeder::class,

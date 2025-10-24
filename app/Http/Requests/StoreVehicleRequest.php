@@ -44,6 +44,8 @@ class StoreVehicleRequest extends FormRequest
             'published_at' => 'nullable|string',
             'features' => 'array',
             'features.*' => 'string',
+            'ownership_paperwork' => 'array', // Add this
+            'ownership_paperwork.*' => 'string', // Add this
             'images' => 'array',
             'images.*' => File::image()
                 ->max(2048)

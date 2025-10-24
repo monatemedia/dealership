@@ -278,6 +278,7 @@
                         </div>
 
                         <x-checkbox-vehicle-features />
+                        <x-checkbox-ownership-paperwork />
 
                         <div class="form-group @error('description') has-error @enderror">
                             <label>Detailed Description</label>
