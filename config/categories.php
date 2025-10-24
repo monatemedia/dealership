@@ -286,12 +286,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Vehicle Types by Category
+    | Vehicle Types by Subcategory
     |--------------------------------------------------------------------------
     | A static list of vehicle types used across the application.
     |
     */
-    'vehicle_types_by_category' => [
+    'vehicle_types_by_sub_category' => [
         'Motorcycles' => [
             [
                 'name' => 'Standard',

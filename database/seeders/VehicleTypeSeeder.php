@@ -11,7 +11,7 @@ class VehicleTypeSeeder extends Seeder
 {
     public function run(): void
     {
-        $vehicleTypesConfig = config('categories.vehicle_types_by_category');
+        $vehicleTypesConfig = config('categories.vehicle_types_by_sub_category');
 
         foreach ($vehicleTypesConfig as $subCategoryName => $types) {
             $subCategory = SubCategory::where('name', $subCategoryName)->first();
