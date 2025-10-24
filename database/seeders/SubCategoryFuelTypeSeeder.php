@@ -10,7 +10,7 @@ class SubCategoryFuelTypeSeeder extends Seeder
 {
     public function run(): void
     {
-        $config = config('categories.fuel_types_by_category');
+        $config = config('categories.fuel_types_by_sub_category');
 
         foreach ($config as $subCategoryName => $fuelConfig) {
             $subCategory = SubCategory::where('name', $subCategoryName)->first();

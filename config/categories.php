@@ -775,7 +775,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Fuel Types by Category
+    | Fuel Types by Subcategory
     |--------------------------------------------------------------------------
     | Maps sub-categories to their allowed fuel type groups from config/lookups.php
     | Each sub-category includes:
@@ -784,7 +784,7 @@ return [
     | - 'can_edit': Boolean indicating if the user can change the fuel type
     |
     */
-    'fuel_types_by_category' => [
+    'fuel_types_by_sub_category' => [
         // Powersport vehicles - only Powersport fuel types
         'Motorcycles' => [
             'groups' => ['Powersport'],
