@@ -56,10 +56,21 @@ class SubCategory extends Model
      */
     public function availableFuelTypes()
     {
-        return FuelType::whereIn(
-            'fuel_type_group_id',
-            $this->fuelTypeGroups()->pluck('fuel_type_groups.id')
-        )->get();
+        $groupIds = $this->fuelTypeGroups()->pluck('fuel_type_groups.id');
+
+        // Check if "None" group (id=5) is included
+        $hasNoneGroup = $this->fuelTypeGroups()->where('fuel_type_groups.name', 'None')->exists();
+
+        // Get all fuel types for the groups
+        $fuelTypes = FuelType::whereIn('fuel_type_group_id', $groupIds)->get();
+
+        // If "None" group is present and no other fuel types, return empty collection
+        // but flag it so we know to show the "None / Not Specified" option
+        if ($hasNoneGroup && $fuelTypes->isEmpty()) {
+            return collect([])->put('_has_none_option', true);
+        }
+
+        return $fuelTypes;
     }
 
     /**
@@ -73,17 +84,29 @@ class SubCategory extends Model
             return [
                 'can_edit' => true,
                 'default' => null,
-                'fuel_types' => []
+                'fuel_types' => collect([]),
+                'has_none_option' => false,
             ];
         }
 
-        // Assuming all groups for a sub-category have the same can_edit and default
+        $fuelTypes = $this->availableFuelTypes();
+
+        // Check if this is a "None" only configuration
+        $hasNoneOption = $fuelTypes->get('_has_none_option', false);
+
+        // Remove the flag before returning
+        if ($hasNoneOption) {
+            $fuelTypes = $fuelTypes->except('_has_none_option');
+        }
+
+        // Get the first group's pivot data for defaults
         $firstGroup = $groups->first();
 
         return [
             'can_edit' => $firstGroup->pivot->can_edit,
             'default' => $firstGroup->pivot->default_fuel_type,
-            'fuel_types' => $this->availableFuelTypes()
+            'fuel_types' => $fuelTypes,
+            'has_none_option' => $hasNoneOption,
         ];
     }
 }

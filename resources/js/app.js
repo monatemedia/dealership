@@ -3,12 +3,34 @@
 import axios from 'axios';
 import Alpine from 'alpinejs';
 
-// Add this before document.addEventListener
+// Update the fuelTypeSelector function
 window.fuelTypeSelector = function(config) {
   return {
     selectedId: config.selectedId || null,
     selectedName: config.selectedName || 'Select Fuel Type',
+    hasNoneOption: config.hasNoneOption || false,
     isOpen: false,
+
+    init() {
+      // Listen for radio button changes within the modal
+      this.$nextTick(() => {
+        const radioButtons = document.querySelectorAll('input[name="fuel_type_modal"]');
+        radioButtons.forEach(radio => {
+          radio.addEventListener('change', (e) => {
+            // Handle empty value for "None / Not Specified"
+            const value = e.target.value;
+            this.selectedId = value === '' ? '' : value;
+
+            // Get the label text
+            const labelText = e.target.nextElementSibling.textContent.trim();
+            this.selectedName = labelText || 'Select Fuel Type';
+
+            // Close modal after selection
+            this.closeModal();
+          });
+        });
+      });
+    },
 
     openModal() {
       this.isOpen = true;
@@ -18,18 +40,6 @@ window.fuelTypeSelector = function(config) {
     closeModal() {
       this.isOpen = false;
       document.body.style.overflow = '';
-    },
-
-    confirmSelection() {
-      // Get the selected radio button value from the modal
-      const selectedRadio = document.querySelector('input[name="fuel_type_modal"]:checked');
-
-      if (selectedRadio) {
-        this.selectedId = selectedRadio.value;
-        this.selectedName = selectedRadio.nextElementSibling.textContent;
-      }
-
-      this.closeModal();
     }
   };
 };

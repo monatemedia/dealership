@@ -99,6 +99,7 @@ class VehicleController extends Controller
                 'fuelTypes' => $fuelConfig['fuel_types'],
                 'defaultFuelType' => $fuelConfig['default'],
                 'canEditFuelType' => $fuelConfig['can_edit'],
+                'hasNoneOption' => $fuelConfig['has_none_option'],
             ]);
         }
 

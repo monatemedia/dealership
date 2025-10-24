@@ -158,22 +158,23 @@
                         <div class="form-group @error('fuel_type_id') has-error @enderror">
                             <label>Fuel Type</label>
                             @if($canEditFuelType)
-                                <x-fuel-type-selector
-                                    :fuelTypes="$fuelTypes"
-                                    :defaultFuelType="$defaultFuelType"
-                                    :value="old('fuel_type_id')"
-                                />
+                            <x-fuel-type-selector
+                                :fuelTypes="$fuelTypes"
+                                :defaultFuelType="$defaultFuelType"
+                                :value="old('fuel_type_id')"
+                                :subCategory="$subCategory"
+                            />
                             @else
                                 <input
                                     type="text"
                                     readonly
-                                    value="{{ $defaultFuelType }}"
+                                    value="{{ $defaultFuelType ?? 'None / Not Specified' }}"
                                     class="readonly-input"
                                 />
                                 <input
                                     type="hidden"
                                     name="fuel_type_id"
-                                    value="{{ $fuelTypes->firstWhere('name', $defaultFuelType)?->id }}"
+                                    value="{{ $hasNoneOption ? '' : $fuelTypes->firstWhere('name', $defaultFuelType)?->id }}"
                                 />
                             @endif
                             <p class="error-message">
