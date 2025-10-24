@@ -17,18 +17,21 @@ class ProductionSeeder extends Seeder
     {
         $this->call([
             // Core application data ONLY
-            CategorySeeder::class,
+            CategorySeeder::class, // Runs first (creates Main/Sub Categories)
             VehicleTypeSeeder::class,
-            FuelTypeSeeder::class,  // Must run before SubCategoryFuelTypeSeeder
-            CategorySeeder::class,  // Must run before SubCategoryFuelTypeSeeder
-            SubCategoryFuelTypeSeeder::class,  // Run after both above
+
+            FuelTypeSeeder::class, // Seed FuelTypes
+            TransmissionSeeder::class, // Seed Transmissions
+            DriveTrainSeeder::class, // Seed DriveTrains
             FeatureSeeder::class,
 
-            // LocationSeeder::class, // This is for development (uses config)
-            SouthAfricanCitySeeder::class, // This is for production (uses JSON)
+            // Linkers (must run after categories and types are seeded)
+            SubCategoryFuelTypeSeeder::class,
+            SubCategoryTransmissionSeeder::class, // Add new linker
+            SubCategoryDriveTrainSeeder::class, // Add new linker
 
-            // ManufacturerSeeder::class, // This is for development (uses config)
-            ProductionManufacturerSeeder::class, // This is for production (uses SQLite)
+            SouthAfricanCitySeeder::class,
+            ProductionManufacturerSeeder::class,
         ]);
     }
 }

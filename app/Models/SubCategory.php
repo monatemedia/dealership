@@ -51,17 +51,27 @@ class SubCategory extends Model
             ->withPivot('default_fuel_type', 'can_edit');
     }
 
+    // ADD THIS
+    public function transmissionGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(TransmissionGroup::class, 'transmission_group_sub_category')
+            ->withPivot('default_transmission', 'can_edit');
+    }
+
+    // ADD THIS
+    public function driveTrainGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(DriveTrainGroup::class, 'drive_train_group_sub_category')
+            ->withPivot('default_drive_train', 'can_edit');
+    }
+
     /**
      * Get all available fuel types for this sub-category
      */
     public function availableFuelTypes()
     {
         $groupIds = $this->fuelTypeGroups()->pluck('fuel_type_groups.id');
-
-        // Get all fuel types for the groups
-        $fuelTypes = FuelType::whereIn('fuel_type_group_id', $groupIds)->get();
-
-        return $fuelTypes;
+        return FuelType::whereIn('fuel_type_group_id', $groupIds)->get();
     }
 
     /**
@@ -70,24 +80,85 @@ class SubCategory extends Model
     public function getFuelTypeConfig(): array
     {
         $groups = $this->fuelTypeGroups()->get();
-
         if ($groups->isEmpty()) {
             return [
                 'can_edit' => true,
                 'default' => null,
-                'fuel_types' => collect([]) // Empty collection
+                'fuel_types' => collect([])
             ];
         }
-
         $fuelTypes = $this->availableFuelTypes();
-
-        // Get the first group's pivot data for defaults
         $firstGroup = $groups->first();
-
         return [
             'can_edit' => $firstGroup->pivot->can_edit,
             'default' => $firstGroup->pivot->default_fuel_type,
             'fuel_types' => $fuelTypes
+        ];
+    }
+
+    // ADD THIS
+    /**
+     * Get all available transmissions for this sub-category
+     */
+    public function availableTransmissions()
+    {
+        $groupIds = $this->transmissionGroups()->pluck('transmission_groups.id');
+        return Transmission::whereIn('transmission_group_id', $groupIds)->get();
+    }
+
+    // ADD THIS
+    /**
+     * Get the transmission configuration for this sub-category
+     */
+    public function getTransmissionConfig(): array
+    {
+        $groups = $this->transmissionGroups()->get();
+        if ($groups->isEmpty()) {
+            return [
+                'can_edit' => true,
+                'default' => null,
+                'transmissions' => collect([])
+            ];
+        }
+        $transmissions = $this->availableTransmissions();
+        $firstGroup = $groups->first();
+        return [
+            'can_edit' => $firstGroup->pivot->can_edit,
+            'default' => $firstGroup->pivot->default_transmission,
+            'transmissions' => $transmissions
+        ];
+    }
+
+    // ADD THIS
+    /**
+     * Get all available drive trains for this sub-category
+     */
+    public function availableDriveTrains()
+    {
+        $groupIds = $this->driveTrainGroups()->pluck('drive_train_groups.id');
+        return DriveTrain::whereIn('drive_train_group_id', $groupIds)->get();
+    }
+
+    // ADD THIS
+    /**
+     * Get the drive train configuration for this sub-category
+     */
+    public function getDriveTrainConfig(): array
+    {
+        $groups = $this->driveTrainGroups()->get();
+        if ($groups->isEmpty()) {
+            return [
+                'can_edit' => true,
+                'default' => null,
+                'drive_trains' => collect([])
+            ];
+        }
+        $driveTrains = $this->availableDriveTrains();
+        $firstGroup = $groups->first();
+        return [
+            'can_edit' => $firstGroup->pivot->can_edit,
+            'default' => $firstGroup->pivot->default_drive_train,
+            'drive_trains' => $driveTrains
         ];
     }
 }

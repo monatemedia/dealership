@@ -31,6 +31,8 @@ class Vehicle extends Model
         'mileage',
         'vehicle_type_id',
         'fuel_type_id',
+        'transmission_id',  // ADD THIS
+        'drive_train_id',   // ADD THIS
         'user_id',
         'city_id',
         'address',
@@ -70,6 +72,18 @@ class Vehicle extends Model
     public function fuelType(): BelongsTo
     {
         return $this->belongsTo(FuelType::class);
+    }
+
+    // ADD THIS
+    public function transmission(): BelongsTo
+    {
+        return $this->belongsTo(Transmission::class);
+    }
+
+    // ADD THIS
+    public function driveTrain(): BelongsTo
+    {
+        return $this->belongsTo(DriveTrain::class);
     }
 
     // Define method for `Manufacturer` and the return type
