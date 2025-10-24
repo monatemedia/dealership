@@ -18,9 +18,9 @@ class TransmissionGroup extends Model
         return $this->hasMany(Transmission::class);
     }
 
-    public function subCategories(): BelongsToMany
+    public function subcategories(): BelongsToMany
     {
-        return $this->belongsToMany(SubCategory::class, 'transmission_group_sub_category')
+        return $this->belongsToMany(Subcategory::class, 'transmission_group_subcategory')
             ->withPivot('default_transmission', 'can_edit');
     }
 }

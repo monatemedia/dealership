@@ -20,7 +20,7 @@
                     <div class="form-details">
                     {{-- Hidden inputs --}}
                     <input type="hidden" name="main_category_id" value="{{ $vehicle->subCategory->mainCategory->id ?? '' }}" />
-                    <input type="hidden" name="sub_category_id" value="{{ $vehicle->subCategory->id ?? '' }}" />
+                    <input type="hidden" name="subcategory_id" value="{{ $vehicle->subCategory->id ?? '' }}" />
 
                     {{-- Display category --}}
                     <div class="row">

@@ -27,7 +27,7 @@ class TaxonomyRouteService
             }
         }
 
-        // Handle SubCategory: requires mainCategory -> subCategory
+        // Handle Subcategory: requires mainCategory -> subCategory
         if (isset($category->mainCategory)) {
             return route($routeName, [
                 'mainCategory' => $category->mainCategory->slug,
@@ -68,7 +68,7 @@ class TaxonomyRouteService
 
         // Handle vehicle-types.index route
         // Route: /{mainCategory}/{subCategory}/vehicle-types
-        // Parent is a SubCategory
+        // Parent is a Subcategory
         if ($routeName === 'vehicle-types.index') {
             if (isset($parentCategory->mainCategory)) {
                 return [
@@ -113,7 +113,7 @@ class TaxonomyRouteService
                 'pluralType' => 'Sub-Categories',
                 'indexRouteName' => 'main-category.sub-categories.index',
                 'showRouteName' => 'sub-categories.show',
-                'createRouteParam' => 'sub_category',
+                'createRouteParam' => 'subcategory',
             ],
             'vehicle-type' => [
                 'type' => 'Vehicle Type',

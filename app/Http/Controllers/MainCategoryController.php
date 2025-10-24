@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MainCategory;
-use App\Models\SubCategory;
+use App\Models\Subcategory;
 use App\Models\Vehicle;
 
 class MainCategoryController extends Controller
@@ -49,7 +49,7 @@ class MainCategoryController extends Controller
             ->latest()
             ->paginate(15);
 
-        $subCategories = SubCategory::with('mainCategory')
+        $subcategories = Subcategory::with('mainCategory')
             ->where('main_category_id', $mainCategory->id)
             ->take(3)
             ->get();
@@ -57,7 +57,7 @@ class MainCategoryController extends Controller
         return view('categories.show', [
             'category' => $mainCategory,
             'vehicles' => $vehicles,
-            'childCategories' => $subCategories,
+            'childCategories' => $subcategories,
             'childCategoryType' => 'Sub-Category',
             'parentCategory' => $mainCategory,
         ]);

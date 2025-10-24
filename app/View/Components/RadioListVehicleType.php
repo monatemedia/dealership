@@ -2,7 +2,7 @@
 
 namespace App\View\Components;
 
-use App\Models\SubCategory;
+use App\Models\Subcategory;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
@@ -14,7 +14,7 @@ class RadioListVehicleType extends Component
     /**
      * Create a new component instance.
      */
-    public function __construct(SubCategory $subCategory, $value = null)
+    public function __construct(Subcategory $subCategory, $value = null)
     {
         $this->types = $subCategory->vehicleTypes()->orderBy('name')->get();
         $this->value = $value; // ← store currently selected value (for edit)

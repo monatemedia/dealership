@@ -1,19 +1,19 @@
-<?php // database/seeders/SubCategoryDrivetrainSeeder.php
+<?php // database/seeders/SubcategoryDrivetrainSeeder.php
 
 namespace Database\Seeders;
 
-use App\Models\SubCategory;
+use App\Models\Subcategory;
 use App\Models\DrivetrainGroup;
 use Illuminate\Database\Seeder;
 
-class SubCategoryDrivetrainSeeder extends Seeder
+class SubcategoryDrivetrainSeeder extends Seeder
 {
     public function run(): void
     {
         $config = config('categories.drivetrain_by_category');
 
         foreach ($config as $subCategoryName => $driveTrainConfig) {
-            $subCategory = SubCategory::where('name', $subCategoryName)->first();
+            $subCategory = Subcategory::where('name', $subCategoryName)->first();
             if (!$subCategory) {
                 continue;
             }

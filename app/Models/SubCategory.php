@@ -1,4 +1,4 @@
-<?php // app/Models/SubCategory.php
+<?php // app/Models/Subcategory.php
 
 namespace App\Models;
 
@@ -8,12 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class SubCategory extends Model
+class Subcategory extends Model
 {
     use HasFactory;
 
     public $timestamps = false;
-    protected $table = 'sub_categories';
+    protected $table = 'subcategories';
 
     protected $fillable = [
         'name',
@@ -47,21 +47,21 @@ class SubCategory extends Model
 
     public function fuelTypeGroups(): BelongsToMany
     {
-        return $this->belongsToMany(FuelTypeGroup::class, 'fuel_type_group_sub_category')
+        return $this->belongsToMany(FuelTypeGroup::class, 'fuel_type_group_subcategory')
             ->withPivot('default_fuel_type', 'can_edit');
     }
 
     // ADD THIS
     public function transmissionGroups(): BelongsToMany
     {
-        return $this->belongsToMany(TransmissionGroup::class, 'transmission_group_sub_category')
+        return $this->belongsToMany(TransmissionGroup::class, 'transmission_group_subcategory')
             ->withPivot('default_transmission', 'can_edit');
     }
 
     // ADD THIS
     public function driveTrainGroups(): BelongsToMany
     {
-        return $this->belongsToMany(DrivetrainGroup::class, 'drivetrain_group_sub_category')
+        return $this->belongsToMany(DrivetrainGroup::class, 'drivetrain_group_subcategory')
             ->withPivot('default_drivetrain', 'can_edit');
     }
 

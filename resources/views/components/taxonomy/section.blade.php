@@ -6,7 +6,7 @@
     'indexRouteName',
     'showRouteName',
     'createRouteName' => 'vehicle.create',
-    'createRouteParam' => 'sub_category',
+    'createRouteParam' => 'subcategory',
     'selectingForCreate' => false,
     'showButton' => true,
     'parentCategory' => null,

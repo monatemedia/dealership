@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\MainCategory;
-use App\Models\SubCategory;
+use App\Models\Subcategory;
 use App\Models\VehicleType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -31,12 +31,12 @@ class CategorySeeder extends Seeder
             );
 
             // Step 2: Seed Sub-Categories for this Main Category
-            if (isset($mainData['sub_categories'])) {
-                foreach ($mainData['sub_categories'] as $subName) {
-                    $subData = config('categories.sub_categories.' . $subName);
+            if (isset($mainData['subcategories'])) {
+                foreach ($mainData['subcategories'] as $subName) {
+                    $subData = config('categories.subcategories.' . $subName);
 
                     if ($subData) {
-                        $sub = SubCategory::updateOrCreate(
+                        $sub = Subcategory::updateOrCreate(
                             ['name' => $subName, 'main_category_id' => $main->id],
                             [
                                 'singular' => $subData['singular'],
@@ -53,14 +53,14 @@ class CategorySeeder extends Seeder
 
                         foreach ($vehicleTypes as $typeData) {
                             VehicleType::updateOrCreate(
-                                ['name' => $typeData['name'], 'sub_category_id' => $sub->id],
+                                ['name' => $typeData['name'], 'subcategory_id' => $sub->id],
                                 [
                                     'name' => $typeData['name'],
                                     'long_name' => $typeData['long_name'],
                                     'description' => $typeData['description'],
                                     'image_path' => $typeData['image_path'],
                                     'slug' => Str::slug($typeData['name']),
-                                    'sub_category_id' => $sub->id,
+                                    'subcategory_id' => $sub->id,
                                 ]
                             );
                         }

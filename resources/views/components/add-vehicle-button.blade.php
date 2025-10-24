@@ -12,7 +12,7 @@ $href = route('vehicle.create');
 // If on sub-category page
 if (isset($subCategory) && $subCategory) {
     $label = 'Sell Your ' . ($subCategory->singular ?? $subCategory->name);
-    $href = route('vehicle.create', ['sub_category' => $subCategory->slug]);
+    $href = route('vehicle.create', ['subcategory' => $subCategory->slug]);
 }
 // If on main category page
 elseif (isset($mainCategory) && $mainCategory) {

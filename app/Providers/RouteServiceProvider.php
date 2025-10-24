@@ -2,7 +2,7 @@
 namespace App\Providers;
 
 use App\Models\MainCategory;
-use App\Models\SubCategory;
+use App\Models\Subcategory;
 use App\Models\VehicleType;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -40,8 +40,8 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         /**
-         * SubCategory Binding
-         * Bind SubCategory under MainCategory
+         * Subcategory Binding
+         * Bind Subcategory under MainCategory
          * The mainCategory parameter is now already resolved to a model
          */
         Route::bind('subCategory', function ($value, $route) {
@@ -53,27 +53,27 @@ class RouteServiceProvider extends ServiceProvider
                 $mainCategory = MainCategory::where('slug', $mainCategory)->firstOrFail();
             }
 
-            return SubCategory::where('slug', $value)
+            return Subcategory::where('slug', $value)
                 ->where('main_category_id', $mainCategory->id)
                 ->firstOrFail();
         });
 
         /**
          * VehicleType Binding
-         * Bind VehicleType under SubCategory
+         * Bind VehicleType under Subcategory
          * The subCategory parameter is now already resolved to a model
          */
         Route::bind('vehicleType', function ($value, $route) {
-            // Get the already-resolved SubCategory model
+            // Get the already-resolved Subcategory model
             $subCategory = $route->parameter('subCategory');
 
             // If subCategory is still a string (shouldn't happen but safety check)
             if (is_string($subCategory)) {
-                $subCategory = SubCategory::where('slug', $subCategory)->firstOrFail();
+                $subCategory = Subcategory::where('slug', $subCategory)->firstOrFail();
             }
 
             return VehicleType::where('slug', $value)
-                ->where('sub_category_id', $subCategory->id)
+                ->where('subcategory_id', $subCategory->id)
                 ->firstOrFail();
         });
     }

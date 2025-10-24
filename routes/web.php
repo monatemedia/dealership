@@ -1,7 +1,7 @@
 <?php // routes/web.php
 
 use App\Http\Controllers\MainCategoryController;
-use App\Http\Controllers\SubCategoryController;
+use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
@@ -40,7 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Multi-step vehicle creation flow
     Route::get('/vehicle/create/main-categories', [MainCategoryController::class, 'indexMainCategories'])
         ->name('vehicle.main-categories');
-    Route::get('/vehicle/create/sub-categories/{mainCategory:slug}', [SubCategoryController::class, 'indexSubCategories'])
+    Route::get('/vehicle/create/sub-categories/{mainCategory:slug}', [SubcategoryController::class, 'indexSubcategories'])
         ->name('vehicle.sub-categories');
 
     // Vehicle images management
@@ -104,9 +104,9 @@ Route::get('/{mainCategory}/{subCategory}/{vehicleType}', [VehicleTypeController
 
 // 2️⃣ SUBCATEGORIES (2 segments)
 // This will handle URLs like /light-vehicles/sub-categories
-Route::get('/{mainCategory}/sub-categories', [SubCategoryController::class, 'index'])
+Route::get('/{mainCategory}/sub-categories', [SubcategoryController::class, 'index'])
     ->name('main-category.sub-categories.index');
-Route::get('/{mainCategory}/{subCategory}', [SubCategoryController::class, 'show'])
+Route::get('/{mainCategory}/{subCategory}', [SubcategoryController::class, 'show'])
     ->name('sub-categories.show');
 
 // 1️⃣ MAIN CATEGORIES (least specific - single segment, MUST BE LAST!)

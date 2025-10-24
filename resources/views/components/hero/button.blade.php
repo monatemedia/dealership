@@ -22,7 +22,7 @@
         // Sub-category aware
         $singular = $subCategory->singular ?? $subCategory->name;
         $label = 'Sell Your ' . $singular;
-        $href = route($routeName, ['sub_category' => $subCategory->slug]);
+        $href = route($routeName, ['subcategory' => $subCategory->slug]);
     } elseif ($mainCategory) {
         // Main category aware
         $singular = $mainCategory->singular ?? $mainCategory->name;

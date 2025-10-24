@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\MainCategory;
-use App\Models\SubCategory;
+use App\Models\Subcategory;
 use App\Models\VehicleType;
 use App\Models\City;
 use App\Models\FuelType;
@@ -34,18 +34,18 @@ class VehicleFactory extends Factory
         $mainCategory = MainCategory::inRandomOrder()->first();
 
         // Pick a random sub-category belonging to the main category (nullable)
-        $subCategory = SubCategory::where('main_category_id', $mainCategory->id)
+        $subCategory = Subcategory::where('main_category_id', $mainCategory->id)
             ->inRandomOrder()
             ->first();
 
         // Pick a random vehicle type for this sub-category
-        $vehicleType = VehicleType::where('sub_category_id', $subCategory->id)
+        $vehicleType = VehicleType::where('subcategory_id', $subCategory->id)
             ->inRandomOrder()
             ->first();
 
         return [
             'main_category_id' => $mainCategory->id,
-            'sub_category_id' => $subCategory?->id, // nullable if no sub-category exists
+            'subcategory_id' => $subCategory?->id, // nullable if no sub-category exists
 
             // Manufacturer
             'manufacturer_id' => $manufacturer->id, // Assign the manufacturer ID

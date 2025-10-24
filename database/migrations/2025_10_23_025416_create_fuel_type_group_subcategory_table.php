@@ -1,4 +1,4 @@
-<?php // 2025_10_23_025416_create_fuel_type_group_sub_category_table.php
+<?php // 2025_10_23_025416_create_fuel_type_group_subcategory_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('fuel_type_group_sub_category', function (Blueprint $table) {
+        Schema::create('fuel_type_group_subcategory', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sub_category_id')->constrained()->onDelete('cascade');
+            $table->foreignId('subcategory_id')->constrained()->onDelete('cascade');
             $table->foreignId('fuel_type_group_id')->constrained()->onDelete('cascade');
             $table->string('default_fuel_type')->nullable(); // e.g., 'Petrol', 'Diesel', 'None'
             $table->boolean('can_edit')->default(true);
 
-            $table->unique(['sub_category_id', 'fuel_type_group_id'], 'sub_fuel_group_unique');
+            $table->unique(['subcategory_id', 'fuel_type_group_id'], 'sub_fuel_group_unique');
         });
     }
 
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('fuel_type_group_sub_category');
+        Schema::dropIfExists('fuel_type_group_subcategory');
     }
 };

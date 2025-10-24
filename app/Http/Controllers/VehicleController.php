@@ -6,7 +6,7 @@ use App\Http\Requests\StoreVehicleRequest;
 use App\Models\Feature;
 use App\Models\MainCategory;
 use App\Models\OwnershipPaperwork;
-use App\Models\SubCategory;
+use App\Models\Subcategory;
 use App\Models\Vehicle;
 use App\Services\VehicleImage\VehicleImageService;
 use Illuminate\Http\JsonResponse;
@@ -59,8 +59,8 @@ class VehicleController extends Controller
      * Show the form for creating a new resource.
      *
      * Multi-step flow:
-     * - If sub_category provided: show create form
-     * - If main_category provided: redirect to sub_category selection
+     * - If subcategory provided: show create form
+     * - If main_category provided: redirect to subcategory selection
      * - If nothing provided: redirect to main_category selection
      */
     public function create(Request $request)
@@ -75,12 +75,12 @@ class VehicleController extends Controller
 
         Gate::authorize('create', Vehicle::class);
 
-        $subCategorySlug = $request->query('sub_category');
+        $subCategorySlug = $request->query('subcategory');
         $mainCategorySlug = $request->query('main_category');
 
-        // --- CASE 1: sub_category present ---
+        // --- CASE 1: subcategory present ---
         if ($subCategorySlug) {
-            $subCategory = SubCategory::where('slug', $subCategorySlug)->first();
+            $subCategory = Subcategory::where('slug', $subCategorySlug)->first();
 
             if (!$subCategory) {
                 return redirect()->route('main-categories.index')
@@ -117,7 +117,7 @@ class VehicleController extends Controller
             ]);
         }
 
-        // --- CASE 2: main_category present, but no sub_category ---
+        // --- CASE 2: main_category present, but no subcategory ---
         if ($mainCategorySlug) {
             $mainCategory = MainCategory::where('slug', $mainCategorySlug)->first();
 
@@ -191,13 +191,13 @@ class VehicleController extends Controller
         // Assign the authenticated user ID to the vehicle record
         $data['user_id'] = Auth::id();
 
-        // Ensure sub_category_id exists and is valid
-        if (empty($data['sub_category_id'])) {
+        // Ensure subcategory_id exists and is valid
+        if (empty($data['subcategory_id'])) {
             return redirect('vehicle.create')
                 ->with('error', 'Please select a valid subcategory before creating a vehicle.');
         }
 
-        $subCategory = SubCategory::find($data['sub_category_id']);
+        $subCategory = Subcategory::find($data['subcategory_id']);
         if (!$subCategory) {
             return redirect('vehicle.create')
                 ->with('error', 'The selected subcategory no longer exists. Please choose another.');

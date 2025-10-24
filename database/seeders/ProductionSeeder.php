@@ -27,9 +27,9 @@ class ProductionSeeder extends Seeder
             OwnershipPaperworkSeeder::class, // Add this line
 
             // Linkers (must run after categories and types are seeded)
-            SubCategoryFuelTypeSeeder::class,
-            SubCategoryTransmissionSeeder::class, // Add new linker
-            SubCategoryDrivetrainSeeder::class, // Add new linker
+            SubcategoryFuelTypeSeeder::class,
+            SubcategoryTransmissionSeeder::class, // Add new linker
+            SubcategoryDrivetrainSeeder::class, // Add new linker
 
             SouthAfricanCitySeeder::class,
             ProductionManufacturerSeeder::class,

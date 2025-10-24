@@ -28,7 +28,7 @@ if (empty($config)) {
         'pluralType' => Str::plural($type),
         'indexRouteName' => '#',
         'showRouteName' => '#',
-        'createRouteParam' => 'sub_category',
+        'createRouteParam' => 'subcategory',
     ];
 }
 @endphp
@@ -41,7 +41,7 @@ if (empty($config)) {
             :pluralType="$config['pluralType']"
             :indexRouteName="$config['indexRouteName']"
             :showRouteName="$config['showRouteName']"
-            :createRouteParam="$config['createRouteParam'] ?? 'sub_category'"
+            :createRouteParam="$config['createRouteParam'] ?? 'subcategory'"
             :selectingForCreate="$selectingForCreate"
             :parentCategory="$parentCategory"
         />

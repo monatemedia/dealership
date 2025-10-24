@@ -43,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
             }
 
             if ($subCategory && is_string($subCategory)) {
-                $subCategory = \App\Models\SubCategory::where('slug', $subCategory)->first();
+                $subCategory = \App\Models\Subcategory::where('slug', $subCategory)->first();
             }
 
             $view->with('mainCategory', $mainCategory)

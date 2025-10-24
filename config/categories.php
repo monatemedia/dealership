@@ -146,7 +146,7 @@ return [
             'long_name' => 'Powersport Vehicles',
             'description' => 'High-performance vehicles designed for speed and agility.',
             'image_path' => 'https://images.pexels.com/photos/33237473/pexels-photo-33237473/free-photo-of-orange-motocross-bike-under-tent-in-the-field.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-            'sub_categories' => [
+            'subcategories' => [
                 'Motorcycles',
                 'ATVs',
                 'Side by Sides',
@@ -157,7 +157,7 @@ return [
             'long_name' => 'Light Vehicles',
             'description' => 'A wide range of vehicles for personal and commercial use.',
             'image_path' => 'https://images.pexels.com/photos/11095885/pexels-photo-11095885.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-            'sub_categories' => [
+            'subcategories' => [
                 'Cars',
                 'Personal Trailers',
                 'Caravans',
@@ -169,7 +169,7 @@ return [
             'long_name' => 'Light Commercial Vehicles',
             'description' => 'Bakkies, Minibuses and Panel Vans.',
             'image_path' => 'https://images.pexels.com/photos/16058147/pexels-photo-16058147/free-photo-of-ford-ranger-pickup-truck.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-            'sub_categories' => [
+            'subcategories' => [
                 'Bakkies',
                 'Minibuses',
                 'Panel Vans',
@@ -180,7 +180,7 @@ return [
             'long_name' => 'Buses, Trucks and Truck Trailers.',
             'description' => 'Vehicles designed for transporting goods and people.',
             'image_path' => 'https://images.pexels.com/photos/33095902/pexels-photo-33095902/free-photo-of-orange-truck-parked-by-industrial-building.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-            'sub_categories' => [
+            'subcategories' => [
                 'Buses',
                 'Rigid Trucks',
                 'Truck Tractors',
@@ -197,7 +197,7 @@ return [
     | Subcategory should be included in a main category
     |
     */
-    'sub_categories' => [
+    'subcategories' => [
         'Motorcycles' => [
             'singular' => 'Motorcycle',
             'long_name' => 'Motorcycles & Powersports',
@@ -291,7 +291,7 @@ return [
     | A static list of vehicle types used across the application.
     |
     */
-    'vehicle_types_by_sub_category' => [
+    'vehicle_types_by_subcategory' => [
         'Motorcycles' => [
             [
                 'name' => 'Standard',
@@ -784,7 +784,7 @@ return [
     | - 'can_edit': Boolean indicating if the user can change the fuel type
     |
     */
-    'fuel_types_by_sub_category' => [
+    'fuel_types_by_subcategory' => [
         // Powersport vehicles - only Powersport fuel types
         'Motorcycles' => [
             'groups' => ['Powersport'],

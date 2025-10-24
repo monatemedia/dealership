@@ -1,19 +1,19 @@
-<?php // database/seeders/SubCategoryFuelTypeSeeder.php
+<?php // database/seeders/SubcategoryFuelTypeSeeder.php
 
 namespace Database\Seeders;
 
 use App\Models\FuelTypeGroup;
-use App\Models\SubCategory;
+use App\Models\Subcategory;
 use Illuminate\Database\Seeder;
 
-class SubCategoryFuelTypeSeeder extends Seeder
+class SubcategoryFuelTypeSeeder extends Seeder
 {
     public function run(): void
     {
-        $config = config('categories.fuel_types_by_sub_category');
+        $config = config('categories.fuel_types_by_subcategory');
 
         foreach ($config as $subCategoryName => $fuelConfig) {
-            $subCategory = SubCategory::where('name', $subCategoryName)->first();
+            $subCategory = Subcategory::where('name', $subCategoryName)->first();
 
             if (!$subCategory) {
                 continue;

@@ -1,12 +1,12 @@
-<?php // app/Http/Controllers/SubCategoryController.php
+<?php // app/Http/Controllers/SubcategoryController.php
 namespace App\Http\Controllers;
 
 use App\Models\MainCategory;
-use App\Models\SubCategory;
+use App\Models\Subcategory;
 use App\Models\Vehicle;
 use App\Models\VehicleType;
 
-class SubCategoryController extends Controller
+class SubcategoryController extends Controller
 {
     /**
      * Show all sub-categories for a main category
@@ -14,30 +14,30 @@ class SubCategoryController extends Controller
      */
     public function index(MainCategory $mainCategory)
     {
-        $subCategories = SubCategory::with('mainCategory')
+        $subcategories = Subcategory::with('mainCategory')
             ->where('main_category_id', $mainCategory->id)
             ->get();
 
         $selectingForCreate = session('selecting_category_for_create', false);
 
         return view('categories.index', [
-            'categories' => $subCategories,
+            'categories' => $subcategories,
             'type' => 'Sub-Category',
             'selectingForCreate' => $selectingForCreate,
             'parentCategory' => $mainCategory,
         ]);
     }
 
-    public function show(MainCategory $mainCategory, SubCategory $subCategory)
+    public function show(MainCategory $mainCategory, Subcategory $subCategory)
     {
         $subCategory->load('mainCategory');
 
         $vehicles = Vehicle::with(['primaryImage', 'manufacturer', 'model'])
-            ->where('sub_category_id', $subCategory->id)
+            ->where('subcategory_id', $subCategory->id)
             ->latest()
             ->paginate(15);
 
-        $vehicleTypes = VehicleType::where('sub_category_id', $subCategory->id)
+        $vehicleTypes = VehicleType::where('subcategory_id', $subCategory->id)
             ->take(3)
             ->get();
 

@@ -22,7 +22,7 @@ class Vehicle extends Model
 
     protected $fillable = [
         'main_category_id',
-        'sub_category_id',
+        'subcategory_id',
         'manufacturer_id',
         'model_id',
         'year',
@@ -50,7 +50,7 @@ class Vehicle extends Model
 
     public function subCategory()
     {
-        return $this->belongsTo(SubCategory::class, 'sub_category_id');
+        return $this->belongsTo(Subcategory::class, 'subcategory_id');
     }
 
     /**

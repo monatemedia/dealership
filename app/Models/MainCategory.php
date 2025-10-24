@@ -27,9 +27,9 @@ class MainCategory extends Model
         return 'slug';
     }
 
-    public function subCategories(): HasMany
+    public function subcategories(): HasMany
     {
-        return $this->hasMany(SubCategory::class);
+        return $this->hasMany(Subcategory::class);
     }
 
     public function vehicles(): HasMany
