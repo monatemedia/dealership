@@ -1,4 +1,4 @@
-<?php
+<?php // config/features.php
 
 /**------------------
  * Vehicle Features Configuration
