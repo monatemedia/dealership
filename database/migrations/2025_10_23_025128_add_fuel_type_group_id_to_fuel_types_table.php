@@ -1,4 +1,4 @@
-<?php
+<?php // 2025_10_23_025128_add_fuel_type_group_id_to_fuel_types_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;

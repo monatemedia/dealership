@@ -321,6 +321,39 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Fuel Types
+    |--------------------------------------------------------------------------
+    | A static list of fuel types used across the application.
+    |
+    */
+    'fuel_types' => [
+        'Powersport' => [
+            'Petrol',
+            'Battery Electric',
+            'Diesel',
+            'Flex-Fuel(FFV)',
+        ],
+        'Internal Combustion' => [
+            'Petrol',
+            'Diesel',
+            'Dual Fuel',
+            'Flex-Fuel(FFV)',
+        ],
+        'Electric' => [
+            'Battery Electric',
+            'Hybrid Electric(HEV)',
+            'Hydrogen Fuel Cell Electric(FCEV)',
+            'Plug-in Hybrid Electric(PHEV)',
+        ],
+        'High Pressure Gas' => [
+            'Compressed Natural Gas(CNG)',
+            'Liquid Petrolium Gas(LPG)',
+        ],
+        'None' => [],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Transmissions
     |--------------------------------------------------------------------------
     */
