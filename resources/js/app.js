@@ -9,23 +9,21 @@ window.itemSelector = function(config) {
     selectedId: config.selectedId || null,
     selectedName: config.selectedName || 'Select an Option',
     isOpen: false,
+    modalRadioName: config.modalRadioName || null,
+    // REMOVED: isFocusing state
 
     init() {
-      // This listener is now generic and will work for any radio button name
+      if (!this.modalRadioName) {
+        console.error('itemSelector: `modalRadioName` is required.');
+        return;
+      }
       this.$nextTick(() => {
-        // Find radio buttons within this component's modal
-        const modal = this.$el.querySelector('.modal-overlay');
-        if (!modal) return;
-
-        const radioButtons = modal.querySelectorAll('input[type="radio"]');
-
+        const radioButtons = document.querySelectorAll(`input[type="radio"][name="${this.modalRadioName}"]`);
         radioButtons.forEach(radio => {
           radio.addEventListener('change', (e) => {
             this.selectedId = e.target.value;
-
             const labelText = e.target.nextElementSibling.textContent.trim();
             this.selectedName = labelText || 'Select an Option';
-
             this.closeModal();
           });
         });
@@ -40,6 +38,7 @@ window.itemSelector = function(config) {
     closeModal() {
       this.isOpen = false;
       document.body.style.overflow = '';
+      // REMOVED: All focus-related logic ($nextTick, setTimeout, this.$refs.trigger.focus())
     }
   };
 };

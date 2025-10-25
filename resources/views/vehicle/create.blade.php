@@ -155,6 +155,7 @@
                                 </div>
                             </div>
                         </div>
+                        {{-- ADD THIS: Fuel Type --}}
                         <div class="form-group @error('fuel_type_id') has-error @enderror">
                             <label>Fuel Type</label>
                             @if($canEditFuelType)
@@ -234,6 +235,7 @@
                                 {{ $errors->first('drivetrain_id') }}
                             </p>
                         </div>
+
                         <div class="row">
                             <div class="col">
                                 <div class="form-group @error('province_id') has-error @enderror">

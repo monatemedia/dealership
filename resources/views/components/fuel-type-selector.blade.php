@@ -26,7 +26,8 @@
 <div
      x-data="itemSelector({ {{-- Renamed to generic 'itemSelector' --}}
         selectedId: '{{ $selectedId }}',
-        selectedName: '{{ $selectedName }}'
+        selectedName: '{{ $selectedName }}',
+        modalRadioName: 'fuel_type_modal'
     })"
     class="fuel-type-selector"> {{-- You can keep this class for styling --}}
 
@@ -34,7 +35,9 @@
     <div
          @click="openModal"
          class="fuel-type-input"
-        :class="{ 'has-selection': selectedId !== null && selectedId !== '' }"
+        :class="{
+            'has-selection': selectedId !== null && selectedId !== '',
+        }"
     >
         <span x-text="selectedName" class="fuel-type-display"></span>
         <i class="fa-solid fa-chevron-down"></i>
