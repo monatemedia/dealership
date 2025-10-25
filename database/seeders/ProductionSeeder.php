@@ -30,6 +30,7 @@ class ProductionSeeder extends Seeder
             SubcategoryFuelTypeSeeder::class,
             SubcategoryTransmissionSeeder::class, // Add new linker
             SubcategoryDrivetrainSeeder::class, // Add new linker
+            SubcategoryFeatureSeeder::class, // Add new linker
 
             SouthAfricanCitySeeder::class,
             ProductionManufacturerSeeder::class,

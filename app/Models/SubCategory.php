@@ -161,4 +161,48 @@ class Subcategory extends Model
             'drivetrains' => $driveTrains
         ];
     }
+
+    public function featureGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(FeatureGroup::class, 'feature_group_subcategory')
+            ->withPivot('can_edit');
+    }
+
+    /**
+     * Get all available features for this sub-category
+     */
+    public function availableFeatures()
+    {
+        $groupIds = $this->featureGroups()->pluck('feature_groups.id');
+        return Feature::whereIn('feature_group_id', $groupIds)->get();
+    }
+
+    /**
+     * Get the feature configuration for this sub-category
+     */
+    public function getFeatureConfig(): array
+    {
+        $groups = $this->featureGroups()->get();
+        if ($groups->isEmpty()) {
+            return [
+                'can_edit' => true,
+                'features' => collect([]),
+                'groups' => collect([])
+            ];
+        }
+
+        $groupIds = $groups->pluck('id');
+        $features = Feature::whereIn('feature_group_id', $groupIds)
+            ->with('featureGroup')
+            ->get()
+            ->groupBy('featureGroup.name');
+
+        $firstGroup = $groups->first();
+
+        return [
+            'can_edit' => $firstGroup->pivot->can_edit,
+            'features' => $this->availableFeatures(),
+            'groups' => $features
+        ];
+    }
 }

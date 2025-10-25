@@ -156,7 +156,10 @@
                             </div>
                         </div>
 
-                        <x-checkbox-vehicle-features :$vehicle/>
+                        <x-checkbox-vehicle-features
+                            :vehicle="$vehicle"
+                            :subCategory="$subCategory"
+                        />
 
                         <x-checkbox-ownership-paperwork :$vehicle />
 

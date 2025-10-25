@@ -277,7 +277,7 @@
                             </div>
                         </div>
 
-                        <x-checkbox-vehicle-features />
+                        <x-checkbox-vehicle-features :subCategory="$subCategory" />
                         <x-checkbox-ownership-paperwork />
 
                         <div class="form-group @error('description') has-error @enderror">

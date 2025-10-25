@@ -1012,25 +1012,79 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Features by Category
+    | Features by Subcategory
     |--------------------------------------------------------------------------
-    | Maps sub-categories to their allowed feature groups.
-    | This is simpler because features are multi-select (checkboxes).
+    | Maps sub-categories to their allowed feature groups from config/features.php
+    | Each sub-category includes:
+    | - 'groups': Array of feature group names from features.features
+    | - 'can_edit': Boolean indicating if the user can change features
+    |
     */
-    'features_by_category' => [
-        'Motorcycles' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
-        'ATVs' => ['Comfort and Convenience', 'Safety Features', 'Technology', 'Modifications (Trucks)'],
-        'Side by Sides' => ['Comfort and Convenience', 'Safety Features', 'Technology', 'Modifications (Trucks)'],
-        'Personal Trailers' => ['Comfort and Convenience', 'Technology'],
-        'Caravans' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
-        'Cars' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
-        'Motor Homes' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
-        'Bakkies' => ['Comfort and Convenience', 'Safety Features', 'Technology', 'Modifications (Trucks)'],
-        'Minibuses' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
-        'Panel Vans' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
-        'Buses' => ['Comfort and Convenience', 'Safety Features', 'Technology', 'Modifications (Trucks)'],
-        'Rigid Trucks' => ['Comfort and Convenience', 'Safety Features', 'Technology', 'Modifications (Trucks)'],
-        'Truck Tractors' => ['Comfort and Convenience', 'Safety Features', 'Technology', 'Modifications (Trucks)'],
-        'Truck Trailers' => ['Modifications (Trucks)'],
+    'features_by_subcategory' => [
+        // Motorcycles - specific features
+        'Motorcycles' => [
+            'groups' => ['Motorcycle Specific', 'Safety Features', 'Technology'],
+            'can_edit' => true,
+        ],
+        'ATVs' => [
+            'groups' => ['Motorcycle Specific', 'Safety Features'],
+            'can_edit' => true,
+        ],
+        'Side by Sides' => [
+            'groups' => ['Motorcycle Specific', 'Safety Features', 'Comfort and Convenience'],
+            'can_edit' => true,
+        ],
+
+        // Non-powered vehicles - no features
+        'Personal Trailers' => [
+            'groups' => ['None'],
+            'can_edit' => false,
+        ],
+        'Caravans' => [
+            'groups' => ['Comfort and Convenience', 'Technology'],
+            'can_edit' => true,
+        ],
+
+        // Passenger vehicles - full features
+        'Cars' => [
+            'groups' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
+            'can_edit' => true,
+        ],
+        'Motor Homes' => [
+            'groups' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
+            'can_edit' => true,
+        ],
+
+        // Commercial vehicles - practical features
+        'Bakkies' => [
+            'groups' => ['Comfort and Convenience', 'Safety Features', 'Technology', 'Modifications (Trucks)'],
+            'can_edit' => true,
+        ],
+        'Minibuses' => [
+            'groups' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
+            'can_edit' => true,
+        ],
+        'Panel Vans' => [
+            'groups' => ['Safety Features', 'Technology'],
+            'can_edit' => true,
+        ],
+        'Buses' => [
+            'groups' => ['Comfort and Convenience', 'Safety Features', 'Technology'],
+            'can_edit' => true,
+        ],
+        'Rigid Trucks' => [
+            'groups' => ['Safety Features', 'Technology', 'Modifications (Trucks)'],
+            'can_edit' => true,
+        ],
+        'Truck Tractors' => [
+            'groups' => ['Safety Features', 'Technology', 'Modifications (Trucks)'],
+            'can_edit' => true,
+        ],
+
+        // Truck trailers
+        'Truck Trailers' => [
+            'groups' => ['Safety Features'],
+            'can_edit' => true,
+        ],
     ],
 ];
