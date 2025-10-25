@@ -271,6 +271,7 @@ class VehicleController extends Controller
     }
 
     /**
+     * VehicleController::show
      * Display the specified resource.
      */
     public function show(Request $request, Vehicle $vehicle)
@@ -281,8 +282,28 @@ class VehicleController extends Controller
             abort(404);
         }
 
+        // Eager load all relationships
+        $vehicle->load([
+            'manufacturer',
+            'model',
+            'city',
+            'vehicleType',
+            'fuelType',
+            'transmission',
+            'driveTrain',
+            'owner',
+            'primaryImage',
+            'images',
+            'features',
+            'favouredUsers'
+        ]);
+
+        // Load feature groups with features
+        $featureGroups = \App\Models\FeatureGroup::with('features')->get();
+
         return view('vehicle.show', [
-            'vehicle' => $vehicle
+            'vehicle' => $vehicle,
+            'featureGroups' => $featureGroups
         ]);
     }
 

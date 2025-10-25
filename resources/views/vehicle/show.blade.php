@@ -5,7 +5,7 @@
 @endphp
 
 <x-app-layout title="{{ $vehicle->manufacturer->name }} {{ $vehicle->model->name }} - {{ $vehicle->year }}">
-
+{{-- @dd($vehicle) --}}
     <main>
         <div class="container">
             <h1 class="vehicle-details-page-title">{{ $vehicle->manufacturer->name }} {{ $vehicle->model->name }} - {{ $vehicle->year }}</h1>
@@ -50,14 +50,19 @@
                     <div class="card vehicle-detailed-description">
                         <h2 class="vehicle-details-title">Vehicle Specifications</h2>
 
-                        <ul class="vehicle-specifications">
-                            @foreach(config('features') as $featureName)
-                                <x-vehicle-specification
-                                    :value="$vehicle->features->contains('name', $featureName)">
-                                    {{ $featureName }}
-                                </x-vehicle-specification>
-                            @endforeach
-                        </ul>
+                        @foreach($featureGroups as $group)
+                            @if($group->features->isNotEmpty())
+                                <h3 class="feature-group-title">{{ $group->name }}</h3>
+                                <ul class="vehicle-specifications">
+                                    @foreach($group->features as $feature)
+                                        <x-vehicle-specification
+                                            :value="$vehicle->features->contains('id', $feature->id)">
+                                            {{ $feature->name }}
+                                        </x-vehicle-specification>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        @endforeach
                     </div>
                 </div>
                 <div class="vehicle-details card">
@@ -123,6 +128,14 @@
                             <tr>
                                 <th>Fuel Type</th>
                                 <td>{{ $vehicle->fuelType->name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Transmission</th>
+                                <td>{{ $vehicle->transmission->name ?? 'N/A' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Drivetrain</th>
+                                <td>{{ $vehicle->driveTrain->name ?? 'N/A' }}</td>
                             </tr>
                             <tr>
                                 <th>Address</th>

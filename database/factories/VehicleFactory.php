@@ -2,8 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Models\Drivetrain;
 use App\Models\MainCategory;
 use App\Models\Subcategory;
+use App\Models\Transmission;
 use App\Models\VehicleType;
 use App\Models\City;
 use App\Models\FuelType;
@@ -83,6 +85,12 @@ class VehicleFactory extends Factory
             'fuel_type_id' => FuelType::inRandomOrder() // Get random fuel type
                 ->first() // Get first fuel type
                 ->id, // Get fuel type id
+
+            // Transmission
+            'transmission_id' => Transmission::inRandomOrder()->first()?->id,
+
+            // Drivetrain
+            'drivetrain_id' => Drivetrain::inRandomOrder()->first()?->id,
 
             // User
             'user_id' => $user->id,  // Assign the user ID
