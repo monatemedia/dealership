@@ -1,14 +1,14 @@
 {{-- resources/views/components/drive-train-selector.blade.php --}}
-@props(['driveTrains', 'defaultDrivetrain' => null, 'value' => null])
+@props(['drivetrains', 'defaultDrivetrain' => null, 'value' => null])
 
 @php
     $groupedDrivetrains = [];
 
-    $selectedId = $value ?? $driveTrains->firstWhere('name', $defaultDrivetrain)?->id;
-    $selectedName = $driveTrains->firstWhere('id', $selectedId)?->name ?? 'Select Drivetrain';
+    $selectedId = $value ?? $drivetrains->firstWhere('name', $defaultDrivetrain)?->id;
+    $selectedName = $drivetrains->firstWhere('id', $selectedId)?->name ?? 'Select Drivetrain';
 
-    foreach($driveTrains as $item) {
-        $groupName = $item->driveTrainGroup->name ?? 'Other';
+    foreach($drivetrains as $item) {
+        $groupName = $item->drivetrainGroup->name ?? 'Other';
         if (!isset($groupedDrivetrains[$groupName])) {
             $groupedDrivetrains[$groupName] = [];
         }

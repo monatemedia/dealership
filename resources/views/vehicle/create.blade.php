@@ -155,6 +155,7 @@
                                 </div>
                             </div>
                         </div>
+
                         {{-- ADD THIS: Fuel Type --}}
                         <div class="form-group @error('fuel_type_id') has-error @enderror">
                             <label>Fuel Type</label>
@@ -214,7 +215,7 @@
                             <label>Drivetrain</label>
                             @if($canEditDrivetrain)
                                 <x-drive-train-selector
-                                    :driveTrains="$driveTrains"
+                                    :drivetrains="$drivetrains"
                                     :defaultDrivetrain="$defaultDrivetrain"
                                     :value="old('drivetrain_id')"
                                 />
@@ -228,11 +229,92 @@
                                 <input
                                     type="hidden"
                                     name="drivetrain_id"
-                                    value="{{ $driveTrains->firstWhere('name', $defaultDrivetrain)?->id ?? '' }}"
+                                    value="{{ $drivetrains->firstWhere('name', $defaultDrivetrain)?->id ?? '' }}"
                                 />
                             @endif
                             <p class="error-message">
                                 {{ $errors->first('drivetrain_id') }}
+                            </p>
+                        </div>
+
+                        {{-- Exterior Color --}}
+                        <div class="form-group @error('color_id') has-error @enderror">
+                            <label>Exterior Color</label>
+                            @if($canEditColor)
+                                <x-color-selector
+                                    :colors="$colors"
+                                    :defaultColor="$defaultColor"
+                                    :value="old('color_id')"
+                                />
+                            @else
+                                <input
+                                    type="text"
+                                    readonly
+                                    value="{{ $defaultColor ?? 'None / Not Specified' }}"
+                                    class="readonly-input"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="color_id"
+                                    value="{{ $colors->firstWhere('name', $defaultColor)?->id ?? '' }}"
+                                />
+                            @endif
+                            <p class="error-message">
+                                {{ $errors->first('color_id') }}
+                            </p>
+                        </div>
+
+                        {{-- Interior --}}
+                        <div class="form-group @error('interior_id') has-error @enderror">
+                            <label>Interior</label>
+                            @if($canEditInterior)
+                                <x-interior-selector
+                                    :interiors="$interiors"
+                                    :defaultInterior="$defaultInterior"
+                                    :value="old('interior_id')"
+                                />
+                            @else
+                                <input
+                                    type="text"
+                                    readonly
+                                    value="{{ $defaultInterior ?? 'None / Not Specified' }}"
+                                    class="readonly-input"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="interior_id"
+                                    value="{{ $interiors->firstWhere('name', $defaultInterior)?->id ?? '' }}"
+                                />
+                            @endif
+                            <p class="error-message">
+                                {{ $errors->first('interior_id') }}
+                            </p>
+                        </div>
+
+                        {{-- Accident History --}}
+                        <div class="form-group @error('accident_history_id') has-error @enderror">
+                            <label>Accident History</label>
+                            @if($canEditAccidentHistory)
+                                <x-accident-history-selector
+                                    :accidentHistories="$accidentHistories"
+                                    :defaultAccidentHistory="$defaultAccidentHistory"
+                                    :value="old('accident_history_id')"
+                                />
+                            @else
+                                <input
+                                    type="text"
+                                    readonly
+                                    value="{{ $defaultAccidentHistory ?? 'No Accidents Reported' }}"
+                                    class="readonly-input"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="accident_history_id"
+                                    value="{{ $accidentHistories->firstWhere('name', $defaultAccidentHistory)?->id ?? '' }}"
+                                />
+                            @endif
+                            <p class="error-message">
+                                {{ $errors->first('accident_history_id') }}
                             </p>
                         </div>
 

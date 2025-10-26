@@ -36,6 +36,9 @@ class StoreVehicleRequest extends FormRequest
             'fuel_type_id' => 'required|exists:fuel_types,id',
             'transmission_id' => 'nullable|exists:transmissions,id',
             'drivetrain_id'  => 'nullable|exists:drivetrains,id',
+            'color_id' => 'nullable|exists:colors,id',
+            'interior_id' => 'nullable|exists:interiors,id',
+            'accident_history_id' => 'nullable|exists:accident_histories,id',
             'province_id' => 'required|exists:provinces,id',
             'city_id' => 'required|exists:cities,id',
             'address' => 'required|string',
@@ -60,6 +63,12 @@ class StoreVehicleRequest extends FormRequest
             'main_category_id.required' => 'Please select a main category',
             'subcategory_id.required' => 'Please select a sub-category',
             'vehicle_type_id.required' => 'Please select a vehicle type',
+            'fuel_type_id.required' => 'Please select a fuel type',
+            'fuel_type_id.exists' => 'The selected fuel type is invalid',
+            'transmission_id.required' => 'Please select a transmission type',
+            'transmission_id.exists' => 'The selected transmission type is invalid',
+            'drivetrain_id.required' => 'Please select a drivetrain type',
+            'drivetrain_id.exists' => 'The selected drivetrain type is invalid',
         ];
     }
 
@@ -70,9 +79,12 @@ class StoreVehicleRequest extends FormRequest
             'model_id' => 'model',
             'vehicle_type_id' => 'vehicle type',
             'fuel_type_id' => 'fuel type',
+            'transmission_id' => 'transmission',
+            'drivetrain_id' => 'drivetrain',
             'city_id' => 'city',
             'main_category_id' => 'main category',
             'subcategory_id' => 'sub-category',
+
         ];
     }
 }

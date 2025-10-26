@@ -59,7 +59,7 @@ class Subcategory extends Model
     }
 
     // ADD THIS
-    public function driveTrainGroups(): BelongsToMany
+    public function drivetrainGroups(): BelongsToMany
     {
         return $this->belongsToMany(DrivetrainGroup::class, 'drivetrain_group_subcategory')
             ->withPivot('default_drivetrain', 'can_edit');
@@ -135,17 +135,16 @@ class Subcategory extends Model
      */
     public function availableDrivetrains()
     {
-        $groupIds = $this->driveTrainGroups()->pluck('drivetrain_groups.id');
+        $groupIds = $this->drivetrainGroups()->pluck('drivetrain_groups.id');
         return Drivetrain::whereIn('drivetrain_group_id', $groupIds)->get();
     }
 
-    // ADD THIS
     /**
      * Get the drive train configuration for this sub-category
      */
     public function getDrivetrainConfig(): array
     {
-        $groups = $this->driveTrainGroups()->get();
+        $groups = $this->drivetrainGroups()->get();
         if ($groups->isEmpty()) {
             return [
                 'can_edit' => true,
@@ -153,12 +152,123 @@ class Subcategory extends Model
                 'drivetrains' => collect([])
             ];
         }
-        $driveTrains = $this->availableDrivetrains();
+        $drivetrains = $this->availableDrivetrains();
         $firstGroup = $groups->first();
         return [
             'can_edit' => $firstGroup->pivot->can_edit,
             'default' => $firstGroup->pivot->default_drivetrain,
-            'drivetrains' => $driveTrains
+            'drivetrains' => $drivetrains
+        ];
+    }
+
+    public function colorGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(ColorGroup::class, 'color_group_subcategory')
+            ->withPivot('default_color', 'can_edit');
+    }
+
+    public function interiorGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(InteriorGroup::class, 'interior_group_subcategory')
+            ->withPivot('default_interior', 'can_edit');
+    }
+
+    public function accidentHistoryGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(AccidentHistoryGroup::class, 'accident_history_group_subcategory')
+            ->withPivot('default_accident_history', 'can_edit');
+    }
+
+    /**
+     * Get all available colors for this sub-category
+     */
+    public function availableColors()
+    {
+        $groupIds = $this->colorGroups()->pluck('color_groups.id');
+        return Color::whereIn('color_group_id', $groupIds)->get();
+    }
+
+    /**
+     * Get the color configuration for this sub-category
+     */
+    public function getColorConfig(): array
+    {
+        $groups = $this->colorGroups()->get();
+        if ($groups->isEmpty()) {
+            return [
+                'can_edit' => true,
+                'default' => null,
+                'colors' => collect([])
+            ];
+        }
+        $colors = $this->availableColors();
+        $firstGroup = $groups->first();
+        return [
+            'can_edit' => $firstGroup->pivot->can_edit,
+            'default' => $firstGroup->pivot->default_color,
+            'colors' => $colors
+        ];
+    }
+
+    /**
+     * Get all available interiors for this sub-category
+     */
+    public function availableInteriors()
+    {
+        $groupIds = $this->interiorGroups()->pluck('interior_groups.id');
+        return Interior::whereIn('interior_group_id', $groupIds)->get();
+    }
+
+    /**
+     * Get the interior configuration for this sub-category
+     */
+    public function getInteriorConfig(): array
+    {
+        $groups = $this->interiorGroups()->get();
+        if ($groups->isEmpty()) {
+            return [
+                'can_edit' => true,
+                'default' => null,
+                'interiors' => collect([])
+            ];
+        }
+        $interiors = $this->availableInteriors();
+        $firstGroup = $groups->first();
+        return [
+            'can_edit' => $firstGroup->pivot->can_edit,
+            'default' => $firstGroup->pivot->default_interior,
+            'interiors' => $interiors
+        ];
+    }
+
+    /**
+     * Get all available accident histories for this sub-category
+     */
+    public function availableAccidentHistories()
+    {
+        $groupIds = $this->accidentHistoryGroups()->pluck('accident_history_groups.id');
+        return AccidentHistory::whereIn('accident_history_group_id', $groupIds)->get();
+    }
+
+    /**
+     * Get the accident history configuration for this sub-category
+     */
+    public function getAccidentHistoryConfig(): array
+    {
+        $groups = $this->accidentHistoryGroups()->get();
+        if ($groups->isEmpty()) {
+            return [
+                'can_edit' => true,
+                'default' => null,
+                'accident_histories' => collect([])
+            ];
+        }
+        $accidentHistories = $this->availableAccidentHistories();
+        $firstGroup = $groups->first();
+        return [
+            'can_edit' => $firstGroup->pivot->can_edit,
+            'default' => $firstGroup->pivot->default_accident_history,
+            'accident_histories' => $accidentHistories
         ];
     }
 

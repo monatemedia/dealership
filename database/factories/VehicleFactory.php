@@ -2,7 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Models\AccidentHistory;
+use App\Models\Color;
 use App\Models\Drivetrain;
+use App\Models\Interior;
 use App\Models\MainCategory;
 use App\Models\Subcategory;
 use App\Models\Transmission;
@@ -91,6 +94,21 @@ class VehicleFactory extends Factory
 
             // Drivetrain
             'drivetrain_id' => Drivetrain::inRandomOrder()->first()?->id,
+
+            // Color - NEW
+            'color_id' => Color::inRandomOrder()
+                ->first()
+                ?->id,
+
+            // Interior - NEW
+            'interior_id' => Interior::inRandomOrder()
+                ->first()
+                ?->id,
+
+            // Accident History - NEW
+            'accident_history_id' => AccidentHistory::inRandomOrder()
+                ->first()
+                ?->id,
 
             // User
             'user_id' => $user->id,  // Assign the user ID

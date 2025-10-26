@@ -172,7 +172,7 @@
                             </tr>
                             <tr>
                                 <th>Drivetrain</th>
-                                <td>{{ $vehicle->driveTrain->name ?? 'N/A' }}</td>
+                                <td>{{ $vehicle->drivetrain->name ?? 'N/A' }}</td>
                             </tr>
                             <tr>
                                 <th>Address</th>

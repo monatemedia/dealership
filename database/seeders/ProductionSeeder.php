@@ -23,6 +23,9 @@ class ProductionSeeder extends Seeder
             FuelTypeSeeder::class, // Seed FuelTypes
             TransmissionSeeder::class, // Seed Transmissions
             DrivetrainSeeder::class, // Seed Drivetrains
+            ColorSeeder::class,
+            InteriorSeeder::class,
+            AccidentHistorySeeder::class,
             FeatureSeeder::class,
             OwnershipPaperworkSeeder::class, // Add this line
 
@@ -30,6 +33,9 @@ class ProductionSeeder extends Seeder
             SubcategoryFuelTypeSeeder::class,
             SubcategoryTransmissionSeeder::class, // Add new linker
             SubcategoryDrivetrainSeeder::class, // Add new linker
+            SubcategoryColorSeeder::class,
+            SubcategoryInteriorSeeder::class,
+            SubcategoryAccidentHistorySeeder::class,
             SubcategoryFeatureSeeder::class, // Add new linker
 
             SouthAfricanCitySeeder::class,

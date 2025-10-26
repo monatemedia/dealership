@@ -93,7 +93,10 @@ class VehicleController extends Controller
             // Get all configs
             $fuelConfig = $subcategory->getFuelTypeConfig();
             $transmissionConfig = $subcategory->getTransmissionConfig(); // <-- ADDED
-            $driveTrainConfig = $subcategory->getDrivetrainConfig();   // <-- ADDED
+            $drivetrainConfig = $subcategory->getDrivetrainConfig();   // <-- ADDED
+            $colorConfig = $subcategory->getColorConfig();              // NEW
+            $interiorConfig = $subcategory->getInteriorConfig();        // NEW
+            $accidentHistoryConfig = $subcategory->getAccidentHistoryConfig(); // NEW
 
             return view('vehicle.create', [
                 'subcategory' => $subcategory,
@@ -111,9 +114,24 @@ class VehicleController extends Controller
                 'canEditTransmission' => $transmissionConfig['can_edit'],     // <-- ADDED
 
                 // Drivetrains
-                'driveTrains' => $driveTrainConfig['drivetrains'],          // <-- ADDED
-                'defaultDrivetrain' => $driveTrainConfig['default'],         // <-- ADDED
-                'canEditDrivetrain' => $driveTrainConfig['can_edit'],       // <-- ADDED
+                'drivetrains' => $drivetrainConfig['drivetrains'],          // <-- ADDED
+                'defaultDrivetrain' => $drivetrainConfig['default'],         // <-- ADDED
+                'canEditDrivetrain' => $drivetrainConfig['can_edit'],       // <-- ADDED
+
+                // Colors - NEW
+                'colors' => $colorConfig['colors'],
+                'defaultColor' => $colorConfig['default'],
+                'canEditColor' => $colorConfig['can_edit'],
+
+                // Interiors - NEW
+                'interiors' => $interiorConfig['interiors'],
+                'defaultInterior' => $interiorConfig['default'],
+                'canEditInterior' => $interiorConfig['can_edit'],
+
+                // Accident History - NEW
+                'accidentHistories' => $accidentHistoryConfig['accident_histories'],
+                'defaultAccidentHistory' => $accidentHistoryConfig['default'],
+                'canEditAccidentHistory' => $accidentHistoryConfig['can_edit'],
             ]);
         }
 
@@ -288,7 +306,10 @@ class VehicleController extends Controller
             'vehicleType',
             'fuelType',
             'transmission',
-            'driveTrain',
+            'drivetrain',
+            'color',              // NEW
+            'interior',           // NEW
+            'accidentHistory',    // NEW
             'owner',
             'primaryImage',
             'images',

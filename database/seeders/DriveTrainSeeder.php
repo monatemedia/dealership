@@ -13,15 +13,15 @@ class DrivetrainSeeder extends Seeder
         // Note: config key is 'drivetrain' not 'drivetrains'
         $config = config('lookups.drivetrain');
 
-        foreach ($config as $groupName => $driveTrains) {
+        foreach ($config as $groupName => $drivetrains) {
             $group = DrivetrainGroup::updateOrCreate(
                 ['name' => $groupName]
             );
 
-            foreach ($driveTrains as $driveTrainName) {
+            foreach ($drivetrains as $drivetrainName) {
                 Drivetrain::updateOrCreate(
                     [
-                        'name' => $driveTrainName,
+                        'name' => $drivetrainName,
                         'drivetrain_group_id' => $group->id
                     ]
                 );

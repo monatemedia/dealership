@@ -17,7 +17,7 @@ class Drivetrain extends Model
         'drivetrain_group_id'
     ];
 
-    public function driveTrainGroup(): BelongsTo
+    public function drivetrainGroup(): BelongsTo
     {
         return $this->belongsTo(DrivetrainGroup::class);
     }

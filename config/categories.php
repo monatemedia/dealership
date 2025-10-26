@@ -1012,6 +1012,243 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Colors by Subcategory
+    |--------------------------------------------------------------------------
+    | Maps sub-categories to their allowed color groups from config/lookups.php
+    */
+    'colors_by_subcategory' => [
+        'Motorcycles' => [
+            'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
+            'default' => 'Black',
+            'can_edit' => true,
+        ],
+        'ATVs' => [
+            'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
+            'default' => 'Black',
+            'can_edit' => true,
+        ],
+        'Side by Sides' => [
+            'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
+            'default' => 'Black',
+            'can_edit' => true,
+        ],
+        'Cars' => [
+            'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
+            'default' => 'White',
+            'can_edit' => true,
+        ],
+        'Bakkies' => [
+            'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
+            'default' => 'White',
+            'can_edit' => true,
+        ],
+        'Personal Trailers' => [
+            'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
+            'default' => 'White',
+            'can_edit' => true,
+        ],
+        'Caravans' => [
+            'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
+            'default' => 'White',
+            'can_edit' => true,
+        ],
+        'Motor Homes' => [
+            'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
+            'default' => 'White',
+            'can_edit' => true,
+        ],
+        'Minibuses' => [
+            'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
+            'default' => 'White',
+            'can_edit' => true,
+        ],
+        'Panel Vans' => [
+            'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
+            'default' => 'White',
+            'can_edit' => true,
+        ],
+        'Buses' => [
+            'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
+            'default' => 'White',
+            'can_edit' => true,
+        ],
+        'Rigid Trucks' => [
+            'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
+            'default' => 'White',
+            'can_edit' => true,
+        ],
+        'Truck Tractors' => [
+            'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
+            'default' => 'White',
+            'can_edit' => true,
+        ],
+        'Truck Trailers' => [
+            'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
+            'default' => 'White',
+            'can_edit' => true,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Interiors by Subcategory
+    |--------------------------------------------------------------------------
+    | Maps sub-categories to their allowed interior groups from config/lookups.php
+    */
+    'interiors_by_subcategory' => [
+        'Motorcycles' => [
+            'groups' => ['None'],
+            'default' => 'None / Not Specified',
+            'can_edit' => false,
+        ],
+        'ATVs' => [
+            'groups' => ['None'],
+            'default' => 'None / Not Specified',
+            'can_edit' => false,
+        ],
+        'Side by Sides' => [
+            'groups' => ['Cloth', 'Vinyl', 'None'],
+            'default' => 'Black',
+            'can_edit' => true,
+        ],
+        'Cars' => [
+            'groups' => ['Cloth', 'Premium Cloth', 'Leather', 'Synthetic Leather (Leatherette)', 'Nappa Leather', 'Suede Leather', 'Alcantara', 'Vinyl', 'None'],
+            'default' => 'Black',
+            'can_edit' => true,
+        ],
+        'Bakkies' => [
+            'groups' => ['Cloth', 'Premium Cloth', 'Leather', 'Synthetic Leather (Leatherette)', 'Vinyl', 'None'],
+            'default' => 'Black',
+            'can_edit' => true,
+        ],
+        'Personal Trailers' => [
+            'groups' => ['None'],
+            'default' => 'None / Not Specified',
+            'can_edit' => false,
+        ],
+        'Caravans' => [
+            'groups' => ['Cloth', 'Vinyl', 'None'],
+            'default' => 'Grey',
+            'can_edit' => true,
+        ],
+        'Motor Homes' => [
+            'groups' => ['Cloth', 'Premium Cloth', 'Leather', 'Vinyl', 'None'],
+            'default' => 'Beige',
+            'can_edit' => true,
+        ],
+        'Minibuses' => [
+            'groups' => ['Cloth', 'Vinyl', 'None'],
+            'default' => 'Grey',
+            'can_edit' => true,
+        ],
+        'Panel Vans' => [
+            'groups' => ['Vinyl', 'None'],
+            'default' => 'Grey',
+            'can_edit' => true,
+        ],
+        'Buses' => [
+            'groups' => ['Cloth', 'Vinyl', 'None'],
+            'default' => 'Grey',
+            'can_edit' => true,
+        ],
+        'Rigid Trucks' => [
+            'groups' => ['Cloth', 'Vinyl', 'None'],
+            'default' => 'Black',
+            'can_edit' => true,
+        ],
+        'Truck Tractors' => [
+            'groups' => ['Cloth', 'Vinyl', 'None'],
+            'default' => 'Black',
+            'can_edit' => true,
+        ],
+        'Truck Trailers' => [
+            'groups' => ['None'],
+            'default' => 'None / Not Specified',
+            'can_edit' => false,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Accident History by Subcategory
+    |--------------------------------------------------------------------------
+    | Maps sub-categories to their allowed accident history groups from config/lookups.php
+    */
+    'accident_history_by_subcategory' => [
+        'Motorcycles' => [
+            'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
+            'default' => 'No Accidents Reported',
+            'can_edit' => true,
+        ],
+        'ATVs' => [
+            'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
+            'default' => 'No Accidents Reported',
+            'can_edit' => true,
+        ],
+        'Side by Sides' => [
+            'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
+            'default' => 'No Accidents Reported',
+            'can_edit' => true,
+        ],
+        'Cars' => [
+            'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
+            'default' => 'No Accidents Reported',
+            'can_edit' => true,
+        ],
+        'Bakkies' => [
+            'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
+            'default' => 'No Accidents Reported',
+            'can_edit' => true,
+        ],
+        'Personal Trailers' => [
+            'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
+            'default' => 'No Accidents Reported',
+            'can_edit' => true,
+        ],
+        'Caravans' => [
+            'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
+            'default' => 'No Accidents Reported',
+            'can_edit' => true,
+        ],
+        'Motor Homes' => [
+            'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
+            'default' => 'No Accidents Reported',
+            'can_edit' => true,
+        ],
+        'Minibuses' => [
+            'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
+            'default' => 'No Accidents Reported',
+            'can_edit' => true,
+        ],
+        'Panel Vans' => [
+            'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
+            'default' => 'No Accidents Reported',
+            'can_edit' => true,
+        ],
+        'Buses' => [
+            'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
+            'default' => 'No Accidents Reported',
+            'can_edit' => true,
+        ],
+        'Rigid Trucks' => [
+            'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
+            'default' => 'No Accidents Reported',
+            'can_edit' => true,
+        ],
+        'Truck Tractors' => [
+            'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
+            'default' => 'No Accidents Reported',
+            'can_edit' => true,
+        ],
+        'Truck Trailers' => [
+            'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
+            'default' => 'No Accidents Reported',
+            'can_edit' => true,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Features by Subcategory
     |--------------------------------------------------------------------------
     | Maps sub-categories to their allowed feature groups from config/features.php

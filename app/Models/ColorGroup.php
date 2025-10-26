@@ -1,4 +1,5 @@
-<?php // app/Models/DrivetrainGroup.php
+<?php
+// app/Models/ColorGroup.php
 
 namespace App\Models;
 
@@ -7,20 +8,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class DrivetrainGroup extends Model
+class ColorGroup extends Model
 {
     use HasFactory;
+
     public $timestamps = false;
+
     protected $fillable = ['name'];
 
-    public function drivetrains(): HasMany
+    public function colors(): HasMany
     {
-        return $this->hasMany(Drivetrain::class);
+        return $this->hasMany(Color::class);
     }
 
     public function subcategories(): BelongsToMany
     {
-        return $this->belongsToMany(Subcategory::class, 'drivetrain_group_subcategory')
-            ->withPivot('default_drivetrain', 'can_edit');
+        return $this->belongsToMany(Subcategory::class, 'color_group_subcategory')
+            ->withPivot('default_color', 'can_edit');
     }
 }

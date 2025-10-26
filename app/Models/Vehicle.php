@@ -33,6 +33,9 @@ class Vehicle extends Model
         'fuel_type_id',
         'transmission_id',  // ADD THIS
         'drivetrain_id',   // ADD THIS
+        'color_id',
+        'interior_id',
+        'accident_history_id',
         'user_id',
         'city_id',
         'address',
@@ -43,12 +46,12 @@ class Vehicle extends Model
 
     # Define the relationships
 
-    public function mainCategory()
+    public function mainCategory() : BelongsTo
     {
         return $this->belongsTo(MainCategory::class, 'main_category_id');
     }
 
-    public function subcategory()
+    public function subcategory(): BelongsTo
     {
         return $this->belongsTo(Subcategory::class, 'subcategory_id');
     }
@@ -81,9 +84,24 @@ class Vehicle extends Model
     }
 
     // ADD THIS
-    public function driveTrain(): BelongsTo
+    public function drivetrain(): BelongsTo
     {
         return $this->belongsTo(Drivetrain::class);
+    }
+
+    public function color(): BelongsTo
+    {
+        return $this->belongsTo(Color::class);
+    }
+
+    public function interior(): BelongsTo
+    {
+        return $this->belongsTo(Interior::class);
+    }
+
+    public function accidentHistory(): BelongsTo
+    {
+        return $this->belongsTo(AccidentHistory::class);
     }
 
     // Define method for `Manufacturer` and the return type

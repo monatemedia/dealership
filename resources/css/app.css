@@ -2211,3 +2211,113 @@ a.pagination-item:hover {
     color: #6b7280;
     cursor: not-allowed;
 }
+
+/*-----------------------------------------------------------------------*/
+/* ===========================
+   Testing Input Selectors for Colors, Interior and Accident History
+   =========================== */
+
+/* Color Selector */
+.color-selector {
+    position: relative;
+    width: 100%;
+}
+
+.color-input {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.color-input:hover {
+    border-color: #999;
+}
+
+.color-input.has-selection {
+    border-color: #4CAF50;
+}
+
+.color-display {
+    flex: 1;
+    color: #333;
+}
+
+/* Interior Selector */
+.interior-selector {
+    position: relative;
+    width: 100%;
+}
+
+.interior-input {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.interior-input:hover {
+    border-color: #999;
+}
+
+.interior-input.has-selection {
+    border-color: #4CAF50;
+}
+
+.interior-display {
+    flex: 1;
+    color: #333;
+}
+
+/* Accident History Selector */
+.accident-history-selector {
+    position: relative;
+    width: 100%;
+}
+
+.accident-history-input {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.accident-history-input:hover {
+    border-color: #999;
+}
+
+.accident-history-input.has-selection {
+    border-color: #4CAF50;
+}
+
+.accident-history-display {
+    flex: 1;
+    color: #333;
+}
+
+/* Read-only input styling */
+.readonly-input {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background: #f5f5f5;
+    color: #666;
+    cursor: not-allowed;
+}
