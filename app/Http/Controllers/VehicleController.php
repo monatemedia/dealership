@@ -298,8 +298,13 @@ class VehicleController extends Controller
             'favouredUsers'
         ]);
 
-        // Load feature groups with features
-        $featureGroups = \App\Models\FeatureGroup::with('features')->get();
+        // Get feature groups for this subcategory with their features
+        // and eager load the pivot data for can_edit flag if needed
+        $featureGroups = \App\Models\FeatureGroup::with(['features'])
+            ->whereHas('subcategories', function($query) use ($vehicle) {
+                $query->where('subcategories.id', $vehicle->subcategory_id);
+            })
+            ->get();
 
         return view('vehicle.show', [
             'vehicle' => $vehicle,

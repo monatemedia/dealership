@@ -50,20 +50,25 @@
                     <div class="card vehicle-detailed-description">
                         <h2 class="vehicle-details-title">Vehicle Specifications</h2>
 
-                        @foreach($featureGroups as $group)
-                            @if($group->features->isNotEmpty())
-                                <h3 class="feature-group-title">{{ $group->name }}</h3>
-                                <ul class="vehicle-specifications">
-                                    @foreach($group->features as $feature)
-                                        <x-vehicle-specification
-                                            :value="$vehicle->features->contains('id', $feature->id)">
-                                            {{ $feature->name }}
-                                        </x-vehicle-specification>
-                                    @endforeach
-                                </ul>
-                            @endif
-                        @endforeach
+                        @if($featureGroups->isNotEmpty())
+                            @foreach($featureGroups as $group)
+                                @if($group->features->isNotEmpty())
+                                    <h3 class="feature-group-title">{{ $group->name }}</h3>
+                                    <ul class="vehicle-specifications">
+                                        @foreach($group->features as $feature)
+                                            <x-vehicle-specification
+                                                :value="$vehicle->features->contains('id', $feature->id)">
+                                                {{ $feature->name }}
+                                            </x-vehicle-specification>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            @endforeach
+                        @else
+                            <p class="text-muted">No feature groups available for this vehicle category.</p>
+                        @endif
                     </div>
+
                 </div>
                 <div class="vehicle-details card">
                     <div class="flex items-center justify-between">
