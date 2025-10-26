@@ -447,12 +447,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Exterior Colours
+    | Exterior Colour
     |--------------------------------------------------------------------------
     | A static list of exterior vehicle colours
     |
     */
-    'colors' => [
+    'color' => [
         'Standard' => [
             'White',
             'Black',
@@ -486,7 +486,7 @@ return [
             'Yellow',
             'Orange',
         ],
-        'Other' => [],
+        'Other' => ['None / Not Specified'],
     ],
 
     /*
@@ -563,7 +563,7 @@ return [
                 'Tan',
             ],
         ],
-        'None' => [],
+        'None' => ['None / Not Specified'],
     ],
 
     /*
@@ -581,8 +581,7 @@ return [
             'Windshield Crack',
         ],
         'Moderate' => [
-            'Front Bumper Repair',
-            'Rear Bumper Repair',
+            'Bumper Repair',
             'Panel Replacement',
             'Suspension Damage',
         ],
@@ -604,12 +603,12 @@ return [
     */
     'exterior_condition' =>
         [
-            'New,
-            Like New,
-            Excellent,
-            Good,
-            Fair,
-            Needs Work'
+            'New',
+            'Like New',
+            'Excellent',
+            'Good',
+            'Fair',
+            'Needs Work'
         ],
 
     /*
@@ -621,12 +620,12 @@ return [
     */
     'interior_condition' =>
         [
-            'New,
-            Like New,
-            Excellent,
-            Good,
-            Fair,
-            Needs Work'
+            'New',
+            'Like New',
+            'Excellent',
+            'Good',
+            'Fair',
+            'Needs Work'
         ],
 
     /*
@@ -645,8 +644,6 @@ return [
             'Fair',
             'Needs Work'
         ],
-
-
 
     /*
     |--------------------------------------------------------------------------
