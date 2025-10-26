@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('category'); // 'Ownership Checklist', 'Supporting Documents', etc.
+            $table->timestamps();
         });
     }
 
