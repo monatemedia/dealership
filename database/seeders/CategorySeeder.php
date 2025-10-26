@@ -48,7 +48,7 @@ class CategorySeeder extends Seeder
                             ]
                         );
 
-                        // Step 3: Seed Vehicle Types for this Sub-Category
+                        // Step 3: Seed Vehicle Types for this Subcategory
                         $vehicleTypes = config('categories.vehicle_types.' . $subName, []);
 
                         foreach ($vehicleTypes as $typeData) {

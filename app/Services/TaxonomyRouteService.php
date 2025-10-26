@@ -109,7 +109,7 @@ class TaxonomyRouteService
                 'createRouteParam' => 'main_category',
             ],
             'sub-category' => [
-                'type' => 'Sub-Category',
+                'type' => 'Subcategory',
                 'pluralType' => 'Sub-Categories',
                 'indexRouteName' => 'main-category.sub-categories.index',
                 'showRouteName' => 'sub-categories.show',

@@ -22,7 +22,7 @@ class SubcategoryController extends Controller
 
         return view('categories.index', [
             'categories' => $subcategories,
-            'type' => 'Sub-Category',
+            'type' => 'Subcategory',
             'selectingForCreate' => $selectingForCreate,
             'parentCategory' => $mainCategory,
         ]);

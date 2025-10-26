@@ -58,7 +58,7 @@ class MainCategoryController extends Controller
             'category' => $mainCategory,
             'vehicles' => $vehicles,
             'childCategories' => $subcategories,
-            'childCategoryType' => 'Sub-Category',
+            'childCategoryType' => 'Subcategory',
             'parentCategory' => $mainCategory,
         ]);
     }
