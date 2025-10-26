@@ -635,7 +635,7 @@ return [
     | A static list of the mechanical condition
     |
     */
-    'Mechanical Condition' =>
+    'mechanical_condition' =>
         [
             'New',
             'Like New',
@@ -652,7 +652,7 @@ return [
     | A static list of history and documentation
     |
     */
-    'Service History' =>[
+    'service_history' =>[
         'Full History',
         'Partial History',
         'No History'

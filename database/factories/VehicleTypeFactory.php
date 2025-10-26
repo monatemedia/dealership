@@ -1,4 +1,4 @@
-<?php
+<?php // database/factories/VehicleTypeFactory.php
 
 namespace Database\Factories;
 

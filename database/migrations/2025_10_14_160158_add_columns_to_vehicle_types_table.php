@@ -1,4 +1,4 @@
-<?php
+<?php // database/migrations/2025_10_14_160158_add_columns_to_vehicle_types_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
