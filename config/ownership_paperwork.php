@@ -29,6 +29,5 @@ return [
             'Motorplan or Service Contract',
             'Previous Owner Information',
         ],
-        'None' => [],
     ],
 ];

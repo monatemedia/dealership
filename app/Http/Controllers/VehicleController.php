@@ -306,9 +306,13 @@ class VehicleController extends Controller
             })
             ->get();
 
+        // Get all ownership paperwork
+        $ownershipPaperwork = \App\Models\OwnershipPaperwork::all();
+
         return view('vehicle.show', [
             'vehicle' => $vehicle,
-            'featureGroups' => $featureGroups
+            'featureGroups' => $featureGroups,
+            'ownershipPaperwork' => $ownershipPaperwork
         ]);
     }
 

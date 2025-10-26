@@ -69,6 +69,34 @@
                         @endif
                     </div>
 
+                    {{-- Add this section for ownership paperwork in your show.blade.php --}}
+                    <div class="card vehicle-detailed-description">
+                        <h2 class="vehicle-details-title">Ownership & Documentation</h2>
+
+                        @if($ownershipPaperwork->isNotEmpty())
+                            @php
+                                // Group paperwork by category for display
+                                $paperworkGrouped = $ownershipPaperwork->groupBy('category');
+                            @endphp
+
+                            @foreach($paperworkGrouped as $category => $items)
+                                @if($category && $category !== 'None' && $items->count() > 0)
+                                    <h3 class="feature-group-title">{{ $category }}</h3>
+                                    <ul class="vehicle-specifications">
+                                        @foreach($items as $paperwork)
+                                            <x-vehicle-specification
+                                                :value="$vehicle->ownershipPaperwork->contains('id', $paperwork->id)">
+                                                {{ $paperwork->name }}
+                                            </x-vehicle-specification>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            @endforeach
+                        @else
+                            <p class="text-muted">No ownership paperwork available.</p>
+                        @endif
+                    </div>
+
                 </div>
                 <div class="vehicle-details card">
                     <div class="flex items-center justify-between">
@@ -106,6 +134,10 @@
                     <hr />
                     <table class="vehicle-details-table">
                         <tbody>
+                            <tr>
+                                <th>Category</th>
+                                <td>{{ $vehicle->subCategory->name }}</td>
+                            </tr>
                             <tr>
                                 <th>Manufacturer</th>
                                 <td>{{ $vehicle->manufacturer->name }}</td>
