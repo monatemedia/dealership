@@ -35,7 +35,11 @@ class Vehicle extends Model
         'drivetrain_id',   // ADD THIS
         'color_id',
         'interior_id',
+        'service_history_id',
         'accident_history_id',
+        'exterior_condition_id',
+        'interior_condition_id',
+        'mechanical_condition_id',
         'user_id',
         'city_id',
         'address',
@@ -102,6 +106,25 @@ class Vehicle extends Model
     public function accidentHistory(): BelongsTo
     {
         return $this->belongsTo(AccidentHistory::class);
+    }
+
+    public function serviceHistory(): BelongsTo
+    {
+        return $this->belongsTo(ServiceHistory::class);
+    }
+    public function exteriorCondition(): BelongsTo
+    {
+        return $this->belongsTo(Condition::class, 'exterior_condition_id');
+    }
+
+    public function interiorCondition(): BelongsTo
+    {
+        return $this->belongsTo(Condition::class, 'interior_condition_id');
+    }
+
+    public function mechanicalCondition(): BelongsTo
+    {
+        return $this->belongsTo(Condition::class, 'mechanical_condition_id');
     }
 
     // Define method for `Manufacturer` and the return type

@@ -111,6 +111,56 @@
                                 {{ $errors->first('vehicle_type_id') }}
                             </p>
                         </div>
+
+
+                        <div class="form-group @error('exterior_condition_id') has-error @enderror">
+                            <label>Exterior Condition</label>
+                            <x-radio-list
+                                :items="$conditions"
+                                name="exterior_condition_id"
+                                :value="old('exterior_condition_id')"
+                            />
+                            <p class="error-message">
+                                {{ $errors->first('exterior_condition_id') }}
+                            </p>
+                        </div>
+
+                        <div class="form-group @error('interior_condition_id') has-error @enderror">
+                            <label>Interior Condition</label>
+                            <x-radio-list
+                                :items="$conditions"
+                                name="interior_condition_id"
+                                :value="old('interior_condition_id')"
+                            />
+                            <p class="error-message">
+                                {{ $errors->first('interior_condition_id') }}
+                            </p>
+                        </div>
+
+                        <div class="form-group @error('mechanical_condition_id') has-error @enderror">
+                            <label>Mechanical Condition</label>
+                            <x-radio-list
+                                :items="$conditions"
+                                name="mechanical_condition_id"
+                                :value="old('mechanical_condition_id')"
+                            />
+                            <p class="error-message">
+                                {{ $errors->first('mechanical_condition_id') }}
+                            </p>
+                        </div>
+
+                        <div class="form-group @error('service_history_id') has-error @enderror">
+                            <label>Service History</label>
+                            <x-radio-list
+                                :items="$serviceHistories"
+                                name="service_history_id"
+                                :value="old('service_history_id')"
+                            />
+                            <p class="error-message">
+                                {{ $errors->first('service_history_id') }}
+                            </p>
+                        </div>
+
                         <div class="row">
                             <div class="col">
                                 <div class="form-group @error('price') has-error @enderror">

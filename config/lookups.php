@@ -596,6 +596,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Condition
+    |--------------------------------------------------------------------------
+    | A static list of the condition falues for
+    |  - exterior_condition
+    |  - interior_condition
+    |  - mechanical_condition
+    |
+    */
+    'condition' =>
+        [
+            'New',
+            'Like New',
+            'Excellent',
+            'Good',
+            'Fair',
+            'Needs Work'
+        ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Exterior Condition
     |--------------------------------------------------------------------------
     | A static list of the exterior condition

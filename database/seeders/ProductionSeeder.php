@@ -26,6 +26,8 @@ class ProductionSeeder extends Seeder
             ColorSeeder::class,
             InteriorSeeder::class,
             AccidentHistorySeeder::class,
+            ServiceHistorySeeder::class,
+            ConditionSeeder::class,
             FeatureSeeder::class,
             OwnershipPaperworkSeeder::class, // Add this line
 

@@ -39,6 +39,10 @@ class StoreVehicleRequest extends FormRequest
             'color_id' => 'nullable|exists:colors,id',
             'interior_id' => 'nullable|exists:interiors,id',
             'accident_history_id' => 'nullable|exists:accident_histories,id',
+            'service_history_id' => 'nullable|exists:service_histories,id',
+            'exterior_condition_id' => 'nullable|exists:conditions,id',
+            'interior_condition_id' => 'nullable|exists:conditions,id',
+            'mechanical_condition_id' => 'nullable|exists:conditions,id',
             'province_id' => 'required|exists:provinces,id',
             'city_id' => 'required|exists:cities,id',
             'address' => 'required|string',
@@ -69,6 +73,10 @@ class StoreVehicleRequest extends FormRequest
             'transmission_id.exists' => 'The selected transmission type is invalid',
             'drivetrain_id.required' => 'Please select a drivetrain type',
             'drivetrain_id.exists' => 'The selected drivetrain type is invalid',
+            'exterior_condition_id.exists' => 'The selected exterior condition is invalid',
+            'interior_condition_id.exists' => 'The selected interior condition is invalid',
+            'mechanical_condition_id.exists' => 'The selected mechanical condition is invalid',
+            'service_history_id.exists' => 'The selected service history is invalid',
         ];
     }
 

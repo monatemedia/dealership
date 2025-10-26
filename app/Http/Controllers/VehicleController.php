@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreVehicleRequest;
+use App\Models\Condition;
 use App\Models\Feature;
 use App\Models\MainCategory;
 use App\Models\OwnershipPaperwork;
+use App\Models\ServiceHistory;
 use App\Models\Subcategory;
 use App\Models\Vehicle;
 use App\Services\VehicleImage\VehicleImageService;
@@ -97,6 +99,8 @@ class VehicleController extends Controller
             $colorConfig = $subcategory->getColorConfig();              // NEW
             $interiorConfig = $subcategory->getInteriorConfig();        // NEW
             $accidentHistoryConfig = $subcategory->getAccidentHistoryConfig(); // NEW
+            $serviceHistories = ServiceHistory::orderBy('order')->get();
+            $conditions = Condition::orderBy('order')->get();
 
             return view('vehicle.create', [
                 'subcategory' => $subcategory,
@@ -132,6 +136,12 @@ class VehicleController extends Controller
                 'accidentHistories' => $accidentHistoryConfig['accident_histories'],
                 'defaultAccidentHistory' => $accidentHistoryConfig['default'],
                 'canEditAccidentHistory' => $accidentHistoryConfig['can_edit'],
+
+                // Service Histories - NEW
+                'serviceHistories' => $serviceHistories,
+
+                // Conditions - NEW
+                'conditions' => $conditions,
             ]);
         }
 
