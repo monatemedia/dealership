@@ -162,12 +162,6 @@ class Subcategory extends Model
         ];
     }
 
-    public function featureGroups(): BelongsToMany
-    {
-        return $this->belongsToMany(FeatureGroup::class, 'feature_group_subcategory')
-            ->withPivot('can_edit');
-    }
-
     /**
      * Get all available features for this sub-category
      */
@@ -178,31 +172,50 @@ class Subcategory extends Model
     }
 
     /**
-     * Get the feature configuration for this sub-category
+     * Get feature configuration for this subcategory
+     * Returns: [
+     *   'can_edit' => bool,
+     *   'groups' => Collection (grouped features by group name),
+     *   'features' => Collection (all features flat)
+     * ]
      */
     public function getFeatureConfig(): array
     {
-        $groups = $this->featureGroups()->get();
-        if ($groups->isEmpty()) {
+        // Get all feature groups for this subcategory with their features
+        $featureGroups = $this->featureGroups()
+            ->with('features')
+            ->get();
+
+        if ($featureGroups->isEmpty()) {
             return [
                 'can_edit' => true,
-                'features' => collect([]),
-                'groups' => collect([])
+                'groups' => collect([]),
+                'features' => collect([])
             ];
         }
 
-        $groupIds = $groups->pluck('id');
-        $features = Feature::whereIn('feature_group_id', $groupIds)
-            ->with('featureGroup')
-            ->get()
-            ->groupBy('featureGroup.name');
+        // Check if user can edit (use the first group's pivot value, or true if all have same value)
+        $canEdit = $featureGroups->first()->pivot->can_edit ?? true;
 
-        $firstGroup = $groups->first();
+        // Group features by their group name
+        $groupedFeatures = $featureGroups->mapWithKeys(function ($group) {
+            return [$group->name => $group->features];
+        });
+
+        // Flatten all features into a single collection
+        $allFeatures = $featureGroups->pluck('features')->flatten();
 
         return [
-            'can_edit' => $firstGroup->pivot->can_edit,
-            'features' => $this->availableFeatures(),
-            'groups' => $features
+            'can_edit' => $canEdit,
+            'groups' => $groupedFeatures,
+            'features' => $allFeatures
         ];
+    }
+
+    // Make sure you have the featureGroups relationship defined
+    public function featureGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(FeatureGroup::class, 'feature_group_subcategory')
+            ->withPivot('can_edit');
     }
 }

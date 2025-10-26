@@ -15,11 +15,17 @@ class FeatureGroup extends Model
 
     protected $fillable = ['name'];
 
-    public function features(): HasMany
+    /**
+     * The features that belong to this group
+     */
+    public function features(): BelongsToMany
     {
-        return $this->hasMany(Feature::class);
+        return $this->belongsToMany(Feature::class);
     }
 
+    /**
+     * The subcategories that can use this feature group
+     */
     public function subcategories(): BelongsToMany
     {
         return $this->belongsToMany(Subcategory::class, 'feature_group_subcategory')

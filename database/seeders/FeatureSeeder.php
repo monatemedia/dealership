@@ -8,10 +8,10 @@ use Illuminate\Database\Seeder;
 
 class FeatureSeeder extends Seeder
 {
+
     public function run(): void
     {
         $features = config('features.features');
-        $createdFeatures = []; // Track created features
 
         foreach ($features as $groupName => $featureList) {
             if ($groupName === 'None') continue;
@@ -19,23 +19,18 @@ class FeatureSeeder extends Seeder
             // Create or get the feature group
             $group = FeatureGroup::firstOrCreate(['name' => $groupName]);
 
-            // Create features within this group
+            // Create features and attach them to this group
             foreach ($featureList as $featureName) {
-                // Check if we already created this feature
-                if (isset($createdFeatures[$featureName])) {
-                    // Feature exists, just log a warning
-                    $this->command->warn("Feature '{$featureName}' already exists in group '{$createdFeatures[$featureName]}', skipping in group '{$groupName}'");
-                    continue;
-                }
+                // Create feature if it doesn't exist (globally unique by name)
+                $feature = Feature::firstOrCreate(['name' => $featureName]);
 
-                Feature::firstOrCreate([
-                    'name' => $featureName,
-                    'feature_group_id' => $group->id
-                ]);
-
-                // Track that we created this feature
-                $createdFeatures[$featureName] = $groupName;
+                // Attach feature to this group (if not already attached)
+                $group->features()->syncWithoutDetaching($feature->id);
             }
+
+            $this->command->info("Processed feature group: {$groupName}");
         }
+
+        $this->command->info("✓ All features seeded successfully");
     }
 }

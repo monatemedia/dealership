@@ -15,14 +15,19 @@ class Feature extends Model
 
     protected $fillable = [
         'name',
-        'feature_group_id'
     ];
 
-    public function featureGroup(): BelongsTo
+    /**
+     * The feature groups this feature belongs to
+     */
+    public function featureGroups(): BelongsToMany
     {
-        return $this->belongsTo(FeatureGroup::class);
+        return $this->belongsToMany(FeatureGroup::class);
     }
 
+    /**
+     * The vehicles that have this feature
+     */
     public function vehicles(): BelongsToMany
     {
         return $this->belongsToMany(Vehicle::class, 'feature_vehicle');

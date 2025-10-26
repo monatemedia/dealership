@@ -2,8 +2,15 @@
 @php
     // Determine which category to display based on what's available
     $displayCategory = $subcategory ?? $mainCategory ?? null;
-    $categoryName = $displayCategory?->name ?? 'The Best Vehicles';
-    $categorySingular = $displayCategory?->singular ?? 'vehicle';
+
+    // More explicit null handling for IDE
+    if ($displayCategory !== null) {
+        $categoryName = $displayCategory->name;
+        $categorySingular = $displayCategory->singular;
+    } else {
+        $categoryName = 'The Best Vehicles';
+        $categorySingular = 'vehicle';
+    }
 @endphp
 
 <x-hero.slider>

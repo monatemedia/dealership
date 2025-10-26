@@ -1,10 +1,14 @@
 {{-- resources/views/components/checkbox-vehicle-features.blade.php --}}
-
 @props(['vehicle' => null, 'subcategory' => null])
 
 @php
     // Get feature configuration for this subcategory
-    $featureConfig = $subcategory?->getFeatureConfig() ?? ['can_edit' => true, 'groups' => collect([]), 'features' => collect([])];
+    $featureConfig = $subcategory?->getFeatureConfig() ?? [
+        'can_edit' => true,
+        'groups' => collect([]),
+        'features' => collect([])
+    ];
+
     $canEdit = $featureConfig['can_edit'];
     $groupedFeatures = $featureConfig['groups'];
     $selectedFeatures = old('features', $vehicle?->features->pluck('name')->toArray() ?? []);
@@ -19,10 +23,13 @@
         @endif
 
         @foreach($groupedFeatures as $groupName => $features)
-            <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; font-weight: 600;">{{ $groupName }}</h4>
+            <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; font-weight: 600;">
+                {{ $groupName }}
+            </h4>
 
             <div class="row">
                 @php
+                    // Split features into two columns
                     $chunks = $features->chunk(ceil($features->count() / 2));
                 @endphp
 
@@ -45,8 +52,8 @@
             </div>
         @endforeach
 
-        <p class="error-message">
-            {{ $errors->first('features') }}
-        </p>
+        @error('features')
+            <p class="error-message">{{ $message }}</p>
+        @enderror
     </div>
 @endif

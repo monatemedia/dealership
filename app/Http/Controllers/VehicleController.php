@@ -148,8 +148,6 @@ class VehicleController extends Controller
             ->with('info', 'Please select a section category to continue');
     }
 
-
-
     /**
      * app/Http/Controllers/VehicleController::store
      * Store a newly created resource in storage.
@@ -294,12 +292,12 @@ class VehicleController extends Controller
             'owner',
             'primaryImage',
             'images',
+            'features.featureGroups',
             'features',
             'favouredUsers'
         ]);
 
         // Get feature groups for this subcategory with their features
-        // and eager load the pivot data for can_edit flag if needed
         $featureGroups = \App\Models\FeatureGroup::with(['features'])
             ->whereHas('subcategories', function($query) use ($vehicle) {
                 $query->where('subcategories.id', $vehicle->subcategory_id);
@@ -307,7 +305,7 @@ class VehicleController extends Controller
             ->get();
 
         // Get all ownership paperwork
-        $ownershipPaperwork = \App\Models\OwnershipPaperwork::all();
+        $ownershipPaperwork = OwnershipPaperwork::all();
 
         return view('vehicle.show', [
             'vehicle' => $vehicle,
@@ -350,9 +348,6 @@ class VehicleController extends Controller
             'mainCategory' => $mainCategory,
         ]);
     }
-
-
-
 
     /**
      * app/Http/Controllers/VehicleController::update
