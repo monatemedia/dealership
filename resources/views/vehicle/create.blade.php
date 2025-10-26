@@ -104,7 +104,7 @@
                         <div class="form-group @error('vehicle_type_id') has-error @enderror">
                             <label>Vehicle Type</label>
                             <x-radio-list-vehicle-type
-                                :sub-category="$subcategory"
+                                :subcategory="$subcategory"
                                 :value="old('vehicle_type_id')"
                             />
                             <p class="error-message">

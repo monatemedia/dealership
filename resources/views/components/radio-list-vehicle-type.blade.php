@@ -1,3 +1,4 @@
+{{-- resources/views/components/radio-list-vehicle-type.blade.php --}}
 <div class="row">
     @foreach ($types as $type)
         <div class="col">
