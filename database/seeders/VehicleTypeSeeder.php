@@ -13,18 +13,18 @@ class VehicleTypeSeeder extends Seeder
     {
         $vehicleTypesConfig = config('categories.vehicle_types_by_subcategory');
 
-        foreach ($vehicleTypesConfig as $subCategoryName => $types) {
-            $subCategory = Subcategory::where('name', $subCategoryName)->first();
+        foreach ($vehicleTypesConfig as $subcategoryName => $types) {
+            $subcategory = Subcategory::where('name', $subcategoryName)->first();
 
-            if (!$subCategory) continue;
+            if (!$subcategory) continue;
 
             foreach ($types as $typeData) {
-                $slug = Str::slug($typeData['name'] . '-' . $subCategory->name);
+                $slug = Str::slug($typeData['name'] . '-' . $subcategory->name);
 
                 VehicleType::updateOrCreate(
                     [
                         'name' => $typeData['name'],
-                        'subcategory_id' => $subCategory->id,
+                        'subcategory_id' => $subcategory->id,
                     ],
                     [
                         'long_name' => $typeData['long_name'] ?? $typeData['name'],

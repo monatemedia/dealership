@@ -35,19 +35,19 @@ class AppServiceProvider extends ServiceProvider
             }
 
             $mainCategory = request()->route('mainCategory');
-            $subCategory = request()->route('subCategory');
+            $subcategory = request()->route('subcategory');
 
             // If route parameter is a string, fetch from database
             if ($mainCategory && is_string($mainCategory)) {
                 $mainCategory = \App\Models\MainCategory::where('slug', $mainCategory)->first();
             }
 
-            if ($subCategory && is_string($subCategory)) {
-                $subCategory = \App\Models\Subcategory::where('slug', $subCategory)->first();
+            if ($subcategory && is_string($subcategory)) {
+                $subcategory = \App\Models\Subcategory::where('slug', $subcategory)->first();
             }
 
             $view->with('mainCategory', $mainCategory)
-                 ->with('subCategory', $subCategory);
+                 ->with('subcategory', $subcategory);
         });
     }
 }

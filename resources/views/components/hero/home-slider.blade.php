@@ -1,7 +1,7 @@
 {{-- resources/views/components/hero/home-slider.blade.php --}}
 @php
     // Determine which category to display based on what's available
-    $displayCategory = $subCategory ?? $mainCategory ?? null;
+    $displayCategory = $subcategory ?? $mainCategory ?? null;
     $categoryName = $displayCategory?->name ?? 'The Best Vehicles';
     $categorySingular = $displayCategory?->singular ?? 'vehicle';
 @endphp

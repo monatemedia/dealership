@@ -48,7 +48,7 @@
         <div class="vehicle-item-badges">
             {{-- @dd($vehicle) --}}
             <span class="vehicle-item-badge">{{ $vehicle->mainCategory?->name }}</span>
-            <span class="vehicle-item-badge">{{ $vehicle->subCategory?->name }}</span>
+            <span class="vehicle-item-badge">{{ $vehicle->subcategory?->name }}</span>
             @if (!empty($vehicle->vehicleType?->name))
                 <span class="vehicle-item-badge">{{ $vehicle->vehicleType?->name }}</span>
             @endif

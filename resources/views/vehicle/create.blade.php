@@ -2,21 +2,21 @@
 
 @php
     // DEBUG: Check what we have
-    // if (!isset($subCategory)) {
-    //     dd('$subCategory is not set');
+    // if (!isset($subcategory)) {
+    //     dd('$subcategory is not set');
     // }
-    // if (is_null($subCategory)) {
-    //     dd('$subCategory is null');
+    // if (is_null($subcategory)) {
+    //     dd('$subcategory is null');
     // }
     // if (!isset($mainCategory)) {
     //     dd('$mainCategory is not set');
     // }
     // if (is_null($mainCategory)) {
-    //     dd('$mainCategory is null', compact('subCategory'));
+    //     dd('$mainCategory is null', compact('subcategory'));
     // }
 
     // If we get here, both exist
-    $singular = $subCategory->singular ?? 'Vehicle';
+    $singular = $subcategory->singular ?? 'Vehicle';
 @endphp
 
 <x-app-layout title="Add New Vehicle">
@@ -41,7 +41,7 @@
             </div>
 
             {{-- Debugging dump --}}
-            {{-- @dump($subCategory) --}}
+            {{-- @dump($subcategory) --}}
 
             {{-- Form --}}
             <h1 class="vehicle-details-page-title">
@@ -60,14 +60,14 @@
                     <div class="form-details">
                         {{-- Category fields (hidden) --}}
                         <input type="hidden" name="main_category_id" value="{{ $mainCategory->id }}" />
-                        <input type="hidden" name="subcategory_id" value="{{ $subCategory->id }}" />
+                        <input type="hidden" name="subcategory_id" value="{{ $subcategory->id }}" />
                         {{-- End Category fields (hidden) --}}
 
                         <div class="row">
                             <div class="col">
                                 <div class="form-group">
                                     <label>Category</label>
-                                    <input type="text" readonly value="{{ $subCategory->long_name }}" />
+                                    <input type="text" readonly value="{{ $subcategory->long_name }}" />
                                 </div>
                             </div>
                         </div>
@@ -104,7 +104,7 @@
                         <div class="form-group @error('vehicle_type_id') has-error @enderror">
                             <label>Vehicle Type</label>
                             <x-radio-list-vehicle-type
-                                :sub-category="$subCategory"
+                                :sub-category="$subcategory"
                                 :value="old('vehicle_type_id')"
                             />
                             <p class="error-message">
@@ -279,7 +279,7 @@
                             </div>
                         </div>
 
-                        <x-checkbox-vehicle-features :subCategory="$subCategory" />
+                        <x-checkbox-vehicle-features :subcategory="$subcategory" />
                         <x-checkbox-ownership-paperwork />
 
                         <div class="form-group @error('description') has-error @enderror">

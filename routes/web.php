@@ -96,17 +96,17 @@ Route::get('/main-categories', [MainCategoryController::class, 'index'])
 // -------------------------------
 
 // 3️⃣ VEHICLE TYPES (most specific slug route - 3 segments)
-Route::get('/{mainCategory}/{subCategory}/vehicle-types', [VehicleTypeController::class, 'index'])
+Route::get('/{mainCategory}/{subcategory}/vehicle-types', [VehicleTypeController::class, 'index'])
     ->name('vehicle-types.index');
 
-Route::get('/{mainCategory}/{subCategory}/{vehicleType}', [VehicleTypeController::class, 'show'])
+Route::get('/{mainCategory}/{subcategory}/{vehicleType}', [VehicleTypeController::class, 'show'])
     ->name('vehicle-types.show');
 
 // 2️⃣ SUBCATEGORIES (2 segments)
 // This will handle URLs like /light-vehicles/sub-categories
 Route::get('/{mainCategory}/sub-categories', [SubcategoryController::class, 'index'])
     ->name('main-category.sub-categories.index');
-Route::get('/{mainCategory}/{subCategory}', [SubcategoryController::class, 'show'])
+Route::get('/{mainCategory}/{subcategory}', [SubcategoryController::class, 'show'])
     ->name('sub-categories.show');
 
 // 1️⃣ MAIN CATEGORIES (least specific - single segment, MUST BE LAST!)

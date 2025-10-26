@@ -12,10 +12,10 @@ class SubcategoryFuelTypeSeeder extends Seeder
     {
         $config = config('categories.fuel_types_by_subcategory');
 
-        foreach ($config as $subCategoryName => $fuelConfig) {
-            $subCategory = Subcategory::where('name', $subCategoryName)->first();
+        foreach ($config as $subcategoryName => $fuelConfig) {
+            $subcategory = Subcategory::where('name', $subcategoryName)->first();
 
-            if (!$subCategory) {
+            if (!$subcategory) {
                 continue;
             }
 
@@ -31,7 +31,7 @@ class SubcategoryFuelTypeSeeder extends Seeder
                 }
 
                 // Attach the group to the sub-category with pivot data
-                $subCategory->fuelTypeGroups()->syncWithoutDetaching([
+                $subcategory->fuelTypeGroups()->syncWithoutDetaching([
                     $group->id => [
                         'default_fuel_type' => $default,
                         'can_edit' => $canEdit

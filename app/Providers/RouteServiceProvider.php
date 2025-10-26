@@ -44,7 +44,7 @@ class RouteServiceProvider extends ServiceProvider
          * Bind Subcategory under MainCategory
          * The mainCategory parameter is now already resolved to a model
          */
-        Route::bind('subCategory', function ($value, $route) {
+        Route::bind('subcategory', function ($value, $route) {
             // Get the already-resolved MainCategory model
             $mainCategory = $route->parameter('mainCategory');
 
@@ -61,19 +61,19 @@ class RouteServiceProvider extends ServiceProvider
         /**
          * VehicleType Binding
          * Bind VehicleType under Subcategory
-         * The subCategory parameter is now already resolved to a model
+         * The subcategory parameter is now already resolved to a model
          */
         Route::bind('vehicleType', function ($value, $route) {
             // Get the already-resolved Subcategory model
-            $subCategory = $route->parameter('subCategory');
+            $subcategory = $route->parameter('subcategory');
 
-            // If subCategory is still a string (shouldn't happen but safety check)
-            if (is_string($subCategory)) {
-                $subCategory = Subcategory::where('slug', $subCategory)->firstOrFail();
+            // If subcategory is still a string (shouldn't happen but safety check)
+            if (is_string($subcategory)) {
+                $subcategory = Subcategory::where('slug', $subcategory)->firstOrFail();
             }
 
             return VehicleType::where('slug', $value)
-                ->where('subcategory_id', $subCategory->id)
+                ->where('subcategory_id', $subcategory->id)
                 ->firstOrFail();
         });
     }

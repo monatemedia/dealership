@@ -48,7 +48,7 @@ class Vehicle extends Model
         return $this->belongsTo(MainCategory::class, 'main_category_id');
     }
 
-    public function subCategory()
+    public function subcategory()
     {
         return $this->belongsTo(Subcategory::class, 'subcategory_id');
     }
@@ -59,7 +59,7 @@ class Vehicle extends Model
      */
     public function vehicleCategory(): BelongsTo
     {
-        return $this->subCategory();
+        return $this->subcategory();
     }
 
     // Define method for `VehicleType` and the return type

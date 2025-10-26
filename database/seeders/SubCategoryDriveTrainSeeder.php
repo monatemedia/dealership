@@ -12,9 +12,9 @@ class SubcategoryDrivetrainSeeder extends Seeder
     {
         $config = config('categories.drivetrain_by_category');
 
-        foreach ($config as $subCategoryName => $driveTrainConfig) {
-            $subCategory = Subcategory::where('name', $subCategoryName)->first();
-            if (!$subCategory) {
+        foreach ($config as $subcategoryName => $driveTrainConfig) {
+            $subcategory = Subcategory::where('name', $subcategoryName)->first();
+            if (!$subcategory) {
                 continue;
             }
 
@@ -28,7 +28,7 @@ class SubcategoryDrivetrainSeeder extends Seeder
                     continue;
                 }
 
-                $subCategory->driveTrainGroups()->syncWithoutDetaching([
+                $subcategory->driveTrainGroups()->syncWithoutDetaching([
                     $group->id => [
                         'default_drivetrain' => $default,
                         'can_edit' => $canEdit

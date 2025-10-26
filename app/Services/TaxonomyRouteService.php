@@ -16,22 +16,22 @@ class TaxonomyRouteService
      */
     public function resolveShowRoute(string $routeName, Model $category): string
     {
-        // Handle VehicleType: requires mainCategory -> subCategory -> vehicleType
-        if (isset($category->subCategory)) {
-            if (isset($category->subCategory->mainCategory)) {
+        // Handle VehicleType: requires mainCategory -> subcategory -> vehicleType
+        if (isset($category->subcategory)) {
+            if (isset($category->subcategory->mainCategory)) {
                 return route($routeName, [
-                    'mainCategory' => $category->subCategory->mainCategory->slug,
-                    'subCategory' => $category->subCategory->slug,
+                    'mainCategory' => $category->subcategory->mainCategory->slug,
+                    'subcategory' => $category->subcategory->slug,
                     'vehicleType' => $category->slug,
                 ]);
             }
         }
 
-        // Handle Subcategory: requires mainCategory -> subCategory
+        // Handle Subcategory: requires mainCategory -> subcategory
         if (isset($category->mainCategory)) {
             return route($routeName, [
                 'mainCategory' => $category->mainCategory->slug,
-                'subCategory' => $category->slug,
+                'subcategory' => $category->slug,
             ]);
         }
 
@@ -67,24 +67,24 @@ class TaxonomyRouteService
         }
 
         // Handle vehicle-types.index route
-        // Route: /{mainCategory}/{subCategory}/vehicle-types
+        // Route: /{mainCategory}/{subcategory}/vehicle-types
         // Parent is a Subcategory
         if ($routeName === 'vehicle-types.index') {
             if (isset($parentCategory->mainCategory)) {
                 return [
                     'mainCategory' => $parentCategory->mainCategory->slug,
-                    'subCategory' => $parentCategory->slug,
+                    'subcategory' => $parentCategory->slug,
                 ];
             }
         }
 
         // Handle fuel-types.index route (when you build it)
-        // Route: /{mainCategory}/{subCategory}/fuel-types
+        // Route: /{mainCategory}/{subcategory}/fuel-types
         if ($routeName === 'fuel-types.index') {
             if (isset($parentCategory->mainCategory)) {
                 return [
                     'mainCategory' => $parentCategory->mainCategory->slug,
-                    'subCategory' => $parentCategory->slug,
+                    'subcategory' => $parentCategory->slug,
                 ];
             }
         }

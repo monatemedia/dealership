@@ -12,9 +12,9 @@ class SubcategoryTransmissionSeeder extends Seeder
     {
         $config = config('categories.transmissions_by_category');
 
-        foreach ($config as $subCategoryName => $transmissionConfig) {
-            $subCategory = Subcategory::where('name', $subCategoryName)->first();
-            if (!$subCategory) {
+        foreach ($config as $subcategoryName => $transmissionConfig) {
+            $subcategory = Subcategory::where('name', $subcategoryName)->first();
+            if (!$subcategory) {
                 continue;
             }
 
@@ -28,7 +28,7 @@ class SubcategoryTransmissionSeeder extends Seeder
                     continue;
                 }
 
-                $subCategory->transmissionGroups()->syncWithoutDetaching([
+                $subcategory->transmissionGroups()->syncWithoutDetaching([
                     $group->id => [
                         'default_transmission' => $default,
                         'can_edit' => $canEdit

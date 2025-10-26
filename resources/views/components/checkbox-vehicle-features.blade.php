@@ -1,10 +1,10 @@
 {{-- resources/views/components/checkbox-vehicle-features.blade.php --}}
 
-@props(['vehicle' => null, 'subCategory' => null])
+@props(['vehicle' => null, 'subcategory' => null])
 
 @php
     // Get feature configuration for this subcategory
-    $featureConfig = $subCategory?->getFeatureConfig() ?? ['can_edit' => true, 'groups' => collect([]), 'features' => collect([])];
+    $featureConfig = $subcategory?->getFeatureConfig() ?? ['can_edit' => true, 'groups' => collect([]), 'features' => collect([])];
     $canEdit = $featureConfig['can_edit'];
     $groupedFeatures = $featureConfig['groups'];
     $selectedFeatures = old('features', $vehicle?->features->pluck('name')->toArray() ?? []);

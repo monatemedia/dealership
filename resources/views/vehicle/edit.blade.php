@@ -1,7 +1,7 @@
 <x-app-layout title="Edit {{ $vehicle->getTitle() }}">
     <main>
         {{-- @dd($vehicleTypes); --}}
-        {{-- @dd($subCategory); --}}
+        {{-- @dd($subcategory); --}}
         <div class="container-small">
             <h1 class="vehicle-details-page-title">
                 Edit Vehicle: {{ $vehicle->getTitle() }}
@@ -19,15 +19,15 @@
 
                     <div class="form-details">
                     {{-- Hidden inputs --}}
-                    <input type="hidden" name="main_category_id" value="{{ $vehicle->subCategory->mainCategory->id ?? '' }}" />
-                    <input type="hidden" name="subcategory_id" value="{{ $vehicle->subCategory->id ?? '' }}" />
+                    <input type="hidden" name="main_category_id" value="{{ $vehicle->subcategory->mainCategory->id ?? '' }}" />
+                    <input type="hidden" name="subcategory_id" value="{{ $vehicle->subcategory->id ?? '' }}" />
 
                     {{-- Display category --}}
                     <div class="row">
                         <div class="col">
                             <div class="form-group">
                                 <label>Category</label>
-                                <input type="text" readonly value="{{ $vehicle->subCategory->long_name ?? 'N/A' }}" />
+                                <input type="text" readonly value="{{ $vehicle->subcategory->long_name ?? 'N/A' }}" />
                             </div>
                         </div>
                     </div>
@@ -63,9 +63,9 @@
                         </div>
                         <div class="form-group @error('vehicle_type_id') has-error @enderror">
                             <label>Vehicle Type</label>
-                                @if($subCategory)
+                                @if($subcategory)
                                     <x-radio-list-vehicle-type
-                                        :sub-category="$subCategory"
+                                        :sub-category="$subcategory"
                                         :value="old('vehicle_type_id', $vehicle->vehicle_type_id)"
                                     />
                                 @else
@@ -158,7 +158,7 @@
 
                         <x-checkbox-vehicle-features
                             :vehicle="$vehicle"
-                            :subCategory="$subCategory"
+                            :subcategory="$subcategory"
                         />
 
                         <x-checkbox-ownership-paperwork :$vehicle />

@@ -36,18 +36,18 @@ class VehicleFactory extends Factory
         $mainCategory = MainCategory::inRandomOrder()->first();
 
         // Pick a random sub-category belonging to the main category (nullable)
-        $subCategory = Subcategory::where('main_category_id', $mainCategory->id)
+        $subcategory = Subcategory::where('main_category_id', $mainCategory->id)
             ->inRandomOrder()
             ->first();
 
         // Pick a random vehicle type for this sub-category
-        $vehicleType = VehicleType::where('subcategory_id', $subCategory->id)
+        $vehicleType = VehicleType::where('subcategory_id', $subcategory->id)
             ->inRandomOrder()
             ->first();
 
         return [
             'main_category_id' => $mainCategory->id,
-            'subcategory_id' => $subCategory?->id, // nullable if no sub-category exists
+            'subcategory_id' => $subcategory?->id, // nullable if no sub-category exists
 
             // Manufacturer
             'manufacturer_id' => $manufacturer->id, // Assign the manufacturer ID

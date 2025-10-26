@@ -28,7 +28,7 @@ class VehicleType extends Model
         return 'slug';
     }
 
-    public function subCategory(): BelongsTo
+    public function subcategory(): BelongsTo
     {
         return $this->belongsTo(Subcategory::class);
     }

@@ -28,25 +28,25 @@ class SubcategoryController extends Controller
         ]);
     }
 
-    public function show(MainCategory $mainCategory, Subcategory $subCategory)
+    public function show(MainCategory $mainCategory, Subcategory $subcategory)
     {
-        $subCategory->load('mainCategory');
+        $subcategory->load('mainCategory');
 
         $vehicles = Vehicle::with(['primaryImage', 'manufacturer', 'model'])
-            ->where('subcategory_id', $subCategory->id)
+            ->where('subcategory_id', $subcategory->id)
             ->latest()
             ->paginate(15);
 
-        $vehicleTypes = VehicleType::where('subcategory_id', $subCategory->id)
+        $vehicleTypes = VehicleType::where('subcategory_id', $subcategory->id)
             ->take(3)
             ->get();
 
         return view('categories.show', [
-            'category' => $subCategory,
+            'category' => $subcategory,
             'vehicles' => $vehicles,
             'childCategories' => $vehicleTypes,
             'childCategoryType' => 'Vehicle Type',
-            'parentCategory' => $subCategory, // Pass subCategory as parent for button
+            'parentCategory' => $subcategory, // Pass subcategory as parent for button
         ]);
     }
 }
