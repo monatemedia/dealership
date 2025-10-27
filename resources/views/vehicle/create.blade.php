@@ -411,9 +411,6 @@
                             </div>
                         </div>
 
-                        <x-checkbox-vehicle-features :subcategory="$subcategory" />
-                        <x-checkbox-ownership-paperwork />
-
                         <div class="form-group @error('description') has-error @enderror">
                             <label>Detailed Description</label>
                             <textarea rows="10" name="description">{{ old('description') }}</textarea>
@@ -430,6 +427,24 @@
                             >
                             <p class="error-message">{{ $errors->first('published_at') }}</p>
                         </div>
+
+                        {{-- Vehicle Features Section --}}
+                        <x-collapsible-section
+                            title="Vehicle Features (Optional)"
+                            :open="false"
+                            storage-key="vehicle-features-section"
+                        >
+                            <x-checkbox-vehicle-features :subcategory="$subcategory" />
+                        </x-collapsible-section>
+
+                        {{-- Ownership & Documentation Section --}}
+                        <x-collapsible-section
+                            title="Ownership & Documentation (Optional)"
+                            :open="false"
+                            storage-key="ownership-paperwork-section"
+                        >
+                            <x-checkbox-ownership-paperwork />
+                        </x-collapsible-section>
                     </div>
                     <div class="form-images">
                         @foreach($errors->get('images.*') as $imageErrors)
