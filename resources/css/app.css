@@ -1983,123 +1983,58 @@ a.pagination-item:hover {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Adds a subtle shadow */
 }
 
-/* Styles for custom Select components */
-/* Main container to position the dropdown correctly */
-.select-container {
-    position: relative;
-    width: 100%;
-}
-
-/* The main text input field */
-.select-input {
-    width: 100%;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
-    padding: 0.5rem 0.75rem;
-    background-color: #ffffff;
-    box-sizing: border-box;
-}
-
-.select-input:focus {
-    outline: 2px solid transparent;
-    outline-offset: 2px;
-}
-
-/* The dropdown panel that appears */
-.select-dropdown {
-    position: absolute;
-    z-index: 50;
-    width: 100%;
-    margin-top: 0.25rem;
-    background-color: #ffffff;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-/* The scrollable list inside the dropdown */
-.select-list {
-    max-height: 15rem; /* 240px */
-    overflow-y: auto;
-    /* Hide scrollbar but keep scroll functionality */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge Legacy */
-}
-
-.select-list::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
-}
-
-/* Each selectable item in the list */
-.select-item {
-    width: 100%;
-    text-align: left;
-    padding: 0.5rem 0.75rem;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-}
-
-.select-item:hover {
-    background-color: #f3f4f6; /* gray-100 */
-}
-
-/* The informational text (e.g., "Loading...", "No results") */
-.select-info {
-    padding: 0.5rem 0.75rem;
-    color: #6b7280; /* gray-500 */
-    font-size: 90%;
-}
-
-
-
 /* ===========================
-   Fuel Type Selector
+   Generic Selector Component
    =========================== */
 
-.fuel-type-selector {
+.generic-selector {
     position: relative;
     width: 100%;
 }
 
-.fuel-type-input {
+.selector-input {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: 0.375rem;
-    background-color: white;
+    border: var(--input-border);
+    border-radius: var(--button-border-radius);
+    background-color: var(--input-bg-color);
     cursor: pointer;
     transition: border-color 0.2s, background-color 0.2s;
 }
 
-.fuel-type-input:hover {
+.selector-input:hover {
     border-color: var(--input-hover-border-color);
 }
 
-.fuel-type-input:focus,
-.fuel-type-input:focus-within {
+.selector-input:focus,
+.selector-input:focus-within {
     outline: none;
-    border-color: var(--border-color);
+    border-color: var(--input-focus-border-color);
 }
 
-.fuel-type-input.has-selection .fuel-type-display {
-    color: var(--text-color);
+.selector-input.has-selection .selector-display {
+    color: var(--input-text-color);
 }
 
-.fuel-type-display {
+.selector-display {
     flex: 1;
     color: var(--text-muted-color);
 }
 
-.fuel-type-input i {
+.selector-input i {
     color: var(--text-muted-color);
     font-size: 14px;
+    transition: transform 0.2s;
+}
+
+.selector-input:hover i {
+    color: var(--text-color);
 }
 
 /* ===========================
-   Grouped Radio List
+   Grouped Radio List (Site-wide Radio Styling)
    =========================== */
 
 .grouped-list {
@@ -2109,20 +2044,20 @@ a.pagination-item:hover {
 }
 
 .grouped-list-section {
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border);
     border-radius: 12px;
     overflow: hidden;
     transition: border-color 0.2s;
 }
 
 .grouped-list-section:hover {
-    border-color: #cbd5e1;
+    border-color: var(--input-hover-border-color);
 }
 
 .grouped-list-header {
     background-color: #f8fafc;
     padding: 0.5rem 1rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border);
 }
 
 .grouped-list-header h3 {
@@ -2131,12 +2066,12 @@ a.pagination-item:hover {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #475569;
+    color: var(--text-color);
 }
 
 .grouped-list-items {
     padding: 0.5rem;
-    background-color: #fff;
+    background-color: var(--input-bg-color);
 }
 
 .grouped-list-item {
@@ -2150,22 +2085,32 @@ a.pagination-item:hover {
 }
 
 .grouped-list-item:hover {
-    background-color: #f8fafc;
+    background-color: var(--add-images-hover-bg);
 }
 
 .grouped-list-item input[type="radio"] {
-    width: 1rem;
-    height: 1rem;
+    width: 1.125rem;
+    height: 1.125rem;
     margin: 0;
     margin-right: 0.75rem;
     accent-color: var(--primary-color);
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .grouped-list-item-label {
     flex: 1;
-    color: #334155;
+    color: var(--input-text-color);
     font-weight: 500;
+}
+
+/* Site-wide Radio Button Styling */
+input[type="radio"] {
+    accent-color: var(--primary-color);
+}
+
+input[type="radio"]:hover {
+    cursor: pointer;
 }
 
 /* ===========================
@@ -2199,7 +2144,7 @@ a.pagination-item:hover {
     justify-content: flex-end;
     gap: 0.75rem;
     padding-top: 1.5rem;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--border);
 }
 
 /* ===========================
@@ -2207,119 +2152,28 @@ a.pagination-item:hover {
    =========================== */
 
 .readonly-input {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: var(--input-border);
+    border-radius: var(--button-border-radius);
     background-color: #f3f4f6;
     color: #6b7280;
     cursor: not-allowed;
 }
 
-/*-----------------------------------------------------------------------*/
 /* ===========================
-   Testing Input Selectors for Colors, Interior and Accident History
+   Theme-aware Checkbox Style
    =========================== */
 
-/* Color Selector */
-.color-selector {
-    position: relative;
-    width: 100%;
+input[type="checkbox"] {
+  accent-color: var(--primary-color);
+  cursor: pointer;
 }
 
-.color-input {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.2s;
+input[type="checkbox"]:hover {
+  accent-color: var(--primary-color-hover);
 }
 
-.color-input:hover {
-    border-color: #999;
-}
 
-.color-input.has-selection {
-    border-color: #4CAF50;
-}
-
-.color-display {
-    flex: 1;
-    color: #333;
-}
-
-/* Interior Selector */
-.interior-selector {
-    position: relative;
-    width: 100%;
-}
-
-.interior-input {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.interior-input:hover {
-    border-color: #999;
-}
-
-.interior-input.has-selection {
-    border-color: #4CAF50;
-}
-
-.interior-display {
-    flex: 1;
-    color: #333;
-}
-
-/* Accident History Selector */
-.accident-history-selector {
-    position: relative;
-    width: 100%;
-}
-
-.accident-history-input {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.accident-history-input:hover {
-    border-color: #999;
-}
-
-.accident-history-input.has-selection {
-    border-color: #4CAF50;
-}
-
-.accident-history-display {
-    flex: 1;
-    color: #333;
-}
-
-/* Read-only input styling */
-.readonly-input {
-    display: block;
-    width: 100%;
-    padding: 12px 16px;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    background: #f5f5f5;
-    color: #666;
-    cursor: not-allowed;
-}
-
-/* -----------------------------------------------------------------------------------*/
+/* --------------------------- End of code -------------------------- */
