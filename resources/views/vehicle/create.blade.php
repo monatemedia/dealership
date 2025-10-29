@@ -73,6 +73,7 @@
                         </div>
 
                         <div class="row">
+                            {{-- Year --}}
                             <div class="col">
                                 <div class="form-group @error('year') has-error @enderror">
                                     <label>Year</label>
@@ -82,6 +83,7 @@
                                     </p>
                                 </div>
                             </div>
+                            {{-- Manufacturer --}}
                             <div class="col">
                                 <div class="form-group @error('manufacturer_id') has-error @enderror">
                                     <label>Manufacturer</label>
@@ -91,6 +93,7 @@
                                     </p>
                                 </div>
                             </div>
+                            {{-- Model --}}
                             <div class="col">
                                 <div class="form-group @error('model_id') has-error @enderror">
                                     <label>Model</label>
@@ -101,6 +104,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="form-group @error('vehicle_type_id') has-error @enderror">
                             <label>Vehicle Type</label>
                             <x-radio-list-vehicle-type
@@ -112,56 +116,8 @@
                             </p>
                         </div>
 
-
-                        <div class="form-group @error('exterior_condition_id') has-error @enderror">
-                            <label>Exterior Condition</label>
-                            <x-radio-list
-                                :items="$conditions"
-                                name="exterior_condition_id"
-                                :value="old('exterior_condition_id')"
-                            />
-                            <p class="error-message">
-                                {{ $errors->first('exterior_condition_id') }}
-                            </p>
-                        </div>
-
-                        <div class="form-group @error('interior_condition_id') has-error @enderror">
-                            <label>Interior Condition</label>
-                            <x-radio-list
-                                :items="$conditions"
-                                name="interior_condition_id"
-                                :value="old('interior_condition_id')"
-                            />
-                            <p class="error-message">
-                                {{ $errors->first('interior_condition_id') }}
-                            </p>
-                        </div>
-
-                        <div class="form-group @error('mechanical_condition_id') has-error @enderror">
-                            <label>Mechanical Condition</label>
-                            <x-radio-list
-                                :items="$conditions"
-                                name="mechanical_condition_id"
-                                :value="old('mechanical_condition_id')"
-                            />
-                            <p class="error-message">
-                                {{ $errors->first('mechanical_condition_id') }}
-                            </p>
-                        </div>
-
-                        <div class="form-group @error('service_history_id') has-error @enderror">
-                            <label>Service History</label>
-                            <x-radio-list
-                                :items="$serviceHistories"
-                                name="service_history_id"
-                                :value="old('service_history_id')"
-                            />
-                            <p class="error-message">
-                                {{ $errors->first('service_history_id') }}
-                            </p>
-                        </div>
-
                         <div class="row">
+                            {{-- Price --}}
                             <div class="col">
                                 <div class="form-group @error('price') has-error @enderror">
                                     <label>Price</label>
@@ -172,6 +128,7 @@
                                     </p>
                                 </div>
                             </div>
+                            {{-- VIN Code --}}
                             <div class="col">
                                 <div class="form-group @error('vin') has-error @enderror">
                                     <label>Vin Code</label>
@@ -182,6 +139,10 @@
                                     </p>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="row">
+                            {{-- Odometer Reading --}}
                             <div class="col">
                                 <div class="form-group mileage-input-group @error('mileage') has-error @enderror">
                                     <label class="mileage-label">Odometer Reading (km)</label>
@@ -204,12 +165,8 @@
                                     </p>
                                 </div>
                             </div>
-                        </div>
-
-
-                        <div class="row">
+                            {{-- Fuel Type --}}
                             <div class="col">
-                                {{-- Fuel Type --}}
                                 <div class="form-group @error('fuel_type_id') has-error @enderror">
                                     <label>Fuel Type</label>
                                     @if($canEditFuelType)
@@ -229,9 +186,11 @@
                                     <p class="error-message">{{ $errors->first('fuel_type_id') }}</p>
                                 </div>
                             </div>
+                        </div>
 
+                        <div class="row">
+                            {{-- Transmission --}}
                             <div class="col">
-                                {{-- Transmission --}}
                                 <div class="form-group @error('transmission_id') has-error @enderror">
                                     <label>Transmission</label>
                                     @if($canEditTransmission)
@@ -251,9 +210,8 @@
                                     <p class="error-message">{{ $errors->first('transmission_id') }}</p>
                                 </div>
                             </div>
-
+                            {{-- Drivetrain --}}
                             <div class="col">
-                                {{-- Drivetrain --}}
                                 <div class="form-group @error('drivetrain_id') has-error @enderror">
                                     <label>Drivetrain</label>
                                     @if($canEditDrivetrain)
@@ -276,74 +234,7 @@
                         </div>
 
                         <div class="row">
-                            <div class="col">
-                                {{-- Exterior Color --}}
-                                <div class="form-group @error('color_id') has-error @enderror">
-                                    <label>Exterior Color</label>
-                                    @if($canEditColor)
-                                        <x-generic-selector
-                                            :items="$colors"
-                                            :defaultItem="$defaultColor"
-                                            :value="old('color_id')"
-                                            name="color_id"
-                                            groupRelation="colorGroup"
-                                            label="Exterior Color"
-                                            subtitle="Choose the exterior color for your vehicle"
-                                        />
-                                    @else
-                                        <input type="text" readonly value="{{ $defaultColor ?? 'None / Not Specified' }}" class="readonly-input" />
-                                        <input type="hidden" name="color_id" value="{{ $colors->firstWhere('name', $defaultColor)?->id ?? '' }}" />
-                                    @endif
-                                    <p class="error-message">{{ $errors->first('color_id') }}</p>
-                                </div>
-                            </div>
-
-                            <div class="col">
-                                {{-- Interior --}}
-                                <div class="form-group @error('interior_id') has-error @enderror">
-                                    <label>Interior</label>
-                                    @if($canEditInterior)
-                                        <x-generic-selector
-                                            :items="$interiors"
-                                            :defaultItem="$defaultInterior"
-                                            :value="old('interior_id')"
-                                            name="interior_id"
-                                            groupRelation="interiorGroup"
-                                            label="Interior"
-                                            subtitle="Choose the interior type and color for your vehicle"
-                                        />
-                                    @else
-                                        <input type="text" readonly value="{{ $defaultInterior ?? 'None / Not Specified' }}" class="readonly-input" />
-                                        <input type="hidden" name="interior_id" value="{{ $interiors->firstWhere('name', $defaultInterior)?->id ?? '' }}" />
-                                    @endif
-                                    <p class="error-message">{{ $errors->first('interior_id') }}</p>
-                                </div>
-                            </div>
-
-                            <div class="col">
-                                {{-- Accident History --}}
-                                <div class="form-group @error('accident_history_id') has-error @enderror">
-                                    <label>Accident History</label>
-                                    @if($canEditAccidentHistory)
-                                        <x-generic-selector
-                                            :items="$accidentHistories"
-                                            :defaultItem="$defaultAccidentHistory"
-                                            :value="old('accident_history_id')"
-                                            name="accident_history_id"
-                                            groupRelation="accidentHistoryGroup"
-                                            label="Accident History"
-                                            subtitle="Provide details about any accidents or damage"
-                                        />
-                                    @else
-                                        <input type="text" readonly value="{{ $defaultAccidentHistory ?? 'No Accidents Reported' }}" class="readonly-input" />
-                                        <input type="hidden" name="accident_history_id" value="{{ $accidentHistories->firstWhere('name', $defaultAccidentHistory)?->id ?? '' }}" />
-                                    @endif
-                                    <p class="error-message">{{ $errors->first('accident_history_id') }}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
+                            {{-- Province --}}
                             <div class="col">
                                 <div class="form-group @error('province_id') has-error @enderror">
                                     <label>Province/Region</label>
@@ -353,6 +244,7 @@
                                     </p>
                                 </div>
                             </div>
+                            {{-- City --}}
                             <div class="col">
                                 <div class="form-group @error('city_id') has-error @enderror">
                                     <label>City</label>
@@ -363,6 +255,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="row">
                             <div class="col">
                                 <div class="form-group @error('address') has-error @enderror">
@@ -402,6 +295,134 @@
                             >
                             <p class="error-message">{{ $errors->first('published_at') }}</p>
                         </div>
+
+                        {{-- Materials & Condition Section --}}
+                        <x-collapsible-section
+                            title="Materials & Condition (Optional)"
+                            :open="false"
+                            storage-key="materials-condition-section"
+                        >
+                            <div class="row">
+                                {{-- Exterior Color --}}
+                                <div class="col">
+                                    <div class="form-group @error('color_id') has-error @enderror">
+                                        <label>Exterior Color</label>
+                                        @if($canEditColor)
+                                            <x-generic-selector
+                                                :items="$colors"
+                                                :defaultItem="$defaultColor"
+                                                :value="old('color_id')"
+                                                name="color_id"
+                                                groupRelation="colorGroup"
+                                                label="Exterior Color"
+                                                subtitle="Choose the exterior color for your vehicle"
+                                            />
+                                        @else
+                                            <input type="text" readonly value="{{ $defaultColor ?? 'None / Not Specified' }}" class="readonly-input" />
+                                            <input type="hidden" name="color_id" value="{{ $colors->firstWhere('name', $defaultColor)?->id ?? '' }}" />
+                                        @endif
+                                        <p class="error-message">{{ $errors->first('color_id') }}</p>
+                                    </div>
+                                </div>
+
+                                {{-- Interior --}}
+                                <div class="col">
+                                    <div class="form-group @error('interior_id') has-error @enderror">
+                                        <label>Interior</label>
+                                        @if($canEditInterior)
+                                            <x-generic-selector
+                                                :items="$interiors"
+                                                :defaultItem="$defaultInterior"
+                                                :value="old('interior_id')"
+                                                name="interior_id"
+                                                groupRelation="interiorGroup"
+                                                label="Interior"
+                                                subtitle="Choose the interior type and color for your vehicle"
+                                            />
+                                        @else
+                                            <input type="text" readonly value="{{ $defaultInterior ?? 'None / Not Specified' }}" class="readonly-input" />
+                                            <input type="hidden" name="interior_id" value="{{ $interiors->firstWhere('name', $defaultInterior)?->id ?? '' }}" />
+                                        @endif
+                                        <p class="error-message">{{ $errors->first('interior_id') }}</p>
+                                    </div>
+                                </div>
+
+                                {{-- Accident History --}}
+                                <div class="col">
+                                    <div class="form-group @error('accident_history_id') has-error @enderror">
+                                        <label>Accident History</label>
+                                        @if($canEditAccidentHistory)
+                                            <x-generic-selector
+                                                :items="$accidentHistories"
+                                                :defaultItem="$defaultAccidentHistory"
+                                                :value="old('accident_history_id')"
+                                                name="accident_history_id"
+                                                groupRelation="accidentHistoryGroup"
+                                                label="Accident History"
+                                                subtitle="Provide details about any accidents or damage"
+                                            />
+                                        @else
+                                            <input type="text" readonly value="{{ $defaultAccidentHistory ?? 'No Accidents Reported' }}" class="readonly-input" />
+                                            <input type="hidden" name="accident_history_id" value="{{ $accidentHistories->firstWhere('name', $defaultAccidentHistory)?->id ?? '' }}" />
+                                        @endif
+                                        <p class="error-message">{{ $errors->first('accident_history_id') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Exterior Condition --}}
+                            <div class="form-group @error('exterior_condition_id') has-error @enderror">
+                                <label>Exterior Condition</label>
+                                <x-radio-list
+                                    :items="$conditions"
+                                    name="exterior_condition_id"
+                                    :value="old('exterior_condition_id')"
+                                />
+                                <p class="error-message">
+                                    {{ $errors->first('exterior_condition_id') }}
+                                </p>
+                            </div>
+
+                            {{-- -Interior Condition --}}
+                            <div class="form-group @error('interior_condition_id') has-error @enderror">
+                                <label>Interior Condition</label>
+                                <x-radio-list
+                                    :items="$conditions"
+                                    name="interior_condition_id"
+                                    :value="old('interior_condition_id')"
+                                />
+                                <p class="error-message">
+                                    {{ $errors->first('interior_condition_id') }}
+                                </p>
+                            </div>
+
+                            {{-- Mechanical Condition --}}
+                            <div class="form-group @error('mechanical_condition_id') has-error @enderror">
+                                <label>Mechanical Condition</label>
+                                <x-radio-list
+                                    :items="$conditions"
+                                    name="mechanical_condition_id"
+                                    :value="old('mechanical_condition_id')"
+                                />
+                                <p class="error-message">
+                                    {{ $errors->first('mechanical_condition_id') }}
+                                </p>
+                            </div>
+
+                            {{-- Service History --}}
+                            <div class="form-group @error('service_history_id') has-error @enderror">
+                                <label>Service History</label>
+                                <x-radio-list
+                                    :items="$serviceHistories"
+                                    name="service_history_id"
+                                    :value="old('service_history_id')"
+                                />
+                                <p class="error-message">
+                                    {{ $errors->first('service_history_id') }}
+                                </p>
+                            </div>
+
+                        </x-collapsible-section>
 
                         {{-- Vehicle Features Section --}}
                         <x-collapsible-section
