@@ -105,6 +105,7 @@
                             </div>
                         </div>
 
+                        {{-- Vehicle Type --}}
                         <div class="form-group @error('vehicle_type_id') has-error @enderror">
                             <label>Vehicle Type</label>
                             <x-radio-list-vehicle-type
@@ -286,12 +287,12 @@
                                 {{ $errors->first('description') }}
                             </p>
                         </div>
-                        <div class="form-group @error('published_at') has-error @enderror">
+                        <div class="form-group @error('published_at') has-error @enderror" style="display: none;">
                             <label>Publish Date & Time</label>
                             <input
                                 type="datetime-local"
                                 name="published_at"
-                                value="{{ old('published_at') }}"
+                                value="{{ old('published_at', now()->timezone('Africa/Johannesburg')->format('Y-m-d\TH:i')) }}"
                             >
                             <p class="error-message">{{ $errors->first('published_at') }}</p>
                         </div>

@@ -48,7 +48,7 @@ class StoreVehicleRequest extends FormRequest
             'address' => 'required|string',
             'phone' => 'required|string|min:10',
             'description' => 'nullable|string',
-            'published_at' => 'nullable|string',
+            'published_at' => 'nullable|date',
             'features' => 'array',
             'features.*' => 'string',
             'ownership_paperwork' => 'array', // Add this

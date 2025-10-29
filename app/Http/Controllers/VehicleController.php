@@ -234,14 +234,18 @@ class VehicleController extends Controller
         // dd($subcategory->toArray());
         // dd($data);
 
-        // Convert to server timezone before saving
+        // Handle published_at: treat as user's local time, convert to UTC
         if (!empty($data['published_at'])) {
-            // Parse the input as local (Africa/Johannesburg) time
+            // datetime-local gives us: "2025-10-29T14:30"
+            // We assume this is in Africa/Johannesburg timezone
             $data['published_at'] = Carbon::createFromFormat(
                 'Y-m-d\TH:i',
                 $data['published_at'],
-                config('app.timezone')
-            );
+                'Africa/Johannesburg' // User's timezone (hardcoded for SA market)
+            )->setTimezone('UTC'); // Convert to UTC for storage
+        } else {
+            // If not provided, publish immediately
+            $data['published_at'] = now(); // This will be in UTC
         }
 
         // Create the Vehicle record
@@ -352,12 +356,26 @@ class VehicleController extends Controller
     {
         Gate::authorize('update', $vehicle);
 
-        // Eager load vehicleType -> subcategory -> mainCategory
+        // Eager load relationships
         $vehicle->load([
             'vehicleType.subcategory.mainCategory',
             'subcategory.mainCategory',
             'manufacturer',
             'model',
+            'fuelType',
+            'transmission',
+            'drivetrain',
+            'color',
+            'interior',
+            'accidentHistory',
+            'serviceHistory',
+            'exteriorCondition',
+            'interiorCondition',
+            'mechanicalCondition',
+            'city.province',
+            'features',
+            'ownershipPaperwork',
+            'images',
         ]);
 
         // Prefer vehicleType's subcategory if it exists; fallback to vehicle->subcategory
@@ -373,10 +391,56 @@ class VehicleController extends Controller
             abort(404, 'No main category found for this subcategory.');
         }
 
+        // Get all the same config data as create
+        $fuelConfig = $subcategory->getFuelTypeConfig();
+        $transmissionConfig = $subcategory->getTransmissionConfig();
+        $drivetrainConfig = $subcategory->getDrivetrainConfig();
+        $colorConfig = $subcategory->getColorConfig();
+        $interiorConfig = $subcategory->getInteriorConfig();
+        $accidentHistoryConfig = $subcategory->getAccidentHistoryConfig();
+        $serviceHistories = ServiceHistory::orderBy('order')->get();
+        $conditions = Condition::orderBy('order')->get();
+
         return view('vehicle.edit', [
             'vehicle' => $vehicle,
             'subcategory' => $subcategory,
             'mainCategory' => $mainCategory,
+
+            // Fuel Types
+            'fuelTypes' => $fuelConfig['fuel_types'],
+            'defaultFuelType' => $fuelConfig['default'],
+            'canEditFuelType' => $fuelConfig['can_edit'],
+
+            // Transmissions
+            'transmissions' => $transmissionConfig['transmissions'],
+            'defaultTransmission' => $transmissionConfig['default'],
+            'canEditTransmission' => $transmissionConfig['can_edit'],
+
+            // Drivetrains
+            'drivetrains' => $drivetrainConfig['drivetrains'],
+            'defaultDrivetrain' => $drivetrainConfig['default'],
+            'canEditDrivetrain' => $drivetrainConfig['can_edit'],
+
+            // Colors
+            'colors' => $colorConfig['colors'],
+            'defaultColor' => $colorConfig['default'],
+            'canEditColor' => $colorConfig['can_edit'],
+
+            // Interiors
+            'interiors' => $interiorConfig['interiors'],
+            'defaultInterior' => $interiorConfig['default'],
+            'canEditInterior' => $interiorConfig['can_edit'],
+
+            // Accident History
+            'accidentHistories' => $accidentHistoryConfig['accident_histories'],
+            'defaultAccidentHistory' => $accidentHistoryConfig['default'],
+            'canEditAccidentHistory' => $accidentHistoryConfig['can_edit'],
+
+            // Service Histories
+            'serviceHistories' => $serviceHistories,
+
+            // Conditions
+            'conditions' => $conditions,
         ]);
     }
 
@@ -392,6 +456,15 @@ class VehicleController extends Controller
         $selectedFeatures = $data['features'] ?? []; // array of feature names
         $selectedPaperwork = $data['ownership_paperwork'] ?? []; // array of ownership paperwork
 
+        // ADD THIS: Handle published_at timezone conversion
+        if (!empty($data['published_at'])) {
+            $data['published_at'] = Carbon::createFromFormat(
+                'Y-m-d\TH:i',
+                $data['published_at'],
+                'Africa/Johannesburg'
+            )->setTimezone('UTC');
+        }
+
         // Update vehicle details
         $vehicle->update($data);
 
@@ -403,10 +476,13 @@ class VehicleController extends Controller
         $paperworkIds = OwnershipPaperwork::whereIn('name', $selectedPaperwork)->pluck('id');
         $vehicle->ownershipPaperwork()->sync($paperworkIds);
 
-        // Flash success message
-        // $request->session()->flash('success', 'Vehicle was updated');
+        // Check if user wants to go to images page (for future use)
+        if ($request->has('redirect_to_images')) {
+            return redirect()->route('vehicle.images', $vehicle)
+                ->with('success', 'Vehicle was updated. Now manage your images.');
+        }
 
-        // Redirect user back to vehicle listing page with success message
+        // Default: redirect back to vehicle listing
         return redirect()->route('vehicle.index')
             ->with('success', 'Vehicle was updated');
     }
