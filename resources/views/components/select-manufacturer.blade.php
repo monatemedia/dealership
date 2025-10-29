@@ -69,7 +69,7 @@ class="select-container">
             <template x-if="loading">
                 <div class="select-info">Loading...</div>
             </template>
-            <template x-if="!loading && search.length < 2 && search !== selectedName">
+            <template x-if="!loading && search.length < 2">
                 <div class="select-info">Type at least 2 characters to search</div>
             </template>
             <template x-if="!loading && manufacturers.length === 0 && search.length >= 2">

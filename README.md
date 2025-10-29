@@ -276,26 +276,26 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Style Model Component
   - [X] Style Province Component
   - [X] Style City Component
-- [ ] Make Dynamic FuelTypes
+- [X] Make Dynamic FuelTypes
   - [X] Create Lookups
   - [X] Create Migrations
   - [X] Create Factory
   - [X] Create Seeder
   - [X] Update Model
-  - [ ] Make Reusable List Component
-  - [ ] Make Dynamic FuelType Component
-- [ ] Add Countries to Database
-- [ ] Add Flags to Database
-  - [ ] https://github.com/hampusborgos/country-flags 
-- [ ] Add Currencies To Database
-- [ ] Change `Provinces` to `Regions`
-- [ ] Add Currencies to Database
-- [ ] Add Group term: **Vehicle Categories**
+  - [X] Make Reusable List Component
+  - [X] Make Dynamic FuelType Component
+- [ ] Make VIN Tools
+  - [ ] VIN Validator
+  - [ ] VIN Decoder
+  - [ ] VIN Generator
+- [ ] Test Create & Edit Pages
+- [ ] Make current Main Categories into **Sections** 
+- [ ] Make current Subcategories into **Categories**
+- [ ] Add Group term: **Channels**
   - [ ] Individual categories:
-    - [ ] Automotive
-    - [ ] Aviation
-    - [ ] Marine
-- [ ] Make Current Categories into **Sub-Categories**
+    - [ ] Air
+    - [ ] Land
+    - [ ] Water
 
 See the [open issues](https://github.com/monatemedia/dealership/issues) for a full list of proposed features (and known issues).
 
