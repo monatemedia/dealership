@@ -16,6 +16,9 @@ class ProductionSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            // Ensure storage symlink exists FIRST
+            StorageLinkSeeder::class,
+
             // Core application data ONLY
             CategorySeeder::class, // Runs first (creates Main/Sub Categories)
             VehicleTypeSeeder::class,
