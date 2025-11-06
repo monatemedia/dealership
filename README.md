@@ -284,10 +284,15 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Update Model
   - [X] Make Reusable List Component
   - [X] Make Dynamic FuelType Component
-- [ ] Make VIN Tools
-  - [ ] VIN Validator
-  - [ ] VIN Decoder
-  - [ ] VIN Generator
+- [X] Make VIN Tools
+  - [X] VIN Validator
+  - [X] VIN Decoder
+  - [X] VIN Generator
+- [X] Make Docker Container
+  - [ ] Make Container with PostgreSQL
+  - [ ] Upload Container To Live Server
+  - [ ] Map Domain Name
+  - [ ] Map Email For Account Creation
 - [ ] Test Create & Edit Pages
 - [ ] Make current Main Categories into **Sections** 
 - [ ] Make current Subcategories into **Categories**
