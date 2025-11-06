@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\File;
+use App\Services\VinValidatorService;
 
 class StoreVehicleRequest extends FormRequest
 {
@@ -30,7 +31,20 @@ class StoreVehicleRequest extends FormRequest
             'model_id' => 'required|exists:models,id',
             'year' => ['required', 'integer', 'min:1900', 'max:' . date('Y')],
             'price' => 'required|integer|min:0',
-            'vin' => 'required|string|size:17',
+            'vin' => [
+                'required',
+                'string',
+                'size:17',
+                'regex:/^[A-HJ-NPR-Z0-9]+$/i',
+                function ($attribute, $value, $fail) {
+                    $validator = app(VinValidatorService::class);
+                    $result = $validator->validateWithMessage($value);
+
+                    if (!$result['valid']) {
+                        $fail($result['message']);
+                    }
+                },
+            ],
             'mileage' => 'required|integer|min:0',
             'vehicle_type_id' => 'required|exists:vehicle_types,id',
             'fuel_type_id' => 'required|exists:fuel_types,id',
