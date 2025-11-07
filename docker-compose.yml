@@ -50,7 +50,7 @@ services:
     env_file:
       - .env
     volumes:
-      - dealership-db-data:/var/lib/postgresql/data
+      - dealership-db-data:/var/lib/postgresql
     ports:
       - "${DOCKER_POSTGRES_PORT}:5432"
     networks:
