@@ -40,7 +40,7 @@ services:
       - proxy-network
 
   dealership-db:
-    image: postgres:16
+    image: postgres:18
     container_name: ${DOCKER_CONTAINER_NAME}-db
     restart: always
     environment:
