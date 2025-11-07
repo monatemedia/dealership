@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 45);
+            $table->string('name', 255);
             $table->foreignId('province_id')->constrained('provinces');
             $table->decimal('latitude', 10, 7)->nullable();
             $table->decimal('longitude', 10, 7)->nullable();

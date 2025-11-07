@@ -14,7 +14,7 @@ class ServiceHistorySeeder extends Seeder
         $histories = config('lookups.service_history');
 
         foreach ($histories as $index => $name) {
-            ServiceHistory::create([
+            ServiceHistory::firstOrCreate([
                 'name' => $name,
                 'slug' => Str::slug($name),
                 'order' => $index + 1,

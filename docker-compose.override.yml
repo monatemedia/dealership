@@ -1,0 +1,5 @@
+networks:
+  proxy-network:
+    # Disable the 'external: true' declaration from the main file
+    # This tells Docker Compose to create this network locally
+    external: false
