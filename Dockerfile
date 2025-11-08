@@ -1,99 +1,85 @@
 # ============================================
-# Composer Stage - For PHP dependencies
+# STAGE 1: COMPOSER BUILDER (PHP Dependency Installation)
 # ============================================
 FROM composer:2 AS composer-builder
+RUN apk add --no-cache git
 WORKDIR /app
-
-# Copy composer files (Less frequent changes layer)
 COPY composer.json composer.lock ./
-
-# Install PHP dependencies
 RUN composer install \
     --no-dev \
     --no-scripts \
     --no-interaction \
     --prefer-dist \
     --optimize-autoloader
-
-# Copy application code for autoload optimization
 COPY . .
-
-# Generate optimized autoload files
 RUN composer dump-autoload --optimize --no-dev
-
 # --------------------------------------------
+
 # ============================================
-# Build Stage - For compiling assets
+# STAGE 2: NODE BUILDER (Frontend Asset Compilation)
 # ============================================
 FROM node:20-alpine AS node-builder
 WORKDIR /app
-
-# Copy package files
 COPY package*.json ./
-
-# Install Node dependencies
 RUN npm ci --only=production=false
-
-# Copy source files needed for build (More frequent changes layer)
 COPY resources ./resources
 COPY vite.config.js ./
 COPY postcss.config.js* ./
 COPY tailwind.config.js* ./
 COPY public ./public
-
-# Build assets
 RUN npm run build
-
 # --------------------------------------------
-# ============================================
-# Production Stage - Final lightweight image
-# ============================================
-FROM php:8.4-apache
 
-# 🚀 FINAL BULLETPROOF FIX: Explicitly install ALL runtime libraries before building/purging.
+# ============================================
+# STAGE 3: PRODUCTION (Official PHP Base Image) 🚀
+# We are using the official image for maximum compatibility.
+# ============================================
+FROM php:8.4-apache-bookworm AS final
+
+# 1. Install Dependencies and Cleanup
 RUN set -ex; \
-    # 1. Update APT lists
     apt-get update; \
     \
-    # 2. Install **ALL REQUIRED LIBRARIES** (Runtime AND Build-time headers)
+    # 1A. Install **Runtime Libraries** (These must REMAIN in the final image)
     apt-get install -y --no-install-recommends \
-    # Explicitly list Runtime Libraries to protect them from auto-remove
     libpq5 \
-    libpng16-16t64 \
-    libicu76 \
-    libzip5 \
+    libpng-tools \
+    libzip4 \
+    # Add other runtimes if needed, e.g., libonig5 for mbstring, libxml2, etc. \
+    # For simplicity, let's keep the others in the build block for now: dos2unix
+    dos2unix \
+    ; \
     \
-    # List Build Headers required for compilation (these will be purged)
+    # 1B. Install **Build Dependencies** (These are for compilation and can be removed later)
+    apt-get install -y --no-install-recommends \
     libpq-dev \
     libpng-dev \
     libicu-dev \
     libzip-dev \
     libonig-dev \
     libxml2-dev \
-    \
-    # Other essential tools
     git \
     unzip \
     ; \
     \
-    # 3. Compile and Install PHP Extensions
+    # 2. Compile and Install PHP Extensions
     docker-php-ext-install \
     pdo pdo_pgsql mbstring exif pcntl bcmath gd zip intl \
     ; \
     \
-    # 4. Clean up **BUILD HEADERS** only.
-    # The runtimes are now protected because they were explicitly installed in step 2.
+    # 3. Remove **Build Dependencies** (Only the -dev packages and build tools)
     apt-get purge -y --auto-remove \
     libpq-dev \
     libpng-dev \
     libicu-dev \
     libzip-dev \
-    libxml2-dev \
     libonig-dev \
-    # Only remove build-time tools
+    libxml2-dev \
+    git \
+    unzip \
     ; \
     \
-    # 5. Final Cleanup of APT Cache
+    # 4. Final Cleanup
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
@@ -115,15 +101,13 @@ COPY . /var/www/html
 COPY --from=composer-builder /app/vendor ./vendor
 COPY --from=node-builder /app/public/build ./public/build
 
-# FIX: Copy entrypoint, install dos2unix, fix line endings, set permission, and uninstall (Atomic Layer)
+# FIX: dos2unix is still needed here, but it's now a system package
 COPY docker-entrypoint.sh /usr/local/bin/
-RUN apt-get update && apt-get install -y dos2unix && \
-    dos2unix /usr/local/bin/docker-entrypoint.sh && \
-    chmod +x /usr/local/bin/docker-entrypoint.sh && \
-    apt-get purge -y --auto-remove dos2unix && \
-    rm -rf /var/lib/apt/lists/*
+# dos2unix is installed in the previous RUN command
+RUN dos2unix /usr/local/bin/docker-entrypoint.sh && \
+    chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Set proper ownership and permissions for cache/storage (775 for R/W by www-data user/group)
+# Set proper ownership and permissions for cache/storage
 RUN chown -R www-data:www-data /var/www/html && \
     chmod -R 775 /var/www/html/storage \
     /var/www/html/bootstrap/cache
