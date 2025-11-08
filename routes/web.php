@@ -27,11 +27,11 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // AUTHENTICATED ROUTES (Specific paths first)
 // -------------------------------
 Route::middleware(['auth', 'verified'])->group(function () {
-
     // Vehicle management
-    Route::resource('vehicle', VehicleController::class)->except(['show']);
+    // Define only 'index' and 'create' via resource, preventing name conflicts below.
+    Route::resource('vehicle', VehicleController::class)->only(['index', 'create']);
 
-    // Vehicle management - specific paths
+    // Vehicle management - specific paths (Manually defined, NO CONFLICTS now)
     Route::post('/vehicle', [VehicleController::class, 'store'])->name('vehicle.store');
     Route::get('/vehicle/{vehicle}/edit', [VehicleController::class, 'edit'])->name('vehicle.edit');
     Route::put('/vehicle/{vehicle}', [VehicleController::class, 'update'])->name('vehicle.update');
@@ -74,7 +74,6 @@ require __DIR__ . '/auth.php';
 // -------------------------------
 // PUBLIC SPECIFIC ROUTES
 // -------------------------------
-
 // Vehicle search (must come before vehicle show)
 Route::get('/vehicle/search', [VehicleController::class, 'search'])
     ->name('vehicle.search');
@@ -94,11 +93,9 @@ Route::get('/main-categories', [MainCategoryController::class, 'index'])
 // -------------------------------
 // CATEGORY HIERARCHY ROUTES (Slug-based - MUST BE LAST)
 // -------------------------------
-
 // 3️⃣ VEHICLE TYPES (most specific slug route - 3 segments)
 Route::get('/{mainCategory}/{subcategory}/vehicle-types', [VehicleTypeController::class, 'index'])
     ->name('vehicle-types.index');
-
 Route::get('/{mainCategory}/{subcategory}/{vehicleType}', [VehicleTypeController::class, 'show'])
     ->name('vehicle-types.show');
 
