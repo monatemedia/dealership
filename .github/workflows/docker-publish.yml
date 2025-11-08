@@ -1,5 +1,5 @@
 # Template: Docker Publish
-# Description: Docker template for publishing applications with CI/CD
+# Description: Docker template to publish applications with CI/CD
 
 name: publish
 on:
