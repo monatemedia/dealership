@@ -289,10 +289,11 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] VIN Decoder
   - [X] VIN Generator
 - [X] Make Docker Container
-  - [ ] Make Container with PostgreSQL
-  - [ ] Upload Container To Live Server
-  - [ ] Map Domain Name
-  - [ ] Map Email For Account Creation
+  - [X] Make Container with PostgreSQL
+  - [X] Upload Container To Live Server
+  - [X] Map Domain Name
+  - [X] Map Email For Account Creation
+  - [ ] Set Up CI/CD
 - [ ] Test Create & Edit Pages
 - [ ] Make current Main Categories into **Sections** 
 - [ ] Make current Subcategories into **Categories**

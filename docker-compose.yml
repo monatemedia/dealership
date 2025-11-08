@@ -1,6 +1,10 @@
 services:
   dealership-web:
     build: .
+    # --- CHANGE START ---
+    # Replace 'build: .' with the remote image reference for production deployment
+    # image: ghcr.io/monatemedia/dealership:latest
+    # --- CHANGE END ---
     container_name: ${DOCKER_CONTAINER_NAME}-web
     depends_on:
       - dealership-db
