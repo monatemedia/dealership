@@ -48,3 +48,9 @@ phpunit.xml
 # Documentation
 *.md
 !README.md
+
+# Ignore all SQLite files
+*.sqlite*
+
+# But keep vpic.sqlite
+!vpic_make_model.sqlite

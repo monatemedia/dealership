@@ -2,4 +2,4 @@
 *.sqlite*
 
 # But keep vpic.sqlite
-!vpic.sqlite
+!vpic_make_model.sqlite
