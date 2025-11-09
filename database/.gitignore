@@ -1,1 +1,5 @@
+# Ignore all SQLite files
 *.sqlite*
+
+# But keep vpic.sqlite
+!vpic.sqlite
