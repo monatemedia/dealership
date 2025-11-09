@@ -14,7 +14,7 @@ class ConditionSeeder extends Seeder
         $conditions = config('lookups.condition'); // They're all the same
 
         foreach ($conditions as $index => $name) {
-            Condition::create([
+            Condition::firstOrCreate([
                 'name' => $name,
                 'slug' => Str::slug($name),
                 'order' => $index + 1,
