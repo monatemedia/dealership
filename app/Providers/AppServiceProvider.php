@@ -1,4 +1,4 @@
-<?php
+<?php // app/Providers/AppServiceProvider.php
 
 namespace App\Providers;
 
