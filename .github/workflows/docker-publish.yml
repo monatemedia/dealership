@@ -2,43 +2,66 @@
 # Description: Docker template to publish applications with CI/CD
 
 name: publish
+
 on:
   push:
     branches: ["main"]
+  workflow_dispatch: # Allow manual triggers
+
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ghcr.io/\${{ github.actor }}/dealership:latest
+  IMAGE_NAME: ghcr.io/${{ github.actor }}/dealership:latest
+
 jobs:
   publish:
     name: Publish Docker Image
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Login to GitHub Container Registry
         run: |
-          echo \${{ secrets.PAT }} | docker login ghcr.io -u \${{ github.actor }} --password-stdin
+          echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Build and Push Docker Image
-        run: |
-          docker build . --tag \${{ env.IMAGE_NAME }}
-          docker push \${{ env.IMAGE_NAME }}
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}
+            ghcr.io/${{ github.actor }}/dealership:${{ github.sha }}
+          cache-from: type=registry,ref=ghcr.io/${{ github.actor }}/dealership:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{ github.actor }}/dealership:buildcache,mode=max
+
   deploy:
     needs: publish
     name: Deploy Docker Image
     runs-on: ubuntu-latest
+
     steps:
-      # --- CRITICAL FIX: Use the dedicated SSH Agent action ---
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          # This action securely loads the private key into the SSH agent.
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # This step is now only for adding the host to known_hosts to bypass prompts
       - name: Add Server to Known Hosts
         run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      # This step now uses the key provided by the SSH agent
       - name: Pull and Deploy Docker Image
-        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && docker compose pull && docker compose up -d"
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ${{ secrets.WORK_DIR }}
+            docker compose pull dealership-web
+            docker compose up -d --force-recreate dealership-web
+            docker image prune -f
+            echo "Deployment complete!"
+          EOF
+
       - name: Cleanup SSH Keys
         run: rm -rf ~/.ssh
