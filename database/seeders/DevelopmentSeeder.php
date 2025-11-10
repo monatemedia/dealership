@@ -19,6 +19,6 @@ class DevelopmentSeeder extends Seeder
         $this->call(ProductionSeeder::class);
 
         // 2. Run seeders with fake/demo data
-        $this->call(DemoDataSeeder::class);
+        // $this->call(DemoDataSeeder::class);
     }
 }

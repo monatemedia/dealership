@@ -53,12 +53,12 @@ class ProfileController extends Controller
             // If the user has changed his email, we need to verify it
             $user->email_verified_at = null;
             $user->sendEmailVerificationNotification();
-            $success = 'Your profile was updated. Please check your email to verify your new email address.';
+            $success = 'Please check your email to verify your new email address.';
         }
         // Save the user
         $user->save();
-        // Redirect user back to profile page with success message
-        return redirect()->intended(route('profile.index'))
+        // Redirect user back to home page with success message
+        return redirect()->intended(route('home'))
             ->with('success', $success);
     }
     public function updatePassword(Request $request)
