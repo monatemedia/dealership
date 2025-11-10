@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\TaxonomyRouteService;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -19,6 +20,13 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Check if the application is running behind a proxy or in a production-like environment (staging)
+        // This forces Laravel to generate ALL URLs using the 'https' scheme,
+        // resolving the "insecure connection" warning from the browser.
+        if ($this->app->environment(['staging', 'production'])) {
+            URL::forceScheme('https');
+        }
+
         // Set default pagination view
         Paginator::defaultView('pagination');
 

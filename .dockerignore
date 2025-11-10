@@ -25,6 +25,7 @@ Dockerfile*
 !.env.example
 .env.backup
 .env.local
+.env.staging
 .env.production
 .phpunit.result.cache
 Homestead.json
