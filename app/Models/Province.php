@@ -1,4 +1,4 @@
-<?php
+<?php // app/Models/Province.php
 
 namespace App\Models;
 

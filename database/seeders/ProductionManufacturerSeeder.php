@@ -1,4 +1,5 @@
 <?php // database/seeders/ProductionManufacturerSeeder.php
+
 namespace Database\Seeders;
 
 use App\Models\Manufacturer;
@@ -13,28 +14,29 @@ class ProductionManufacturerSeeder extends Seeder
 
         // Step 1: Import manufacturers using upsert for speed
         $this->command->info("Importing manufacturers...");
-
         $manufacturers = DB::connection('vpic')
             ->table('Make_Model AS mm')
             ->join('Make AS m', 'mm.MakeId', '=', 'm.Id')
             ->select('m.Name as name')
             ->distinct()
             ->get()
-            ->map(fn($m) => ['name' => $m->name])
+            ->map(fn($m) => [
+                'name' => $m->name,
+                // Timestamps removed as per model definition
+            ])
             ->all();
 
         $totalManufacturers = count($manufacturers);
 
-        // Use upsert for idempotent bulk insert
-        // This will insert new records and update existing ones
+        // Use upsert for idempotent bulk insert. Using 'name' in the update array
+        // forces PostgreSQL to use ON CONFLICT DO UPDATE SET name = EXCLUDED.name.
         DB::table('manufacturers')->upsert(
             $manufacturers,
             ['name'], // Unique key
-            [] // No fields to update if exists
+            ['name'] // Update an existing field to itself if conflict occurs
         );
 
         $this->command->info("Processed {$totalManufacturers} manufacturers.");
-
         unset($manufacturers);
         gc_collect_cycles();
 
@@ -46,7 +48,6 @@ class ProductionManufacturerSeeder extends Seeder
         $totalModels = DB::connection('vpic')
             ->table('Make_Model AS mm')
             ->count();
-
         $processedModels = 0;
         $chunkSize = 2000; // Larger chunks for better performance
 
@@ -59,24 +60,24 @@ class ProductionManufacturerSeeder extends Seeder
             ->orderBy('mm.Id')
             ->chunk($chunkSize, function ($rows) use ($manufacturerMap, &$processedModels, $totalModels) {
                 $modelsToUpsert = [];
-
                 foreach ($rows as $row) {
                     $manufacturerId = $manufacturerMap[$row->make_name] ?? null;
-
                     if ($manufacturerId) {
                         $modelsToUpsert[] = [
                             'name' => $row->model_name,
                             'manufacturer_id' => $manufacturerId,
+                            // Timestamps removed as per model definition
                         ];
                     }
                 }
 
-                // Use upsert for idempotent operation
+                // Use upsert for idempotent operation. Using 'name' in the update array
+                // forces PostgreSQL to use ON CONFLICT DO UPDATE SET name = EXCLUDED.name.
                 if (!empty($modelsToUpsert)) {
                     DB::table('models')->upsert(
                         $modelsToUpsert,
                         ['name', 'manufacturer_id'], // Composite unique key
-                        [] // No fields to update if exists
+                        ['name'] // Update an existing field to itself if conflict occurs
                     );
                 }
 
@@ -86,7 +87,6 @@ class ProductionManufacturerSeeder extends Seeder
                 if ($processedModels % 5000 === 0 || $processedModels >= $totalModels) {
                     $this->command->info("Processed {$processedModels}/{$totalModels} models...");
                 }
-
                 unset($modelsToUpsert);
                 gc_collect_cycles();
             });

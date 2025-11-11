@@ -1,4 +1,4 @@
-<?php
+<?php // app/Models/Manufacturer.php
 
 namespace App\Models;
 

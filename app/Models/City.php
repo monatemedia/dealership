@@ -1,4 +1,4 @@
-<?php
+<?php // app/Models/City.php
 
 namespace App\Models;
 

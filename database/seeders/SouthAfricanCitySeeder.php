@@ -1,4 +1,5 @@
 <?php // database/seeders/SouthAfricanCitySeeder.php
+
 namespace Database\Seeders;
 
 use App\Models\Province;
@@ -19,7 +20,6 @@ class SouthAfricanCitySeeder extends Seeder
 
         // Step 1: Get the JSON data
         $jsonData = $this->getJsonData();
-
         if (!$jsonData) {
             $this->command->error("Failed to load city data.");
             return;
@@ -42,7 +42,6 @@ class SouthAfricanCitySeeder extends Seeder
     private function getJsonData(): ?array
     {
         $localPath = base_path(self::JSON_FILE_PATH);
-
         // Check if file exists locally
         if (File::exists($localPath)) {
             $this->command->info("Loading cities from local file...");
@@ -52,24 +51,19 @@ class SouthAfricanCitySeeder extends Seeder
 
         // Download from GitHub
         $this->command->info("Local file not found. Downloading from GitHub...");
-
         try {
             $response = Http::timeout(60)->get(self::GITHUB_URL);
-
             if ($response->successful()) {
                 // Ensure the directory exists
                 $directory = dirname($localPath);
                 if (!File::exists($directory)) {
                     File::makeDirectory($directory, 0755, true);
                 }
-
                 // Save the file locally for future use
                 File::put($localPath, $response->body());
                 $this->command->info("File downloaded and saved to: " . self::JSON_FILE_PATH);
-
                 return json_decode($response->body(), true);
             }
-
             $this->command->error("Failed to download file. Status: " . $response->status());
             return null;
         } catch (\Exception $e) {
@@ -84,15 +78,20 @@ class SouthAfricanCitySeeder extends Seeder
             ->pluck('ProvinceName')
             ->unique()
             ->filter()
-            ->map(fn($name) => ['name' => $name])
+            ->map(fn($name) => [
+                'name' => $name,
+                // Timestamps removed as per model definition
+            ])
             ->values()
             ->all();
 
-        // Use upsert for idempotent operation
+        // Use upsert for idempotent operation. Using 'name' in the update array
+        // forces PostgreSQL to use ON CONFLICT DO UPDATE SET name = EXCLUDED.name,
+        // which reliably avoids the duplicate key error when no real update is needed.
         DB::table('provinces')->upsert(
             $provinces,
             ['name'], // Unique key
-            [] // No fields to update
+            ['name'] // Update an existing field to itself if conflict occurs
         );
 
         $this->command->info("Processed " . count($provinces) . " provinces.");
@@ -106,18 +105,15 @@ class SouthAfricanCitySeeder extends Seeder
 
         foreach ($chunks as $chunk) {
             $citiesToUpsert = [];
-
             foreach ($chunk as $city) {
                 $provinceId = $provinceMap[$city['ProvinceName']] ?? null;
-
                 if ($provinceId && !empty($city['AccentCity'])) {
                     $citiesToUpsert[] = [
                         'name' => $city['AccentCity'],
                         'province_id' => $provinceId,
                         'latitude' => $city['Latitude'] ?? null,
                         'longitude' => $city['Longitude'] ?? null,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        // Timestamps removed as per model definition
                     ];
                 }
             }
@@ -127,12 +123,10 @@ class SouthAfricanCitySeeder extends Seeder
                 DB::table('cities')->upsert(
                     $citiesToUpsert,
                     ['name', 'province_id'], // Composite unique key
-                    ['latitude', 'longitude', 'updated_at'] // Update these if exists
+                    ['latitude', 'longitude'] // Only update existing columns if needed
                 );
-
                 $totalProcessed += count($citiesToUpsert);
             }
-
             unset($citiesToUpsert);
             gc_collect_cycles();
 
@@ -141,7 +135,6 @@ class SouthAfricanCitySeeder extends Seeder
                 $this->command->info("Processed {$totalProcessed} cities...");
             }
         }
-
         $this->command->info("Imported {$totalProcessed} cities.");
     }
 }
