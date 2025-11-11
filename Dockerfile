@@ -13,8 +13,8 @@ RUN composer install \
     --optimize-autoloader
 COPY . .
 RUN composer dump-autoload --optimize --no-dev
-# --------------------------------------------
 
+# --------------------------------------------
 # ============================================
 # STAGE 2: NODE BUILDER (Frontend Asset Compilation)
 # ============================================
@@ -32,28 +32,25 @@ RUN npm run build
 
 # ============================================
 # STAGE 3: PRODUCTION (Official PHP Base Image) 🚀
-# We are using the official image for maximum compatibility.
+# Simplified and combined RUN block for reliability.
 # ============================================
 FROM php:8.4-apache-bookworm AS final
 
-# 1. Install Dependencies and Cleanup
+# 1. Install Dependencies, Extensions, and Cleanup (One powerful RUN block)
 RUN set -ex; \
+    # 1A. Update and Install ALL required build and runtime dependencies
     apt-get update; \
-    \
-    # 1A. Install **Runtime Libraries** (These must REMAIN in the final image)
     apt-get install -y --no-install-recommends \
+    # Runtime/Base Dependencies
     libpq5 \
-    libpng-tools \
     libzip4 \
-    # Add other runtimes if needed, e.g., libonig5 for mbstring, libxml2, etc. \
-    # For simplicity, let's keep the others in the build block for now: dos2unix
     dos2unix \
-    ; \
-    \
-    # 1B. Install **Build Dependencies** (These are for compilation and can be removed later)
-    apt-get install -y --no-install-recommends \
-    libpq-dev \
+    # GD Dependencies
+    libjpeg-dev \
     libpng-dev \
+    libfreetype-dev \
+    # Other Extension Dependencies
+    libpq-dev \
     libicu-dev \
     libzip-dev \
     libonig-dev \
@@ -62,15 +59,20 @@ RUN set -ex; \
     unzip \
     ; \
     \
-    # 2. Compile and Install PHP Extensions
-    docker-php-ext-install \
+    # 1B. Configure and Install PHP Extensions
+    # Note: GD needs explicit configuration for common formats (JPEG, PNG, Freetype)
+    docker-php-ext-configure gd --with-jpeg --with-png --with-freetype; \
+    docker-php-ext-install -j$(nproc) \
     pdo pdo_pgsql mbstring exif pcntl bcmath gd zip intl \
     ; \
     \
-    # 3. Remove **Build Dependencies** (Only the -dev packages and build tools)
+    # 1C. Remove Build Dependencies and Clean up
+    # We remove the *-dev packages and build tools, but keep the runtime libraries (libpq5, libzip4, etc.)
     apt-get purge -y --auto-remove \
-    libpq-dev \
+    libjpeg-dev \
     libpng-dev \
+    libfreetype-dev \
+    libpq-dev \
     libicu-dev \
     libzip-dev \
     libonig-dev \
@@ -79,7 +81,7 @@ RUN set -ex; \
     unzip \
     ; \
     \
-    # 4. Final Cleanup
+    # 1D. Final Cleanup
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
@@ -103,7 +105,6 @@ COPY --from=node-builder /app/public/build ./public/build
 
 # FIX: dos2unix is still needed here, but it's now a system package
 COPY docker-entrypoint.sh /usr/local/bin/
-# dos2unix is installed in the previous RUN command
 RUN dos2unix /usr/local/bin/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
 

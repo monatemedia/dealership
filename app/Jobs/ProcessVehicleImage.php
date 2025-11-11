@@ -1,6 +1,4 @@
-<?php
-
-// app/Jobs/ProcessVehicleImage.php
+<?php // app/Jobs/ProcessVehicleImage.php
 
 namespace App\Jobs;
 
@@ -12,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Services\ImageProcessingService;
-use Exception;
+use Throwable;
 
 class ProcessVehicleImage implements ShouldQueue
 {
@@ -68,7 +66,7 @@ class ProcessVehicleImage implements ShouldQueue
         }
     }
 
-    public function failed(Exception $exception): void
+    public function failed(Throwable $exception): void
     {
         // Ensure status is set to failed if job crashes unexpectedly
         VehicleImage::where('id', $this->vehicleImageId)->update([
