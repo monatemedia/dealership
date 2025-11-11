@@ -80,14 +80,14 @@ class SouthAfricanCitySeeder extends Seeder
             ->filter()
             ->map(fn($name) => [
                 'name' => $name,
-                // Timestamps removed as per model definition
             ])
             ->values()
             ->all();
 
         // Use upsert for idempotent operation. Using 'name' in the update array
         // forces PostgreSQL to use ON CONFLICT DO UPDATE SET name = EXCLUDED.name,
-        // which reliably avoids the duplicate key error when no real update is needed.
+        // which reliably avoids the duplicate key error when no real update is needed
+        // (as confirmed in the previous step, since the models don't use timestamps).
         DB::table('provinces')->upsert(
             $provinces,
             ['name'], // Unique key
@@ -113,28 +113,35 @@ class SouthAfricanCitySeeder extends Seeder
                         'province_id' => $provinceId,
                         'latitude' => $city['Latitude'] ?? null,
                         'longitude' => $city['Longitude'] ?? null,
-                        // Timestamps removed as per model definition
                     ];
                 }
             }
 
             if (!empty($citiesToUpsert)) {
+                // **CRITICAL FIX: Deduplicate the chunk before upserting**
+                // This prevents the PostgreSQL 'Cardinality violation' error
+                // when the source JSON contains multiple entries for the same city/province.
+                $citiesToUpsert = collect($citiesToUpsert)
+                    ->unique(fn ($item) => $item['name'] . '|' . $item['province_id'])
+                    ->values()
+                    ->all();
+
                 // Use upsert for idempotent operation
                 DB::table('cities')->upsert(
                     $citiesToUpsert,
                     ['name', 'province_id'], // Composite unique key
-                    ['latitude', 'longitude'] // Only update existing columns if needed
+                    ['latitude', 'longitude'] // Update these if exists
                 );
-                $totalProcessed += count($citiesToUpsert);
+                $totalProcessed += count($citiesToUpsert); // Use the count of the unique items
             }
             unset($citiesToUpsert);
             gc_collect_cycles();
 
             // Show progress less frequently
             if ($totalProcessed % 3000 === 0 || $totalProcessed >= count($data)) {
-                $this->command->info("Processed {$totalProcessed} cities...");
+                $this->command->info("Processed {$totalProcessed} unique cities...");
             }
         }
-        $this->command->info("Imported {$totalProcessed} cities.");
+        $this->command->info("Imported {$totalProcessed} unique cities.");
     }
 }
