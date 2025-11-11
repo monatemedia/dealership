@@ -10,6 +10,12 @@ if [ -f "/var/www/html/public/hot" ]; then
 fi
 
 # Run Laravel setup
+# We will clear all caches (config, route, view) here to ensure
+# fresh variables and routing tables are loaded before Apache starts.
+php artisan config:clear
+php artisan route:clear  # ADDED: Clear cached routes
+php artisan view:clear   # ADDED: Clear cached views
+
 php artisan migrate --force
 
 # --- ADDED LOGIC FOR SEEDING ---
@@ -20,10 +26,6 @@ if [ "$SEED_DATABASE" = "true" ]; then
 fi
 # ---------------------------------
 
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache # This command is critical for staging/prod
-
-echo "Starting web server..."
-# Execute the main container command (apache2-foreground)
-exec "$@"
+# REPLACED: exec "$@" with the direct call to the Apache foreground process.
+echo "Application setup complete. Starting Apache web server..."
+exec apache2-foreground

@@ -45,11 +45,6 @@ RUN set -ex; \
     libzip4 \
     dos2unix \
     \
-    # GD Runtime Dependencies (Kept during cleanup)
-    libjpeg62-turbo \
-    libpng16-16 \
-    libfreetype6 \
-    \
     # **NEW: Image Optimization CLI Tools (Runtime)**
     jpegoptim \
     optipng \
@@ -57,10 +52,11 @@ RUN set -ex; \
     gifsicle \
     webp \
     \
-    # GD Development Dependencies (Removed during cleanup)
+    # GD Development Dependencies (for building)
     libjpeg-dev \
     libpng-dev \
     libfreetype-dev \
+    libwebp-dev \
     \
     # Other Extension Dependencies
     libpq-dev \
@@ -71,19 +67,24 @@ RUN set -ex; \
     git \
     unzip;
 
-# 2. Install PHP Extensions
+# 2. Configure and Install PHP Extensions
+# Configure GD with all image format support
 RUN set -ex; \
+    docker-php-ext-configure gd \
+    --with-freetype \
+    --with-jpeg \
+    --with-webp; \
     docker-php-ext-install -j$(nproc) \
     pdo pdo_pgsql mbstring exif pcntl bcmath gd zip intl;
 
 # 3. Clean Up Build Dependencies and Apt Cache
-# NOTE: The image optimization tools installed in Step 1 (which are not *-dev packages)
-# are retained because they are not listed here and are not considered auto-removable.
+# Keep only runtime libraries needed by GD
 RUN set -ex; \
-    apt-get purge -y --auto-remove \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
     libjpeg-dev \
     libpng-dev \
     libfreetype-dev \
+    libwebp-dev \
     libpq-dev \
     libicu-dev \
     libzip-dev \
