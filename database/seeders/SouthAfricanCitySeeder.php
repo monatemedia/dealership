@@ -1,5 +1,4 @@
-<?php
-
+<?php // database/seeders/SouthAfricanCitySeeder.php
 namespace Database\Seeders;
 
 use App\Models\Province;
@@ -16,28 +15,28 @@ class SouthAfricanCitySeeder extends Seeder
 
     public function run(): void
     {
-        $this->command->info("    Seeding South African provinces and cities...");
+        $this->command->info("Seeding South African provinces and cities...");
 
         // Step 1: Get the JSON data
         $jsonData = $this->getJsonData();
 
         if (!$jsonData) {
-            $this->command->error("    Failed to load city data.");
+            $this->command->error("Failed to load city data.");
             return;
         }
 
-        // Step 2: Import provinces first
-        $this->command->info("    Importing provinces...");
+        // Step 2: Import provinces using upsert
+        $this->command->info("Importing provinces...");
         $this->importProvinces($jsonData);
 
         // Step 3: Build province lookup map
         $provinceMap = Province::pluck('id', 'name')->all();
 
-        // Step 4: Import cities in chunks
-        $this->command->info("    Importing cities (this may take a while - ~13,000 records)...");
+        // Step 4: Import cities using upsert
+        $this->command->info("Importing cities (~13,000 records)...");
         $this->importCities($jsonData, $provinceMap);
 
-        $this->command->info("      Finished seeding provinces and cities.");
+        $this->command->info("Finished seeding provinces and cities.");
     }
 
     private function getJsonData(): ?array
@@ -46,13 +45,13 @@ class SouthAfricanCitySeeder extends Seeder
 
         // Check if file exists locally
         if (File::exists($localPath)) {
-            $this->command->info("    Loading cities from local file...");
+            $this->command->info("Loading cities from local file...");
             $content = File::get($localPath);
             return json_decode($content, true);
         }
 
         // Download from GitHub
-        $this->command->info("    Local file not found. Downloading from GitHub...");
+        $this->command->info("Local file not found. Downloading from GitHub...");
 
         try {
             $response = Http::timeout(60)->get(self::GITHUB_URL);
@@ -66,15 +65,15 @@ class SouthAfricanCitySeeder extends Seeder
 
                 // Save the file locally for future use
                 File::put($localPath, $response->body());
-                $this->command->info("    File downloaded and saved to: " . self::JSON_FILE_PATH);
+                $this->command->info("File downloaded and saved to: " . self::JSON_FILE_PATH);
 
                 return json_decode($response->body(), true);
             }
 
-            $this->command->error("    Failed to download file. Status: " . $response->status());
+            $this->command->error("Failed to download file. Status: " . $response->status());
             return null;
         } catch (\Exception $e) {
-            $this->command->error("    Error downloading file: " . $e->getMessage());
+            $this->command->error("Error downloading file: " . $e->getMessage());
             return null;
         }
     }
@@ -85,52 +84,68 @@ class SouthAfricanCitySeeder extends Seeder
             ->pluck('ProvinceName')
             ->unique()
             ->filter()
-            ->values();
+            ->map(fn($name) => [
+                'name' => $name,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])
+            ->values()
+            ->all();
 
-        foreach ($provinces as $provinceName) {
-            Province::firstOrCreate(['name' => $provinceName]);
-        }
+        // Use upsert for idempotent operation
+        DB::table('provinces')->upsert(
+            $provinces,
+            ['name'], // Unique key
+            ['updated_at'] // Update timestamp if exists
+        );
 
-        $this->command->info("      Imported " . $provinces->count() . " provinces.");
+        $this->command->info("Processed " . count($provinces) . " provinces.");
     }
 
     private function importCities(array $data, array $provinceMap): void
     {
-        // Process in chunks to manage memory
-        $chunks = array_chunk($data, 500);
+        $chunkSize = 1000; // Larger chunks for better performance
+        $chunks = array_chunk($data, $chunkSize);
         $totalProcessed = 0;
 
         foreach ($chunks as $chunk) {
-            $citiesToInsert = [];
+            $citiesToUpsert = [];
 
             foreach ($chunk as $city) {
                 $provinceId = $provinceMap[$city['ProvinceName']] ?? null;
 
                 if ($provinceId && !empty($city['AccentCity'])) {
-                    $citiesToInsert[] = [
+                    $citiesToUpsert[] = [
                         'name' => $city['AccentCity'],
                         'province_id' => $provinceId,
                         'latitude' => $city['Latitude'] ?? null,
                         'longitude' => $city['Longitude'] ?? null,
-                        // 'created_at' => now(),
-                        // 'updated_at' => now(),
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ];
                 }
             }
 
-            if (!empty($citiesToInsert)) {
-                DB::table('cities')->insertOrIgnore($citiesToInsert);
-                $totalProcessed += count($citiesToInsert);
+            if (!empty($citiesToUpsert)) {
+                // Use upsert for idempotent operation
+                DB::table('cities')->upsert(
+                    $citiesToUpsert,
+                    ['name', 'province_id'], // Composite unique key
+                    ['latitude', 'longitude', 'updated_at'] // Update these if exists
+                );
+
+                $totalProcessed += count($citiesToUpsert);
             }
 
-            // Force garbage collection for memory management
-            unset($citiesToInsert);
+            unset($citiesToUpsert);
             gc_collect_cycles();
 
-            // Show progress
-            $this->command->info("      Processed {$totalProcessed} cities...");
+            // Show progress less frequently
+            if ($totalProcessed % 3000 === 0 || $totalProcessed >= count($data)) {
+                $this->command->info("Processed {$totalProcessed} cities...");
+            }
         }
 
-        $this->command->info("      Imported {$totalProcessed} cities.");
+        $this->command->info("Imported {$totalProcessed} cities.");
     }
 }

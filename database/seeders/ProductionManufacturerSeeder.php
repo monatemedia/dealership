@@ -1,5 +1,4 @@
 <?php // database/seeders/ProductionManufacturerSeeder.php
-
 namespace Database\Seeders;
 
 use App\Models\Manufacturer;
@@ -10,41 +9,41 @@ class ProductionManufacturerSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info("    Seeding manufacturers and models from VPIC SQLite database...");
+        $this->command->info("Seeding manufacturers and models from VPIC SQLite database...");
 
-        // Step 1: Import all unique manufacturers first
-        $this->command->info("    Importing manufacturers...");
+        // Step 1: Import manufacturers using upsert for speed
+        $this->command->info("Importing manufacturers...");
 
         $manufacturers = DB::connection('vpic')
             ->table('Make_Model AS mm')
             ->join('Make AS m', 'mm.MakeId', '=', 'm.Id')
-            ->select('m.Id as vpic_id', 'm.Name as name')
+            ->select('m.Name as name')
             ->distinct()
-            ->get();
+            ->get()
+            ->map(fn($m) => [
+                'name' => $m->name,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])
+            ->all();
 
-        $totalManufacturers = $manufacturers->count();
-        $processedManufacturers = 0;
+        $totalManufacturers = count($manufacturers);
 
-        foreach ($manufacturers as $make) {
-            Manufacturer::firstOrCreate(
-                ['name' => $make->name]
-            );
+        // Use upsert for idempotent bulk insert
+        // This will insert new records and update existing ones
+        DB::table('manufacturers')->upsert(
+            $manufacturers,
+            ['name'], // Unique key
+            ['updated_at'] // Fields to update if exists
+        );
 
-            $processedManufacturers++;
+        $this->command->info("Processed {$totalManufacturers} manufacturers.");
 
-            // Show progress every 500 manufacturers
-            if ($processedManufacturers % 500 === 0 || $processedManufacturers === $totalManufacturers) {
-                $this->command->info("      Processed {$processedManufacturers}/{$totalManufacturers} manufacturers...");
-            }
-        }
-
-        // Clear any cached data
         unset($manufacturers);
         gc_collect_cycles();
 
-        $this->command->info("    Importing models...");
-
-        // Step 2: Build a manufacturer ID lookup map to avoid repeated queries
+        // Step 2: Build manufacturer lookup map
+        $this->command->info("Importing models...");
         $manufacturerMap = Manufacturer::pluck('id', 'name')->all();
 
         // Get total count for progress tracking
@@ -53,22 +52,23 @@ class ProductionManufacturerSeeder extends Seeder
             ->count();
 
         $processedModels = 0;
+        $chunkSize = 2000; // Larger chunks for better performance
 
-        // Step 3: Import models in chunks
+        // Step 3: Import models in chunks using upsert
         DB::connection('vpic')
             ->table('Make_Model AS mm')
             ->join('Make AS m', 'mm.MakeId', '=', 'm.Id')
             ->join('Model AS mo', 'mm.ModelId', '=', 'mo.Id')
-            ->select('m.Name as make_name', 'mo.Name as model_name', 'mm.Id as chunk_id')
+            ->select('m.Name as make_name', 'mo.Name as model_name')
             ->orderBy('mm.Id')
-            ->chunk(1000, function ($rows) use ($manufacturerMap, &$processedModels, $totalModels) {
-                $modelsToInsert = [];
+            ->chunk($chunkSize, function ($rows) use ($manufacturerMap, &$processedModels, $totalModels) {
+                $modelsToUpsert = [];
 
                 foreach ($rows as $row) {
                     $manufacturerId = $manufacturerMap[$row->make_name] ?? null;
 
                     if ($manufacturerId) {
-                        $modelsToInsert[] = [
+                        $modelsToUpsert[] = [
                             'name' => $row->model_name,
                             'manufacturer_id' => $manufacturerId,
                             'created_at' => now(),
@@ -77,19 +77,26 @@ class ProductionManufacturerSeeder extends Seeder
                     }
                 }
 
-                // Use insertOrIgnore to skip duplicates (Laravel 8+)
-                if (!empty($modelsToInsert)) {
-                    DB::table('models')->insertOrIgnore($modelsToInsert);
+                // Use upsert for idempotent operation
+                if (!empty($modelsToUpsert)) {
+                    DB::table('models')->upsert(
+                        $modelsToUpsert,
+                        ['name', 'manufacturer_id'], // Composite unique key
+                        ['updated_at'] // Update timestamp if exists
+                    );
                 }
 
                 $processedModels += count($rows);
-                $this->command->info("      Processed {$processedModels}/{$totalModels} models...");
 
-                // Force garbage collection
-                unset($modelsToInsert);
+                // Show progress less frequently for speed
+                if ($processedModels % 5000 === 0 || $processedModels >= $totalModels) {
+                    $this->command->info("Processed {$processedModels}/{$totalModels} models...");
+                }
+
+                unset($modelsToUpsert);
                 gc_collect_cycles();
             });
 
-        $this->command->info("      Finished seeding manufacturers and models.");
+        $this->command->info("Finished seeding manufacturers and models.");
     }
 }
