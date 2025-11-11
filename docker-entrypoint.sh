@@ -16,6 +16,9 @@ php artisan config:clear
 php artisan route:clear  # ADDED: Clear cached routes
 php artisan view:clear   # ADDED: Clear cached views
 
+# Create storage symlink (idempotent - won't fail if already exists)
+php artisan storage:link
+
 php artisan migrate --force
 
 # --- ADDED LOGIC FOR SEEDING ---

@@ -1,14 +1,13 @@
 services:
   dealership-web:
-    build: .
-    # --- CHANGE START ---
-    # Replace 'build: .' with the remote image reference for production deployment
-    # image: ghcr.io/monatemedia/dealership:latest
-    # --- CHANGE END ---
+    image: ghcr.io/monatemedia/dealership:latest
     container_name: ${DOCKER_CONTAINER_NAME}-web
     depends_on:
-      - dealership-db
+      dealership-db:
+        condition: service_healthy # Ensure DB is healthy before starting
     restart: always
+    # FIX: Switched to /bin/bash -c to ensure /dev/tcp connection check is supported.
+    entrypoint: /bin/bash -c "echo 'Waiting for database connection...'; until (exec 6<>/dev/tcp/dealership-db/5432) 2>/dev/null; do echo 'Database not ready, sleeping for 1 second...'; sleep 1; done; echo 'Database is ready. Executing application setup...'; /usr/local/bin/docker-entrypoint.sh"
     environment:
       # Database
       DB_CONNECTION: pgsql
@@ -27,19 +26,63 @@ services:
       # Seeding (set to true to run seeders on startup)
       SEED_DATABASE: ${SEED_DATABASE:-false}
       # Nginx Proxy (only used on server)
-      VIRTUAL_HOST: ${DOCKER_CONTAINER_NAME}-${ENVIRONMENT}.${BASE_DOMAIN}
-      LETSENCRYPT_HOST: ${DOCKER_CONTAINER_NAME}-${ENVIRONMENT}.${BASE_DOMAIN}
+      VIRTUAL_HOST: ${DOCKER_CONTAINER_NAME}.${BASE_DOMAIN}
+      # --- FIX: LETSENCRYPT_HOST must match VIRTUAL_HOST exactly ---
+      LETSENCRYPT_HOST: ${DOCKER_CONTAINER_NAME}.${BASE_DOMAIN}
       VIRTUAL_PORT: 80
     env_file:
       - .env
     volumes:
-      - ./:/var/www/html
+      # 1. Mount the .env file
+      - ./.env:/var/www/html/.env
+      # 2. Mount persistent storage
       - ./storage:/var/www/html/storage
+      # 3. Mount cache
       - ./bootstrap/cache:/var/www/html/bootstrap/cache
+      # --- Mount the entrypoint script ---
+      - ./docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
+      # ----------------------------------------------------------------
     mem_limit: 512M
     tty: true
     ports:
       - "${DOCKER_LARAVEL_PORT}:80"
+    networks:
+      - proxy-network
+
+  # NEW: Queue Worker Service for Image Processing
+  dealership-queue:
+    image: ghcr.io/monatemedia/dealership:latest
+    container_name: ${DOCKER_CONTAINER_NAME}-queue
+    depends_on:
+      dealership-db:
+        condition: service_healthy
+    restart: always
+    entrypoint: /bin/bash -c "echo 'Waiting for database connection...'; until (exec 6<>/dev/tcp/dealership-db/5432) 2>/dev/null; do echo 'Database not ready, sleeping for 1 second...'; sleep 1; done; echo 'Database is ready. Starting queue worker...'; php artisan queue:work --verbose --tries=3 --timeout=300 --sleep=3 --max-jobs=1000"
+    environment:
+      # Database
+      DB_CONNECTION: pgsql
+      DB_HOST: dealership-db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # App
+      APP_NAME: ${APP_NAME}
+      APP_ENV: ${APP_ENV}
+      APP_KEY: ${APP_KEY}
+      APP_DEBUG: ${APP_DEBUG}
+      APP_URL: ${APP_URL}
+      APP_TIMEZONE: ${APP_TIMEZONE}
+    env_file:
+      - .env
+    volumes:
+      # 1. Mount the .env file
+      - ./.env:/var/www/html/.env
+      # 2. Mount persistent storage (critical for image processing!)
+      - ./storage:/var/www/html/storage
+      # 3. Mount cache
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    mem_limit: 512M
     networks:
       - proxy-network
 
@@ -74,8 +117,8 @@ services:
     environment:
       ADMINER_DEFAULT_SERVER: dealership-db
       ADMINER_DESIGN: nette
-      VIRTUAL_HOST: ${DOCKER_CONTAINER_NAME}-adminer-${ENVIRONMENT}.${BASE_DOMAIN}
-      LETSENCRYPT_HOST: ${DOCKER_CONTAINER_NAME}-adminer-${ENVIRONMENT}.${BASE_DOMAIN}
+      VIRTUAL_HOST: ${DOCKER_CONTAINER_NAME}-adminer.${BASE_DOMAIN}
+      LETSENCRYPT_HOST: ${DOCKER_CONTAINER_NAME}-adminer.${BASE_DOMAIN}
       VIRTUAL_PORT: 8080
     ports:
       - "${DOCKER_ADMINER_PORT}:8080"
