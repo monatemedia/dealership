@@ -36,29 +36,33 @@ RUN npm run build
 # ============================================
 FROM php:8.4-apache-bookworm AS final
 
-# 1. Install ALL Dependencies (Runtime and Build)
+# 1. Install System Dependencies
 RUN set -ex; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-    # Standard Runtime/Base Dependencies
+    # Standard Runtime Dependencies
     libpq5 \
     libzip4 \
     dos2unix \
     \
-    # **NEW: Image Optimization CLI Tools (Runtime)**
+    # Image Optimization CLI Tools
     jpegoptim \
     optipng \
     pngquant \
     gifsicle \
     webp \
     \
-    # GD Development Dependencies (for building)
+    # GD Runtime Libraries (these must stay)
+    libjpeg62-turbo \
+    libpng16-16 \
+    libfreetype6 \
+    libwebp7 \
+    \
+    # Build Dependencies (will be removed)
     libjpeg-dev \
     libpng-dev \
     libfreetype-dev \
     libwebp-dev \
-    \
-    # Other Extension Dependencies
     libpq-dev \
     libicu-dev \
     libzip-dev \
@@ -68,19 +72,28 @@ RUN set -ex; \
     unzip;
 
 # 2. Configure and Install PHP Extensions
-# Configure GD with all image format support
 RUN set -ex; \
     docker-php-ext-configure gd \
-    --with-freetype \
-    --with-jpeg \
-    --with-webp; \
+    --with-freetype=/usr \
+    --with-jpeg=/usr \
+    --with-webp=/usr; \
     docker-php-ext-install -j$(nproc) \
-    pdo pdo_pgsql mbstring exif pcntl bcmath gd zip intl;
+    pdo pdo_pgsql mbstring exif pcntl bcmath gd zip intl; \
+    \
+    # Verify GD was compiled correctly
+    php -m | grep -q gd || (echo "ERROR: GD extension failed to compile" && exit 1);
 
-# 3. Clean Up Build Dependencies and Apt Cache
-# Keep only runtime libraries needed by GD
+# 3. Clean Up Build Dependencies Only
 RUN set -ex; \
-    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+    # Mark runtime libraries to keep
+    apt-mark manual \
+    libjpeg62-turbo \
+    libpng16-16 \
+    libfreetype6 \
+    libwebp7; \
+    \
+    # Remove build dependencies
+    apt-get purge -y --auto-remove \
     libjpeg-dev \
     libpng-dev \
     libfreetype-dev \
@@ -92,6 +105,9 @@ RUN set -ex; \
     libxml2-dev \
     git \
     unzip; \
+    \
+    # Verify GD still works after cleanup
+    php -m | grep -q gd || (echo "ERROR: GD extension broken after cleanup" && exit 1); \
     \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
