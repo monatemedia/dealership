@@ -32,7 +32,7 @@ RUN npm run build
 
 # ============================================
 # STAGE 3: PRODUCTION (Official PHP Base Image) 🚀
-# RUN block is split for stability and debugging.
+# Includes GD fix and image optimization tools.
 # ============================================
 FROM php:8.4-apache-bookworm AS final
 
@@ -40,14 +40,28 @@ FROM php:8.4-apache-bookworm AS final
 RUN set -ex; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-    # Runtime/Base Dependencies
+    # Standard Runtime/Base Dependencies
     libpq5 \
     libzip4 \
     dos2unix \
-    # GD Dependencies (Development Libraries)
+    \
+    # GD Runtime Dependencies (Kept during cleanup)
+    libjpeg62-turbo \
+    libpng16-16 \
+    libfreetype6 \
+    \
+    # **NEW: Image Optimization CLI Tools (Runtime)**
+    jpegoptim \
+    optipng \
+    pngquant \
+    gifsicle \
+    webp \
+    \
+    # GD Development Dependencies (Removed during cleanup)
     libjpeg-dev \
     libpng-dev \
     libfreetype-dev \
+    \
     # Other Extension Dependencies
     libpq-dev \
     libicu-dev \
@@ -57,17 +71,15 @@ RUN set -ex; \
     git \
     unzip;
 
-# 2. Configure and Install PHP Extensions
-# This step is isolated to ensure the dependencies from step 1 are available.
+# 2. Install PHP Extensions
 RUN set -ex; \
-    # Install all extensions (GD will auto-detect installed dependencies)
     docker-php-ext-install -j$(nproc) \
     pdo pdo_pgsql mbstring exif pcntl bcmath gd zip intl;
 
 # 3. Clean Up Build Dependencies and Apt Cache
-# This step is isolated so failures here do not block the essential installation.
+# NOTE: The image optimization tools installed in Step 1 (which are not *-dev packages)
+# are retained because they are not listed here and are not considered auto-removable.
 RUN set -ex; \
-    # Remove only the -dev packages and build tools
     apt-get purge -y --auto-remove \
     libjpeg-dev \
     libpng-dev \
@@ -80,7 +92,6 @@ RUN set -ex; \
     git \
     unzip; \
     \
-    # Final Cleanup
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
