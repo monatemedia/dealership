@@ -20,11 +20,7 @@ class ProductionManufacturerSeeder extends Seeder
             ->select('m.Name as name')
             ->distinct()
             ->get()
-            ->map(fn($m) => [
-                'name' => $m->name,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ])
+            ->map(fn($m) => ['name' => $m->name])
             ->all();
 
         $totalManufacturers = count($manufacturers);
@@ -34,7 +30,7 @@ class ProductionManufacturerSeeder extends Seeder
         DB::table('manufacturers')->upsert(
             $manufacturers,
             ['name'], // Unique key
-            ['updated_at'] // Fields to update if exists
+            [] // No fields to update if exists
         );
 
         $this->command->info("Processed {$totalManufacturers} manufacturers.");
@@ -71,8 +67,6 @@ class ProductionManufacturerSeeder extends Seeder
                         $modelsToUpsert[] = [
                             'name' => $row->model_name,
                             'manufacturer_id' => $manufacturerId,
-                            'created_at' => now(),
-                            'updated_at' => now(),
                         ];
                     }
                 }
@@ -82,7 +76,7 @@ class ProductionManufacturerSeeder extends Seeder
                     DB::table('models')->upsert(
                         $modelsToUpsert,
                         ['name', 'manufacturer_id'], // Composite unique key
-                        ['updated_at'] // Update timestamp if exists
+                        [] // No fields to update if exists
                     );
                 }
 

@@ -84,11 +84,7 @@ class SouthAfricanCitySeeder extends Seeder
             ->pluck('ProvinceName')
             ->unique()
             ->filter()
-            ->map(fn($name) => [
-                'name' => $name,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ])
+            ->map(fn($name) => ['name' => $name])
             ->values()
             ->all();
 
@@ -96,7 +92,7 @@ class SouthAfricanCitySeeder extends Seeder
         DB::table('provinces')->upsert(
             $provinces,
             ['name'], // Unique key
-            ['updated_at'] // Update timestamp if exists
+            [] // No fields to update
         );
 
         $this->command->info("Processed " . count($provinces) . " provinces.");
