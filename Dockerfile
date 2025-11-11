@@ -60,10 +60,7 @@ RUN set -ex; \
 # 2. Configure and Install PHP Extensions
 # This step is isolated to ensure the dependencies from step 1 are available.
 RUN set -ex; \
-    # Configure GD with its dependencies
-    docker-php-ext-configure gd --with-jpeg --with-png --with-freetype; \
-    \
-    # Install all extensions
+    # Install all extensions (GD will auto-detect installed dependencies)
     docker-php-ext-install -j$(nproc) \
     pdo pdo_pgsql mbstring exif pcntl bcmath gd zip intl;
 
