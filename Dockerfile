@@ -1,5 +1,5 @@
 # ============================================
-# STAGE 1: COMPOSER BUILDER (PHP Dependency Installation)
+# STAGE 1: COMPOSER BUILDER
 # ============================================
 FROM composer:2 AS composer-builder
 RUN apk add --no-cache git
@@ -13,10 +13,10 @@ RUN composer install \
     --optimize-autoloader
 COPY . .
 RUN composer dump-autoload --optimize --no-dev
-
 # --------------------------------------------
+
 # ============================================
-# STAGE 2: NODE BUILDER (Frontend Asset Compilation)
+# STAGE 2: NODE BUILDER
 # ============================================
 FROM node:20-alpine AS node-builder
 WORKDIR /app
@@ -32,20 +32,19 @@ RUN npm run build
 
 # ============================================
 # STAGE 3: PRODUCTION (Official PHP Base Image) 🚀
-# Simplified and combined RUN block for reliability.
+# RUN block is split for stability and debugging.
 # ============================================
 FROM php:8.4-apache-bookworm AS final
 
-# 1. Install Dependencies, Extensions, and Cleanup (One powerful RUN block)
+# 1. Install ALL Dependencies (Runtime and Build)
 RUN set -ex; \
-    # 1A. Update and Install ALL required build and runtime dependencies
     apt-get update; \
     apt-get install -y --no-install-recommends \
     # Runtime/Base Dependencies
     libpq5 \
     libzip4 \
     dos2unix \
-    # GD Dependencies
+    # GD Dependencies (Development Libraries)
     libjpeg-dev \
     libpng-dev \
     libfreetype-dev \
@@ -56,18 +55,22 @@ RUN set -ex; \
     libonig-dev \
     libxml2-dev \
     git \
-    unzip \
-    ; \
-    \
-    # 1B. Configure and Install PHP Extensions
-    # Note: GD needs explicit configuration for common formats (JPEG, PNG, Freetype)
+    unzip;
+
+# 2. Configure and Install PHP Extensions
+# This step is isolated to ensure the dependencies from step 1 are available.
+RUN set -ex; \
+    # Configure GD with its dependencies
     docker-php-ext-configure gd --with-jpeg --with-png --with-freetype; \
-    docker-php-ext-install -j$(nproc) \
-    pdo pdo_pgsql mbstring exif pcntl bcmath gd zip intl \
-    ; \
     \
-    # 1C. Remove Build Dependencies and Clean up
-    # We remove the *-dev packages and build tools, but keep the runtime libraries (libpq5, libzip4, etc.)
+    # Install all extensions
+    docker-php-ext-install -j$(nproc) \
+    pdo pdo_pgsql mbstring exif pcntl bcmath gd zip intl;
+
+# 3. Clean Up Build Dependencies and Apt Cache
+# This step is isolated so failures here do not block the essential installation.
+RUN set -ex; \
+    # Remove only the -dev packages and build tools
     apt-get purge -y --auto-remove \
     libjpeg-dev \
     libpng-dev \
@@ -78,17 +81,16 @@ RUN set -ex; \
     libonig-dev \
     libxml2-dev \
     git \
-    unzip \
-    ; \
+    unzip; \
     \
-    # 1D. Final Cleanup
+    # Final Cleanup
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Configure Apache DocumentRoot to point to Laravel's public directory
+# Configure Apache DocumentRoot
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf && \
     sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
@@ -103,7 +105,7 @@ COPY . /var/www/html
 COPY --from=composer-builder /app/vendor ./vendor
 COPY --from=node-builder /app/public/build ./public/build
 
-# FIX: dos2unix is still needed here, but it's now a system package
+# Custom Entrypoint
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN dos2unix /usr/local/bin/docker-entrypoint.sh && \
     chmod +x /usr/local/bin/docker-entrypoint.sh
