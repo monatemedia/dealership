@@ -53,7 +53,7 @@ class ProcessVehicleImage implements ShouldQueue
                 @unlink($vehicleImage->temp_file_path); // @ suppresses any rare unlink error
             }
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log the error for debugging
             Log::error("ProcessVehicleImage: Error processing VehicleImage ID {$vehicleImage->id}", [
                 'error' => $e->getMessage(),
