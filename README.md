@@ -310,51 +310,80 @@ See the [open issues](https://github.com/monatemedia/dealership/issues) for a fu
 
 
 <!-- CONTRIBUTING -->
-## Contributing
+# Contributing
 
 We use the `GitFlow Branching Model`. To make a contribution, please fork the repo and create a pull request. You can also <a href="https://github.com/monatemedia/dealership/issues/new?labels=bug&template=bug-report---.md">report a bug</a>, or <a href="https://github.com/monatemedia/dealership/issues/new?labels=enhancement&template=feature-request---.md">request a feature</a>.
 
-### GitFlow Branching Model
+## GitFlow Branching Model
 
-This project follows the **GitFlow branching strategy**.  
+This project follows the GitFlow branching strategy with automated CI/CD deployments.
+The goal is to keep `main` always production-ready while using `dev` as an integration branch.
 
-The goal is to keep `main` always production-ready while using `dev` as an integration branch.  
-All work happens in short-lived branches that are deleted after merge. 
-
-Core branches:
-1. `main` → always production-ready, deployed code.
-2. `dev`  → integration branch where features and fixes are merged before going to main.
-
-Short-lived branches (temporary branches, deleted after merge):
-  - `feature/<name>` → for new functionality. Created from `dev`, merged back into `dev`.
-  - `bugfix/<name>` → for fixing bugs. Created from `dev`, merged back into `dev`.
-  - `release/<version>` → staging branch to prepare a version before tagging and merging to `main`. created from `dev`, merged into both `main` and `dev`.
-  - `hotfix/<name>` → for urgent production fixes (branched off `main`, merged back to both `main` and `dev`).
-
-
----
+All work happens in short-lived branches that are deleted after merge.
 
 ### Core Branches
-1. **`main`**  
-   - Always production-ready.  
-   - Code here is what’s deployed.  
 
-2. **`dev`**
-   - Integration branch.  
-   - Features and bugfixes merge here before going to `main`.  
+**`main`** → always production-ready, deployed code. Automatically builds and deploys to production server when code is pushed or when version tags are created.
 
----
+**`dev`** → integration branch where features and fixes are merged before going to production. Used for local development on Docker Desktop.
 
 ### Short-Lived Branches
 
-#### Feature Branches
-- For new functionality.  
-- Created from `dev`, merged back into `dev`.  
+Temporary branches, deleted after merge:
+
+- **`feature/<name>`** → for new functionality. Created from `dev`, merged back into `dev`.
+- **`bugfix/<name>`** → for fixing bugs. Created from `dev`, merged back into `dev`.
+- **`release/<version>`** → staging branch to prepare a version before tagging and merging to `main`. Created from `dev`, merged into both `main` and `dev`. **Automatically deploys to staging environment for testing.**
+- **`hotfix/<name>`** → for urgent production fixes. Branched off `main`, merged back to both `main` and `dev`.
+
+### Deployment Environments
+
+- **Production** → Triggered by pushes to `main` or version tags (e.g., `v1.0.0`). Deploys to production server. **Adminer is NOT included in production.**
+- **Staging** → `release/*` branches automatically deploy to staging environment on VPS for QA/testing. **Adminer is included for database access.**
+- **Local Development** → `dev` branch for development on Docker Desktop. **Adminer is included.**
+
+### Version Management
+
+This project uses **Git tags** as the source of truth for versioning. All deployments are tracked with semantic versioning (e.g., `v1.0.0`, `v2.1.5`).
+
+**Docker images are tagged with:**
+- `:staging` - Latest staging release
+- `:production` - Latest production release
+- `:v1.0.0` - Specific version number
+- `:abc123def` - Git commit SHA (for traceability)
+
+**Image tags are automatically managed** - the `IMAGE_TAG` environment variable in `.env` is updated during deployment.
+
+---
+
+## Working with Branches
+
+### Core Branches
+
+#### main
+
+Always production-ready. Code here is what's deployed to production.
+
+**Triggers automatic deployment to production when:**
+- Code is pushed to `main`
+- A version tag is created (e.g., `v1.0.0`)
+
+#### dev
+
+Integration branch. Features and bugfixes merge here before going to production. Used for local development.
+
+---
+
+## Short-Lived Branches
+
+### Feature Branches
+
+For new functionality.
+Created from `dev`, merged back into `dev`.
+
+#### CREATE A FEATURE BRANCH
 
 ```bash
-# CREATE A FEATURE BRANCH
-# ---------------------
-
 # Make sure you're on dev
 git checkout dev
 
@@ -369,10 +398,11 @@ git push origin feature/<name>
 
 # List all branches that contain the tip commit of your feature branch
 git branch --contains feature/<name>
+```
 
-# MERGE FEATURE BRANCH
-# --------------------
+#### MERGE FEATURE BRANCH
 
+```bash
 # Make sure all your work is committed on the feature branch
 git status
 git add .
@@ -408,10 +438,11 @@ git push origin --delete feature/<name>
 
 # Get existing local and remote branches
 git branch --all
+```
 
-# DELETE AN UNWANTED FEATURE BRANCH
-# --------------------
+#### DELETE AN UNWANTED FEATURE BRANCH
 
+```bash
 # Switch back to dev
 git checkout dev
 
@@ -431,39 +462,47 @@ Merge via Pull Request into `dev`.
 
 ---
 
-#### Undo Last Commit
-- For undoing your last commit.    
+### Undo Last Commit
+
+For undoing your last commit.
+
+#### UNDO THE LAST COMMIT BUT KEEP YOUR CODE CHANGES (UNCOMMITTED)
 
 ```bash
-# UNDO THE LAST COMMIT BUT KEEP YOUR CODE CHANGES (UNCOMMITTED)
 # - The commit is undone
 # - All your changes stay staged and ready to recommit
-# ---------------------
 git reset --soft HEAD~1
+```
 
-# UNDO THE LAST COMMIT AND UNSTAGE THE FILES (KEEP IN WORKING DIRECTORY)
+#### UNDO THE LAST COMMIT AND UNSTAGE THE FILES (KEEP IN WORKING DIRECTORY)
+
+```bash
 # - The commit is undone
 # - Files are unstaged but still modified in your working directory.
-# ---------------------
 git reset --mixed HEAD~1
+```
 
-# COMPLETELY DISCARD THE LAST COMMIT AND ALL ITS CHANGES
+#### COMPLETELY DISCARD THE LAST COMMIT AND ALL ITS CHANGES
+
+```bash
 # - The commit and all associated changes are deleted.
 # - Your local dev matches the state before that commit.
-# ---------------------
 git reset --hard HEAD~1
+```
 
-# OPTIONAL CLEANUP
+#### OPTIONAL CLEANUP
+
+```bash
 # - If you want to discard both commits and exactly match remote origin/dev
-# ---------------------
 git reset --hard origin/dev
 ```
+
 ---
 
-#### Bugfix Branches
+### Bugfix Branches
 
-* For fixing bugs (not urgent production issues).
-* Created from `dev`, merged back into `dev`.
+For fixing bugs (not urgent production issues).
+Created from `dev`, merged back into `dev`.
 
 ```bash
 git checkout dev
@@ -477,35 +516,83 @@ Merge via Pull Request into `dev`.
 
 ---
 
-#### Release Branches
+### Release Branches
 
-* For preparing a version before tagging and merging into production.
-* Created from `dev`, merged into both `main` and `dev`.
+For preparing a version before tagging and merging into production.
+Created from `dev`, merged into both `main` and `dev`.
+
+**Release branches are automatically deployed to the staging environment for QA and testing.**
+
+#### CREATE AND DEPLOY TO STAGING
 
 ```bash
+# Make sure dev is up to date
 git checkout dev
 git pull origin dev
-git checkout -b release/<version>
-# final tweaks, version bumps
-git push origin release/<version>
+
+# Create release branch with version number
+git checkout -b release/1.0.0
+
+# Make final tweaks, version bumps
+# Update version in composer.json, package.json, etc.
+
+# Push to trigger automatic staging deployment
+git push origin release/1.0.0
 ```
 
-Merge via Pull Request into both `main` and `dev`.
-Tag the release on `main`:
+**🧪 Automatic Staging Deployment:**
+- GitHub Actions builds Docker image tagged as `:staging` and `:v1.0.0`
+- Image is deployed to staging server automatically
+- Adminer is available for database access
+- Server's `.env` is updated with `IMAGE_TAG=v1.0.0`
+
+#### TEST ON STAGING
+
+Visit your staging environment and thoroughly test all functionality.
+
+#### PROMOTE TO PRODUCTION
+
+After successful testing, merge to `main` and create a version tag:
 
 ```bash
+# Merge release to main
 git checkout main
 git pull origin main
-git tag -a v<version> -m "Release v<version>"
-git push origin v<version>
+git merge release/1.0.0
+git push origin main
+
+# Create and push version tag
+git tag -a v1.0.0 -m "Release version 1.0.0"
+git push origin v1.0.0
+
+# Merge back to dev to keep it updated
+git checkout dev
+git pull origin dev
+git merge release/1.0.0
+git push origin dev
+
+# Delete the release branch
+git branch -d release/1.0.0
+git push origin --delete release/1.0.0
 ```
+
+**🚀 Automatic Production Deployment:**
+- GitHub Actions builds Docker image tagged as `:production` and `:v1.0.0`
+- Image is deployed to production server automatically
+- Adminer is NOT included in production (security)
+- Server's `.env` is updated with `IMAGE_TAG=v1.0.0`
+
+**GitHub Release:**
+The version tag automatically creates a GitHub Release. You can add release notes there.
 
 ---
 
-#### Hotfix Branches
+### Hotfix Branches
 
-* For urgent production fixes.
-* Created from `main`, merged back into both `main` and `dev`.
+For urgent production fixes.
+Created from `main`, merged back into both `main` and `dev`.
+
+#### CREATE HOTFIX
 
 ```bash
 git checkout main
@@ -515,40 +602,178 @@ git checkout -b hotfix/<name>
 git push origin hotfix/<name>
 ```
 
-Merge via Pull Request into both `main` and `dev`.
-Tag the hotfix on `main`:
+#### DEPLOY HOTFIX
 
 ```bash
-git tag -a v<version+patch> -m "Hotfix v<version+patch>"
-git push origin v<version+patch>
+# Merge to main
+git checkout main
+git merge hotfix/<name>
+git push origin main
+
+# Create patch version tag
+git tag -a v1.0.1 -m "Hotfix: <description>"
+git push origin v1.0.1
+
+# Merge back to dev
+git checkout dev
+git merge hotfix/<name>
+git push origin dev
+
+# Delete hotfix branch
+git branch -d hotfix/<name>
+git push origin --delete hotfix/<name>
+```
+
+Merge via Pull Request into both `main` and `dev`.
+
+**Optional: Test on staging before merging**
+If needed, you can manually deploy the hotfix branch to staging for testing before merging to production.
+
+---
+
+## Version Management
+
+### Semantic Versioning
+
+We use semantic versioning: `MAJOR.MINOR.PATCH` (e.g., `v1.0.0`, `v2.3.5`)
+
+- **MAJOR** - Breaking changes
+- **MINOR** - New features (backwards compatible)
+- **PATCH** - Bug fixes
+
+### Checking Current Version
+
+**On your server:**
+```bash
+# Check configured version
+cat .env | grep IMAGE_TAG
+
+# Check running containers
+docker compose ps
+
+# List all available versions
+docker images ghcr.io/monatemedia/dealership
+
+# View image details
+docker compose config | grep "image:"
+```
+
+### Rolling Back to Previous Version
+
+If you need to rollback to a previous version:
+
+```bash
+# SSH into your server
+cd /path/to/project
+
+# Update IMAGE_TAG in .env
+echo "IMAGE_TAG=v1.0.0" >> .env  # Change to desired version
+
+# Restart containers
+docker compose down
+docker compose up -d
+
+# Or for production (without Adminer)
+docker compose up -d dealership-web dealership-queue dealership-db
+```
+
+### Running Adminer Locally
+
+For local development with Adminer:
+
+```bash
+docker compose --profile dev up -d
+```
+
+For staging with Adminer:
+
+```bash
+docker compose --profile staging up -d
+```
+
+For production (no Adminer):
+
+```bash
+docker compose up -d dealership-web dealership-queue dealership-db
 ```
 
 ---
 
-### Standard Workflow
+## Standard Workflow
 
 1. Fork or clone the project.
-2. Create your branch (`feature/*`, `bugfix/*`, `release/*`, or `hotfix/*`).
-3. Commit your changes:
 
+2. Create your branch (`feature/*`, `bugfix/*`, `release/*`, or `hotfix/*`).
+
+3. Commit your changes:
    ```bash
    git commit -m "Meaningful message"
    ```
-4. Push to remote:
 
+4. Push to remote:
    ```bash
    git push origin branch-name
    ```
+
 5. Open a Pull Request into the correct target branch.
+
+6. After merge, **deployments happen automatically** via GitHub Actions.
 
 ---
 
-### Summary of Branch Sources
+## Summary of Branch Sources
 
-* `feature/*` → from `dev`, merge into `dev`.
-* `bugfix/*` → from `dev`, merge into `dev`.
-* `release/*` → from `dev`, merge into `main` + `dev`.
-* `hotfix/*` → from `main`, merge into `main` + `dev`.
+- `feature/*` → from `dev`, merge into `dev`.
+- `bugfix/*` → from `dev`, merge into `dev`.
+- `release/*` → from `dev`, merge into `main` + `dev`. **Auto-deploys to staging.**
+- `hotfix/*` → from `main`, merge into `main` + `dev`. **Auto-deploys to production.**
+
+---
+
+## CI/CD Deployment Flow
+
+### Automatic Deployments
+
+| Trigger | Environment | Docker Tags | Adminer |
+|---------|-------------|-------------|---------|
+| Push to `release/*` | Staging | `:staging`, `:v1.0.0` | ✅ Yes |
+| Push to `main` | Production | `:production`, `:v1.0.0` | ❌ No |
+| Push tag `v1.0.0` | Production | `:production`, `:v1.0.0` | ❌ No |
+| Local dev | Development | `:dev` | ✅ Yes |
+
+### Required GitHub Secrets
+
+**For Staging (Current VPS):**
+- `PAT` - GitHub Personal Access Token
+- `SSH_PRIVATE_KEY` - SSH key for VPS
+- `SSH_HOST` - VPS IP address
+- `SSH_USER` - SSH username
+- `WORK_DIR` - Project directory path
+
+**For Production (When Ready):**
+- `PRODUCTION_SSH_KEY` - SSH key for production server
+- `PRODUCTION_HOST` - Production server IP
+- `PRODUCTION_USER` - Production SSH username
+- `PRODUCTION_WORK_DIR` - Production project directory
+
+### Workflow Location
+
+`.github/workflows/docker-publish.yml`
+
+---
+
+## Best Practices
+
+1. **Always create release branches from dev** - never from feature branches
+2. **Test thoroughly on staging** before merging to main
+3. **Use semantic versioning** for all releases
+4. **Tag releases immediately** after merging to main
+5. **Keep release notes** in GitHub Releases
+6. **Never push directly to main** - always use pull requests
+7. **Clean up branches** after merging
+8. **Monitor GitHub Actions** for deployment status
+9. **Keep `.env` files secure** - never commit them
+10. **Use Adminer only in dev/staging** - never expose in production
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
