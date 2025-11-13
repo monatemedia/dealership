@@ -8,7 +8,7 @@
         $categoryName = $displayCategory->name;
         $categorySingular = $displayCategory->singular;
     } else {
-        $categoryName = 'The Best Vehicles';
+        $categoryName = 'Vehicles';
         $categorySingular = 'vehicle';
     }
 @endphp
