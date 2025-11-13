@@ -293,7 +293,10 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Upload Container To Live Server
   - [X] Map Domain Name
   - [X] Map Email For Account Creation
-  - [ ] Set Up CI/CD
+  - [X] Set Up CI/CD
+- [ ] Set Up Typesense Search Engine
+  - [ ] Install Laravel Scout
+  - [ ] Update Models
 - [ ] Test Create & Edit Pages
 - [ ] Make current Main Categories into **Sections** 
 - [ ] Make current Subcategories into **Categories**

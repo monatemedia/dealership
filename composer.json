@@ -10,6 +10,7 @@
         "aws/aws-sdk-php": "^3.359",
         "intervention/image-laravel": "^1.5",
         "laravel/framework": "^12.0",
+        "laravel/scout": "^10.22",
         "laravel/socialite": "^5.21",
         "laravel/tinker": "^2.9",
         "spatie/image-optimizer": "^1.8"
