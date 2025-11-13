@@ -18,15 +18,13 @@ Dockerfile*
 /public/hot
 /public/storage
 
-# Development
-/storage/*.key
+# No .env files except .env.example
 .env
 .env.*
 !.env.example
-.env.backup
-.env.local
-.env.staging
-.env.production
+
+# Development
+/storage/*.key
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
