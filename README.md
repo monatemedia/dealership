@@ -354,6 +354,128 @@ This project uses **Git tags** as the source of truth for versioning. All deploy
 
 **Image tags are automatically managed** - the `IMAGE_TAG` environment variable in `.env` is updated during deployment.
 
+## Complete Release Workflow Example
+
+Here's a complete example from start to finish:
+
+### Scenario: Releasing version 1.2.0
+
+**Week 1-2: Development**
+```bash
+# Create and work on features
+git checkout dev
+git checkout -b feature/vehicle-search
+# ... work on feature ...
+git push origin feature/vehicle-search
+# Merge to dev via PR
+```
+
+**Week 3: Prepare Release**
+```bash
+# Create release branch
+git checkout dev
+git pull origin dev
+git checkout -b release/1.2.0
+
+# Update version numbers in your code
+# - composer.json
+# - package.json
+# - Any version constants
+
+git add .
+git commit -m "Bump version to 1.2.0"
+git push origin release/1.2.0
+```
+
+**🧪 Automatic Staging Deployment happens now**
+- Test thoroughly on staging environment
+- Fix any bugs found
+- Push bug fixes to `release/1.2.0` branch
+
+**Week 4: Deploy to Production**
+```bash
+# Step 1: Merge to main
+git checkout main
+git pull origin main
+git merge release/1.2.0
+git push origin main
+
+# Step 2: Create and push tag (THIS IS CRITICAL!)
+git tag -a v1.2.0 -m "Release 1.2.0: Add vehicle search and favorites"
+git push origin v1.2.0
+
+# Step 3: Merge back to dev
+git checkout dev
+git pull origin dev
+git merge release/1.2.0
+git push origin dev
+
+# Step 4: Clean up
+git branch -d release/1.2.0
+git push origin --delete release/1.2.0
+```
+
+**🚀 Production Deployment happens automatically**
+- GitHub Actions deploys to production
+- Visit GitHub Releases to add release notes
+
+**Add Release Notes on GitHub:**
+1. Go to: `https://github.com/your-username/dealership/releases/tag/v1.2.0`
+2. Click "Edit release"
+3. Add details:
+   ```markdown
+   ## What's New
+   - Added advanced vehicle search with filters
+   - Implemented user favorites feature
+   - Improved search performance by 40%
+   
+   ## Bug Fixes
+   - Fixed pagination on search results
+   - Resolved image upload timeout issues
+   
+   ## Breaking Changes
+   None
+   
+   ## Migration Notes
+   No database migrations required
+   ```
+
+**Week 4+: Monitor Production**
+- Watch for any issues
+- Prepare hotfix if critical bugs are found
+
+### If a Critical Bug is Found
+
+```bash
+# Create hotfix
+git checkout main
+git pull origin main
+git checkout -b hotfix/fix-search-crash
+
+# Fix the bug, test locally
+git add .
+git commit -m "Fix search crash on empty query"
+git push origin hotfix/fix-search-crash
+
+# Deploy hotfix
+git checkout main
+git merge hotfix/fix-search-crash
+git push origin main
+
+# Create patch version tag
+git tag -a v1.2.1 -m "Hotfix 1.2.1: Fix search crash on empty query"
+git push origin v1.2.1
+
+# Merge to dev
+git checkout dev
+git merge hotfix/fix-search-crash
+git push origin dev
+
+# Clean up
+git branch -d hotfix/fix-search-crash
+git push origin --delete hotfix/fix-search-crash
+```
+
 ---
 
 ## Working with Branches
@@ -552,38 +674,74 @@ Visit your staging environment and thoroughly test all functionality.
 
 #### PROMOTE TO PRODUCTION
 
-After successful testing, merge to `main` and create a version tag:
+After successful testing on staging, it's time to deploy to production. Follow these steps carefully:
+
+**Step 1: Merge release to main**
+```bash
+# Switch to main branch
+git checkout main
+
+# Make sure main is up to date
+git pull origin main
+
+# Merge the release branch
+git merge release/1.0.0
+
+# Push to main
+git push origin main
+```
+
+**Step 2: Create and push the version tag**
+
+This is **critical** - the tag triggers the production deployment and creates a GitHub Release.
 
 ```bash
-# Merge release to main
-git checkout main
-git pull origin main
-git merge release/1.0.0
-git push origin main
-
-# Create and push version tag
+# Still on main branch
+# Create an annotated tag with a message
 git tag -a v1.0.0 -m "Release version 1.0.0"
+
+# Push the tag to trigger production deployment
 git push origin v1.0.0
+```
 
-# Merge back to dev to keep it updated
+⚠️ **Important:** Always use the `-a` flag (annotated tag) and include a meaningful message with `-m`.
+
+**Step 3: Merge back to dev**
+
+Keep `dev` updated with the production changes:
+
+```bash
+# Switch to dev
 git checkout dev
-git pull origin dev
-git merge release/1.0.0
-git push origin dev
 
-# Delete the release branch
+# Make sure dev is up to date
+git pull origin dev
+
+# Merge the release branch
+git merge release/1.0.0
+
+# Push to dev
+git push origin dev
+```
+
+**Step 4: Clean up the release branch**
+```bash
+# Delete the local release branch
 git branch -d release/1.0.0
+
+# Delete the remote release branch
 git push origin --delete release/1.0.0
 ```
 
 **🚀 Automatic Production Deployment:**
-- GitHub Actions builds Docker image tagged as `:production` and `:v1.0.0`
+- GitHub Actions detects the `v1.0.0` tag
+- Builds Docker image tagged as `:production` and `:v1.0.0`
 - Image is deployed to production server automatically
 - Adminer is NOT included in production (security)
 - Server's `.env` is updated with `IMAGE_TAG=v1.0.0`
 
 **GitHub Release:**
-The version tag automatically creates a GitHub Release. You can add release notes there.
+The version tag automatically creates a GitHub Release at `https://github.com/your-username/dealership/releases/tag/v1.0.0`. You can add release notes there describing what's new, what's fixed, and any breaking changes.
 
 ---
 
@@ -637,9 +795,96 @@ If needed, you can manually deploy the hotfix branch to staging for testing befo
 
 We use semantic versioning: `MAJOR.MINOR.PATCH` (e.g., `v1.0.0`, `v2.3.5`)
 
-- **MAJOR** - Breaking changes
-- **MINOR** - New features (backwards compatible)
-- **PATCH** - Bug fixes
+- **MAJOR** - Breaking changes (e.g., `v1.0.0` → `v2.0.0`)
+- **MINOR** - New features (backwards compatible) (e.g., `v1.0.0` → `v1.1.0`)
+- **PATCH** - Bug fixes (e.g., `v1.0.0` → `v1.0.1`)
+
+### Git Tagging Quick Reference
+
+**Creating tags:**
+
+```bash
+# Annotated tag (REQUIRED - use this!)
+git tag -a v1.0.0 -m "Release version 1.0.0"
+
+# Push a specific tag
+git push origin v1.0.0
+
+# Push all tags at once (use with caution)
+git push origin --tags
+```
+
+**Listing tags:**
+
+```bash
+# List all tags
+git tag
+
+# List tags matching a pattern
+git tag -l "v1.*"
+
+# Show tag details
+git show v1.0.0
+```
+
+**Deleting tags (if you made a mistake):**
+
+```bash
+# Delete local tag
+git tag -d v1.0.0
+
+# Delete remote tag
+git push origin --delete v1.0.0
+```
+
+**Common tagging mistakes to avoid:**
+
+❌ **DON'T** create lightweight tags: `git tag v1.0.0` (missing `-a`)
+✅ **DO** create annotated tags: `git tag -a v1.0.0 -m "message"`
+
+❌ **DON'T** forget to push tags after creating them
+✅ **DO** remember: `git push origin v1.0.0`
+
+❌ **DON'T** use inconsistent version formats (`1.0.0` vs `v1.0.0`)
+✅ **DO** always prefix with `v`: `v1.0.0`, `v2.1.5`
+
+### When to Increment Version Numbers
+
+**Increment MAJOR (v1.0.0 → v2.0.0):**
+- Breaking API changes
+- Major architectural changes
+- Database migrations that require manual intervention
+- Removing deprecated features
+
+**Increment MINOR (v1.0.0 → v1.1.0):**
+- New features added
+- New API endpoints
+- New functionality that doesn't break existing code
+- Regular releases from `release/*` branches
+
+**Increment PATCH (v1.0.0 → v1.0.1):**
+- Bug fixes
+- Security patches
+- Performance improvements
+- Hotfixes from `hotfix/*` branches
+
+### Version Numbering Examples
+
+Starting from `v1.0.0`:
+
+```bash
+# First feature release
+git tag -a v1.1.0 -m "Release 1.1.0: Add vehicle search feature"
+
+# Bug fix
+git tag -a v1.1.1 -m "Hotfix 1.1.1: Fix search pagination bug"
+
+# Another feature release
+git tag -a v1.2.0 -m "Release 1.2.0: Add user favorites"
+
+# Major breaking change
+git tag -a v2.0.0 -m "Release 2.0.0: New API structure (breaking changes)"
+```
 
 ### Checking Current Version
 
