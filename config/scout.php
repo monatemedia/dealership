@@ -158,6 +158,9 @@ return [
     */
 
     'typesense' => [
+        // This value dictates how many documents the searchable() call
+        // will attempt to bulk-index in a single API request to Typesense.
+        'chunk_size' => 2000,
             'client-settings' => [
                 'api_key' => env('TYPESENSE_API_KEY', 'xyz'),
                 'nodes' => [
