@@ -62,7 +62,7 @@ class StartTypesense extends Command
                 '--name typesense-local ' .
                 '-p 8108:8108 ' .
                 '-v typesense-data:/data ' .
-                'typesense/typesense:27.1 ' .
+                'typesense/typesense:29.0 ' .
                 '--data-dir /data ' .
                 '--api-key=' . escapeshellarg($apiKey) . ' ' .
                 '--enable-cors';
