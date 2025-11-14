@@ -1,4 +1,4 @@
-<?php
+<?php // app/Console/Commands/StartTypesense.php
 
 namespace App\Console\Commands;
 
@@ -6,23 +6,16 @@ use Illuminate\Console\Command;
 
 class StartTypesense extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'typesense:start';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
+    protected $signature = 'typesense:start {--skip-import : Skip data import after starting} {--fresh : Flush existing data before importing}';
     protected $description = 'Start Typesense Docker container for local development';
 
-    /**
-     * Execute the console command.
-     */
+    protected $modelsToImport = [
+        'App\Models\Manufacturer',
+        'App\Models\Model',
+        'App\Models\Province',
+        'App\Models\City',
+    ];
+
     public function handle()
     {
         $this->info('Starting Typesense...');
@@ -54,6 +47,7 @@ class StartTypesense extends Command
                 $this->info('✓ Typesense is running on http://localhost:8108');
             } else {
                 $this->error('Failed to start Typesense container');
+                return 1;
             }
         } else {
             $this->info('Creating new Typesense container...');
@@ -62,7 +56,7 @@ class StartTypesense extends Command
                 '--name typesense-local ' .
                 '-p 8108:8108 ' .
                 '-v typesense-data:/data ' .
-                'typesense/typesense:29.0 ' .
+                'typesense/typesense:27.1 ' .
                 '--data-dir /data ' .
                 '--api-key=' . escapeshellarg($apiKey) . ' ' .
                 '--enable-cors';
@@ -73,10 +67,55 @@ class StartTypesense extends Command
                 $this->info('✓ Typesense container created and running on http://localhost:8108');
             } else {
                 $this->error('Failed to create Typesense container');
+                return 1;
             }
         }
 
+        // Import data unless --skip-import flag is used
+        if (!$this->option('skip-import')) {
+            $this->newLine();
+
+            // Flush if --fresh flag is used
+            if ($this->option('fresh')) {
+                $this->info('Flushing existing data from Typesense...');
+                $this->flushData();
+                $this->newLine();
+            }
+
+            $this->info('Importing data to Typesense...');
+            $this->importData();
+        }
+
         return 0;
+    }
+
+    protected function flushData(): void
+    {
+        foreach ($this->modelsToImport as $model) {
+            $modelName = class_basename($model);
+            $this->info("Flushing {$modelName}...");
+
+            $exitCode = $this->call('scout:flush', ['model' => $model]);
+
+            if ($exitCode === 0) {
+                $this->info("✓ {$modelName} flushed successfully");
+            } else {
+                $this->warn("⚠ Failed to flush {$modelName}");
+            }
+        }
+    }
+
+    protected function importData(): void
+    {
+        // Use our custom import command instead
+        $exitCode = $this->call('typesense:import');
+
+        if ($exitCode === 0) {
+            $this->newLine();
+            $this->info('✓ All data imported successfully!');
+        } else {
+            $this->warn('⚠ Import failed');
+        }
     }
 
     protected function isDockerRunning(): bool

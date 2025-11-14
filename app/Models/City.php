@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Scout\Searchable;
 
 class City extends Model
 {
     /** @use HasFactory<\Database\Factories\CityFactory> */
-    use HasFactory;
+    use HasFactory, Searchable;
     public $timestamps = false;
 
     protected $fillable = [
@@ -20,10 +21,33 @@ class City extends Model
         'longitude',
     ];
 
+    // ADD THESE LINES:
+    protected $keyType = 'int';
+    public $incrementing = true;
+
     protected $casts = [
         'latitude' => 'decimal:7',
         'longitude' => 'decimal:7',
     ];
+
+    public function toSearchableArray()
+    {
+        return [
+            'name' => $this->name,
+            'province_id' => $this->province_id,
+        ];
+    }
+
+    public function getScoutKey()
+    {
+        return (string) $this->id;
+    }
+
+    // ADD THIS METHOD:
+    public function getScoutKeyName()
+    {
+        return 'id';
+    }
 
     // Relationships
     public function province(): BelongsTo

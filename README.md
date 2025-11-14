@@ -170,7 +170,27 @@ This command will:
 - Check if Docker Desktop is running (waits if not)
 - Create a new Typesense container if it doesn't exist
 - Start the container if it's stopped
+- Imports data by default
 - Runs on `http://localhost:8108`
+
+**Usage:**
+- `php artisan typesense:start` - Normal start with import
+- `php artisan typesense:start --fresh` - Flush and re-import everything
+- `php artisan typesense:start --skip-import` - Just start, no import
+- `php artisan typesense:start --fresh --skip-import` - Won't work (skip-import takes precedence)
+
+**To add more models in the future**, just update the $modelsToImport array:
+
+```php
+protected $modelsToImport = [
+    'App\Models\Manufacturer',
+    'App\Models\Model',
+    'App\Models\Province',
+    'App\Models\City',
+    'App\Models\Vehicle',  // Add new models here
+    'App\Models\Dealer',   // Easy to expand
+];
+```
 
 ##### Stop Typesense
 

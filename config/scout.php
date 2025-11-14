@@ -158,52 +158,88 @@ return [
     */
 
     'typesense' => [
-        'client-settings' => [
-            'api_key' => env('TYPESENSE_API_KEY', 'xyz'),
-            'nodes' => [
-                [
+            'client-settings' => [
+                'api_key' => env('TYPESENSE_API_KEY', 'xyz'),
+                'nodes' => [
+                    [
+                        'host' => env('TYPESENSE_HOST', 'localhost'),
+                        'port' => env('TYPESENSE_PORT', '8108'),
+                        'path' => env('TYPESENSE_PATH', ''),
+                        'protocol' => env('TYPESENSE_PROTOCOL', 'http'),
+                    ],
+                ],
+                'nearest_node' => [
                     'host' => env('TYPESENSE_HOST', 'localhost'),
                     'port' => env('TYPESENSE_PORT', '8108'),
                     'path' => env('TYPESENSE_PATH', ''),
                     'protocol' => env('TYPESENSE_PROTOCOL', 'http'),
                 ],
+                'connection_timeout_seconds' => env('TYPESENSE_CONNECTION_TIMEOUT_SECONDS', 2),
+                'healthcheck_interval_seconds' => env('TYPESENSE_HEALTHCHECK_INTERVAL_SECONDS', 30),
+                'num_retries' => env('TYPESENSE_NUM_RETRIES', 3),
+                'retry_interval_seconds' => env('TYPESENSE_RETRY_INTERVAL_SECONDS', 1),
             ],
-            'nearest_node' => [
-                'host' => env('TYPESENSE_HOST', 'localhost'),
-                'port' => env('TYPESENSE_PORT', '8108'),
-                'path' => env('TYPESENSE_PATH', ''),
-                'protocol' => env('TYPESENSE_PROTOCOL', 'http'),
+            'model-settings' => [
+                \App\Models\Manufacturer::class => [
+                    'collection-schema' => [
+                        'fields' => [
+                            [
+                                'name' => 'name',
+                                'type' => 'string',
+                            ],
+                        ],
+                    ],
+                    'search-parameters' => [
+                        'query_by' => 'name'
+                    ],
+                ],
+                \App\Models\Model::class => [
+                    'collection-schema' => [
+                        'fields' => [
+                            [
+                                'name' => 'name',
+                                'type' => 'string',
+                            ],
+                            [
+                                'name' => 'manufacturer_id',
+                                'type' => 'int32',
+                            ],
+                        ],
+                    ],
+                    'search-parameters' => [
+                        'query_by' => 'name'
+                    ],
+                ],
+                \App\Models\Province::class => [
+                    'collection-schema' => [
+                        'fields' => [
+                            [
+                                'name' => 'name',
+                                'type' => 'string',
+                            ],
+                        ],
+                    ],
+                    'search-parameters' => [
+                        'query_by' => 'name'
+                    ],
+                ],
+                \App\Models\City::class => [
+                    'collection-schema' => [
+                        'fields' => [
+                            [
+                                'name' => 'name',
+                                'type' => 'string',
+                            ],
+                            [
+                                'name' => 'province_id',
+                                'type' => 'int32',
+                            ],
+                        ],
+                    ],
+                    'search-parameters' => [
+                        'query_by' => 'name'
+                    ],
+                ],
             ],
-            'connection_timeout_seconds' => env('TYPESENSE_CONNECTION_TIMEOUT_SECONDS', 2),
-            'healthcheck_interval_seconds' => env('TYPESENSE_HEALTHCHECK_INTERVAL_SECONDS', 30),
-            'num_retries' => env('TYPESENSE_NUM_RETRIES', 3),
-            'retry_interval_seconds' => env('TYPESENSE_RETRY_INTERVAL_SECONDS', 1),
         ],
-        // 'max_total_results' => env('TYPESENSE_MAX_TOTAL_RESULTS', 1000),
-        'model-settings' => [
-            // User::class => [
-            //     'collection-schema' => [
-            //         'fields' => [
-            //             [
-            //                 'name' => 'id',
-            //                 'type' => 'string',
-            //             ],
-            //             [
-            //                 'name' => 'name',
-            //                 'type' => 'string',
-            //             ],
-            //             [
-            //                 'name' => 'created_at',
-            //                 'type' => 'int64',
-            //             ],
-            //         ],
-            //         'default_sorting_field' => 'created_at',
-            //     ],
-            //     'search-parameters' => [
-            //         'query_by' => 'name'
-            //     ],
-            // ],
-        ],
-    ],
-
-];
+    ];

@@ -1,51 +1,50 @@
-<?php // app/Http/Controllers/ModelController.php
+<?php // app/Http/Controllers/Api/ModelController.php
 
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Model;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class ModelController extends Controller
 {
-    public function search(Request $request)
+    public function search(Request $request): JsonResponse
     {
-        try {
-            $query = $request->input('q', '');
-            $manufacturerId = $request->input('manufacturer_id');
+        $query = $request->input('q', '');
+        $manufacturerId = $request->input('manufacturer_id');
 
-            if (strlen($query) < 2) {
-                return response()->json([]);
-            }
-
-            $models = Model::query()
-                ->where('name', 'LIKE', "%{$query}%")
-                ->when($manufacturerId, function ($q) use ($manufacturerId) {
-                    $q->where('manufacturer_id', $manufacturerId);
-                })
-                ->orderBy('name')
-                ->limit(50)
-                ->get(['id', 'name', 'manufacturer_id']);
-
-            return response()->json($models);
-        } catch (\Exception $e) {
-            Log::error('Model search error: ' . $e->getMessage());
-            return response()->json(['error' => $e->getMessage()], 500);
+        if (strlen($query) < 2) {
+            return response()->json([]);
         }
-    }
 
-    public function show($id)
-    {
-        try {
-            $model = Model::findOrFail($id);
+        $searchQuery = Model::search($query);
 
-            return response()->json([
+        // Filter by manufacturer if provided
+        if ($manufacturerId) {
+            $searchQuery->where('manufacturer_id', $manufacturerId);
+        }
+
+        $models = $searchQuery
+            ->take(20)
+            ->get()
+            ->map(fn($model) => [
                 'id' => $model->id,
                 'name' => $model->name,
+                'manufacturer_id' => $model->manufacturer_id,
             ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Model not found'], 404);
-        }
+
+        return response()->json($models);
+    }
+
+    public function show(int $id): JsonResponse
+    {
+        $model = Model::findOrFail($id);
+
+        return response()->json([
+            'id' => $model->id,
+            'name' => $model->name,
+            'manufacturer_id' => $model->manufacturer_id,
+        ]);
     }
 }
