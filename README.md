@@ -356,8 +356,10 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Map Email For Account Creation
   - [X] Set Up CI/CD
 - [ ] Set Up Typesense Search Engine
-  - [ ] Install Laravel Scout
+  - [X] Install Laravel Scout
   - [ ] Update Models
+- [ ] Allow Unknown `Manufacturers` and `Models` to be created
+- [ ] Bugfix: App CSS to `carType` and `fueltype` components
 - [ ] Test Create & Edit Pages
 - [ ] Make current Main Categories into **Sections** 
 - [ ] Make current Subcategories into **Categories**

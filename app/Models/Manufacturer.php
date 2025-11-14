@@ -20,6 +20,7 @@ class Manufacturer extends Model
     public function toSearchableArray()
     {
         return [
+            'id' => (string) $this->id,
             'name' => $this->name,
         ];
     }
@@ -34,13 +35,6 @@ class Manufacturer extends Model
     {
         return 'id';
     }
-
-    // public function scoutMetadata()
-    // {
-    //     return [
-    //         'id' => $this->getScoutKey(),
-    //     ];
-    // }
 
     public function vehicles(): HasMany
     {

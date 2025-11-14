@@ -33,6 +33,7 @@ class City extends Model
     public function toSearchableArray()
     {
         return [
+            'id' => (string) $this->id,
             'name' => $this->name,
             'province_id' => $this->province_id,
         ];
@@ -43,7 +44,6 @@ class City extends Model
         return (string) $this->id;
     }
 
-    // ADD THIS METHOD:
     public function getScoutKeyName()
     {
         return 'id';

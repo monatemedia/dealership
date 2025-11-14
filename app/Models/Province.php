@@ -14,12 +14,14 @@ class Province extends Model
     /** @use HasFactory<\Database\Factories\ProvinceFactory> */
     use HasFactory, Searchable;
     public $timestamps = false;
-
     protected $fillable = ['name'];
+    protected $keyType = 'int';
+    public $incrementing = true;
 
     public function toSearchableArray()
     {
         return [
+            'id' => (string) $this->id,
             'name' => $this->name,
         ];
     }
@@ -27,6 +29,11 @@ class Province extends Model
     public function getScoutKey()
     {
         return (string) $this->id;
+    }
+
+    public function getScoutKeyName()
+    {
+        return 'id';
     }
 
     public function cities(): HasMany

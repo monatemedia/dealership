@@ -23,6 +23,7 @@ class Model extends EloquentModel
     public function toSearchableArray()
     {
         return [
+            'id' => (string) $this->id,
             'name' => $this->name,
             'manufacturer_id' => $this->manufacturer_id,
         ];

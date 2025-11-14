@@ -34,18 +34,17 @@ class ImportToTypesense extends Command
         $modelName = class_basename($modelClass);
         $this->info("Importing {$modelName}...");
 
-        $model = new $modelClass;
         $count = 0;
 
-        // Import in chunks, but index each record individually
-        $model::chunk(100, function ($records) use (&$count, $modelName) {
-            foreach ($records as $record) {
-                $record->searchable();
-                $count++;
+        // Use the standard Scout import with proper collection handling
+        $modelClass::chunk(500, function ($records) use (&$count, $modelName) {
+            // Make sure we're passing a Collection, not an array
+            $records->searchable();
 
-                if ($count % 500 === 0) {
-                    $this->info("Imported {$count} {$modelName} records...");
-                }
+            $count += $records->count();
+
+            if ($count % 500 === 0) {
+                $this->info("Imported {$count} {$modelName} records...");
             }
         });
 

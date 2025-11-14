@@ -184,6 +184,10 @@ return [
                     'collection-schema' => [
                         'fields' => [
                             [
+                                'name' => 'id',
+                                'type' => 'string',
+                            ],
+                            [
                                 'name' => 'name',
                                 'type' => 'string',
                             ],
@@ -196,6 +200,10 @@ return [
                 \App\Models\Model::class => [
                     'collection-schema' => [
                         'fields' => [
+                            [
+                                'name' => 'id',
+                                'type' => 'string',
+                            ],
                             [
                                 'name' => 'name',
                                 'type' => 'string',
@@ -214,6 +222,10 @@ return [
                     'collection-schema' => [
                         'fields' => [
                             [
+                                'name' => 'id',
+                                'type' => 'string',
+                            ],
+                            [
                                 'name' => 'name',
                                 'type' => 'string',
                             ],
@@ -226,6 +238,10 @@ return [
                 \App\Models\City::class => [
                     'collection-schema' => [
                         'fields' => [
+                            [
+                                'name' => 'id',
+                                'type' => 'string',
+                            ],
                             [
                                 'name' => 'name',
                                 'type' => 'string',
