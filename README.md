@@ -152,6 +152,47 @@ npm run dev
 php artisan queue:work
 ```
 
+- In a fourth terminal run
+```sh
+# Start the Typesense server
+php artisan typesense:start
+```
+
+#### Typesense Artisan Commands
+
+##### Start Typesense
+
+```bash
+php artisan typesense:start
+```
+
+This command will:
+- Check if Docker Desktop is running (waits if not)
+- Create a new Typesense container if it doesn't exist
+- Start the container if it's stopped
+- Runs on `http://localhost:8108`
+
+##### Stop Typesense
+
+```bash
+php artisan typesense:stop
+```
+
+Stops the Typesense container without removing it.
+
+##### Destroy Typesense
+
+```bash
+# With confirmation prompt
+php artisan typesense:destroy
+
+# Skip confirmation
+php artisan typesense:destroy --force
+```
+
+Removes the Typesense container and optionally the data volume.
+
+
 ### Prerequisites
 
 #### Prerequisites At OS Level
