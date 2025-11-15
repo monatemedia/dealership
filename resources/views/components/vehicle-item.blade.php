@@ -1,3 +1,4 @@
+{{-- resources/views/components --}}
 @props(['vehicle', 'isInWatchlist' => false])
 
 <div class="vehicle-item card">

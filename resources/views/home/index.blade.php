@@ -1,4 +1,4 @@
-@php
+@php // resources/views/home/index.blade.php
 $taxonomyService = app('App\Services\TaxonomyRouteService');
 $config = $taxonomyService->getConfig('main-category');
 @endphp
