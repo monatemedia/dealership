@@ -5,12 +5,36 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Scout\Searchable;
 
 class Manufacturer extends Model
 {
     /** @use HasFactory<\Database\Factories\ManufacturerFactory> */
-    use HasFactory;
+    use HasFactory, Searchable;
     public $timestamps = false;
+
+    // ADD THESE LINES:
+    protected $keyType = 'int';
+    public $incrementing = true;
+
+    public function toSearchableArray()
+    {
+        return [
+            'id' => (string) $this->id,
+            'name' => $this->name,
+        ];
+    }
+
+    public function getScoutKey()
+    {
+        return (string) $this->id;
+    }
+
+    // ADD THIS METHOD:
+    public function getScoutKeyName()
+    {
+        return 'id';
+    }
 
     public function vehicles(): HasMany
     {

@@ -55,13 +55,23 @@ services:
       - "${DOCKER_LARAVEL_PORT}:80"
     networks:
       - proxy-network
+    # NEW: Add a health check to signal readiness after entrypoint/migrations finish
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost"] # Check that the web server is up and responsive
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   # NEW: Queue Worker Service for Image Processing
   dealership-queue:
-    image: ghcr.io/monatemedia/dealership:latest
+
+    # ADD the 'build:' key to tell Docker Compose where to find the Dockerfile
+    build: .
+    # Optional: You can still tag the locally built image with a name if you want to push it later
+    image: dealership-queue:local
     container_name: ${DOCKER_CONTAINER_NAME}-queue
     depends_on:
-      dealership-db:
+      dealership-web:
         condition: service_healthy
     restart: always
     entrypoint: /bin/bash -c "echo 'Waiting for database connection...'; until (exec 6<>/dev/tcp/dealership-db/5432) 2>/dev/null; do echo 'Database not ready, sleeping for 1 second...'; sleep 1; done; echo 'Database is ready. Starting queue worker...'; php artisan queue:work --verbose --tries=3 --timeout=300 --sleep=3 --max-jobs=1000"
@@ -92,6 +102,25 @@ services:
     mem_limit: 512M
     networks:
       - proxy-network
+
+  dealership-typesense:
+    image: typesense/typesense:29.0
+    container_name: ${DOCKER_CONTAINER_NAME}-typesense
+    restart: always
+    command: '--data-dir /data --api-key=${TYPESENSE_API_KEY} --enable-cors'
+    environment:
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY}
+    volumes:
+      - dealership-typesense-data:/data
+    ports:
+      - "${DOCKER_TYPESENSE_PORT:-8108}:8108"
+    networks:
+      - proxy-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8108/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   dealership-db:
     image: postgres:18
@@ -134,6 +163,7 @@ services:
 
 volumes:
   dealership-db-data:
+  dealership-typesense-data:
 
 networks:
   proxy-network:

@@ -1,47 +1,40 @@
-<?php // app/Http/Controllers/ManufacturerController.php
+<?php // app/Http/Controllers/Api/ManufacturerController.php
 
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Manufacturer;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class ManufacturerController extends Controller
 {
-    public function search(Request $request)
+    public function search(Request $request): JsonResponse
     {
-        try {
-            $query = $request->input('q', '');
+        $query = $request->input('q', '');
 
-            if (strlen($query) < 2) {
-                return response()->json([]);
-            }
-
-            $manufacturers = Manufacturer::query()
-                ->where('name', 'LIKE', "%{$query}%")
-                ->orderBy('name')
-                ->limit(50)
-                ->get(['id', 'name']);
-
-            return response()->json($manufacturers);
-        } catch (\Exception $e) {
-            Log::error('Manufacturer search error: ' . $e->getMessage());
-            return response()->json(['error' => $e->getMessage()], 500);
+        if (strlen($query) < 2) {
+            return response()->json([]);
         }
-    }
 
-    public function show($id)
-    {
-        try {
-            $manufacturer = Manufacturer::findOrFail($id);
-
-            return response()->json([
+        $manufacturers = Manufacturer::search($query)
+            ->take(20)
+            ->get()
+            ->map(fn($manufacturer) => [
                 'id' => $manufacturer->id,
                 'name' => $manufacturer->name,
             ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Manufacturer not found'], 404);
-        }
+
+        return response()->json($manufacturers);
+    }
+
+    public function show(int $id): JsonResponse
+    {
+        $manufacturer = Manufacturer::findOrFail($id);
+
+        return response()->json([
+            'id' => $manufacturer->id,
+            'name' => $manufacturer->name,
+        ]);
     }
 }

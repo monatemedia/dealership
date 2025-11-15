@@ -152,6 +152,67 @@ npm run dev
 php artisan queue:work
 ```
 
+- In a fourth terminal run
+```sh
+# Start the Typesense server
+php artisan typesense:start
+```
+
+#### Typesense Artisan Commands
+
+##### Start Typesense
+
+```bash
+php artisan typesense:start
+```
+
+This command will:
+- Check if Docker Desktop is running (waits if not)
+- Create a new Typesense container if it doesn't exist
+- Start the container if it's stopped
+- Imports data by default
+- Runs on `http://localhost:8108`
+
+**Usage:**
+- `php artisan typesense:start` - Normal start with import
+- `php artisan typesense:start --fresh` - Flush and re-import everything
+- `php artisan typesense:start --skip-import` - Just start, no import
+- `php artisan typesense:start --fresh --skip-import` - Won't work (skip-import takes precedence)
+
+**To add more models in the future**, just update the $modelsToImport array:
+
+```php
+protected $modelsToImport = [
+    'App\Models\Manufacturer',
+    'App\Models\Model',
+    'App\Models\Province',
+    'App\Models\City',
+    'App\Models\Vehicle',  // Add new models here
+    'App\Models\Dealer',   // Easy to expand
+];
+```
+
+##### Stop Typesense
+
+```bash
+php artisan typesense:stop
+```
+
+Stops the Typesense container without removing it.
+
+##### Destroy Typesense
+
+```bash
+# With confirmation prompt
+php artisan typesense:destroy
+
+# Skip confirmation
+php artisan typesense:destroy --force
+```
+
+Removes the Typesense container and optionally the data volume.
+
+
 ### Prerequisites
 
 #### Prerequisites At OS Level
@@ -293,7 +354,12 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Upload Container To Live Server
   - [X] Map Domain Name
   - [X] Map Email For Account Creation
-  - [ ] Set Up CI/CD
+  - [X] Set Up CI/CD
+- [ ] Set Up Typesense Search Engine
+  - [X] Install Laravel Scout
+  - [ ] Update Models
+- [ ] Allow Unknown `Manufacturers` and `Models` to be created
+- [ ] Bugfix: App CSS to `carType` and `fueltype` components
 - [ ] Test Create & Edit Pages
 - [ ] Make current Main Categories into **Sections** 
 - [ ] Make current Subcategories into **Categories**
