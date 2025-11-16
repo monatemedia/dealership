@@ -174,23 +174,23 @@
         class VehicleInstantSearch {
             constructor() {
                 console.log('Constructor called'); // Debug
-
                 // Check if all required elements exist
                 this.searchInput = document.getElementById('instant-search-input');
                 this.filterForm = document.getElementById('filter-form');
                 this.resultsContainer = document.getElementById('search-results');
                 this.loadingIndicator = document.getElementById('loading-indicator');
+                this.loadMoreIndicator = document.getElementById('load-more-indicator'); // <-- ADD THIS LINE
                 this.noResults = document.getElementById('no-results');
                 this.totalResultsEl = document.getElementById('total-results'); // Changed from totalResults
                 this.searchResultsCount = document.getElementById('search-results-count');
                 this.sortDropdown = document.getElementById('sort-dropdown');
-
                 // Debug: Check if elements exist
                 console.log('Elements found:', {
                     searchInput: !!this.searchInput,
                     filterForm: !!this.filterForm,
                     resultsContainer: !!this.resultsContainer,
                     loadingIndicator: !!this.loadingIndicator,
+                    loadMoreIndicator: !!this.loadMoreIndicator, // <-- ADD THIS LINE
                     noResults: !!this.noResults,
                     totalResultsEl: !!this.totalResultsEl,
                     searchResultsCount: !!this.searchResultsCount,
@@ -345,7 +345,6 @@
 
             renderResults(data, clearResults = true) {
                 console.log('Rendering results:', data.hits?.length || 0, 'vehicles');
-
                 if (!data.hits || data.hits.length === 0) {
                     if (clearResults) {
                         this.resultsContainer.innerHTML = '';
@@ -356,25 +355,46 @@
                 }
 
                 this.noResults.classList.add('hidden');
-
                 console.log('First hit sample:', data.hits[0]?.substring(0, 100));
 
                 if (clearResults) {
                     this.resultsContainer.innerHTML = data.hits.join('');
                     this.setupImageLoading();
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else {
-                    // Save scroll position
-                    const scrollY = window.scrollY;
 
-                    // Append new content
-                    this.resultsContainer.innerHTML += data.hits.join('');
+                } else {
+                    // --- OLD (This causes the flicker) ---
+                    // const scrollY = window.scrollY;
+                    // this.resultsContainer.innerHTML += data.hits.join('');
+                    // this.setupImageLoading();
+                    // requestAnimationFrame(() => {
+                    //     window.scrollTo({ top: scrollY, behavior: 'auto' });
+                    // });
+
+                    // +++ NEW (Smoother, faster, and Alpine-friendly) +++
+
+                    // Create a 'document fragment' to hold the new elements.
+                    // This is much more performant than innerHTML +=
+                    const fragment = document.createDocumentFragment();
+
+                    // Create a temporary div to parse the HTML strings
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = data.hits.join('');
+
+                    // Move all the new child nodes into the fragment
+                    while (tempDiv.firstChild) {
+                        fragment.appendChild(tempDiv.firstChild);
+                    }
+
+                    // Append the fragment (all new items) to the container
+                    // in a single, efficient operation.
+                    this.resultsContainer.appendChild(fragment);
+
+                    // Now, setup image loading for the new items
                     this.setupImageLoading();
 
-                    // Maintain scroll position
-                    requestAnimationFrame(() => {
-                        window.scrollTo({ top: scrollY, behavior: 'auto' });
-                    });
+                    // No more window.scrollTo! The browser's native
+                    // scroll anchoring will prevent the "flicker".
                 }
             }
 
@@ -427,13 +447,20 @@
                 }
             }
 
-            showLoading() {
-                this.loadingIndicator.classList.remove('hidden');
-                this.resultsContainer.style.opacity = '0.5';
+            showLoading(clearResults = true) {
+                if (clearResults) {
+                    // This is a fresh search (or filter change)
+                    this.loadingIndicator.classList.remove('hidden');
+                    this.resultsContainer.style.opacity = '0.5';
+                } else {
+                    // This is an infinite scroll
+                    this.loadMoreIndicator?.classList.remove('hidden'); // Use ?. just in case
+                }
             }
 
             hideLoading() {
                 this.loadingIndicator.classList.add('hidden');
+                this.loadMoreIndicator?.classList.add('hidden');
                 this.resultsContainer.style.opacity = '1';
             }
 
