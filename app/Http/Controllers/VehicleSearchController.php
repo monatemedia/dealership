@@ -82,6 +82,7 @@ class VehicleSearchController extends Controller
                 'primaryImage',
                 'mainCategory',
                 'subcategory',
+                'favouredUsers'
             ])
             ->whereIn('id', $vehicleIds)
             ->get()
@@ -93,10 +94,19 @@ class VehicleSearchController extends Controller
                 ->filter()
                 ->values();
 
+            // Render HTML for each vehicle using the Blade component
+            $vehiclesHtml = $hydratedResults->map(function($vehicle) use ($request) {
+                $isInWatchlist = $vehicle->favouredUsers->contains($request->user());
+                return view('components.vehicle-item', [
+                    'vehicle' => $vehicle,
+                    'isInWatchlist' => $isInWatchlist
+                ])->render();
+            })->toArray();
+
             return response()->json([
-                'hits' => $hydratedResults,
+                'hits' => $vehiclesHtml, // Return rendered HTML instead of data
                 'nbHits' => $results->total(),
-                'page' => $results->currentPage() - 1, // InstantSearch uses 0-based pages
+                'page' => $results->currentPage() - 1,
                 'nbPages' => $results->lastPage(),
                 'hitsPerPage' => $perPage,
                 'query' => $query,

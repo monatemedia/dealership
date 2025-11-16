@@ -148,11 +148,16 @@
         <!--/ Found Vehicles -->
     </main>
 
-    @push('scripts')
+    <!-- Move scripts to bottom of page, before closing body tag -->
     <script>
+        console.log('Script is loading...'); // Debug to confirm script runs
+
         // Instant Search Implementation
         class VehicleInstantSearch {
             constructor() {
+                console.log('Constructor called'); // Debug
+
+                // Check if all required elements exist
                 this.searchInput = document.getElementById('instant-search-input');
                 this.filterForm = document.getElementById('filter-form');
                 this.resultsContainer = document.getElementById('search-results');
@@ -162,15 +167,36 @@
                 this.searchResultsCount = document.getElementById('search-results-count');
                 this.sortDropdown = document.getElementById('sort-dropdown');
 
+                // Debug: Check if elements exist
+                console.log('Elements found:', {
+                    searchInput: !!this.searchInput,
+                    filterForm: !!this.filterForm,
+                    resultsContainer: !!this.resultsContainer,
+                    loadingIndicator: !!this.loadingIndicator,
+                    noResults: !!this.noResults,
+                    totalResults: !!this.totalResults,
+                    searchResultsCount: !!this.searchResultsCount,
+                    sortDropdown: !!this.sortDropdown
+                });
+
+                // If critical elements don't exist, stop
+                if (!this.searchInput || !this.resultsContainer) {
+                    console.error('Critical elements missing!');
+                    return;
+                }
+
                 this.searchTimeout = null;
                 this.currentPage = 1;
                 this.currentQuery = '';
                 this.currentFilters = {};
 
+                console.log('VehicleInstantSearch initialized');
                 this.init();
             }
 
             init() {
+                console.log('Initializing event listeners...');
+
                 // Search input with debounce
                 this.searchInput.addEventListener('input', (e) => {
                     clearTimeout(this.searchTimeout);
@@ -182,27 +208,37 @@
                 });
 
                 // Filter form submission
-                document.getElementById('apply-filters').addEventListener('click', () => {
-                    this.currentPage = 1;
-                    this.updateFilters();
-                    this.performSearch();
-                });
+                const applyBtn = document.getElementById('apply-filters');
+                if (applyBtn) {
+                    applyBtn.addEventListener('click', () => {
+                        this.currentPage = 1;
+                        this.updateFilters();
+                        this.performSearch();
+                    });
+                }
 
                 // Reset filters
-                document.getElementById('reset-filters').addEventListener('click', () => {
-                    this.filterForm.reset();
-                    this.currentFilters = {};
-                    this.currentPage = 1;
-                    this.performSearch();
-                });
+                const resetBtn = document.getElementById('reset-filters');
+                if (resetBtn) {
+                    resetBtn.addEventListener('click', () => {
+                        this.filterForm.reset();
+                        this.currentFilters = {};
+                        this.currentPage = 1;
+                        this.performSearch();
+                    });
+                }
 
                 // Sort dropdown
-                this.sortDropdown.addEventListener('change', () => {
-                    this.currentPage = 1;
-                    this.performSearch();
-                });
+                if (this.sortDropdown) {
+                    this.sortDropdown.addEventListener('change', () => {
+                        this.currentPage = 1;
+                        this.performSearch();
+                    });
+                }
 
-                // Initial load
+                console.log('Event listeners attached, performing initial search...');
+
+                // Initial load - THIS IS THE KEY LINE
                 this.performSearch();
             }
 
@@ -227,9 +263,14 @@
                     ...this.currentFilters
                 });
 
+                console.log('Searching with params:', params.toString()); // Debug
+
                 try {
                     const response = await fetch(`/api/vehicles/search?${params.toString()}`);
+                    console.log('Response status:', response.status); // Debug
+
                     const data = await response.json();
+                    console.log('Response data:', data); // Debug
 
                     this.renderResults(data);
                     this.updateStats(data);
@@ -243,51 +284,20 @@
             }
 
             renderResults(data) {
+                console.log('Rendering results:', data.hits?.length || 0, 'vehicles'); // Debug
+
                 if (!data.hits || data.hits.length === 0) {
                     this.resultsContainer.innerHTML = '';
                     this.noResults.classList.remove('hidden');
+                    console.log('No results to display'); // Debug
                     return;
                 }
 
                 this.noResults.classList.add('hidden');
 
-                this.resultsContainer.innerHTML = data.hits.map(vehicle =>
-                    this.renderVehicleCard(vehicle)
-                ).join('');
-            }
-
-            renderVehicleCard(vehicle) {
-                const imageUrl = vehicle.primary_image?.url || '/images/placeholder-vehicle.jpg';
-                const price = new Intl.NumberFormat('en-ZA', {
-                    style: 'currency',
-                    currency: 'ZAR',
-                    minimumFractionDigits: 0
-                }).format(vehicle.price);
-                const mileage = new Intl.NumberFormat('en-ZA').format(vehicle.mileage);
-                const city = vehicle.city?.name || 'Unknown';
-                const province = vehicle.city?.province?.name || '';
-
-                return `
-                    <div class="vehicle-item">
-                        <a href="/vehicle/${vehicle.id}" class="vehicle-item-link">
-                            <div class="vehicle-item-image">
-                                <img src="${imageUrl}" alt="${vehicle.title}">
-                            </div>
-                            <div class="vehicle-item-content">
-                                <h3 class="vehicle-item-title">${vehicle.title}</h3>
-                                <p class="vehicle-item-price">${price}</p>
-                                <div class="vehicle-item-details">
-                                    <span>${vehicle.year}</span> •
-                                    <span>${mileage} km</span>
-                                </div>
-                                <p class="vehicle-item-location">${city}, ${province}</p>
-                                <p class="vehicle-item-meta">
-                                    ${vehicle.manufacturer?.name || ''} ${vehicle.model?.name || ''}
-                                </p>
-                            </div>
-                        </a>
-                    </div>
-                `;
+                // Hits are already rendered HTML from Laravel
+                console.log('First hit sample:', data.hits[0]?.substring(0, 100)); // Debug
+                this.resultsContainer.innerHTML = data.hits.join('');
             }
 
             updateStats(data) {
@@ -322,8 +332,8 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Content Loaded, initializing search...'); // Debug
             new VehicleInstantSearch();
         });
     </script>
-    @endpush
 </x-app-layout>

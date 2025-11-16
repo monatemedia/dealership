@@ -1,4 +1,4 @@
-{{-- resources/views/components --}}
+{{-- resources/views/components/vehicle-item.blade.php --}}
 @props(['vehicle', 'isInWatchlist' => false])
 
 <div class="vehicle-item card">
