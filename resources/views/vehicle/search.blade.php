@@ -125,8 +125,13 @@
 
                     <div class="search-vehicles-results">
                         <!-- Loading indicator -->
-                        <div id="loading-indicator" class="hidden text-center p-large">
-                            <p>Searching...</p>
+                        <div id="loading-indicator" class="hidden" style="position: relative; min-height: 100px;">
+                            <div class="loader main">
+                                <div class="ball"></div>
+                                <div class="ball"></div>
+                                <div class="ball"></div>
+                                <div class="ball"></div>
+                            </div>
                         </div>
 
                         <!-- Results container -->
@@ -139,8 +144,21 @@
                             No vehicles were found by given search criteria.
                         </div>
 
-                        <!-- Pagination -->
-                        <div id="pagination-container"></div>
+                        <!-- Load More Indicator (shown while loading more) -->
+                        <div id="load-more-indicator" class="hidden" style="position: relative; height: 80px; margin: 2rem 0;">
+                            <div class="loader main">
+                                <div class="ball"></div>
+                                <div class="ball"></div>
+                                <div class="ball"></div>
+                                <div class="ball"></div>
+                            </div>
+                        </div>
+
+                        <!-- End of results message -->
+                        <div id="end-of-results" class="hidden text-center p-medium" style="color: var(--text-muted-color);">
+                            <p>You've reached the end of the results</p>
+                            <p style="font-size: 0.9rem;">Showing all <span id="total-shown">0</span> vehicles</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -163,7 +181,7 @@
                 this.resultsContainer = document.getElementById('search-results');
                 this.loadingIndicator = document.getElementById('loading-indicator');
                 this.noResults = document.getElementById('no-results');
-                this.totalResults = document.getElementById('total-results');
+                this.totalResultsEl = document.getElementById('total-results'); // Changed from totalResults
                 this.searchResultsCount = document.getElementById('search-results-count');
                 this.sortDropdown = document.getElementById('sort-dropdown');
 
@@ -174,7 +192,7 @@
                     resultsContainer: !!this.resultsContainer,
                     loadingIndicator: !!this.loadingIndicator,
                     noResults: !!this.noResults,
-                    totalResults: !!this.totalResults,
+                    totalResultsEl: !!this.totalResultsEl,
                     searchResultsCount: !!this.searchResultsCount,
                     sortDropdown: !!this.sortDropdown
                 });
@@ -189,6 +207,9 @@
                 this.currentPage = 1;
                 this.currentQuery = '';
                 this.currentFilters = {};
+                this.isLoading = false;
+                this.hasMoreResults = true;
+                this.totalResultsCount = 0; // Changed variable name to avoid conflict
 
                 console.log('VehicleInstantSearch initialized');
                 this.init();
@@ -203,7 +224,8 @@
                     this.searchTimeout = setTimeout(() => {
                         this.currentPage = 1;
                         this.currentQuery = e.target.value;
-                        this.performSearch();
+                        this.hasMoreResults = true;
+                        this.performSearch(true);
                     }, 300);
                 });
 
@@ -212,8 +234,9 @@
                 if (applyBtn) {
                     applyBtn.addEventListener('click', () => {
                         this.currentPage = 1;
+                        this.hasMoreResults = true;
                         this.updateFilters();
-                        this.performSearch();
+                        this.performSearch(true);
                     });
                 }
 
@@ -224,7 +247,8 @@
                         this.filterForm.reset();
                         this.currentFilters = {};
                         this.currentPage = 1;
-                        this.performSearch();
+                        this.hasMoreResults = true;
+                        this.performSearch(true);
                     });
                 }
 
@@ -232,14 +256,42 @@
                 if (this.sortDropdown) {
                     this.sortDropdown.addEventListener('change', () => {
                         this.currentPage = 1;
-                        this.performSearch();
+                        this.hasMoreResults = true;
+                        this.performSearch(true);
                     });
                 }
 
+                // Infinite scroll
+                this.setupInfiniteScroll();
+
                 console.log('Event listeners attached, performing initial search...');
 
-                // Initial load - THIS IS THE KEY LINE
-                this.performSearch();
+                // Initial load
+                this.performSearch(true);
+            }
+
+            setupInfiniteScroll() {
+                let scrollTimeout;
+
+                window.addEventListener('scroll', () => {
+                    // Debounce scroll events
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        // Check if user scrolled near bottom
+                        const scrollPosition = window.innerHeight + window.scrollY;
+                        const pageHeight = document.documentElement.scrollHeight;
+                        const threshold = 300; // Load more when 300px from bottom
+
+                        if (scrollPosition >= pageHeight - threshold) {
+                            // Only load if not currently loading and has more results
+                            if (!this.isLoading && this.hasMoreResults) {
+                                console.log('Reached bottom, loading more...');
+                                this.currentPage++;
+                                this.performSearch(false); // false = append
+                            }
+                        }
+                    }, 100);
+                });
             }
 
             updateFilters() {
@@ -253,61 +305,125 @@
                 }
             }
 
-            async performSearch() {
-                this.showLoading();
+            async performSearch(clearResults = true) {
+                if (this.isLoading) return; // Prevent multiple simultaneous requests
+
+                this.isLoading = true;
+                this.showLoading(clearResults);
 
                 const params = new URLSearchParams({
                     q: this.currentQuery,
                     page: this.currentPage,
-                    sort: this.sortDropdown.value,
+                    sort: this.sortDropdown?.value || '',
                     ...this.currentFilters
                 });
 
-                console.log('Searching with params:', params.toString()); // Debug
+                console.log('Searching with params:', params.toString());
 
                 try {
                     const response = await fetch(`/api/vehicles/search?${params.toString()}`);
-                    console.log('Response status:', response.status); // Debug
+                    console.log('Response status:', response.status);
 
                     const data = await response.json();
-                    console.log('Response data:', data); // Debug
+                    console.log('Response data:', data);
 
-                    this.renderResults(data);
+                    this.totalResultsCount = data.nbHits; // Use renamed variable
+                    this.hasMoreResults = this.currentPage < data.nbPages;
+
+                    this.renderResults(data, clearResults);
                     this.updateStats(data);
+                    this.updateEndMessage();
 
                 } catch (error) {
                     console.error('Search error:', error);
                     this.showError();
                 } finally {
+                    this.isLoading = false;
                     this.hideLoading();
                 }
             }
 
-            renderResults(data) {
-                console.log('Rendering results:', data.hits?.length || 0, 'vehicles'); // Debug
+            renderResults(data, clearResults = true) {
+                console.log('Rendering results:', data.hits?.length || 0, 'vehicles');
 
                 if (!data.hits || data.hits.length === 0) {
-                    this.resultsContainer.innerHTML = '';
-                    this.noResults.classList.remove('hidden');
-                    console.log('No results to display'); // Debug
+                    if (clearResults) {
+                        this.resultsContainer.innerHTML = '';
+                        this.noResults.classList.remove('hidden');
+                    }
+                    console.log('No results to display');
                     return;
                 }
 
                 this.noResults.classList.add('hidden');
 
-                // Hits are already rendered HTML from Laravel
-                console.log('First hit sample:', data.hits[0]?.substring(0, 100)); // Debug
-                this.resultsContainer.innerHTML = data.hits.join('');
+                console.log('First hit sample:', data.hits[0]?.substring(0, 100));
+
+                if (clearResults) {
+                    this.resultsContainer.innerHTML = data.hits.join('');
+                    this.setupImageLoading();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    // Save scroll position
+                    const scrollY = window.scrollY;
+
+                    // Append new content
+                    this.resultsContainer.innerHTML += data.hits.join('');
+                    this.setupImageLoading();
+
+                    // Maintain scroll position
+                    requestAnimationFrame(() => {
+                        window.scrollTo({ top: scrollY, behavior: 'auto' });
+                    });
+                }
+            }
+
+            setupImageLoading() {
+                // Add loaded class to images when they finish loading
+                const images = this.resultsContainer.querySelectorAll('.vehicle-item-img');
+                images.forEach(img => {
+                    if (img.complete) {
+                        // Image already loaded
+                        img.classList.add('loaded');
+                    } else {
+                        // Wait for image to load
+                        img.addEventListener('load', function() {
+                            this.classList.add('loaded');
+                        });
+                        img.addEventListener('error', function() {
+                            // Even on error, show it (might be broken image icon)
+                            this.classList.add('loaded');
+                        });
+                    }
+                });
+            }
+
+            updateEndMessage() {
+                const endMessage = document.getElementById('end-of-results');
+                const totalShown = document.getElementById('total-shown');
+
+                if (!endMessage) return;
+
+                if (!this.hasMoreResults && this.totalResultsCount > 0) {
+                    if (totalShown) totalShown.textContent = this.totalResultsCount;
+                    endMessage.classList.remove('hidden');
+                } else {
+                    endMessage.classList.add('hidden');
+                }
             }
 
             updateStats(data) {
-                this.totalResults.textContent = data.nbHits || 0;
+                if (this.totalResultsEl) {
+                    this.totalResultsEl.textContent = data.nbHits || 0;
+                }
 
                 const query = this.currentQuery;
-                if (query) {
-                    this.searchResultsCount.textContent = `Found ${data.nbHits} results for "${query}"`;
-                } else {
-                    this.searchResultsCount.textContent = `Found ${data.nbHits} vehicles`;
+                if (this.searchResultsCount) {
+                    if (query) {
+                        this.searchResultsCount.textContent = `Found ${data.nbHits} results for "${query}"`;
+                    } else {
+                        this.searchResultsCount.textContent = `Found ${data.nbHits} vehicles`;
+                    }
                 }
             }
 
