@@ -242,7 +242,7 @@ class Vehicle extends Model
 
         return [
             'id' => (string) $this->id,
-            'title' => (string) ($this->title ?? ''),
+            'title' => (string) ($this->getTitle() ?? ''), // Use getTitle() method instead of title attribute
             'description' => (string) ($this->description ?? ''),
             'price' => (float) ($this->price ?? 0),
             'year' => (int) ($this->year ?? 0),

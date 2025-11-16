@@ -1,5 +1,4 @@
-<?php
-// app/Console/Commands/TypesenseReset.php
+<?php // app/Console/Commands/TypesenseReset.php
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;

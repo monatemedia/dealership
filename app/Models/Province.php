@@ -18,11 +18,12 @@ class Province extends Model
     protected $keyType = 'int';
     public $incrementing = true;
 
-    public function toSearchableArray()
+    public function toSearchableArray(): array
     {
         return [
             'id' => (string) $this->id,
-            'name' => $this->name,
+            'name' => (string) ($this->name ?? ''),
+            'created_at' => 0, // Fixed: No timestamps on this model, so always 0
         ];
     }
 
@@ -34,6 +35,11 @@ class Province extends Model
     public function getScoutKeyName()
     {
         return 'id';
+    }
+
+    public function searchableAs(): string
+    {
+        return 'provinces';
     }
 
     public function cities(): HasMany

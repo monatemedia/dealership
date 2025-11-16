@@ -1,5 +1,5 @@
-<?php // app/Models/Model.php
-
+<?php
+// app/Models/Model.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,34 +10,37 @@ use Laravel\Scout\Searchable;
 
 class Model extends EloquentModel
 {
-    /** @use HasFactory<\Database\Factories\ModelFactory> */
     use HasFactory, Searchable;
+
     public $timestamps = false;
 
     protected $fillable = ['name', 'manufacturer_id'];
-
-    // ADD THESE LINES:
     protected $keyType = 'int';
     public $incrementing = true;
 
-    public function toSearchableArray()
+    public function toSearchableArray(): array
     {
         return [
             'id' => (string) $this->id,
-            'name' => $this->name,
-            'manufacturer_id' => $this->manufacturer_id,
+            'name' => (string) ($this->name ?? ''),
+            'manufacturer_id' => (int) ($this->manufacturer_id ?? 0),
+            'created_at' => 0, // Fixed: No timestamps on this model, so always 0
         ];
     }
 
-    public function getScoutKey()
+    public function getScoutKey(): mixed
     {
         return (string) $this->id;
     }
 
-    // ADD THIS METHOD:
-    public function getScoutKeyName()
+    public function getScoutKeyName(): mixed
     {
         return 'id';
+    }
+
+    public function searchableAs(): string
+    {
+        return 'models';
     }
 
     public function manufacturer(): BelongsTo

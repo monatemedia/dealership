@@ -442,9 +442,9 @@ return [
                 ],
                 'search-parameters' => [
                     'query_by' => 'title,manufacturer_name,model_name,city_name,province_name,vehicle_type_name,fuel_type_name,description',
-                    'prefix' => true,
-                    'num_typos' => 2,
-                    'typo_tokens_threshold' => 1,
+                    'prefix' => 'true,true,true,true,true,true,true,false', // Enable prefix matching
+                    'num_typos' => '2,2,2,1,1,1,1,1', // Allow typos
+                    'infix' => 'always', // Match anywhere in the string
                 ],
             ],
         ],

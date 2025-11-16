@@ -29,7 +29,14 @@ class TypesenseStatus extends Command
 
         // Check Typesense API connectivity
         try {
-            $client = app(TypesenseClient::class);
+            $config = config('scout.typesense.client-settings');
+
+            if (!$config) {
+                $this->error('Typesense client settings not found in config/scout.php');
+                return 1;
+            }
+
+            $client = new TypesenseClient($config);
             $health = $client->health->retrieve();
 
             if ($health['ok'] === true) {
