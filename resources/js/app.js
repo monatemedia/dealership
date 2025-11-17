@@ -925,7 +925,6 @@ document.addEventListener("DOMContentLoaded", function () {
   initPollVehicleImagesMyVehiclesPage();
   initMileageInputs();
   initSearch();
-  new VehicleInstantSearch();
 
   // ----------------------------
   // Hero Slider Scroll Reveal
