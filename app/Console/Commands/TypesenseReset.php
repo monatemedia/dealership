@@ -31,7 +31,10 @@ class TypesenseReset extends Command
         $this->warn('🗑️  Deleting all collections...');
 
         try {
-            $client = app(TypesenseClient::class);
+            // 🎯 FIX: Manually instantiate client instead of using app() helper
+            $config = config('scout.typesense.client-settings');
+            $client = new TypesenseClient($config); // <-- CHANGE IS HERE
+
             $collections = $client->collections->retrieve();
 
             foreach ($collections as $collection) {

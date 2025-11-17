@@ -11,6 +11,7 @@ export class VehicleInstantSearch {
         this.noResults = document.getElementById('no-results');
         this.totalResultsEl = document.getElementById('total-results');
         this.searchResultsCount = document.getElementById('search-results-count');
+        this.resultsContainer = document.getElementById('search-results');
         this.sortDropdown = document.getElementById('sort-dropdown');
 
         // State
@@ -18,13 +19,15 @@ export class VehicleInstantSearch {
         this.currentPage = 1;
         this.currentQuery = '';
         this.currentSort = '';
-        this.currentFilters = {};
+        this.currentFilters = {}; // Initialize filters here
         this.isLoading = false;
         this.hasMoreResults = true;
         this.totalResultsCount = 0;
 
         // Only init if critical elements exist
         if (this.resultsContainer) {
+            // CRITICAL CHANGE 1: Read initial filters immediately from the hidden form
+            this.updateFilters();
             this.init();
         }
     }
@@ -83,11 +86,9 @@ export class VehicleInstantSearch {
         // 5. Infinite Scroll
         this.setupInfiniteScroll();
 
-        // 6. Initial Load (if needed)
-        // If the page is empty, trigger a search to fill it
-        if (this.resultsContainer.children.length === 0) {
-            this.performSearch(true);
-        }
+        // 6. Initial Load (CRITICAL CHANGE 2: Call performSearch unconditionally here)
+        // Now that the filters are read in the constructor, we can perform the initial search.
+        this.performSearch(true);
     }
 
     setupInfiniteScroll() {

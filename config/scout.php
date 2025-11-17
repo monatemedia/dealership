@@ -349,6 +349,23 @@ return [
                             'type' => 'string',
                             'facet' => true,
                         ],
+                        // ----------------------------------------------------
+                        // 🎯 CRITICAL FIX: Add Main/Sub Category IDs
+                        // These must match the keys sent by the frontend JS/Form
+                        // ----------------------------------------------------
+                        [
+                            'name' => 'main_category_id',
+                            'type' => 'int32',
+                            'facet' => true,
+                            'optional' => true,
+                        ],
+                        [
+                            'name' => 'subcategory_id',
+                            'type' => 'int32',
+                            'facet' => true,
+                            'optional' => true,
+                        ],
+                        // ----------------------------------------------------
 
                         // Manufacturer fields
                         [
@@ -362,7 +379,6 @@ return [
                             'type' => 'string',
                             'facet' => true,
                         ],
-
                         // Model fields
                         [
                             'name' => 'model_id',
@@ -375,7 +391,6 @@ return [
                             'type' => 'string',
                             'facet' => true,
                         ],
-
                         // Vehicle Type fields
                         [
                             'name' => 'vehicle_type_id',
@@ -388,7 +403,6 @@ return [
                             'type' => 'string',
                             'facet' => true,
                         ],
-
                         // Fuel Type fields
                         [
                             'name' => 'fuel_type_id',
@@ -401,7 +415,6 @@ return [
                             'type' => 'string',
                             'facet' => true,
                         ],
-
                         // Location fields
                         [
                             'name' => 'city_id',
@@ -425,7 +438,6 @@ return [
                             'type' => 'string',
                             'facet' => true,
                         ],
-
                         // Timestamps
                         [
                             'name' => 'created_at',
@@ -442,9 +454,9 @@ return [
                 ],
                 'search-parameters' => [
                     'query_by' => 'title,manufacturer_name,model_name,city_name,province_name,vehicle_type_name,fuel_type_name,description',
-                    'prefix' => 'true,true,true,true,true,true,true,false', // Enable prefix matching
-                    'num_typos' => '2,2,2,1,1,1,1,1', // Allow typos
-                    'infix' => 'always', // Match anywhere in the string
+                    'prefix' => 'true,true,true,true,true,true,true,false',
+                    'num_typos' => '2,2,2,1,1,1,1,1',
+                    'infix' => 'always',
                 ],
             ],
         ],
