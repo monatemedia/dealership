@@ -99,7 +99,17 @@ document.addEventListener("DOMContentLoaded", function () {
     moveToSlide(0);
   };
 
-// ----------------------------
+  // ----------------------------
+  // Initialize Search For Vehicles
+  // ----------------------------
+  function initSearch() {
+      // Check if the search input or results area is present before initializing
+      if (document.getElementById('search-results')) {
+          new VehicleInstantSearch();
+      }
+  }
+
+  // ----------------------------
   // Flash Messages Alpine Setup
   // ----------------------------
   function flashMessages(initialMessages = []) {
@@ -914,6 +924,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initShowPhoneNumber();
   initPollVehicleImagesMyVehiclesPage();
   initMileageInputs();
+  initSearch();
   new VehicleInstantSearch();
 
   // ----------------------------
