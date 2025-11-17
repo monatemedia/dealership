@@ -160,57 +160,49 @@ php artisan typesense:start
 
 #### Typesense Artisan Commands
 
-##### Start Typesense
-
+##### Start Typesense ✨
 ```bash
 php artisan typesense:start
-```
+````
 
-This command will:
-- Check if Docker Desktop is running (waits if not)
-- Create a new Typesense container if it doesn't exist
-- Start the container if it's stopped
-- Imports data by default
-- Runs on `http://localhost:8108`
+This is your **primary command** for local Typesense development. It handles checking Docker, starting the container, waiting for the API to become ready, and importing all data if needed.
+
+**Functionality:**
+
+  * Checks if **Docker Desktop** is running (waits if not).
+  * Creates and starts the Typesense container (runs on `http://localhost:8108`).
+  * **Imports all data** by default after the container is ready.
 
 **Usage:**
-- `php artisan typesense:start` - Normal start with import
-- `php artisan typesense:start --fresh` - Flush and re-import everything
-- `php artisan typesense:start --skip-import` - Just start, no import
-- `php artisan typesense:start --fresh --skip-import` - Won't work (skip-import takes precedence)
 
-**To add more models in the future**, just update the $modelsToImport array:
+  * `php artisan typesense:start` - Normal start with data import.
+  * `php artisan typesense:start --fresh` - Flush existing data, then start and re-import everything (useful after a major schema change).
+  * `php artisan typesense:start --skip-import` - Just start the container, skip the data import.
 
-```php
-protected $modelsToImport = [
-    'App\Models\Manufacturer',
-    'App\Models\Model',
-    'App\Models\Province',
-    'App\Models\City',
-    'App\Models\Vehicle',  // Add new models here
-    'App\Models\Dealer',   // Easy to expand
-];
-```
+**Note:** To add or change searchable models, update the `$modelsToImport` array in `app/Console/Commands/StartTypesense.php`.
 
-##### Stop Typesense
+-----
 
-```bash
-php artisan typesense:stop
-```
+##### Schema and Data Management 🗃️
 
-Stops the Typesense container without removing it.
+These utility commands provide granular control for Typesense schema and data management, useful when collections schemas change or a specific sync is needed.
 
-##### Destroy Typesense
+| Command | Description |
+| :--- | :--- |
+| `php artisan typesense:create-collections` | Forces Typesense to **create or update collection schemas** based on your Laravel Scout configuration (`config/scout.php`). Use `--force` to delete and recreate existing collections. |
+| `php artisan typesense:import` | Runs the dedicated import process for all configured models. This is useful for quickly syncing data after a large database change without restarting the container. |
+| `php artisan typesense:reset --force` | **DANGEROUS\!** Deletes ALL Typesense collections and then immediately attempts a full data re-import. Use this when the underlying **schema definition changes** and a full clean slate is needed. |
+| `php artisan typesense:status` | Checks if the Docker container is running, if the Typesense API is healthy, and lists the document count and field count for all live collections. |
 
-```bash
-# With confirmation prompt
-php artisan typesense:destroy
+-----
 
-# Skip confirmation
-php artisan typesense:destroy --force
-```
+##### Stop and Destroy Commands 🛑
 
-Removes the Typesense container and optionally the data volume.
+| Command | Description |
+| :--- | :--- |
+| `php artisan typesense:stop` | Stops the running Typesense container without removing it. |
+| `php artisan typesense:destroy --force` | Removes the Typesense container and optionally the persistent data volume (if not using `--force`, it will prompt for confirmation). |
+
 
 
 ### Prerequisites

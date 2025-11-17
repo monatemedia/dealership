@@ -30,12 +30,13 @@ class City extends Model
         'longitude' => 'decimal:7',
     ];
 
-    public function toSearchableArray()
+    public function toSearchableArray(): array
     {
         return [
             'id' => (string) $this->id,
-            'name' => $this->name,
-            'province_id' => $this->province_id,
+            'name' => (string) ($this->name ?? ''),
+            'province_id' => (int) ($this->province_id ?? 0),
+            'created_at' => 0, // Fixed: No timestamps on this model, so always 0
         ];
     }
 
@@ -47,6 +48,11 @@ class City extends Model
     public function getScoutKeyName()
     {
         return 'id';
+    }
+
+    public function searchableAs(): string
+    {
+        return 'cities';
     }
 
     // Relationships

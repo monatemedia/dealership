@@ -1,4 +1,4 @@
-<?php
+<?php // config/scout.php
 
 return [
 
@@ -156,109 +156,309 @@ return [
     | state the host, key, and schema configuration for the instance.
     |
     */
-
     'typesense' => [
-        // This value dictates how many documents the searchable() call
-        // will attempt to bulk-index in a single API request to Typesense.
-        'chunk_size' => 2000,
-            'client-settings' => [
-                'api_key' => env('TYPESENSE_API_KEY', 'xyz'),
-                'nodes' => [
-                    [
-                        'host' => env('TYPESENSE_HOST', 'localhost'),
-                        'port' => env('TYPESENSE_PORT', '8108'),
-                        'path' => env('TYPESENSE_PATH', ''),
-                        'protocol' => env('TYPESENSE_PROTOCOL', 'http'),
-                    ],
-                ],
-                'nearest_node' => [
+        // Chunk size for bulk indexing
+        'chunk_size' => 500,
+
+        'client-settings' => [
+            'api_key' => env('TYPESENSE_API_KEY', 'xyz'),
+            'nodes' => [
+                [
                     'host' => env('TYPESENSE_HOST', 'localhost'),
                     'port' => env('TYPESENSE_PORT', '8108'),
                     'path' => env('TYPESENSE_PATH', ''),
                     'protocol' => env('TYPESENSE_PROTOCOL', 'http'),
                 ],
-                'connection_timeout_seconds' => env('TYPESENSE_CONNECTION_TIMEOUT_SECONDS', 2),
-                'healthcheck_interval_seconds' => env('TYPESENSE_HEALTHCHECK_INTERVAL_SECONDS', 30),
-                'num_retries' => env('TYPESENSE_NUM_RETRIES', 3),
-                'retry_interval_seconds' => env('TYPESENSE_RETRY_INTERVAL_SECONDS', 1),
             ],
-            'model-settings' => [
-                \App\Models\Manufacturer::class => [
-                    'collection-schema' => [
-                        'fields' => [
-                            [
-                                'name' => 'id',
-                                'type' => 'string',
-                            ],
-                            [
-                                'name' => 'name',
-                                'type' => 'string',
-                            ],
+            'nearest_node' => [
+                'host' => env('TYPESENSE_HOST', 'localhost'),
+                'port' => env('TYPESENSE_PORT', '8108'),
+                'path' => env('TYPESENSE_PATH', ''),
+                'protocol' => env('TYPESENSE_PROTOCOL', 'http'),
+            ],
+            'connection_timeout_seconds' => env('TYPESENSE_CONNECTION_TIMEOUT_SECONDS', 2),
+            'healthcheck_interval_seconds' => env('TYPESENSE_HEALTHCHECK_INTERVAL_SECONDS', 30),
+            'num_retries' => env('TYPESENSE_NUM_RETRIES', 3),
+            'retry_interval_seconds' => env('TYPESENSE_RETRY_INTERVAL_SECONDS', 1),
+        ],
+        'model-settings' => [
+            \App\Models\Manufacturer::class => [
+                'collection-schema' => [
+                    'name' => 'manufacturers',
+                    'fields' => [
+                        // DO NOT include 'id' - Scout handles this
+                        [
+                            'name' => 'name',
+                            'type' => 'string',
+                            'facet' => true,
+                        ],
+                        [
+                            'name' => 'slug',
+                            'type' => 'string',
+                            'facet' => false,
+                            'optional' => true,
+                        ],
+                        [
+                            'name' => 'created_at',
+                            'type' => 'int64',
+                            'facet' => false,
                         ],
                     ],
-                    'search-parameters' => [
-                        'query_by' => 'name'
-                    ],
+                    'default_sorting_field' => 'created_at',
                 ],
-                \App\Models\Model::class => [
-                    'collection-schema' => [
-                        'fields' => [
-                            [
-                                'name' => 'id',
-                                'type' => 'string',
-                            ],
-                            [
-                                'name' => 'name',
-                                'type' => 'string',
-                            ],
-                            [
-                                'name' => 'manufacturer_id',
-                                'type' => 'int32',
-                            ],
-                        ],
-                    ],
-                    'search-parameters' => [
-                        'query_by' => 'name'
-                    ],
+                'search-parameters' => [
+                    'query_by' => 'name',
+                    'prefix' => true,
+                    'num_typos' => 2,
                 ],
-                \App\Models\Province::class => [
-                    'collection-schema' => [
-                        'fields' => [
-                            [
-                                'name' => 'id',
-                                'type' => 'string',
-                            ],
-                            [
-                                'name' => 'name',
-                                'type' => 'string',
-                            ],
+            ],
+
+            \App\Models\Model::class => [
+                'collection-schema' => [
+                    'name' => 'models',
+                    'fields' => [
+                        [
+                            'name' => 'name',
+                            'type' => 'string',
+                            'facet' => true,
+                        ],
+                        [
+                            'name' => 'slug',
+                            'type' => 'string',
+                            'facet' => false,
+                            'optional' => true,
+                        ],
+                        [
+                            'name' => 'manufacturer_id',
+                            'type' => 'int32',
+                            'facet' => true,
+                        ],
+                        [
+                            'name' => 'created_at',
+                            'type' => 'int64',
+                            'facet' => false,
                         ],
                     ],
-                    'search-parameters' => [
-                        'query_by' => 'name'
-                    ],
+                    'default_sorting_field' => 'created_at',
                 ],
-                \App\Models\City::class => [
-                    'collection-schema' => [
-                        'fields' => [
-                            [
-                                'name' => 'id',
-                                'type' => 'string',
-                            ],
-                            [
-                                'name' => 'name',
-                                'type' => 'string',
-                            ],
-                            [
-                                'name' => 'province_id',
-                                'type' => 'int32',
-                            ],
+                'search-parameters' => [
+                    'query_by' => 'name',
+                    'prefix' => true,
+                    'num_typos' => 2,
+                ],
+            ],
+
+            \App\Models\Province::class => [
+                'collection-schema' => [
+                    'name' => 'provinces',
+                    'fields' => [
+                        [
+                            'name' => 'name',
+                            'type' => 'string',
+                            'facet' => true,
+                        ],
+                        [
+                            'name' => 'slug',
+                            'type' => 'string',
+                            'facet' => false,
+                            'optional' => true,
+                        ],
+                        [
+                            'name' => 'created_at',
+                            'type' => 'int64',
+                            'facet' => false,
                         ],
                     ],
-                    'search-parameters' => [
-                        'query_by' => 'name'
+                    'default_sorting_field' => 'created_at',
+                ],
+                'search-parameters' => [
+                    'query_by' => 'name',
+                    'prefix' => true,
+                    'num_typos' => 2,
+                ],
+            ],
+
+            \App\Models\City::class => [
+                'collection-schema' => [
+                    'name' => 'cities',
+                    'fields' => [
+                        [
+                            'name' => 'name',
+                            'type' => 'string',
+                            'facet' => true,
+                        ],
+                        [
+                            'name' => 'slug',
+                            'type' => 'string',
+                            'facet' => false,
+                            'optional' => true,
+                        ],
+                        [
+                            'name' => 'province_id',
+                            'type' => 'int32',
+                            'facet' => true,
+                        ],
+                        [
+                            'name' => 'created_at',
+                            'type' => 'int64',
+                            'facet' => false,
+                        ],
                     ],
+                    'default_sorting_field' => 'created_at',
+                ],
+                'search-parameters' => [
+                    'query_by' => 'name',
+                    'prefix' => true,
+                    'num_typos' => 2,
+                ],
+            ],
+
+            \App\Models\Vehicle::class => [
+                'collection-schema' => [
+                    'name' => 'vehicles',
+                    'fields' => [
+                        // DO NOT include 'id' - Scout handles this automatically
+                        [
+                            'name' => 'title',
+                            'type' => 'string',
+                            'facet' => false,
+                        ],
+                        [
+                            'name' => 'description',
+                            'type' => 'string',
+                            'facet' => false,
+                            'optional' => true,
+                        ],
+                        [
+                            'name' => 'price',
+                            'type' => 'float',
+                            'facet' => true,
+                        ],
+                        [
+                            'name' => 'year',
+                            'type' => 'int32',
+                            'facet' => true,
+                        ],
+                        [
+                            'name' => 'mileage',
+                            'type' => 'int32',
+                            'facet' => true,
+                        ],
+                        [
+                            'name' => 'status',
+                            'type' => 'string',
+                            'facet' => true,
+                        ],
+                        // ----------------------------------------------------
+                        // 🎯 CRITICAL FIX: Add Main/Sub Category IDs
+                        // These must match the keys sent by the frontend JS/Form
+                        // ----------------------------------------------------
+                        [
+                            'name' => 'main_category_id',
+                            'type' => 'int32',
+                            'facet' => true,
+                            'optional' => true,
+                        ],
+                        [
+                            'name' => 'subcategory_id',
+                            'type' => 'int32',
+                            'facet' => true,
+                            'optional' => true,
+                        ],
+                        // ----------------------------------------------------
+
+                        // Manufacturer fields
+                        [
+                            'name' => 'manufacturer_id',
+                            'type' => 'int32',
+                            'facet' => true,
+                            'optional' => true,
+                        ],
+                        [
+                            'name' => 'manufacturer_name',
+                            'type' => 'string',
+                            'facet' => true,
+                        ],
+                        // Model fields
+                        [
+                            'name' => 'model_id',
+                            'type' => 'int32',
+                            'facet' => true,
+                            'optional' => true,
+                        ],
+                        [
+                            'name' => 'model_name',
+                            'type' => 'string',
+                            'facet' => true,
+                        ],
+                        // Vehicle Type fields
+                        [
+                            'name' => 'vehicle_type_id',
+                            'type' => 'int32',
+                            'facet' => true,
+                            'optional' => true,
+                        ],
+                        [
+                            'name' => 'vehicle_type_name',
+                            'type' => 'string',
+                            'facet' => true,
+                        ],
+                        // Fuel Type fields
+                        [
+                            'name' => 'fuel_type_id',
+                            'type' => 'int32',
+                            'facet' => true,
+                            'optional' => true,
+                        ],
+                        [
+                            'name' => 'fuel_type_name',
+                            'type' => 'string',
+                            'facet' => true,
+                        ],
+                        // Location fields
+                        [
+                            'name' => 'city_id',
+                            'type' => 'int32',
+                            'facet' => true,
+                            'optional' => true,
+                        ],
+                        [
+                            'name' => 'city_name',
+                            'type' => 'string',
+                            'facet' => true,
+                        ],
+                        [
+                            'name' => 'province_id',
+                            'type' => 'int32',
+                            'facet' => true,
+                            'optional' => true,
+                        ],
+                        [
+                            'name' => 'province_name',
+                            'type' => 'string',
+                            'facet' => true,
+                        ],
+                        // Timestamps
+                        [
+                            'name' => 'created_at',
+                            'type' => 'int64',
+                            'facet' => false,
+                        ],
+                        [
+                            'name' => 'updated_at',
+                            'type' => 'int64',
+                            'facet' => false,
+                        ],
+                    ],
+                    'default_sorting_field' => 'created_at',
+                ],
+                'search-parameters' => [
+                    'query_by' => 'title,manufacturer_name,model_name,city_name,province_name,vehicle_type_name,fuel_type_name,description',
+                    'prefix' => 'true,true,true,true,true,true,true,false',
+                    'num_typos' => '2,2,2,1,1,1,1,1',
+                    'infix' => 'always',
                 ],
             ],
         ],
-    ];
+    ],
+];

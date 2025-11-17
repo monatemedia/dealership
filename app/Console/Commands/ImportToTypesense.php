@@ -1,23 +1,31 @@
 <?php
 
+// app/Console/Commands/ImportToTypesense.php
+
 namespace App\Console\Commands;
 
+use App\Models\Vehicle;
 use Illuminate\Console\Command;
-use Typesense\Client as TypesenseClient; // Assuming you have a way to resolve the Typesense Client
 
 class ImportToTypesense extends Command
 {
-    protected $signature = 'typesense:import {--model= : Specific model to import} {--force : Force a fresh import (drop and create collection)}';
+    protected $signature = 'typesense:import
+        {--model= : Specific model to import}
+        {--force : Force a fresh import (drop and create collection)}';
+
     protected $description = 'Import data to Typesense with correct IDs and improved performance.';
+
+    // Updated to include Vehicle model
     protected $modelsToImport = [
         'App\Models\Manufacturer',
         'App\Models\Model',
         'App\Models\Province',
         'App\Models\City',
+        'App\Models\Vehicle',  // Added Vehicle model
     ];
 
-    // Increase chunk size for fewer database queries and bulk indexing operations
-    protected const CHUNK_SIZE = 2000;
+    // Chunk size for bulk operations
+    protected const CHUNK_SIZE = 500; // Reduced from 2000 for better memory management with relationships
 
     public function handle()
     {
@@ -25,17 +33,30 @@ class ImportToTypesense extends Command
             ? [$this->option('model')]
             : $this->modelsToImport;
 
-        // Optionally, resolve the Typesense client if you need it for fresh import/schema
-        // $typesenseClient = app(TypesenseClient::class);
+        $totalStartTime = microtime(true);
 
         foreach ($models as $modelClass) {
-            // Check if the model uses the Searchable trait
-            if (!in_array(\Laravel\Scout\Searchable::class, class_uses($modelClass))) {
-                $this->error("Model {$modelClass} does not use the Laravel Scout Searchable trait.");
+            // Verify model exists and uses Searchable trait
+            if (! class_exists($modelClass)) {
+                $this->error("Model {$modelClass} does not exist.");
+
                 continue;
             }
+
+            if (! in_array(\Laravel\Scout\Searchable::class, class_uses($modelClass))) {
+                $this->error("Model {$modelClass} does not use the Laravel Scout Searchable trait.");
+
+                continue;
+            }
+
             $this->importModel($modelClass);
         }
+
+        $totalTime = round(microtime(true) - $totalStartTime, 2);
+
+        $this->newLine();
+        $this->info("✨ Import completed in {$totalTime} seconds");
+        $this->info('🔍 Your data is now searchable with InstantSearch!');
 
         return 0;
     }
@@ -45,28 +66,78 @@ class ImportToTypesense extends Command
         $modelName = class_basename($modelClass);
         $this->info("Importing {$modelName}...");
 
+        $startTime = microtime(true);
         $count = 0;
+
+        // Start building the query
         $query = $modelClass::query();
 
-        // Optional: Optimize Database Query
-        if (method_exists($modelClass, 'getScoutImportColumns')) {
-            $query->select((new $modelClass)->getScoutImportColumns());
+        // Special handling for Vehicle model - eager load relationships
+        if ($modelClass === Vehicle::class) {
+            $this->info('  Loading relationships for denormalized search data...');
+
+            $query->with([
+                'manufacturer',
+                'model',
+                'vehicleType',
+                'fuelType',
+                'city.province',
+                'primaryImage',
+            ]);
         }
 
-        // Use the query builder's chunk method
-        $query->chunk(self::CHUNK_SIZE, function ($records) use (&$count, $modelName) {
+        // Get total count for progress display
+        $total = $query->count();
 
-            // Revert to the standard searchable() method.
-            // The Typesense Scout driver converts this into an optimized bulk operation.
+        if ($total === 0) {
+            $this->warn("  ⚠ No {$modelName} records found to import");
+
+            return;
+        }
+
+        $this->info("  Found {$total} {$modelName} records to import");
+
+        // Progress bar
+        $bar = $this->output->createProgressBar($total);
+        $bar->start();
+
+        // Chunk the query for memory efficiency
+        $query->chunk(self::CHUNK_SIZE, function ($records) use (&$count, $bar) {
+            // Make searchable using Scout's bulk indexing
             $records->searchable();
 
             $count += $records->count();
-
-            if ($count % self::CHUNK_SIZE === 0) {
-                $this->info("Imported {$count} {$modelName} records...");
-            }
+            $bar->advance($records->count());
         });
 
-        $this->info("✅ {$modelName}: {$count} records imported successfully");
+        $bar->finish();
+        $this->newLine();
+
+        $duration = round(microtime(true) - $startTime, 2);
+        $this->info("✅ {$modelName}: {$count} records imported in {$duration}s");
+
+        // Show some helpful stats
+        if ($modelClass === Vehicle::class && $count > 0) {
+            $this->displayVehicleStats();
+        }
+    }
+
+    protected function displayVehicleStats(): void
+    {
+        try {
+            $stats = [
+                'Total Vehicles' => Vehicle::count(),
+                'With Images' => Vehicle::whereHas('primaryImage')->count(),
+                'Active Listings' => Vehicle::where('status', 'active')->count(),
+            ];
+
+            $this->newLine();
+            $this->info('📊 Vehicle Statistics:');
+            foreach ($stats as $label => $value) {
+                $this->info("  {$label}: {$value}");
+            }
+        } catch (\Exception $e) {
+            // Silently fail if stats can't be retrieved
+        }
     }
 }

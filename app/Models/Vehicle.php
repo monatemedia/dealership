@@ -9,11 +9,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class Vehicle extends Model
 {
     /** @use HasFactory<\Database\Factories\VehicleFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Searchable;
 
     protected $casts = [
         'published_at' => 'datetime',
@@ -222,5 +223,99 @@ class Vehicle extends Model
     public function isInWatchlist(User $user = null)
     {
         return $this->favouredUsers->contains($user);
+    }
+
+    /**
+     * Get the indexable data array for the model.
+     * Keep it simple - just return the data you want to search/filter on.
+     */
+    public function toSearchableArray(): array
+    {
+        // Load relationships if not already loaded (Added mainCategory and subcategory)
+        $this->loadMissing([
+            'manufacturer',
+            'model',
+            'vehicleType',
+            'fuelType',
+            'city.province',
+            'mainCategory', // Added for indexing
+            'subcategory', // Added for indexing
+        ]);
+
+        return [
+            'id' => (string) $this->id,
+            'title' => (string) ($this->getTitle() ?? ''),
+            'description' => (string) ($this->description ?? ''),
+            'price' => (float) ($this->price ?? 0),
+            'year' => (int) ($this->year ?? 0),
+            'mileage' => (int) ($this->mileage ?? 0),
+            'status' => (string) ($this->status ?? 'draft'),
+
+            // ----------------------------------------------------------------
+            // 🎯 CRITICAL FIX: Include Taxonomy IDs for filtering
+            // ----------------------------------------------------------------
+            'main_category_id' => (int) ($this->main_category_id ?? 0),
+            'main_category_name' => (string) ($this->mainCategory?->name ?? ''),
+            'subcategory_id' => (int) ($this->subcategory_id ?? 0),
+            'subcategory_name' => (string) ($this->subcategory?->name ?? ''),
+            // ----------------------------------------------------------------
+
+            // Denormalized relationship data for searchability
+            'manufacturer_id' => (int) ($this->manufacturer_id ?? 0),
+            'manufacturer_name' => (string) ($this->manufacturer?->name ?? ''),
+            'model_id' => (int) ($this->model_id ?? 0),
+            'model_name' => (string) ($this->model?->name ?? ''),
+            'vehicle_type_id' => (int) ($this->vehicle_type_id ?? 0),
+            'vehicle_type_name' => (string) ($this->vehicleType?->name ?? ''),
+            'fuel_type_id' => (int) ($this->fuel_type_id ?? 0),
+            'fuel_type_name' => (string) ($this->fuelType?->name ?? ''),
+            'city_id' => (int) ($this->city_id ?? 0),
+            'city_name' => (string) ($this->city?->name ?? ''),
+            'province_id' => (int) ($this->city?->province_id ?? 0),
+            'province_name' => (string) ($this->city?->province?->name ?? ''),
+
+            // Timestamps
+            'created_at' => (int) ($this->created_at?->timestamp ?? 0),
+            'updated_at' => (int) ($this->updated_at?->timestamp ?? 0),
+        ];
+    }
+
+    /**
+     * Get the value used to index the model.
+     */
+    public function getScoutKey(): mixed
+    {
+        return (string) $this->id;
+    }
+
+    /**
+     * Get the key name used to index the model.
+     */
+    public function getScoutKeyName(): mixed
+    {
+        return 'id';
+    }
+
+    /**
+     * Get the name of the index associated with the model.
+     */
+    public function searchableAs(): string
+    {
+        return 'vehicles';
+    }
+
+    /**
+     * Modify the query used to retrieve models when making all searchable.
+     * This is important for performance during bulk imports.
+     */
+    protected function makeAllSearchableUsing($query)
+    {
+        return $query->with([
+            'manufacturer',
+            'model',
+            'vehicleType',
+            'fuelType',
+            'city.province',
+        ]);
     }
 }
