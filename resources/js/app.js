@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import Alpine from 'alpinejs';
+import { VehicleInstantSearch } from './VehicleInstantSearch'; // Import the class
 
 // Update the fuelTypeSelector function
 window.itemSelector = function(config) {
@@ -913,6 +914,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initShowPhoneNumber();
   initPollVehicleImagesMyVehiclesPage();
   initMileageInputs();
+  new VehicleInstantSearch();
 
   // ----------------------------
   // Hero Slider Scroll Reveal

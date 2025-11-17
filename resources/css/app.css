@@ -2775,3 +2775,84 @@ input[type="checkbox"]:checked::after {
 .vehicle-item-img.loaded {
     opacity: 1;
 }
+/* Utility for JS toggling - CRITICAL */
+.hidden {
+    display: none !important;
+}
+
+/* Section Header */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-medium, 2rem); /* Fallback if variable doesn't exist */
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.results-count {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* The Grid Layout - 4 Columns */
+.vehicle-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* 1 column on mobile */
+    gap: 24px; /* Space between items */
+    min-height: 200px;
+}
+
+/* Tablet: 2 Columns */
+@media (min-width: 768px) {
+    .vehicle-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Desktop: 4 Columns (As requested) */
+@media (min-width: 1024px) {
+    .vehicle-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Loading & Status Containers */
+.status-container {
+    text-align: center;
+    padding: 3rem 0;
+    position: relative;
+}
+
+.loader-container {
+    position: relative;
+    min-height: 100px;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+.no-results-text {
+    font-size: 1.25rem;
+    color: #666;
+}
+
+.end-message {
+    text-align: center;
+    color: #888;
+    padding: 1rem 0;
+    font-size: 0.9rem;
+}
+
+/* Error Message Styling */
+.search-error-message {
+    text-align: center;
+    padding: 1rem;
+    color: #dc3545; /* Red color */
+}
+
+
