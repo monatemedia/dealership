@@ -50,7 +50,6 @@ Route::prefix('cities')->group(function () {
 // -------------------------------
 // INSTANT SEARCH
 // -------------------------------
-// Fix: Remove duplicate /api prefix (already added automatically)
 Route::get('/vehicles/search', [VehicleSearchController::class, 'instantSearch'])
     ->name('api.vehicle.search');
 
@@ -59,3 +58,8 @@ Route::get('/vehicles/filter-options', [VehicleSearchController::class, 'getFilt
 
 Route::get('/vehicles/cities/{provinceId}', [VehicleSearchController::class, 'getCitiesByProvince'])
     ->name('api.vehicles.cities');
+
+// -------------------------------
+// MAXIMUM RANGE FOR SLIDER
+// -------------------------------
+Route::get('/vehicles/max-range/{cityId}', [VehicleSearchController::class, 'getMaxRange']);

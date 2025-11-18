@@ -318,4 +318,33 @@ class Vehicle extends Model
             'city.province',
         ]);
     }
+
+    /**
+     * Scope a query to only include vehicles within a specific range of an origin city.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param int $originCityId The ID of the city (where the user is searching from)
+     * @param float $rangeKm The radius in kilometers
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWithinDistance($query, int $originCityId, float $rangeKm)
+    {
+        // The query relies on the 'cities' table, so we must join it
+        // The PostGIS function ST_DistanceSphere returns distance in meters.
+        $rangeMeters = $rangeKm * 1000.0;
+
+        return $query
+            ->join('cities AS listing_city', 'vehicles.city_id', '=', 'listing_city.id')
+            ->join('cities AS origin_city', function ($join) use ($originCityId) {
+                $join->where('origin_city.id', '=', $originCityId);
+            })
+            ->whereRaw("
+                ST_DistanceSphere(
+                    ST_MakePoint(origin_city.longitude, origin_city.latitude),
+                    ST_MakePoint(listing_city.longitude, listing_city.latitude)
+                ) <= ?
+            ", [$rangeMeters])
+            // Select all vehicle columns to avoid overwriting them during the join
+            ->select('vehicles.*');
+    }
 }
