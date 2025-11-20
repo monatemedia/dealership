@@ -1,3 +1,4 @@
+{{-- resources/views/components/search/select-mileage.blade.php --}}
 @php // Open a php directive
     $options = [ // Define an array of options
         '5 000',

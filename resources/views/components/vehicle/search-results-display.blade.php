@@ -1,9 +1,12 @@
+{{-- resources/views/components/vehicle/search-results-display.blade.php --}}
 <section>
     <div class="container">
         {{-- Header --}}
         <div class="section-header mb-medium">
-            <h2 class="section-title">Latest Vehicles Added</h2>
-            <span class="m-0">Found <strong id="total-results">0</strong> vehicles</span>
+            <h2 id="search-results-count">Define your search criteria</h2>
+            <a href="#"><span class="m-0">
+                <i class="fa-solid fa-compass"></i> Parow, Western Cape - 5 km
+            </span></a>
         </div>
 
         {{-- Main Results Grid --}}

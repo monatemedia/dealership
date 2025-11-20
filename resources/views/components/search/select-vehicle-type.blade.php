@@ -1,3 +1,4 @@
+{{-- resources/views/components/search/select-vehicle-type.blade.php --}}
 <select name="vehicle_type_id">
     <option value="">Vehicle Type</option>
     @foreach ($types as $type)

@@ -1,3 +1,4 @@
+{{-- resources/views/components/vehicle/search-sidebar-filters.blade.php --}}
 <div class="search-vehicles-sidebar">
     <div class="card card-found-vehicles">
         <p class="m-0">Found <strong id="total-results">0</strong> vehicles</p>
