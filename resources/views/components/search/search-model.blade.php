@@ -1,63 +1,64 @@
-{{-- resources/views/components/search/select-manufacturer.blade.php --}}
+{{-- resources/views/components/search/search-model.blade.php --}}
 <div x-data="{
     search: '',
-    manufacturers: [],
+    models: [],
     selected: @js($attributes->get('value')),
     selectedName: '',
+    manufacturerId: null,
     open: false,
     loading: false,
 
-    async searchManufacturers() {
-        if (this.search === this.selectedName) {
-            this.manufacturers = [];
-            return;
-        }
-
+    async searchModels() {
         if (this.search.length < 2) {
-            this.manufacturers = [];
+            this.models = [];
             return;
         }
 
         this.loading = true;
         try {
-            const response = await fetch(`/api/manufacturers/search?q=${encodeURIComponent(this.search)}`);
-            this.manufacturers = await response.json();
+            let url = `/api/models/search?q=${encodeURIComponent(this.search)}`;
+            if (this.manufacturerId) {
+                url += `&manufacturer_id=${this.manufacturerId}`;
+            }
+            const response = await fetch(url);
+            this.models = await response.json();
         } catch (error) {
-            console.error('Error fetching manufacturers:', error);
+            console.error('Error fetching models:', error);
         }
         this.loading = false;
     },
 
-    selectManufacturer(id, name) {
+    selectModel(id, name) {
         this.selected = id;
         this.selectedName = name;
         this.open = false;
         this.search = name;
-        this.$dispatch('manufacturer-selected', { id });
     },
 
     async init() {
         if (this.selected) {
             try {
-                const response = await fetch(`/api/manufacturers/${this.selected}`);
+                const response = await fetch(`/api/models/${this.selected}`);
                 const data = await response.json();
                 this.selectedName = data.name;
                 this.search = data.name;
+                this.manufacturerId = data.manufacturer_id;
             } catch (error) {
-                console.error('Error fetching initial manufacturer:', error);
+                console.error('Error fetching initial model:', error);
             }
         }
     }
 }"
+@manufacturer-selected.window="manufacturerId = $event.detail.id; selected = null; selectedName = ''; search = ''"
 @click.away="open = false"
 class="select-container">
-    <input type="hidden" name="manufacturer_id" x-model="selected">
+    <input type="hidden" name="model_id" x-model="selected">
     <input
         type="text"
         x-model="search"
-        @input.debounce.300ms="searchManufacturers()"
+        @input.debounce.300ms="searchModels()"
         @focus="open = true"
-        placeholder="Select Manufacturer"
+        placeholder="Select Model"
         class="select-input"
     >
     <div
@@ -72,15 +73,15 @@ class="select-container">
             <template x-if="!loading && search.length < 2">
                 <div class="select-info">Type at least 2 characters to search</div>
             </template>
-            <template x-if="!loading && manufacturers.length === 0 && search.length >= 2">
-                <div class="select-info">No manufacturers found</div>
+            <template x-if="!loading && models.length === 0 && search.length >= 2">
+                <div class="select-info">No models found</div>
             </template>
-            <template x-for="manufacturer in manufacturers" :key="manufacturer.id">
+            <template x-for="model in models" :key="model.id">
                 <button
                     type="button"
-                    @click="selectManufacturer(manufacturer.id, manufacturer.name)"
+                    @click="selectModel(model.id, model.name)"
                     class="select-item"
-                    x-text="manufacturer.name"
+                    x-text="model.name"
                 ></button>
             </template>
         </div>

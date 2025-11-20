@@ -1,4 +1,4 @@
-{{-- resources/views/components/search/select-province.blade.php --}}
+{{-- resources/views/components/search/search-province.blade.php --}}
 <div x-data="{
     search: '',
     provinces: [],

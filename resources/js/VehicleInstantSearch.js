@@ -1,5 +1,3 @@
-// resources/js/VehicleInstantSearch.js
-
 export class VehicleInstantSearch {
     constructor() {
         // DOM Elements
@@ -19,14 +17,21 @@ export class VehicleInstantSearch {
         this.currentPage = 1;
         this.currentQuery = '';
         this.currentSort = '';
-        this.currentFilters = {}; // Initialize filters here
         this.isLoading = false;
         this.hasMoreResults = true;
         this.totalResultsCount = 0;
 
+        // CRITICAL CHANGE 1: Initialize filters and set a default Geo-Search state
+        this.currentFilters = {
+            // Default Location: Parow, 5km (Based on your successful test)
+            // These will be overridden by the hidden inputs if the user interacts with the modal
+            origin_city_id: '3212',
+            range_km: '5',
+        };
+
         // Only init if critical elements exist
         if (this.resultsContainer) {
-            // CRITICAL CHANGE 1: Read initial filters immediately from the hidden form
+            // CRITICAL CHANGE 2: Read initial filters immediately from the hidden form
             this.updateFilters();
             this.init();
         }
@@ -53,7 +58,7 @@ export class VehicleInstantSearch {
                 e.preventDefault(); // Prevent form submit
                 this.currentPage = 1;
                 this.hasMoreResults = true;
-                this.updateFilters();
+                this.updateFilters(); // Re-read filters including the new geo values
                 this.performSearch(true);
             });
         }
@@ -63,7 +68,11 @@ export class VehicleInstantSearch {
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
                 if (this.filterForm) this.filterForm.reset();
-                this.currentFilters = {};
+                this.currentFilters = {
+                    // Reset to hardcoded Geo-Search defaults
+                    origin_city_id: '3212',
+                    range_km: '5',
+                };
                 this.currentPage = 1;
                 this.hasMoreResults = true;
                 this.currentSort = '';
@@ -86,8 +95,7 @@ export class VehicleInstantSearch {
         // 5. Infinite Scroll
         this.setupInfiniteScroll();
 
-        // 6. Initial Load (CRITICAL CHANGE 2: Call performSearch unconditionally here)
-        // Now that the filters are read in the constructor, we can perform the initial search.
+        // 6. Initial Load
         this.performSearch(true);
     }
 
@@ -99,7 +107,6 @@ export class VehicleInstantSearch {
                 const scrollPosition = window.innerHeight + window.scrollY;
                 const pageHeight = document.documentElement.scrollHeight;
                 const threshold = 300;
-
                 if (scrollPosition >= pageHeight - threshold) {
                     if (!this.isLoading && this.hasMoreResults) {
                         this.currentPage++;
@@ -117,6 +124,10 @@ export class VehicleInstantSearch {
         for (let [key, value] of formData.entries()) {
             if (value) this.currentFilters[key] = value;
         }
+
+        // Ensure Geo-Search filters are always present with defaults if the form doesn't provide them
+        if (!this.currentFilters.origin_city_id) this.currentFilters.origin_city_id = '3212';
+        if (!this.currentFilters.range_km) this.currentFilters.range_km = '5';
     }
 
     async performSearch(clearResults = true) {
@@ -124,6 +135,7 @@ export class VehicleInstantSearch {
         this.isLoading = true;
         this.showLoading(clearResults);
 
+        // All necessary filters, including origin_city_id and range_km, are in this.currentFilters
         const params = new URLSearchParams({
             q: this.currentQuery,
             page: this.currentPage,
@@ -133,17 +145,15 @@ export class VehicleInstantSearch {
 
         try {
             const response = await fetch(`/api/vehicles/search?${params.toString()}`);
-
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
             const data = await response.json();
 
             this.totalResultsCount = data.nbHits;
             this.hasMoreResults = this.currentPage < data.nbPages;
+
             this.renderResults(data, clearResults);
             this.updateStats(data);
             this.updateEndMessage();
-
         } catch (error) {
             console.error('Search error:', error);
             this.showError();
@@ -163,12 +173,9 @@ export class VehicleInstantSearch {
         }
 
         if (this.noResults) this.noResults.classList.add('hidden');
-
         if (clearResults) {
             this.resultsContainer.innerHTML = data.hits.join('');
             this.setupImageLoading();
-            // Only scroll to top on a fresh search/filter, not page load
-            // window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
             // Efficient Append
             const fragment = document.createDocumentFragment();

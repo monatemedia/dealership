@@ -1,12 +1,23 @@
-{{-- resources/views/components/vehicle/search-results-display.blade.php --}}
+{{-- resources/views/component/vehicle/search-results-display.blade.php --}}
+{{--
+    This component displays the search results and contains the trigger
+    for the Geo-Search Modal.
+--}}
 <section>
     <div class="container">
         {{-- Header --}}
         <div class="section-header mb-medium">
             <h2 id="search-results-count">Define your search criteria</h2>
-            <a href="#"><span class="m-0">
-                <i class="fa-solid fa-compass"></i> Parow, Western Cape - 5 km
-            </span></a>
+            {{-- 🆕 ALPINE CONTEXT FOR LOCATION DISPLAY --}}
+            <a href="#" x-data @click.prevent="$dispatch('open-geo-modal')" class="location-link">
+                <span class="m-0">
+                    <i class="fa-solid fa-compass"></i>
+                    {{-- Default placeholder text, updated by the modal's applyLocationFilter --}}
+                    <span id="geo-city-display">Parow</span>,
+                    <span id="geo-province-display">Western Cape</span> -
+                    <span id="geo-range-display">5 km</span>
+                </span>
+            </a>
         </div>
 
         {{-- Main Results Grid --}}
@@ -38,4 +49,7 @@
             You've reached the end of the list.
         </div>
     </div>
+
+    {{-- 🆕 THE LOCATION SELECTION MODAL --}}
+    <x-vehicle.geo-search-modal />
 </section>

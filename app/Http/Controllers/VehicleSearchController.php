@@ -1,8 +1,10 @@
-<?php // app/Http/Controllers/VehicleSearchController.php
+<?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
+use App\Models\FuelType; // REQUIRED: Ensure this import is present
 
 class VehicleSearchController extends Controller
 {
@@ -29,6 +31,7 @@ class VehicleSearchController extends Controller
             if ($request->filled('subcategory_id')) {
                 $builder->where('subcategory_id', (int) $request->input('subcategory_id'));
             }
+
             // Apply other filters...
             if ($request->filled('manufacturer_id')) {
                 $builder->where('manufacturer_id', (int) $request->input('manufacturer_id'));
@@ -37,7 +40,6 @@ class VehicleSearchController extends Controller
             if ($request->filled('mileage')) {
                 $builder->where('mileage', '<=', (int) $request->input('mileage'));
             }
-
             // Execute search and paginate
             $results = $builder->paginate($perPage, 'page', $page);
             $vehicleIds = $results->pluck('id')->toArray();
@@ -68,10 +70,15 @@ class VehicleSearchController extends Controller
                 'subcategory',
                 'favouredUsers'
             ])
-            ->whereIn('id', $vehicleIds); // Hydrate only the IDs from Scout
+            // 🔑 FIX: Explicitly select columns and qualify 'id' to prevent ambiguity
+            ->select('vehicles.*')
+            ->whereIn('vehicles.id', $vehicleIds); // Hydrate only the IDs from Scout
+
+            // Determine if the Geo-Filter is active
+            $geoFilterApplied = isset($originCityId) && isset($rangeKm) && (int)$originCityId > 0 && (float)$rangeKm > 0;
 
             // Apply the PostGIS scope to the Eloquent query if the filters are present
-            if (isset($originCityId) && isset($rangeKm) && (int)$originCityId > 0 && (float)$rangeKm > 0) {
+            if ($geoFilterApplied) {
                  // The scope `withinDistance` will add the necessary joins and WHERE clause
                 $eloquentQuery->withinDistance((int)$originCityId, (float)$rangeKm);
             }
@@ -98,11 +105,22 @@ class VehicleSearchController extends Controller
                 ])->render();
             })->toArray();
 
+            // 🔑 FIX: Adjust the total hit count if the current page was filtered out by Geo-Search.
+            // This prevents the confusing "Found 10001 vehicles" message when no results are visible.
+            $vehiclesTotal = $results->total();
+            $nbPages = $results->lastPage();
+            if ($geoFilterApplied && $hydratedResults->isEmpty() && $vehiclesTotal > 0) {
+                // If the Geo-Filter filtered all results on this page, assume 0 total hits for now.
+                // The user needs to widen their search to reveal the true count.
+                $vehiclesTotal = 0;
+                $nbPages = 0; // Prevent infinite scroll from trying to load more empty pages
+            }
+
             return response()->json([
                 'hits' => $vehiclesHtml,
-                'nbHits' => $results->total(), // This is the total from Typesense/Scout
+                'nbHits' => $vehiclesTotal, // Use the potentially modified total
                 'page' => $results->currentPage() - 1,
-                'nbPages' => $results->lastPage(),
+                'nbPages' => $nbPages, // Use the potentially modified page count
                 'hitsPerPage' => $perPage,
                 'query' => $query,
             ]);
@@ -110,6 +128,7 @@ class VehicleSearchController extends Controller
         } catch (\Exception $e) {
             // Log the detailed error for server inspection
             \Log::error('Vehicle search fatal error: ' . $e->getMessage(), ['exception' => $e]);
+
             // Return a clearer 500 response message
             return response()->json([
                 'error' => 'Server search failed',
@@ -127,7 +146,7 @@ class VehicleSearchController extends Controller
             return response()->json([
                 'manufacturers' => \App\Models\Manufacturer::orderBy('name')->get(['id', 'name']),
                 'vehicleTypes' => \App\Models\VehicleType::orderBy('name')->get(['id', 'name']),
-                'fuelTypes' => \App\Models\FuelType::orderBy('name')->get(['id', 'name']),
+                'fuelTypes' => FuelType::orderBy('name')->get(['id', 'name']),
                 'provinces' => \App\Models\Province::orderBy('name')->get(['id', 'name']),
             ]);
         } catch (\Exception $e) {
@@ -144,6 +163,7 @@ class VehicleSearchController extends Controller
             $cities = \App\Models\City::where('province_id', $provinceId)
                 ->orderBy('name')
                 ->get(['id', 'name']);
+
             return response()->json($cities);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -155,7 +175,13 @@ class VehicleSearchController extends Controller
      */
     public function index(Request $request)
     {
-        return view('vehicle.search');
+        // 🔑 FIX: Fetch the collection of FuelType models (not just names)
+        $fuelTypes = FuelType::orderBy('name')->get();
+
+        // 🔑 FIX: Pass $fuelTypes into the view's scope.
+        return view('vehicle.search', [
+            'fuelTypes' => $fuelTypes,
+        ]);
     }
 
     /**
@@ -201,7 +227,6 @@ class VehicleSearchController extends Controller
             return response()->json([
                 'max_range_km' => max(5.0, $maxRange),
             ]);
-
         } catch (\Exception $e) {
             \Log::error('PostGIS Max Range Error: ' . $e->getMessage(), ['exception' => $e]);
             return response()->json(['error' => 'Failed to calculate max range.'], 500);

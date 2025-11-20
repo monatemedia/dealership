@@ -1,64 +1,63 @@
-{{-- resources/views/components/search/select-city.blade.php --}}
+{{-- resources/views/components/search/search-manufacturer.blade.php --}}
 <div x-data="{
     search: '',
-    cities: [],
+    manufacturers: [],
     selected: @js($attributes->get('value')),
     selectedName: '',
-    provinceId: null,
     open: false,
     loading: false,
 
-    async searchCities() {
+    async searchManufacturers() {
+        if (this.search === this.selectedName) {
+            this.manufacturers = [];
+            return;
+        }
+
         if (this.search.length < 2) {
-            this.cities = [];
+            this.manufacturers = [];
             return;
         }
 
         this.loading = true;
         try {
-            let url = `/api/cities/search?q=${encodeURIComponent(this.search)}`;
-            if (this.provinceId) {
-                url += `&province_id=${this.provinceId}`;
-            }
-            const response = await fetch(url);
-            this.cities = await response.json();
+            const response = await fetch(`/api/manufacturers/search?q=${encodeURIComponent(this.search)}`);
+            this.manufacturers = await response.json();
         } catch (error) {
-            console.error('Error fetching cities:', error);
+            console.error('Error fetching manufacturers:', error);
         }
         this.loading = false;
     },
 
-    selectCity(id, name) {
+    selectManufacturer(id, name) {
         this.selected = id;
         this.selectedName = name;
         this.open = false;
         this.search = name;
+        this.$dispatch('manufacturer-selected', { id });
     },
 
     async init() {
         if (this.selected) {
             try {
-                const response = await fetch(`/api/cities/${this.selected}`);
+                const response = await fetch(`/api/manufacturers/${this.selected}`);
                 const data = await response.json();
                 this.selectedName = data.name;
                 this.search = data.name;
-                this.provinceId = data.province_id;
             } catch (error) {
-                console.error('Error fetching initial city:', error);
+                console.error('Error fetching initial manufacturer:', error);
             }
         }
     }
 }"
-@province-selected.window="provinceId = $event.detail.id; selected = null; selectedName = ''; search = ''"
 @click.away="open = false"
 class="select-container">
-    <input type="hidden" name="city_id" x-model="selected">
+    <input type="hidden" name="manufacturer_id" x-model="selected">
     <input
         type="text"
         x-model="search"
-        @input.debounce.300ms="searchCities()"
+        @input.debounce.300ms="searchManufacturers()"
         @focus="open = true"
-        placeholder="Select City"
+        placeholder="Select Manufacturer"
         class="select-input"
     >
     <div
@@ -73,15 +72,15 @@ class="select-container">
             <template x-if="!loading && search.length < 2">
                 <div class="select-info">Type at least 2 characters to search</div>
             </template>
-            <template x-if="!loading && cities.length === 0 && search.length >= 2">
-                <div class="select-info">No cities found</div>
+            <template x-if="!loading && manufacturers.length === 0 && search.length >= 2">
+                <div class="select-info">No manufacturers found</div>
             </template>
-            <template x-for="city in cities" :key="city.id">
+            <template x-for="manufacturer in manufacturers" :key="manufacturer.id">
                 <button
                     type="button"
-                    @click="selectCity(city.id, city.name)"
+                    @click="selectManufacturer(manufacturer.id, manufacturer.name)"
                     class="select-item"
-                    x-text="city.name"
+                    x-text="manufacturer.name"
                 ></button>
             </template>
         </div>
