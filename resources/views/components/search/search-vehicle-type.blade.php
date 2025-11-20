@@ -1,39 +1,71 @@
 {{-- resources/views/components/search/search-vehicle-type.blade.php --}}
+@props(['value' => null])
 @php
-// Fix: Fetch the data directly in the component since it's a simple, static list.
-$types = \App\Models\VehicleType::all();
+    $initialSubcatId = request('subcategory_id', '');
 @endphp
-<div x-data="{
-    open: false,
-    selected: @js($attributes->get('value', '')),
-    selectedName: 'Select Type'
-}" @click.away="open = false" class="select-container w-full">
-    <input type="hidden" name="{{ $attributes->get('name', 'vehicle_type_id') }}" x-model="selected">
-    <button
-        type="button"
-        @click="open = !open"
-        :class="{ 'select-button-active': open }"
-        class="select-input flex justify-between items-center"
+
+<div class="select-container w-full"
+    x-data="{
+        // State for dynamic content
+        parentSubcatId: '{{ $initialSubcatId }}',
+        options: [],
+        isLoading: false,
+        selectedTypeId: '{{ request('vehicle_type_id', '') }}',
+
+        // Computed check for enabled state
+        isEnabled() { return this.parentSubcatId !== ''; },
+
+        // Fetch vehicle types from the API
+        async fetchOptions(subcatId) {
+            this.parentSubcatId = subcatId;
+            this.options = [];
+
+            if (!this.isEnabled()) {
+                this.selectedTypeId = '';
+                return;
+            }
+
+            this.isLoading = true;
+            try {
+                const response = await fetch(`/api/vehicle-types-by-sub/${subcatId}`);
+                if (response.ok) {
+                    this.options = await response.json();
+                } else {
+                    console.error('Failed to fetch vehicle types.');
+                    this.options = [];
+                }
+            } catch (error) {
+                console.error('Error fetching vehicle types:', error);
+                this.options = [];
+            } finally {
+                this.isLoading = false;
+            }
+        }
+    }"
+    x-init="
+        if (parentSubcatId) { fetchOptions(parentSubcatId); }
+        $nextTick(() => {
+            window.addEventListener('subcategory-selected', (e) => {
+                fetchOptions(e.detail.id);
+            });
+        });
+    "
+>
+    <select
+        name="{{ $attributes->get('name', 'vehicle_type_id') }}"
+        class="select-input"
+        x-model="selectedTypeId"
+        {{-- Bind disabled state (disabled if not enabled OR if loading) --}}
+        x-bind:disabled="!isEnabled() || isLoading"
+        {{-- Bind classes for greying out --}}
+        x-bind:class="{
+            'opacity-50 cursor-not-allowed': !isEnabled() || isLoading,
+            'select-input': true
+        }"
     >
-         <span x-text="selectedName">Select Type</span>
-        {{-- 🔑 FIX: Using custom CSS class for small icon size --}}
-        <svg class="select-icon-sm transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-    </button>
-    <div x-show="open" x-transition class="select-dropdown">
-        <div class="select-list">
-            <button type="button" @click="selected = ''; selectedName = 'Select Type'; open = false;" class="select-item select-item-clear">
-                Clear Selection
-            </button>
-            @foreach ($types as $type)
-                <button
-                    type="button"
-                    @click="selected = {{ $type->id }}; selectedName = '{{ $type->name }}'; open = false;"
-                           :class="{ 'select-item-active': selected == {{ $type->id }} }"
-                    class="select-item"
-                >
-                    {{ $type->name }}
-                </button>
-            @endforeach
-        </div>
-    </div>
+        <option value="" x-text="isLoading ? 'Loading...' : 'Body Type'"></option>
+        <template x-for="option in options" :key="option.id">
+            <option :value="option.id" x-text="option.name" :selected="option.id == selectedTypeId"></option>
+        </template>
+    </select>
 </div>

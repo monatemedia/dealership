@@ -7,13 +7,11 @@
     manufacturerId: null,
     open: false,
     loading: false,
-
     async searchModels() {
         if (this.search.length < 2) {
             this.models = [];
             return;
         }
-
         this.loading = true;
         try {
             let url = `/api/models/search?q=${encodeURIComponent(this.search)}`;
@@ -27,14 +25,19 @@
         }
         this.loading = false;
     },
-
     selectModel(id, name) {
         this.selected = id;
         this.selectedName = name;
         this.open = false;
         this.search = name;
     },
-
+    // 🔑 NEW: Helper function to clear component state
+    resetComponent() {
+        this.search = '';
+        this.selected = null; // Clear the actual ID
+        this.selectedName = '';
+        this.models = [];
+    },
     async init() {
         if (this.selected) {
             try {
@@ -47,9 +50,22 @@
                 console.error('Error fetching initial model:', error);
             }
         }
+
+        // 🔑 NEW: Watch for manual input clearing
+        this.$watch('search', (value) => {
+            if (value === '' && this.selected !== null) {
+                // If the user manually clears the input text, treat it as a reset
+                this.resetComponent();
+            }
+        });
+
+        // 🔑 NEW: Listen for global form reset event
+        window.addEventListener('filters-reset', () => {
+            this.resetComponent();
+        });
     }
 }"
-@manufacturer-selected.window="manufacturerId = $event.detail.id; selected = null; selectedName = ''; search = ''"
+@manufacturer-selected.window="manufacturerId = $event.detail.id; resetComponent();"
 @click.away="open = false"
 class="select-container">
     <input type="hidden" name="model_id" x-model="selected">

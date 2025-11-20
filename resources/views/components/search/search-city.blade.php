@@ -1,5 +1,8 @@
 {{-- resources/views/components/search/search-city.blade.php --}}
-<?php $provinceEvent = $attributes->get('province-event', 'province-selected'); ?>
+@php
+    $provinceEvent = $attributes->get('province-event', 'province-selected');
+    $cityEvent = $attributes->get('city-event', 'city-changed'); // Capture the dynamic event name prop
+@endphp
 <div x-data="{
     search: '',
     cities: [],
@@ -8,6 +11,7 @@
     provinceId: null,
     open: false,
     loading: false,
+
     async searchCities() {
         if (this.search.length < 2) {
             this.cities = [];
@@ -26,16 +30,32 @@
         }
         this.loading = false;
     },
+
     selectCity(id, name) {
         this.selected = id;
         this.selectedName = name;
         this.open = false;
         this.search = name;
-        // Dispatch the city-selected event for the geo-modal to update its state
+
+        // Dispatch the city-selected event (for map/modal)
         this.$dispatch('city-selected', { id: id, name: name });
-        // Dispatch city-changed so the range slider can update its max value
-        this.$dispatch('city-changed', { id: id });
+
+        // 🔑 FIX: Dispatch the dynamic event name (e.g., 'city-filter-selected')
+        // This ensures the search-range-slider listens correctly.
+        this.$dispatch('{{ $cityEvent }}', { id: id });
     },
+
+    // 🔑 NEW: Helper function to clear component state
+    resetComponent() {
+        this.search = '';
+        this.selected = null; // Clear the actual ID
+        this.selectedName = '';
+        this.provinceId = null;
+        this.cities = [];
+        // Important: Dispatch null/empty to force the range slider to clear its max range
+        this.$dispatch('{{ $cityEvent }}', { id: null });
+    },
+
     async init() {
         if (this.selected) {
             try {
@@ -48,11 +68,24 @@
                 console.error('Error fetching initial city:', error);
             }
         }
+
+        // 🔑 NEW: Listen for global form reset event
+        window.addEventListener('filters-reset', () => {
+            this.resetComponent();
+        });
+
+        // 🔑 NEW: Watch for manual input clearing
+        this.$watch('search', (value) => {
+            if (value === '' && this.selected !== null) {
+                this.resetComponent();
+            }
+        });
     }
 }"
-{{-- 🔑 FIX: Dynamically set the event listener name using the province-event attribute. --}}
-@php echo "@" . $provinceEvent . ".window=\"provinceId = \$event.detail.id; selected = null; selectedName = ''; search = ''\"" @endphp
-@click.away="open = false"class="select-container">
+{{-- Dynamically set the event listener name using the province-event attribute. --}}
+@php echo "@" . $provinceEvent . ".window=\"provinceId = \$event.detail.id; resetComponent()\"" @endphp
+@click.away="open = false"
+class="select-container">
     <input type="hidden" name="{{ $attributes->get('name', 'city_id') }}" x-model="selected">
     <input
         type="text"

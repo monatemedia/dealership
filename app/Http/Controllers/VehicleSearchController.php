@@ -1,10 +1,12 @@
-<?php
-
+<?php // app/Http/Controllers/VehicleSearchController.php
 namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use App\Models\FuelType; // REQUIRED: Ensure this import is present
+use App\Models\MainCategory; // 🔑 FIX 1: Import MainCategory model
+use App\Models\Subcategory; // 🔑 NEW IMPORT
+use App\Models\VehicleType; // 🔑 NEW IMPORT
 
 class VehicleSearchController extends Controller
 {
@@ -31,7 +33,6 @@ class VehicleSearchController extends Controller
             if ($request->filled('subcategory_id')) {
                 $builder->where('subcategory_id', (int) $request->input('subcategory_id'));
             }
-
             // Apply other filters...
             if ($request->filled('manufacturer_id')) {
                 $builder->where('manufacturer_id', (int) $request->input('manufacturer_id'));
@@ -40,6 +41,7 @@ class VehicleSearchController extends Controller
             if ($request->filled('mileage')) {
                 $builder->where('mileage', '<=', (int) $request->input('mileage'));
             }
+
             // Execute search and paginate
             $results = $builder->paginate($perPage, 'page', $page);
             $vehicleIds = $results->pluck('id')->toArray();
@@ -109,6 +111,7 @@ class VehicleSearchController extends Controller
             // This prevents the confusing "Found 10001 vehicles" message when no results are visible.
             $vehiclesTotal = $results->total();
             $nbPages = $results->lastPage();
+
             if ($geoFilterApplied && $hydratedResults->isEmpty() && $vehiclesTotal > 0) {
                 // If the Geo-Filter filtered all results on this page, assume 0 total hits for now.
                 // The user needs to widen their search to reveal the true count.
@@ -124,7 +127,6 @@ class VehicleSearchController extends Controller
                 'hitsPerPage' => $perPage,
                 'query' => $query,
             ]);
-
         } catch (\Exception $e) {
             // Log the detailed error for server inspection
             \Log::error('Vehicle search fatal error: ' . $e->getMessage(), ['exception' => $e]);
@@ -175,12 +177,16 @@ class VehicleSearchController extends Controller
      */
     public function index(Request $request)
     {
-        // 🔑 FIX: Fetch the collection of FuelType models (not just names)
+        // 🔑 FIX 2: Fetch the collection of MainCategory models
+        $mainCategories = MainCategory::orderBy('name')->get();
+
+        // Fetch the collection of FuelType models
         $fuelTypes = FuelType::orderBy('name')->get();
 
-        // 🔑 FIX: Pass $fuelTypes into the view's scope.
+        // 🔑 FIX 3: Pass both collections into the view's scope.
         return view('vehicle.search', [
             'fuelTypes' => $fuelTypes,
+            'mainCategories' => $mainCategories, // Pass the main categories
         ]);
     }
 
@@ -230,6 +236,56 @@ class VehicleSearchController extends Controller
         } catch (\Exception $e) {
             \Log::error('PostGIS Max Range Error: ' . $e->getMessage(), ['exception' => $e]);
             return response()->json(['error' => 'Failed to calculate max range.'], 500);
+        }
+    }
+
+    /**
+     * Get subcategories filtered by the selected Main Category ID.
+     */
+    public function getSubcategoriesByMainCategory(Request $request, $mainCategoryId)
+    {
+        try {
+            $subcategories = Subcategory::where('main_category_id', $mainCategoryId)
+                ->orderBy('name')
+                ->get(['id', 'name']);
+            return response()->json($subcategories);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch subcategories: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get Vehicle Types (Body Types) filtered by the selected Subcategory ID.
+     */
+    public function getVehicleTypesBySubcategory(Request $request, $subcategoryId)
+    {
+        try {
+            // Assuming VehicleType model has a subcategory_id field
+            $vehicleTypes = VehicleType::where('subcategory_id', $subcategoryId)
+                ->orderBy('name')
+                ->get(['id', 'name']);
+            return response()->json($vehicleTypes);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch vehicle types: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get Fuel Types filtered by the selected Subcategory ID using the relationship defined in Subcategory model.
+     */
+    public function getFuelTypesBySubcategory(Request $request, $subcategoryId)
+    {
+        try {
+            $subcategory = Subcategory::find($subcategoryId);
+            if (!$subcategory) {
+                return response()->json([], 404);
+            }
+            // Use the availableFuelTypes method from the Subcategory model
+            $fuelTypes = $subcategory->availableFuelTypes()->map(fn($ft) => ['id' => $ft->id, 'name' => $ft->name]);
+
+            return response()->json($fuelTypes);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch fuel types: ' . $e->getMessage()], 500);
         }
     }
 }

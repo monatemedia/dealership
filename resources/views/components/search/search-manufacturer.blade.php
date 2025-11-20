@@ -6,28 +6,24 @@
     selectedName: '',
     open: false,
     loading: false,
-
     async searchManufacturers() {
         if (this.search === this.selectedName) {
             this.manufacturers = [];
             return;
         }
-
         if (this.search.length < 2) {
             this.manufacturers = [];
             return;
         }
-
         this.loading = true;
         try {
             const response = await fetch(`/api/manufacturers/search?q=${encodeURIComponent(this.search)}`);
-            this.manufacturers = await response.json();
+                  this.manufacturers = await response.json();
         } catch (error) {
             console.error('Error fetching manufacturers:', error);
         }
         this.loading = false;
     },
-
     selectManufacturer(id, name) {
         this.selected = id;
         this.selectedName = name;
@@ -35,7 +31,15 @@
         this.search = name;
         this.$dispatch('manufacturer-selected', { id });
     },
-
+    // 🔑 NEW: Helper function to clear component state
+    resetComponent() {
+        this.search = '';
+        this.selected = null; // Clear the actual ID
+        this.selectedName = '';
+        this.manufacturers = [];
+        // Important: Dispatch null to force the Model component to clear itself
+        this.$dispatch('manufacturer-selected', { id: null });
+    },
     async init() {
         if (this.selected) {
             try {
@@ -47,6 +51,19 @@
                 console.error('Error fetching initial manufacturer:', error);
             }
         }
+
+        // 🔑 NEW: Watch for manual input clearing
+        this.$watch('search', (value) => {
+            if (value === '' && this.selected !== null) {
+                // If the user manually clears the input text, treat it as a reset
+                this.resetComponent();
+            }
+        });
+
+        // 🔑 NEW: Listen for global form reset event
+        window.addEventListener('filters-reset', () => {
+            this.resetComponent();
+        });
     }
 }"
 @click.away="open = false"

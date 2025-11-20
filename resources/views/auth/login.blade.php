@@ -1,3 +1,4 @@
+{{-- resources/views/auth/login.blade.php --}}
 <x-guest-layout title="Login" bodyClass="page-login">
     <h1 class="auth-page-title">Login</h1>
     {{ session('error') }}

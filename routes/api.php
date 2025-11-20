@@ -60,6 +60,13 @@ Route::get('/vehicles/cities/{provinceId}', [VehicleSearchController::class, 'ge
     ->name('api.vehicles.cities');
 
 // -------------------------------
+// API ROUTES FOR STATIC SEARCH
+// -------------------------------
+Route::get('/subcategories-by-main/{mainCategoryId}', [VehicleSearchController::class, 'getSubcategoriesByMainCategory']);
+Route::get('/vehicle-types-by-sub/{subcategoryId}', [VehicleSearchController::class, 'getVehicleTypesBySubcategory']);
+Route::get('/fuel-types-by-sub/{subcategoryId}', [VehicleSearchController::class, 'getFuelTypesBySubcategory']);
+
+// -------------------------------
 // MAXIMUM RANGE FOR SLIDER
 // -------------------------------
 Route::get('/vehicles/max-range/{cityId}', [VehicleSearchController::class, 'getMaxRange']);

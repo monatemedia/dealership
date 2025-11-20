@@ -1,3 +1,4 @@
+{{-- resources/views/components/vehicle/search-results-list.blade.php --}}
 <div class="search-vehicles-results">
     <div id="loading-indicator" class="hidden" style="position: relative; min-height: 100px;">
         <div class="loader main">

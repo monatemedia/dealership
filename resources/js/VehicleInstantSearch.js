@@ -1,3 +1,4 @@
+// resources/js/VehicleInstantSearch
 export class VehicleInstantSearch {
     constructor() {
         // DOM Elements

@@ -1,4 +1,4 @@
-<?php
+<?php // app/Models/VehicleType.php
 
 namespace App\Models;
 

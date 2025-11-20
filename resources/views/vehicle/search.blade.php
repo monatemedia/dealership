@@ -2,11 +2,8 @@
 <x-app-layout title="Search">
     <main>
         <section>
-
             <x-search-form /> {{-- Reusing the component from index.blade.php --}}
-
             <div class="container">
-
                 <div class="sm:flex items-center justify-between mb-medium">
                     <div class="flex items-center">
                         <button class="show-filters-button flex items-center">
@@ -31,12 +28,11 @@
                         <option value="-published_at">Latest Listing First</option>
                     </select>
                 </div>
-
                 <div class="search-vehicle-results-wrapper">
-                    <x-vehicle.search-sidebar-filters />
+                    {{-- 🔑 FIX: Pass fetched data from the controller to the sidebar component --}}
+                    <x-vehicle.search-sidebar-filters :fuel-types="$fuelTypes" :main-categories="$mainCategories" />
                     <x-vehicle.search-results-list />
                 </div>
-
             </div>
         </section>
     </main>
