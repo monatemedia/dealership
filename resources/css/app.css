@@ -2554,10 +2554,6 @@ input[type="checkbox"]:checked::after {
     gap: 24px; /* space-y-6 */
 }
 
-.filter-group {
-    /* No additional styling needed here beyond margin/padding defined by filters-content gap */
-}
-
 .filter-title {
     font-weight: 600; /* font-semibold */
     margin-bottom: 8px; /* mb-2 */

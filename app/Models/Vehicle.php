@@ -50,7 +50,6 @@ class Vehicle extends Model
     ];
 
     # Define the relationships
-
     public function mainCategory() : BelongsTo
     {
         return $this->belongsTo(MainCategory::class, 'main_category_id');
@@ -113,6 +112,7 @@ class Vehicle extends Model
     {
         return $this->belongsTo(ServiceHistory::class);
     }
+
     public function exteriorCondition(): BelongsTo
     {
         return $this->belongsTo(Condition::class, 'exterior_condition_id');
@@ -164,7 +164,6 @@ class Vehicle extends Model
      * Define the features function and define the return type
      * @return HasOne<VehicleFeatures, Vehicle>
      */
-
     public function features(): BelongsToMany
     {
         return $this->belongsToMany(Feature::class, 'feature_vehicle');
@@ -241,7 +240,6 @@ class Vehicle extends Model
             'mainCategory', // Added for indexing
             'subcategory', // Added for indexing
         ]);
-
         return [
             'id' => (string) $this->id,
             'title' => (string) ($this->getTitle() ?? ''),
@@ -250,7 +248,6 @@ class Vehicle extends Model
             'year' => (int) ($this->year ?? 0),
             'mileage' => (int) ($this->mileage ?? 0),
             'status' => (string) ($this->status ?? 'draft'),
-
             // ----------------------------------------------------------------
             // 🎯 CRITICAL FIX: Include Taxonomy IDs for filtering
             // ----------------------------------------------------------------
@@ -259,7 +256,6 @@ class Vehicle extends Model
             'subcategory_id' => (int) ($this->subcategory_id ?? 0),
             'subcategory_name' => (string) ($this->subcategory?->name ?? ''),
             // ----------------------------------------------------------------
-
             // Denormalized relationship data for searchability
             'manufacturer_id' => (int) ($this->manufacturer_id ?? 0),
             'manufacturer_name' => (string) ($this->manufacturer?->name ?? ''),
@@ -273,7 +269,6 @@ class Vehicle extends Model
             'city_name' => (string) ($this->city?->name ?? ''),
             'province_id' => (int) ($this->city?->province_id ?? 0),
             'province_name' => (string) ($this->city?->province?->name ?? ''),
-
             // Timestamps
             'created_at' => (int) ($this->created_at?->timestamp ?? 0),
             'updated_at' => (int) ($this->updated_at?->timestamp ?? 0),
@@ -329,22 +324,23 @@ class Vehicle extends Model
      */
     public function scopeWithinDistance($query, int $originCityId, float $rangeKm)
     {
-        // The query relies on the 'cities' table, so we must join it
-        // The PostGIS function ST_DistanceSphere returns distance in meters.
         $rangeMeters = $rangeKm * 1000.0;
 
-        return $query
-            ->join('cities AS listing_city', 'vehicles.city_id', '=', 'listing_city.id')
-            ->join('cities AS origin_city', function ($join) use ($originCityId) {
-                $join->where('origin_city.id', '=', $originCityId);
-            })
-            ->whereRaw("
-                ST_DistanceSphere(
-                    ST_MakePoint(origin_city.longitude, origin_city.latitude),
-                    ST_MakePoint(listing_city.longitude, listing_city.latitude)
-                ) <= ?
-            ", [$rangeMeters])
-            // Select all vehicle columns to avoid overwriting them during the join
-            ->select('vehicles.*');
+        // 🔑 CRITICAL FIX: Use a WHERE IN subquery to find all city IDs (dest_city.id)
+        // that are within the range of the origin city (origin_city.id).
+        return $query->whereIn('city_id', function ($subQuery) use ($originCityId, $rangeMeters) {
+            $subQuery->select('dest_city.id')
+                ->from('cities AS origin_city')
+                ->crossJoin('cities AS dest_city')
+                ->where('origin_city.id', $originCityId)
+                ->whereRaw("
+                    ST_DistanceSphere(
+                        ST_MakePoint(origin_city.longitude, origin_city.latitude),
+                        ST_MakePoint(dest_city.longitude, dest_city.latitude)
+                    ) <= ?
+                ", [$rangeMeters]);
+        });
+        // Note: The select('vehicles.*') is no longer needed here as no joins are performed.
+        // It relies purely on the main query's columns.
     }
 }

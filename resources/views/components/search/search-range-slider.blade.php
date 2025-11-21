@@ -1,5 +1,13 @@
 {{-- resources/views/components/search/search-range-slider.blade.php --}}
+
+<?php
+/** @var string $name The name of the input field (e.g., 'range_km') */
+/** @var int $initialRange The initial value for the range slider */
+/** @var int $maxRange The default maximum value for the range slider */
+/** @var string $cityEvent The event name to listen for city changes */
+?>
 @props(['name' => 'range_km', 'initialRange' => 5, 'maxRange' => 1000, 'cityEvent' => 'city-changed'])
+
 <div
     x-data="{
         range: {{ $initialRange }},
@@ -8,35 +16,40 @@
         cityId: null,
 
         async fetchMaxRange(id) {
+            // Store the current range before potential modification
+            const currentRangeBeforeFetch = this.range;
+
             // Convert ID to string if null/undefined, otherwise keep as is
             const cityIdString = id !== null && id !== undefined ? String(id) : null;
-
-            // 1. Update component state and check if a fetch is needed
             this.cityId = cityIdString;
+
             if (!this.cityId || this.loadingMax) {
-                // If city is cleared or null, reset maxRange to default and update range
                 if (!this.cityId) {
                     this.maxRange = {{ $maxRange }};
+                    // Reset range to default 5 if city is cleared
                     this.range = 5;
                 }
                 return;
             }
-
             this.loadingMax = true;
             try {
-                // Call the new API endpoint to get the maximum distance
                 const response = await fetch(`/api/vehicles/max-range/${this.cityId}`);
                 const data = await response.json();
-
-                // Use the returned max_range_km or a large, safe default if the API fails
                 console.log('MAX RANGE API RESPONSE:', data.max_range_km);
-                this.maxRange = data.max_range_km || 1500;
 
-                // Ensure the current range doesn't exceed the new max
-                this.range = Math.min(this.range, this.maxRange);
+                const newMax = data.max_range_km || 1500;
+                this.maxRange = newMax;
 
-                // Manually trigger an input change to update the hidden field immediately
-                this.$el.querySelector('input[type=range]').dispatchEvent(new Event('input'));
+                // 💡 Improvement: Only adjust 'range' if it exceeds the new max,
+                // otherwise keep the user's current slider setting (e.g., 354 km).
+                if (currentRangeBeforeFetch > newMax) {
+                    this.range = newMax;
+                    console.log(`Range adjusted down to ${newMax} km.`);
+                }
+
+                // Log the final state value
+                console.log('Range state after fetchMaxRange update:', this.range);
+
             } catch (error) {
                 console.error('Error fetching max range:', error);
                 this.maxRange = 1500;
@@ -49,46 +62,54 @@
             this.range = 5;
             this.maxRange = {{ $maxRange }};
             this.cityId = null;
-            // Ensure the hidden field updates immediately when the parent form resets.
-            this.$el.querySelector('input[type=range]').dispatchEvent(new Event('input'));
         }
     }"
-
     x-on:{{ $cityEvent }}.window="
         console.log('RANGE SLIDER RECEIVED CITY EVENT:', $event.detail.id);
+
+        // 1. Start the Max Range calculation (which might update 'range' state)
         fetchMaxRange($event.detail.id);
+
+        // 🟢 CRITICAL FIX: Use $nextTick to ensure the Alpine 'range' state
+        // has finished propagating to the hidden input's DOM value before the
+        // external filter application logic reads it.
+        $nextTick(() => {
+            const finalRange = document.getElementById('range_km_filter').value;
+            console.log('Range Hidden Input value after $nextTick:', finalRange);
+        });
     "
-
     x-on:filters-reset.window="resetSliderState()"
-
     x-init="
-        // 🔑 CRITICAL FIX: Wrapping logic in an IIFE to provide a safe scope for 'const' declarations,
-        // which resolves the 'expected expression, got keyword' syntax error in Alpine.
+        // CRITICAL FIX: IIFE wrapper for safe scope.
         (() => {
+            const rangeInput = document.getElementById('range_km_filter');
             const initialCityId = document.getElementById('origin_city_id_filter')?.value;
-            const initialRange = document.getElementById('range_km_filter')?.value;
+            const initialRange = rangeInput ? rangeInput.value : null;
 
             if (initialCityId && initialCityId !== 'null' && initialCityId !== 'undefined') {
-                // Ensure range is an integer
+                // Ensure range is an integer, falling back to initialRange prop if input is empty
                 this.range = parseInt(initialRange || this.range);
                 // Fetch max range for the initial city, if set
-                this.fetchMaxRange(initialCityId);
+                fetchMaxRange(initialCityId);
             } else {
-                // If no city is pre-selected, set to the 5km default
                 this.range = 5;
-                // The maxRange will remain the initial prop default (1000)
             }
         })();
     "
-    class="range-slider-container">
-    <input type="hidden" name="{{ $name }}" x-model="range">
+    class="py-2">
+
+    {{-- The hidden input uses :value, binding directly to the 'range' state --}}
+    <input type="hidden" name="{{ $name }}" :value="range" id="range_km_filter">
+
     <div class="flex justify-between mb-2">
         <label for="{{ $name }}" class="text-sm font-medium text-gray-700">
             Max Distance
             <span x-show="loadingMax" class="text-xs text-gray-500">(Calculating max...)</span>:
         </label>
+        {{-- Display the live slider value --}}
         <span x-text="`${range} km`" class="font-bold text-primary"></span>
     </div>
+
     <input
         type="range"
         id="{{ $name }}"
@@ -99,6 +120,7 @@
         class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
         style="--tw-bg-opacity: 1; --tw-text-opacity: 1; accent-color: var(--primary-color);"
     >
+
     <div class="flex justify-between text-xs text-gray-500 mt-1">
         <span>5 km</span>
         <span x-text="`${Math.round(maxRange)} km`"></span>

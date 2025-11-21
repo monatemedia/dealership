@@ -1,4 +1,3 @@
-// resources/js/VehicleInstantSearch
 export class VehicleInstantSearch {
     constructor() {
         // DOM Elements
@@ -22,17 +21,11 @@ export class VehicleInstantSearch {
         this.hasMoreResults = true;
         this.totalResultsCount = 0;
 
-        // CRITICAL CHANGE 1: Initialize filters and set a default Geo-Search state
-        this.currentFilters = {
-            // Default Location: Parow, 5km (Based on your successful test)
-            // These will be overridden by the hidden inputs if the user interacts with the modal
-            origin_city_id: '3212',
-            range_km: '5',
-        };
+        // Filters will contain all form inputs, including geo-search parameters (origin_city_id, range_km)
+        this.currentFilters = {};
 
         // Only init if critical elements exist
         if (this.resultsContainer) {
-            // CRITICAL CHANGE 2: Read initial filters immediately from the hidden form
             this.updateFilters();
             this.init();
         }
@@ -69,11 +62,7 @@ export class VehicleInstantSearch {
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
                 if (this.filterForm) this.filterForm.reset();
-                this.currentFilters = {
-                    // Reset to hardcoded Geo-Search defaults
-                    origin_city_id: '3212',
-                    range_km: '5',
-                };
+                this.currentFilters = {}; // Reset to empty filters
                 this.currentPage = 1;
                 this.hasMoreResults = true;
                 this.currentSort = '';
@@ -96,7 +85,17 @@ export class VehicleInstantSearch {
         // 5. Infinite Scroll
         this.setupInfiniteScroll();
 
-        // 6. Initial Load
+        // 6. FIX: Custom Listener for Geo-Search Updates
+        // Assuming your Alpine component dispatches this event after setting the form values.
+        window.addEventListener('geo-filters-updated', () => {
+            console.log('Vehicle Instant Search: Received GEO update event. Triggering search...');
+            this.currentPage = 1;
+            this.hasMoreResults = true;
+            this.updateFilters(); // Re-read the newly set hidden inputs
+            this.performSearch(true);
+        });
+
+        // 7. Initial Load
         this.performSearch(true);
     }
 
@@ -108,6 +107,7 @@ export class VehicleInstantSearch {
                 const scrollPosition = window.innerHeight + window.scrollY;
                 const pageHeight = document.documentElement.scrollHeight;
                 const threshold = 300;
+
                 if (scrollPosition >= pageHeight - threshold) {
                     if (!this.isLoading && this.hasMoreResults) {
                         this.currentPage++;
@@ -123,16 +123,14 @@ export class VehicleInstantSearch {
         const formData = new FormData(this.filterForm);
         this.currentFilters = {};
         for (let [key, value] of formData.entries()) {
+            // Only include non-empty values
             if (value) this.currentFilters[key] = value;
         }
-
-        // Ensure Geo-Search filters are always present with defaults if the form doesn't provide them
-        if (!this.currentFilters.origin_city_id) this.currentFilters.origin_city_id = '3212';
-        if (!this.currentFilters.range_km) this.currentFilters.range_km = '5';
     }
 
     async performSearch(clearResults = true) {
         if (this.isLoading) return;
+
         this.isLoading = true;
         this.showLoading(clearResults);
 
@@ -147,7 +145,13 @@ export class VehicleInstantSearch {
         try {
             const response = await fetch(`/api/vehicles/search?${params.toString()}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
             const data = await response.json();
+
+            // 🔑 IMPORTANT: Verify that the backend is returning the rendered HTML for each hit
+            if (data.hits && data.hits.length > 0 && typeof data.hits[0] !== 'string') {
+                console.error('BACKEND CHECK FAILED: The frontend requires the "hits" array to contain HTML strings (Blade-rendered cards). Please ensure your Laravel Scout search endpoint renders each hit before returning the JSON payload.');
+            }
 
             this.totalResultsCount = data.nbHits;
             this.hasMoreResults = this.currentPage < data.nbPages;
@@ -155,6 +159,7 @@ export class VehicleInstantSearch {
             this.renderResults(data, clearResults);
             this.updateStats(data);
             this.updateEndMessage();
+
         } catch (error) {
             console.error('Search error:', error);
             this.showError();
@@ -174,6 +179,7 @@ export class VehicleInstantSearch {
         }
 
         if (this.noResults) this.noResults.classList.add('hidden');
+
         if (clearResults) {
             this.resultsContainer.innerHTML = data.hits.join('');
             this.setupImageLoading();
@@ -205,6 +211,7 @@ export class VehicleInstantSearch {
     updateEndMessage() {
         const endMessage = document.getElementById('end-of-results');
         const totalShown = document.getElementById('total-shown');
+
         if (!endMessage) return;
 
         if (!this.hasMoreResults && this.totalResultsCount > 0) {
@@ -242,10 +249,10 @@ export class VehicleInstantSearch {
     showError() {
         // Only replace content if it's a fresh search
         if (this.currentPage === 1) {
-            // UPDATED: Uses standard CSS class instead of Tailwind
             this.resultsContainer.innerHTML = `
-                <div class="search-error-message">
-                    Unable to load vehicles. Please try again later.
+                <div class="p-8 text-center bg-red-50 text-red-700 rounded-lg border border-red-200">
+                    <h3 class="font-bold text-xl mb-2">Search Error</h3>
+                    <p>Unable to load vehicles. Please check your network connection or try again later.</p>
                 </div>
             `;
         }

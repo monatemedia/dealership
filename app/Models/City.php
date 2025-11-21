@@ -81,25 +81,25 @@ class City extends Model
      * $johannesburg = City::where('name', 'Johannesburg')->first();
      * $distance = $capeTown->distanceTo($johannesburg); // Returns distance in km
      */
-    public function distanceTo(City $otherCity): float
-    {
-        if (!$this->latitude || !$this->longitude || !$otherCity->latitude || !$otherCity->longitude) {
-            return 0;
-        }
+    // public function distanceTo(City $otherCity): float
+    // {
+    //     if (!$this->latitude || !$this->longitude || !$otherCity->latitude || !$otherCity->longitude) {
+    //         return 0;
+    //     }
 
-        $earthRadius = 6371; // km
+    //     $earthRadius = 6371; // km
 
-        $latFrom = deg2rad($this->latitude);
-        $lonFrom = deg2rad($this->longitude);
-        $latTo = deg2rad($otherCity->latitude);
-        $lonTo = deg2rad($otherCity->longitude);
+    //     $latFrom = deg2rad($this->latitude);
+    //     $lonFrom = deg2rad($this->longitude);
+    //     $latTo = deg2rad($otherCity->latitude);
+    //     $lonTo = deg2rad($otherCity->longitude);
 
-        $latDelta = $latTo - $latFrom;
-        $lonDelta = $lonTo - $lonFrom;
+    //     $latDelta = $latTo - $latFrom;
+    //     $lonDelta = $lonTo - $lonFrom;
 
-        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+    //     $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+    //         cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
 
-        return round($angle * $earthRadius, 2);
-    }
+    //     return round($angle * $earthRadius, 2);
+    // }
 }
