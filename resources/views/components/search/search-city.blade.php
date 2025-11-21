@@ -1,7 +1,7 @@
 {{-- resources/views/components/search/search-city.blade.php --}}
 @php
     $provinceEvent = $attributes->get('province-event', 'province-selected');
-    $cityEvent = $attributes->get('city-event', 'city-changed'); // Capture the dynamic event name prop
+    $cityEvent = $attributes->get('city-event', 'city-changed');
 @endphp
 <div x-data="{
     search: '',
@@ -20,11 +20,16 @@
         this.loading = true;
         try {
             let url = `/api/cities/search?q=${encodeURIComponent(this.search)}`;
+            // Optional filtering: only add province filter if one is selected
             if (this.provinceId) {
                 url += `&province_id=${this.provinceId}`;
+                console.log('🔍 Fetching cities filtered by province:', this.provinceId);
+            } else {
+                console.log('🔍 Fetching all cities (no province filter)');
             }
             const response = await fetch(url);
             this.cities = await response.json();
+            console.log('✅ Cities received:', this.cities.length, 'results');
         } catch (error) {
             console.error('Error fetching cities:', error);
         }
@@ -37,26 +42,38 @@
         this.open = false;
         this.search = name;
 
-        // Dispatch the city-selected event (for map/modal)
+        console.log('📍 City selected:', { id, name });
         this.$dispatch('city-selected', { id: id, name: name });
-
-        // 🔑 FIX: Dispatch the dynamic event name (e.g., 'city-filter-selected')
-        // This ensures the search-range-slider listens correctly.
         this.$dispatch('{{ $cityEvent }}', { id: id });
     },
 
-    // 🔑 NEW: Helper function to clear component state
-    resetComponent() {
+    resetCityOnly() {
+        // Only reset city, keep province filter intact
+        console.log('🔄 Resetting city selection (keeping province filter)');
         this.search = '';
-        this.selected = null; // Clear the actual ID
+        this.selected = null;
         this.selectedName = '';
-        this.provinceId = null;
         this.cities = [];
-        // Important: Dispatch null/empty to force the range slider to clear its max range
         this.$dispatch('{{ $cityEvent }}', { id: null });
     },
 
+    resetComponent() {
+        // Full reset: clear both city and province filter
+        console.log('🔄 Full reset: clearing city and province filter');
+        this.search = '';
+        this.selected = null;
+        this.selectedName = '';
+        this.provinceId = null;
+        this.cities = [];
+        this.$dispatch('{{ $cityEvent }}', { id: null });
+    },
+
+    closeDropdown() {
+        this.open = false;
+    },
+
     async init() {
+        // Load initial city if provided
         if (this.selected) {
             try {
                 const response = await fetch(`/api/cities/${this.selected}`);
@@ -64,27 +81,47 @@
                 this.selectedName = data.name;
                 this.search = data.name;
                 this.provinceId = data.province_id;
+                console.log('🏙️ Initial city loaded:', data.name);
             } catch (error) {
                 console.error('Error fetching initial city:', error);
             }
         }
 
-        // 🔑 NEW: Listen for global form reset event
+        // Listen for filter reset
         window.addEventListener('filters-reset', () => {
             this.resetComponent();
         });
 
-        // 🔑 NEW: Watch for manual input clearing
+        // Watch for manual clearing
         this.$watch('search', (value) => {
             if (value === '' && this.selected !== null) {
-                this.resetComponent();
+                this.resetCityOnly();
             }
         });
     }
 }"
-{{-- Dynamically set the event listener name using the province-event attribute. --}}
-@php echo "@" . $provinceEvent . ".window=\"provinceId = \$event.detail.id; resetComponent()\"" @endphp
-@click.away="open = false"
+x-init="
+    console.log('🏙️ City component initialized. Listening for event:', '{{ $provinceEvent }}');
+    console.log('🏙️ Initial provinceId:', provinceId);
+    init();
+    // Listen to the province event dynamically
+    window.addEventListener('{{ $provinceEvent }}', (event) => {
+        console.log('🗺️ Province event received in city component:', event.detail);
+        const newProvinceId = event.detail.id;
+
+        // Check if province was cleared (null, empty string, or undefined)
+        if (!newProvinceId || newProvinceId === '' || newProvinceId === null) {
+            console.log('🗑️ Province cleared - resetting city component completely');
+            provinceId = null;
+            resetCityOnly();
+        } else {
+            console.log('🗺️ provinceId updated to:', newProvinceId);
+            provinceId = newProvinceId;
+            resetCityOnly();
+        }
+    });
+"
+@click.outside="closeDropdown()"
 class="select-container">
     <input type="hidden" name="{{ $attributes->get('name', 'city_id') }}" x-model="selected">
     <input
@@ -92,8 +129,10 @@ class="select-container">
         x-model="search"
         @input.debounce.300ms="searchCities()"
         @focus="open = true"
+        @blur="setTimeout(() => { if (!$el.closest('[x-data]').querySelector('.select-dropdown:hover')) closeDropdown() }, 150)"
         placeholder="Select City"
         class="select-input"
+        autocomplete="off"
     >
     <div
         x-show="open"
@@ -105,10 +144,16 @@ class="select-container">
                 <div class="select-info">Loading...</div>
             </template>
             <template x-if="!loading && search.length < 2">
-                <div class="select-info">Type at least 2 characters to search</div>
+                <div class="select-info">
+                    <span x-show="provinceId">Type at least 2 characters to search cities in selected province</span>
+                    <span x-show="!provinceId">Type at least 2 characters to search all cities</span>
+                </div>
             </template>
             <template x-if="!loading && cities.length === 0 && search.length >= 2">
-                <div class="select-info">No cities found</div>
+                <div class="select-info">
+                    <span x-show="provinceId">No cities found in selected province</span>
+                    <span x-show="!provinceId">No cities found</span>
+                </div>
             </template>
             <template x-for="city in cities" :key="city.id">
                 <button

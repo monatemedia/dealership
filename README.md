@@ -143,7 +143,7 @@ php artisan serve
 - In a second terminal run
 ```sh
 # Start the Vite dev server
-npm run dev
+npm run build && npm run dev
 ```
 
 - In a third terminal run

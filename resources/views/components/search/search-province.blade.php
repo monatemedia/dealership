@@ -1,4 +1,8 @@
 {{-- resources/views/components/search/search-province.blade.php --}}
+@php
+    // Allow dynamic event name via dispatch-event attribute
+    $dispatchEvent = $attributes->get('dispatch-event', 'province-selected');
+@endphp
 <div x-data="{
     search: '',
     provinces: [],
@@ -28,7 +32,9 @@
         this.selectedName = name;
         this.open = false;
         this.search = name;
-        this.$dispatch('province-selected', { id });
+
+        console.log('🗺️ Province selected:', { id, name });
+        this.$dispatch('{{ $dispatchEvent }}', { id, name });
     },
 
     async init() {
@@ -38,18 +44,34 @@
             this.selectedName = data.name;
             this.search = data.name;
         }
+
+        // Watch for manual clearing - only dispatch reset event
+        this.$watch('search', (value) => {
+            if (value === '' && this.selected !== null) {
+                console.log('🗑️ Province input cleared');
+                this.selected = null;
+                this.selectedName = '';
+                this.$dispatch('{{ $dispatchEvent }}', { id: null, name: '' });
+            }
+        });
+    },
+
+    closeDropdown() {
+        this.open = false;
     }
 }"
-@click.away="open = false"
+@click.outside="closeDropdown()"
 class="select-container">
-    <input type="hidden" name="province_id" x-model="selected">
+    <input type="hidden" name="{{ $attributes->get('name', 'province_id') }}" x-model="selected">
     <input
         type="text"
         x-model="search"
         @input.debounce.300ms="searchProvinces()"
         @focus="open = true"
+        @blur="setTimeout(() => { if (!$el.closest('[x-data]').querySelector('.select-dropdown:hover')) closeDropdown() }, 150)"
         placeholder="Select Province"
         class="select-input"
+        autocomplete="off"
     >
     <div
         x-show="open"
