@@ -4,28 +4,52 @@ namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
-use App\Models\FuelType; // REQUIRED: Ensure this import is present
-use App\Models\MainCategory; // 🔑 FIX 1: Import MainCategory model
-use App\Models\Subcategory; // 🔑 NEW IMPORT
-use App\Models\VehicleType; // 🔑 NEW IMPORT
+use App\Models\FuelType;
+use App\Models\MainCategory;
+use App\Models\Subcategory;
+use App\Models\VehicleType;
 
 class VehicleSearchController extends Controller
 {
     /**
      * API endpoint for InstantSearch.js
-     * This endpoint handles the search and returns results compatible with InstantSearch
      */
     public function instantSearch(Request $request)
     {
         $query = $request->input('q', '');
         $page = max(1, (int) $request->input('page', 1));
         $perPage = 12;
-        $originCityId = $request->input('origin_city_id'); // New input for Geo-Search origin
-        $rangeKm = $request->input('range_km'); // New input for Geo-Search range
+        $originCityId = $request->input('origin_city_id');
+        $rangeKm = $request->input('range_km');
 
         try {
             // Build Scout query
             $builder = Vehicle::search($query);
+
+            // 🔑 NEW: Apply Typesense native geo-filtering
+            if ($originCityId && $rangeKm && (int)$originCityId > 0 && (float)$rangeKm > 0) {
+                // Get origin city coordinates
+                $originCity = \App\Models\City::find((int)$originCityId);
+
+                if ($originCity && $originCity->latitude && $originCity->longitude) {
+                    $lat = (float) $originCity->latitude;
+                    $lon = (float) $originCity->longitude;
+                    $radiusKm = (float) $rangeKm;
+
+                    \Log::debug('Geo-Filter: Using Typesense native filtering', [
+                        'origin_city_id' => $originCityId,
+                        'lat' => $lat,
+                        'lon' => $lon,
+                        'range_km' => $radiusKm,
+                    ]);
+
+                    // Use Typesense's geopoint filtering
+                    // Format: geo_location:(lat, lon, radius_km)
+                    $builder->options([
+                        'filter_by' => "geo_location:($lat, $lon, {$radiusKm} km)"
+                    ]);
+                }
+            }
 
             // Apply Taxonomy Filters
             if ($request->filled('main_category_id')) {
@@ -35,11 +59,10 @@ class VehicleSearchController extends Controller
                 $builder->where('subcategory_id', (int) $request->input('subcategory_id'));
             }
 
-            // Apply other filters...
+            // Apply other filters
             if ($request->filled('manufacturer_id')) {
                 $builder->where('manufacturer_id', (int) $request->input('manufacturer_id'));
             }
-            // ... (keep all other existing filter applications) ...
             if ($request->filled('mileage')) {
                 $builder->where('mileage', '<=', (int) $request->input('mileage'));
             }
@@ -48,7 +71,7 @@ class VehicleSearchController extends Controller
             $results = $builder->paginate($perPage, 'page', $page);
             $vehicleIds = $results->pluck('id')->toArray();
 
-            // CRITICAL FIX 1: Handle case where Scout search returns 0 results
+            // Handle case where Scout search returns 0 results
             if (empty($vehicleIds)) {
                  return response()->json([
                     'hits' => [],
@@ -60,9 +83,7 @@ class VehicleSearchController extends Controller
                 ]);
             }
 
-            // -------------------------------------------------------------
-            // 🆕 APPLY GEO-SEARCH FILTER TO THE ELOQUENT QUERY
-            // -------------------------------------------------------------
+            // Hydrate results with Eloquent relationships
             $eloquentQuery = Vehicle::with([
                 'city.province',
                 'vehicleType',
@@ -74,34 +95,9 @@ class VehicleSearchController extends Controller
                 'subcategory',
                 'favouredUsers'
             ])
-            // 🔑 FIX: Explicitly select columns and qualify 'id' to prevent ambiguity
             ->select('vehicles.*')
-            ->whereIn('vehicles.id', $vehicleIds); // Hydrate only the IDs from Scout
+            ->whereIn('vehicles.id', $vehicleIds);
 
-            // Determine if the Geo-Filter is active
-            $geoFilterApplied = isset($originCityId) && isset($rangeKm) && (int)$originCityId > 0 && (float)$rangeKm > 0;
-
-            // Apply the PostGIS scope to the Eloquent query if the filters are present
-            if ($geoFilterApplied) {
-                 // The scope `withinDistance` will add the necessary joins and WHERE clause
-                $eloquentQuery->withinDistance((int)$originCityId, (float)$rangeKm);
-
-                // 🔑 NEW DEBUG LOGGING: Log the SQL query generated by PostGIS scope
-                try {
-                    $debugSql = $eloquentQuery->toSql();
-                    $debugBindings = $eloquentQuery->getBindings();
-                    \Log::debug('PostGIS Geo-Filter Query Debug (After Fix):', [
-                        'sql' => $debugSql,
-                        'bindings' => $debugBindings,
-                        'origin_city_id' => $originCityId,
-                        'range_km' => $rangeKm,
-                    ]);
-                } catch (\Exception $e) {
-                    \Log::warning('Failed to log PostGIS query via toSql(): ' . $e->getMessage());
-                }
-            }
-
-            // Execute the final Eloquent query to get the filtered and hydrated vehicles
             $vehicles = $eloquentQuery->get()->keyBy('id');
 
             // Maintain Typesense result order and attach full models
@@ -110,12 +106,11 @@ class VehicleSearchController extends Controller
                 ->filter()
                 ->values();
 
-            // CRITICAL FIX 2: Check for authenticated user outside the loop
+            // Check for authenticated user
             $user = $request->user();
 
             // Render HTML for each vehicle using the Blade component
             $vehiclesHtml = $hydratedResults->map(function($vehicle) use ($user) {
-                // Safely determine watchlist status for guests
                 $isInWatchlist = $user ? $vehicle->favouredUsers->contains($user) : false;
                 return view('components.vehicle-item', [
                     'vehicle' => $vehicle,
@@ -123,40 +118,25 @@ class VehicleSearchController extends Controller
                 ])->render();
             })->toArray();
 
-            // 🔑 FIX: Adjust the total hit count if the current page was filtered out by Geo-Search.
-            $vehiclesTotal = $results->total();
-            $nbPages = $results->lastPage();
-
-            // Re-calculate the total hits if the geo filter reduced the current page's hits to zero
-            if ($geoFilterApplied) {
-                if ($hydratedResults->isEmpty() && $vehiclesTotal > 0) {
-                    // Set total to zero to indicate to the frontend that nothing matched the strict filter
-                    $vehiclesTotal = 0;
-                    $nbPages = 0;
-                }
-            }
-
             return response()->json([
                 'hits' => $vehiclesHtml,
-                'nbHits' => $vehiclesTotal, // Use the potentially modified total
+                'nbHits' => $results->total(),
                 'page' => $results->currentPage() - 1,
-                'nbPages' => $nbPages, // Use the potentially modified page count
+                'nbPages' => $results->lastPage(),
                 'hitsPerPage' => $perPage,
                 'query' => $query,
             ]);
         } catch (\Exception $e) {
-            // Log the detailed error for server inspection
             \Log::error('Vehicle search fatal error: ' . $e->getMessage(), ['exception' => $e]);
-            // Return a clearer 500 response message
             return response()->json([
                 'error' => 'Server search failed',
-                'message' => 'The server encountered an error processing the search query. Check server logs for PostGIS query details.',
+                'message' => 'The server encountered an error processing the search query.',
             ], 500);
         }
     }
 
     /**
-     * Get filter options for refinements (manufacturers, models, etc.)
+     * Get filter options for refinements
      */
     public function getFilterOptions(Request $request)
     {
@@ -173,7 +153,7 @@ class VehicleSearchController extends Controller
     }
 
     /**
-     * Get cities by province (for cascading filter)
+     * Get cities by province
      */
     public function getCitiesByProvince(Request $request, $provinceId)
     {
@@ -188,43 +168,34 @@ class VehicleSearchController extends Controller
     }
 
     /**
-     * Traditional search view (initial page load)
+     * Traditional search view
      */
     public function index(Request $request)
     {
-        // 🔑 FIX 2: Fetch the collection of MainCategory models
         $mainCategories = MainCategory::orderBy('name')->get();
-        // Fetch the collection of FuelType models
         $fuelTypes = FuelType::orderBy('name')->get();
 
-        // 🔑 FIX 3: Pass both collections into the view's scope.
         return view('vehicle.search', [
             'fuelTypes' => $fuelTypes,
-            'mainCategories' => $mainCategories, // Pass the main categories
+            'mainCategories' => $mainCategories,
         ]);
     }
 
     /**
-     * Get the maximum distance in kilometers to the furthest listing from a selected city.
-     * Used to set the max value for the search range slider.
+     * Get maximum distance to furthest listing
      */
     public function getMaxRange(Request $request, $cityId)
     {
-        // Validate the input to ensure it's a positive integer
         if (!filter_var($cityId, FILTER_VALIDATE_INT) || $cityId <= 0) {
             return response()->json(['error' => 'Invalid City ID.'], 400);
         }
 
         try {
-            // Use a raw DB query to execute the PostGIS max distance calculation
             $result = \DB::selectOne("
                 SELECT
-                    -- 🔑 FIX: Cast to NUMERIC before rounding to fix PostgreSQL 42883 error
                     ROUND(CAST(MAX(
                         ST_DistanceSphere(
-                            -- Origin City's Geometry (ST_MakePoint(lon, lat))
                             ST_MakePoint(origin_city.longitude, origin_city.latitude),
-                            -- Destination City's Geometry
                             ST_MakePoint(dest_city.longitude, dest_city.latitude)
                         )
                     ) / 1000.0 AS NUMERIC), 2) AS max_distance_km
@@ -233,17 +204,12 @@ class VehicleSearchController extends Controller
                 CROSS JOIN
                     cities AS dest_city
                 WHERE
-                    -- 1. Limit the origin to the city selected by the user
                     origin_city.id = :origin_city_id
-                    AND
-                    -- 2. Only consider cities that actually have listings
-                    dest_city.id IN (SELECT DISTINCT city_id FROM vehicles)
+                    AND dest_city.id IN (SELECT DISTINCT city_id FROM vehicles)
             ", ['origin_city_id' => $cityId]);
 
-            // The result will be an object with max_distance_km or null
-            $maxRange = $result ? (float) $result->max_distance_km : 5; // Default to 5km if no listings exist
+            $maxRange = $result ? (float) $result->max_distance_km : 5;
 
-            // The minimum range is 5km, so ensure the max is at least 5km
             return response()->json([
                 'max_range_km' => max(5.0, $maxRange),
             ]);
@@ -254,7 +220,7 @@ class VehicleSearchController extends Controller
     }
 
     /**
-     * Get subcategories filtered by the selected Main Category ID.
+     * Get subcategories by main category
      */
     public function getSubcategoriesByMainCategory(Request $request, $mainCategoryId)
     {
@@ -265,27 +231,26 @@ class VehicleSearchController extends Controller
             return response()->json($subcategories);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to fetch subcategories: ' . $e->getMessage()], 500);
-             }
+        }
     }
 
     /**
-     * Get Vehicle Types (Body Types) filtered by the selected Subcategory ID.
+     * Get vehicle types by subcategory
      */
     public function getVehicleTypesBySubcategory(Request $request, $subcategoryId)
     {
         try {
-            // Assuming VehicleType model has a subcategory_id field
             $vehicleTypes = VehicleType::where('subcategory_id', $subcategoryId)
                 ->orderBy('name')
                 ->get(['id', 'name']);
             return response()->json($vehicleTypes);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to fetch vehicle types: ' . $e->getMessage()], 500);
-             }
+        }
     }
 
     /**
-     * Get Fuel Types filtered by the selected Subcategory ID using the relationship defined in Subcategory model.
+     * Get fuel types by subcategory
      */
     public function getFuelTypesBySubcategory(Request $request, $subcategoryId)
     {
@@ -294,11 +259,10 @@ class VehicleSearchController extends Controller
             if (!$subcategory) {
                 return response()->json([], 404);
             }
-            // Use the availableFuelTypes method from the Subcategory model
             $fuelTypes = $subcategory->availableFuelTypes()->map(fn($ft) => ['id' => $ft->id, 'name' => $ft->name]);
             return response()->json($fuelTypes);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to fetch fuel types: ' . $e->getMessage()], 500);
-                }
+        }
     }
 }

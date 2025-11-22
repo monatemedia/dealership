@@ -224,23 +224,28 @@ class Vehicle extends Model
         return $this->favouredUsers->contains($user);
     }
 
-    /**
+/**
      * Get the indexable data array for the model.
      * Keep it simple - just return the data you want to search/filter on.
      */
     public function toSearchableArray(): array
     {
-        // Load relationships if not already loaded (Added mainCategory and subcategory)
+        // Load relationships if not already loaded
         $this->loadMissing([
             'manufacturer',
             'model',
             'vehicleType',
             'fuelType',
             'city.province',
-            'mainCategory', // Added for indexing
-            'subcategory', // Added for indexing
+            'mainCategory',
+            'subcategory',
         ]);
-        return [
+
+        // 🔑 NEW: Get city coordinates for geo-filtering
+        $latitude = $this->city?->latitude;
+        $longitude = $this->city?->longitude;
+
+        $searchableData = [
             'id' => (string) $this->id,
             'title' => (string) ($this->getTitle() ?? ''),
             'description' => (string) ($this->description ?? ''),
@@ -248,15 +253,12 @@ class Vehicle extends Model
             'year' => (int) ($this->year ?? 0),
             'mileage' => (int) ($this->mileage ?? 0),
             'status' => (string) ($this->status ?? 'draft'),
-            // ----------------------------------------------------------------
-            // 🎯 CRITICAL FIX: Include Taxonomy IDs for filtering
-            // ----------------------------------------------------------------
+            // Taxonomy IDs for filtering
             'main_category_id' => (int) ($this->main_category_id ?? 0),
             'main_category_name' => (string) ($this->mainCategory?->name ?? ''),
             'subcategory_id' => (int) ($this->subcategory_id ?? 0),
             'subcategory_name' => (string) ($this->subcategory?->name ?? ''),
-            // ----------------------------------------------------------------
-            // Denormalized relationship data for searchability
+            // Denormalized relationship data
             'manufacturer_id' => (int) ($this->manufacturer_id ?? 0),
             'manufacturer_name' => (string) ($this->manufacturer?->name ?? ''),
             'model_id' => (int) ($this->model_id ?? 0),
@@ -273,6 +275,17 @@ class Vehicle extends Model
             'created_at' => (int) ($this->created_at?->timestamp ?? 0),
             'updated_at' => (int) ($this->updated_at?->timestamp ?? 0),
         ];
+
+        // 🔑 NEW: Add geo_location field if coordinates exist
+        // Typesense requires [lat, lon] format for geopoint fields
+        if ($latitude !== null && $longitude !== null) {
+            $searchableData['geo_location'] = [
+                (float) $latitude,
+                (float) $longitude
+            ];
+        }
+
+        return $searchableData;
     }
 
     /**

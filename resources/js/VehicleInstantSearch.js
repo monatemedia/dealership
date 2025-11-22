@@ -50,9 +50,11 @@ export class VehicleInstantSearch {
         if (applyBtn) {
             applyBtn.addEventListener('click', (e) => {
                 e.preventDefault(); // Prevent form submit
+                console.log('🔍 Apply filters button clicked');
                 this.currentPage = 1;
                 this.hasMoreResults = true;
                 this.updateFilters(); // Re-read filters including the new geo values
+                console.log('📊 Current filters:', this.currentFilters);
                 this.performSearch(true);
             });
         }
@@ -119,12 +121,30 @@ export class VehicleInstantSearch {
     }
 
     updateFilters() {
-        if (!this.filterForm) return;
-        const formData = new FormData(this.filterForm);
         this.currentFilters = {};
-        for (let [key, value] of formData.entries()) {
-            // Only include non-empty values
-            if (value) this.currentFilters[key] = value;
+
+        // 1. Read from filter form if it exists (search page)
+        if (this.filterForm) {
+            const formData = new FormData(this.filterForm);
+            for (let [key, value] of formData.entries()) {
+                // Only include non-empty values
+                if (value) this.currentFilters[key] = value;
+            }
+        }
+
+        // 2. 🔑 CRITICAL: Always read geo-location filters from specific hidden inputs
+        // These exist outside the form on the home page
+        const originCityInput = document.getElementById('origin_city_id_filter');
+        const rangeKmInput = document.getElementById('range_km_filter');
+
+        if (originCityInput && originCityInput.value) {
+            this.currentFilters['origin_city_id'] = originCityInput.value;
+            console.log('📍 Geo-filter: origin_city_id =', originCityInput.value);
+        }
+
+        if (rangeKmInput && rangeKmInput.value) {
+            this.currentFilters['range_km'] = rangeKmInput.value;
+            console.log('📏 Geo-filter: range_km =', rangeKmInput.value);
         }
     }
 
@@ -141,6 +161,8 @@ export class VehicleInstantSearch {
             sort: this.currentSort,
             ...this.currentFilters
         });
+
+        console.log('🌐 API Request URL:', `/api/vehicles/search?${params.toString()}`);
 
         try {
             const response = await fetch(`/api/vehicles/search?${params.toString()}`);

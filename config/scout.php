@@ -313,11 +313,10 @@ return [
                 ],
             ],
 
-            \App\Models\Vehicle::class => [
+\App\Models\Vehicle::class => [
                 'collection-schema' => [
                     'name' => 'vehicles',
                     'fields' => [
-                        // DO NOT include 'id' - Scout handles this automatically
                         [
                             'name' => 'title',
                             'type' => 'string',
@@ -349,14 +348,17 @@ return [
                             'type' => 'string',
                             'facet' => true,
                         ],
-                        // ----------------------------------------------------
-                        // 🎯 CRITICAL FIX: Add Main/Sub Category IDs
-                        // These must match the keys sent by the frontend JS/Form
-                        // ----------------------------------------------------
+                        // Taxonomy IDs
                         [
                             'name' => 'main_category_id',
                             'type' => 'int32',
                             'facet' => true,
+                            'optional' => true,
+                        ],
+                        [
+                            'name' => 'main_category_name',
+                            'type' => 'string',
+                            'facet' => false,
                             'optional' => true,
                         ],
                         [
@@ -365,8 +367,12 @@ return [
                             'facet' => true,
                             'optional' => true,
                         ],
-                        // ----------------------------------------------------
-
+                        [
+                            'name' => 'subcategory_name',
+                            'type' => 'string',
+                            'facet' => false,
+                            'optional' => true,
+                        ],
                         // Manufacturer fields
                         [
                             'name' => 'manufacturer_id',
@@ -437,6 +443,13 @@ return [
                             'name' => 'province_name',
                             'type' => 'string',
                             'facet' => true,
+                        ],
+                        // 🔑 NEW: Geo-location field for radius filtering
+                        [
+                            'name' => 'geo_location',
+                            'type' => 'geopoint',
+                            'facet' => false,
+                            'optional' => true,
                         ],
                         // Timestamps
                         [

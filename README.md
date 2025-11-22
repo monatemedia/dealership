@@ -135,74 +135,154 @@ php artisan migrate:fresh --seed --seeder=DemoDataSeeder
 ### How to Start The App Locally
 
 - In the first terminal run
+
 ```sh
 # Start the PHP server
 php artisan serve
 ```
 
 - In a second terminal run
+
 ```sh
 # Start the Vite dev server
 npm run build && npm run dev
 ```
 
 - In a third terminal run
+
 ```sh
 # Start the queue worker
 php artisan queue:work
 ```
 
 - In a fourth terminal run
+
 ```sh
-# Start the Typesense server
+# Start Typesense and import data
 php artisan typesense:start
+php artisan typesense:create-collections --force --import
 ```
+
+---
 
 #### Typesense Artisan Commands
 
-##### Start Typesense ✨
+##### Quick Start 🚀
+
+```bash
+# 1. Start Typesense container
+php artisan typesense:start
+
+# 2. Create collections and import data
+php artisan typesense:create-collections --force --import
+
+# 3. Verify everything is working
+php artisan typesense:status
+```
+
+---
+
+##### Core Commands
+
+| Command | Description |
+| :--- | :--- |
+| `php artisan typesense:start` | Starts the Typesense Docker container. Creates new container if it doesn't exist, or starts existing one. Waits for API to be healthy before returning. |
+| `php artisan typesense:stop` | Stops the running Typesense container without removing it. Data is preserved. |
+| `php artisan typesense:status` | Shows Docker container status, API health, and lists all collections with document/field counts. Use this to verify your setup. |
+
+---
+
+##### Data Management 🗃️
+
+| Command | Description |
+| :--- | :--- |
+| `php artisan typesense:create-collections` | Creates collection schemas from `config/scout.php`. Use alone to create empty collections. |
+| `php artisan typesense:create-collections --force` | **Recreates** collections by deleting existing ones first. Required when schema changes. |
+| `php artisan typesense:create-collections --force --import` | **Recommended:** Recreates schemas AND imports all data with progress bars. Imports in correct dependency order: Manufacturer → Model → Province → City → Vehicle. |
+| `php artisan typesense:search "query"` | Test search from command line. Use `--limit=N` to control result count. Great for debugging. |
+
+**Note:** The Vehicle collection includes a `geo_location` geopoint field (25 total fields) for radius-based location filtering.
+
+---
+
+##### Destroy Commands 🛑
+
+⚠️ **Warning:** These commands permanently delete data!
+
+| Command | Description |
+| :--- | :--- |
+| `php artisan typesense:destroy` | Prompts for confirmation, then removes container. Asks about data volume removal. |
+| `php artisan typesense:destroy --force` | Removes container and data volume immediately without prompts. **ALL DATA LOST!** |
+| `php artisan typesense:destroy --keep-volume` | Removes container but preserves the data volume for later use. |
+
+---
+
+##### Common Workflows
+
+**Fresh Setup:**
 ```bash
 php artisan typesense:start
-````
+php artisan typesense:create-collections --force --import
+php artisan typesense:status
+```
 
-This is your **primary command** for local Typesense development. It handles checking Docker, starting the container, waiting for the API to become ready, and importing all data if needed.
+**After Schema Changes:**
+```bash
+php artisan typesense:create-collections --force --import
+```
 
-**Functionality:**
+**Complete Reset:**
+```bash
+php artisan typesense:destroy --force
+php artisan typesense:start
+php artisan typesense:create-collections --force --import
+```
 
-  * Checks if **Docker Desktop** is running (waits if not).
-  * Creates and starts the Typesense container (runs on `http://localhost:8108`).
-  * **Imports all data** by default after the container is ready.
+**Quick Search Test:**
+```bash
+php artisan typesense:search "BMW" --limit=5
+```
 
-**Usage:**
+---
 
-  * `php artisan typesense:start` - Normal start with data import.
-  * `php artisan typesense:start --fresh` - Flush existing data, then start and re-import everything (useful after a major schema change).
-  * `php artisan typesense:start --skip-import` - Just start the container, skip the data import.
+##### Configuration
 
-**Note:** To add or change searchable models, update the `$modelsToImport` array in `app/Console/Commands/StartTypesense.php`.
+Typesense settings are in `config/scout.php` under `model-settings`. Each model has:
+- **collection-schema**: Field definitions and types
+- **search-parameters**: Query configuration (query_by, num_typos, etc.)
 
------
+Environment variables:
+```env
+TYPESENSE_HOST=dealership-typesense
+TYPESENSE_PORT=8108
+TYPESENSE_API_KEY=your-secret-key
+```
 
-##### Schema and Data Management 🗃️
+---
 
-These utility commands provide granular control for Typesense schema and data management, useful when collections schemas change or a specific sync is needed.
+##### Troubleshooting
 
-| Command | Description |
-| :--- | :--- |
-| `php artisan typesense:create-collections` | Forces Typesense to **create or update collection schemas** based on your Laravel Scout configuration (`config/scout.php`). Use `--force` to delete and recreate existing collections. |
-| `php artisan typesense:import` | Runs the dedicated import process for all configured models. This is useful for quickly syncing data after a large database change without restarting the container. |
-| `php artisan typesense:reset --force` | **DANGEROUS\!** Deletes ALL Typesense collections and then immediately attempts a full data re-import. Use this when the underlying **schema definition changes** and a full clean slate is needed. |
-| `php artisan typesense:status` | Checks if the Docker container is running, if the Typesense API is healthy, and lists the document count and field count for all live collections. |
+**Container won't start:**
+```bash
+docker info  # Check Docker is running
+docker logs dealership-typesense  # View logs
+php artisan typesense:destroy --force  # Reset completely
+php artisan typesense:start
+```
 
------
+**No search results:**
+```bash
+php artisan typesense:status  # Check document counts
+php artisan typesense:create-collections --force --import  # Re-import
+```
 
-##### Stop and Destroy Commands 🛑
-
-| Command | Description |
-| :--- | :--- |
-| `php artisan typesense:stop` | Stops the running Typesense container without removing it. |
-| `php artisan typesense:destroy --force` | Removes the Typesense container and optionally the persistent data volume (if not using `--force`, it will prompt for confirmation). |
-
+**Schema field mismatch:**
+```bash
+# Vehicle should show 25 fields (including geo_location)
+php artisan typesense:status
+# If wrong, recreate:
+php artisan typesense:create-collections --force --import
+```
 
 
 ### Prerequisites
