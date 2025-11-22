@@ -8,6 +8,7 @@ use App\Models\FuelType;
 use App\Models\MainCategory;
 use App\Models\Subcategory;
 use App\Models\VehicleType;
+use App\Models\City;
 
 class VehicleSearchController extends Controller
 {
@@ -16,20 +17,26 @@ class VehicleSearchController extends Controller
      */
     public function instantSearch(Request $request)
     {
+        // Variable Setup for Search
         $query = $request->input('q', '');
         $page = max(1, (int) $request->input('page', 1));
         $perPage = 12;
         $originCityId = $request->input('origin_city_id');
         $rangeKm = $request->input('range_km');
 
+        // Vehicle Item Card Distance Variables
+        $originCity = null; // Initialize
+        $lat = null;
+        $lon = null;
+
         try {
             // Build Scout query
             $builder = Vehicle::search($query);
 
-            // 🔑 NEW: Apply Typesense native geo-filtering
+            // 🔑 STEP 1: Get Origin City and Apply Typesense native geo-filtering
             if ($originCityId && $rangeKm && (int)$originCityId > 0 && (float)$rangeKm > 0) {
                 // Get origin city coordinates
-                $originCity = \App\Models\City::find((int)$originCityId);
+                $originCity = City::find((int)$originCityId);
 
                 if ($originCity && $originCity->latitude && $originCity->longitude) {
                     $lat = (float) $originCity->latitude;
@@ -98,11 +105,42 @@ class VehicleSearchController extends Controller
             ->select('vehicles.*')
             ->whereIn('vehicles.id', $vehicleIds);
 
+            // 🔑 STEP 2: Calculate distance if origin location is set
+            if ($lat !== null && $lon !== null) {
+                // Calculate distance from the origin (lat/lon) to the vehicle's city
+                // Join to the cities table is required to access latitude/longitude for the calculation
+                $distanceCalculation = "
+                    ROUND(
+                        (
+                            ST_DistanceSphere(
+                                ST_MakePoint({$lon}, {$lat}),
+                                ST_MakePoint(cities.longitude, cities.latitude)
+                            ) / 1000.0
+                        )::NUMERIC, 0
+                    ) AS distance_km
+                ";
+
+                $eloquentQuery
+                    // Join to the cities table to access the coordinates of the vehicle's location
+                    ->join('cities', 'vehicles.city_id', '=', 'cities.id')
+                    // Add the calculated distance as a new column named 'distance_km'
+                    ->addSelect(\DB::raw($distanceCalculation));
+            }
+
             $vehicles = $eloquentQuery->get()->keyBy('id');
 
             // Maintain Typesense result order and attach full models
             $hydratedResults = collect($results->items())
-                ->map(fn($hit) => $vehicles->get($hit->id))
+                ->map(function($hit) use ($vehicles) {
+                    $vehicle = $vehicles->get($hit->id);
+
+                    // 🔑 STEP 3: Ensure distance is attached before rendering
+                    // The distance_km attribute is automatically added by ->addSelect
+                    if ($vehicle && isset($vehicle->distance_km)) {
+                         $vehicle->setAttribute('distance_km', (int)$vehicle->distance_km);
+                    }
+                    return $vehicle;
+                })
                 ->filter()
                 ->values();
 
@@ -112,9 +150,15 @@ class VehicleSearchController extends Controller
             // Render HTML for each vehicle using the Blade component
             $vehiclesHtml = $hydratedResults->map(function($vehicle) use ($user) {
                 $isInWatchlist = $user ? $vehicle->favouredUsers->contains($user) : false;
+
+                // 🔑 STEP 4: Pass the calculated distance to the view component
+                // Check for the dynamic attribute added by the query
+                $distanceKm = $vehicle->distance_km ?? null;
+
                 return view('components.vehicle-item', [
                     'vehicle' => $vehicle,
-                    'isInWatchlist' => $isInWatchlist
+                    'isInWatchlist' => $isInWatchlist,
+                    'distanceKm' => $distanceKm // Pass the distance
                 ])->render();
             })->toArray();
 

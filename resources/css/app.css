@@ -2707,6 +2707,11 @@ input[type="checkbox"]:checked::after {
     /* Color is handled by .text-primary from your existing CSS */
 }
 
+/* Add this to your existing CSS file (e.g., resources/css/app.css) */
+.vehicle-card-distance-badge {
+  font-size: 13px; /* Smaller text size */
+}
+
 .vehicle-card-details {
     font-size: 14px; /* text-sm */
     color: var(--text-color); /* text-gray-600 */
