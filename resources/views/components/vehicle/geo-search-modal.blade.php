@@ -25,8 +25,17 @@
         handleProvinceSelect(event) {
             this.originProvinceName = event.detail.name;
         },
+        handleRangeChange(event) {
+            this.rangeKm = event.detail.range;
+            console.log('🎚️ Modal received range update:', this.rangeKm);
+        },
         applyLocationFilter() {
             console.log('--- Applying Location Filter (START) ---');
+
+            // 🔑 FIX: The rangeKm is already being updated via the range-changed event listener
+            // No need to read from DOM - just use the current state value
+            console.log('📏 Using modal state rangeKm value:', this.rangeKm);
+
             // ⭐️ DEBUG LOG: Final check on state before application
             console.log('Modal State: City ID:', this.originCityId, 'City Name:', this.originCityName, 'Province Name:', this.originProvinceName, 'Range:', this.rangeKm);
 
@@ -119,7 +128,8 @@
     x-init="initializeState()"
     @open-geo-modal.window="isOpen = true"
     @city-selected.window="handleCitySelect"
-    @geo-province-selected.window="handleProvinceSelect">
+    @geo-province-selected.window="handleProvinceSelect"
+    @range-changed.window="handleRangeChange">
     <x-modal-overlay title="Select Search Location" maxWidth="500px">
         <div class="space-y-6 p-4">
             {{-- 1. Province Selection (Triggers City Reset) --}}
@@ -134,9 +144,12 @@
             </div>
             {{-- 3. Range Slider --}}
             <div class="form-group">
-                {{-- RangeKm is bound via x-on:input to update the modal's state immediately, explicitly converting to Number --}}
                 <label class="mb-medium block">Search Distance: <span x-text="`${rangeKm} km`">5 km</span></label>
-                <x-search.search-range-slider x-ref="slider" x-bind:initial-range="rangeKm" x-on:input="rangeKm = Number($event.target.value)" />
+                <x-search.search-range-slider
+                    name="range_km"
+                    :initial-range="$rangeKm ?? 5"
+                    city-event="city-selected"
+                />
             </div>
             {{-- 4. Apply Button --}}
             <div class="flex justify-end pt-4">

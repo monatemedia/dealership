@@ -1,5 +1,4 @@
 {{-- resources/views/components/search/search-range-slider.blade.php --}}
-
 <?php
 /** @var string $name The name of the input field (e.g., 'range_km') */
 /** @var int $initialRange The initial value for the range slider */
@@ -95,6 +94,13 @@
                 this.range = 5;
             }
         })();
+
+        // 🔑 NEW: Watch for range changes and dispatch event for parent components
+        $watch('range', (value) => {
+            console.log('📏 Slider range changed to:', value);
+            // Dispatch a custom event that the modal can listen to
+            $dispatch('range-changed', { range: value });
+        });
     "
     class="py-2">
 
