@@ -149,6 +149,7 @@
                     name="range_km"
                     :initial-range="$rangeKm ?? 5"
                     city-event="city-selected"
+                    province-event="geo-province-selected"
                 />
             </div>
             {{-- 4. Apply Button --}}

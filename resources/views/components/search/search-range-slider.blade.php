@@ -5,7 +5,7 @@
 /** @var int $maxRange The default maximum value for the range slider */
 /** @var string $cityEvent The event name to listen for city changes */
 ?>
-@props(['name' => 'range_km', 'initialRange' => 5, 'maxRange' => 1000, 'cityEvent' => 'city-changed'])
+@props(['name' => 'range_km', 'initialRange' => 5, 'maxRange' => 1000, 'cityEvent' => 'city-changed', 'provinceEvent' => 'province-selected'])
 
 <div
     x-data="{
@@ -76,6 +76,10 @@
             const finalRange = document.getElementById('range_km_filter').value;
             console.log('Range Hidden Input value after $nextTick:', finalRange);
         });
+    "
+    x-on:{{ $provinceEvent ?? 'geo-province-selected' }}.window="
+        console.log('🗺️ RANGE SLIDER: Province changed, resetting slider');
+        resetSliderState();
     "
     x-on:filters-reset.window="resetSliderState()"
     x-init="
