@@ -1,10 +1,55 @@
 {{-- resources/views/components/vehicle/search-results-display.blade.php --}}
-{{--
-    This component displays the search results and contains the trigger
-    for the Geo-Search Modal, as well as the critical hidden inputs
-    and the main search trigger button targeted by the modal's JS.
---}}
-<section>
+@php
+    // Define Local Storage Keys (MUST match geo-search-modal.blade.php)
+    $cityIdKey = 'geo_filter_city_id';
+    $cityNameKey = 'geo_filter_city_name';
+    $provinceNameKey = 'geo_filter_province_name';
+    $rangeKey = 'geo_filter_range_km';
+@endphp
+
+<section
+    x-data="{
+        initDisplay() {
+            // Load state from local storage on page load
+            const cityId = localStorage.getItem('{{ $cityIdKey }}');
+            const cityName = localStorage.getItem('{{ $cityNameKey }}');
+            const provinceName = localStorage.getItem('{{ $provinceNameKey }}');
+            const range = localStorage.getItem('{{ $rangeKey }}');
+
+            const wrapperEl = document.getElementById('geo-display-wrapper');
+            const cityEl = document.getElementById('geo-city-display');
+            const provinceEl = document.getElementById('geo-province-display');
+            const rangeEl = document.getElementById('geo-range-display');
+
+            const cityIdInput = document.getElementById('origin_city_id_filter');
+            const rangeKmInput = document.getElementById('range_km_filter');
+
+            if (cityId && cityName) {
+                // Set the hidden inputs for VehicleInstantSearch.js
+                if (cityIdInput) cityIdInput.value = cityId;
+                // Use saved range or default to 5
+                if (rangeKmInput) rangeKmInput.value = range || '5';
+
+                // Update the visible display elements
+                if (wrapperEl) wrapperEl.classList.add('hidden');
+                if (cityEl) cityEl.textContent = cityName;
+                if (provinceEl) provinceEl.textContent = provinceName ? `, ${provinceName}` : '';
+                if (rangeEl) rangeEl.textContent = ` - ${range || '5'} km`;
+            } else {
+                // If no saved data, ensure hidden inputs are clear for default search
+                if (cityIdInput) cityIdInput.value = '';
+                if (rangeKmInput) rangeKmInput.value = '5';
+
+                // Show default display prompt
+                if (wrapperEl) wrapperEl.classList.remove('hidden');
+                if (cityEl) cityEl.textContent = '';
+                if (provinceEl) provinceEl.textContent = '';
+                if (rangeEl) rangeEl.textContent = '';
+            }
+        }
+    }"
+    x-init="initDisplay()"
+>
     <div class="container">
         {{-- Header --}}
         <div class="section-header mb-medium">
@@ -25,6 +70,7 @@
 
         {{-- 🔑 CRITICAL: HIDDEN INPUTS for Location Filtering (TARGETS for the Geo Modal) --}}
         <div class="hidden">
+            {{-- These values will be set by the x-init function above --}}
             <input type="hidden" id="origin_city_id_filter" name="origin_city_id_filter" value="">
             <input type="hidden" id="range_km_filter" name="range_km_filter" value="5">
         </div>
@@ -38,28 +84,30 @@
         <div id="loading-indicator" class="loader-container hidden">
             <div class="loader main">
                 <div class="ball"></div><div class="ball"></div><div class="ball"></div><div class="ball"></div>
-             </div>
+              </div>
         </div>
+
         {{-- No Results Message --}}
         <div id="no-results" class="status-container hidden">
             <p class="no-results-text">No vehicles found.</p>
         </div>
+
         {{-- Load More Indicator (Infinite Scroll) --}}
         <div id="load-more-indicator" class="loader-container hidden" style="height: 80px;">
             <div class="loader main">
                 <div class="ball"></div><div class="ball"></div><div class="ball"></div><div class="ball"></div>
-             </div>
+              </div>
         </div>
+
         {{-- End of Results --}}
         <div id="end-of-results" class="end-message hidden">
             You've reached the end of the list.
         </div>
 
         {{-- 🔑 CRITICAL: APPLY FILTERS BUTTON (TARGET for the Geo Modal) --}}
-        {{-- This button is usually hidden and only clicked programmatically by the modal to trigger a search. --}}
         <button type="button" id="apply-filters" class="hidden">Apply Filters</button>
-
     </div>
+
     {{-- 🆕 THE LOCATION SELECTION MODAL --}}
     <x-vehicle.geo-search-modal />
 </section>

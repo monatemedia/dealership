@@ -3,16 +3,30 @@
  * resources/views/components/vehicle/geo-search-modal.blade.php
  * The Geo Search Modal allows users to select an origin city and a search range (in km).
  * It dispatches a global event to update the main VehicleInstantSearch class.
+ * It lives on the home page
  */
+
+ // Define Local Storage Keys (MUST match search-results-display.blade.php)
+$cityIdKey = 'geo_filter_city_id';
+$cityNameKey = 'geo_filter_city_name';
+$provinceNameKey = 'geo_filter_province_name';
+$rangeKey = 'geo_filter_range_km';
 @endphp
+
 <div
     x-data="{
+        // Keys defined in PHP for consistent use in JS/Alpine
+        cityIdKey: '{{ $cityIdKey }}',
+        cityNameKey: '{{ $cityNameKey }}',
+        provinceNameKey: '{{ $provinceNameKey }}',
+        rangeKey: '{{ $rangeKey }}',
+
         originCityId: null,
         originCityName: '',
         originProvinceName: '',
-        // Initialize rangeKm as a number
         rangeKm: 5,
         isOpen: false,
+
         closeModal() {
             this.isOpen = false;
         },
@@ -98,24 +112,21 @@
             this.isOpen = false;
         },
         // Initializes the modal state from the current search filters on page load
+
         initializeState() {
+            // Load state from local storage or hidden inputs
             const cityId = document.getElementById('origin_city_id_filter')?.value;
             const range = document.getElementById('range_km_filter')?.value;
 
-            // FIX: Get current city/province names from the display elements if they are visible
-            const cityEl = document.getElementById('geo-city-display');
-            const provinceEl = document.getElementById('geo-province-display');
+            // Read names from Local Storage, as hidden inputs only store IDs/Ranges
+            const cityName = localStorage.getItem(this.cityNameKey);
+            const provinceName = localStorage.getItem(this.provinceNameKey);
 
             if (cityId && cityId !== '') {
                 this.originCityId = parseInt(cityId);
-                // Try to initialize the name from the display text if available
-                if (cityEl && !cityEl.classList.contains('hidden')) {
-                    this.originCityName = cityEl.textContent.trim();
-                }
-                if (provinceEl && !provinceEl.classList.contains('hidden')) {
-                    // Strip leading comma and space if present in the display
-                    this.originProvinceName = provinceEl.textContent.trim().replace(/^, /, '');
-                }
+                // Set the name/province for the modal's internal state display
+                this.originCityName = cityName || '';
+                this.originProvinceName = provinceName || '';
             } else {
                 this.originCityId = null;
                 this.originCityName = '';
@@ -126,32 +137,52 @@
         }
     }"
     x-init="initializeState()"
-    @open-geo-modal.window="isOpen = true"
+    @open-geo-modal.window="
+        // 🔑 CRITICAL: Re-initialize state whenever the modal opens to fetch latest Local Storage values
+        initializeState();
+        isOpen = true;
+    "
     @city-selected.window="handleCitySelect"
     @geo-province-selected.window="handleProvinceSelect"
-    @range-changed.window="handleRangeChange">
+    @range-changed.window="handleRangeChange"
+>
     <x-modal-overlay title="Select Search Location" maxWidth="500px">
         <div class="space-y-6 p-4">
-            {{-- 1. Province Selection (Triggers City Reset) --}}
+            {{-- 1. Province Selection --}}
             <div class="form-group">
                 <label class="mb-medium block">Province</label>
-                <x-search.search-province name="province_id_modal" dispatch-event="geo-province-selected" />
+                {{-- 🔑 PASS the persistent name to the component --}}
+                <x-search.search-province
+                    name="province_id_modal"
+                    dispatch-event="geo-province-selected"
+                    x-bind:initial-value="originProvinceName"
+                />
             </div>
-            {{-- 2. City Selection (Sets Origin ID) --}}
+
+            {{-- 2. City Selection --}}
             <div class="form-group">
                 <label class="mb-medium block">City</label>
-                <x-search.search-city name="origin_city_id" province-event="geo-province-selected" />
+                {{-- 🔑 PASS the persistent ID to the component --}}
+                <x-search.search-city
+                    name="origin_city_id"
+                    province-event="geo-province-selected"
+                    x-bind:initial-city-id="originCityId"
+                    x-bind:value="originCityId"
+                />
             </div>
+
             {{-- 3. Range Slider --}}
             <div class="form-group">
                 <label class="mb-medium block">Search Distance: <span x-text="`${rangeKm} km`">5 km</span></label>
+                {{-- 🔑 PASS the persistent range value --}}
                 <x-search.search-range-slider
                     name="range_km"
-                    :initial-range="$rangeKm ?? 5"
+                    x-bind:initial-range="rangeKm"
                     city-event="city-selected"
                     province-event="geo-province-selected"
                 />
             </div>
+
             {{-- 4. Apply Button --}}
             <div class="flex justify-end pt-4">
                 <button

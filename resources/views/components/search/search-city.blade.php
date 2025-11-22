@@ -2,6 +2,8 @@
 @php
     $provinceEvent = $attributes->get('province-event', 'province-selected');
     $cityEvent = $attributes->get('city-event', 'city-changed');
+    // We expect the city ID to be passed via the 'value' prop, but we'll use an explicit prop for clarity if available
+    $initialCityId = $attributes->get('initial-city-id');
 @endphp
 <div x-data="{
     search: '',
@@ -73,15 +75,24 @@
     },
 
     async init() {
-        // Load initial city if provided
-        if (this.selected) {
+        // 1. Load initial city if provided (either via 'value' prop or initial-city-id prop)
+        const initialId = @js($initialCityId) || this.selected;
+
+        if (initialId) {
             try {
-                const response = await fetch(`/api/cities/${this.selected}`);
+                const response = await fetch(`/api/cities/${initialId}`);
                 const data = await response.json();
+                this.selected = initialId;
                 this.selectedName = data.name;
                 this.search = data.name;
                 this.provinceId = data.province_id;
-                console.log('🏙️ Initial city loaded:', data.name);
+                console.log('🏙️ Initial city loaded:', data.name, 'Province ID:', this.provinceId);
+
+                // 🔑 CRITICAL: Dispatch the province event after loading the city,
+                // so that the province selector (if it's initialized after the city)
+                // can also update its state and pre-select the correct province.
+                this.$dispatch('{{ $provinceEvent }}', { id: this.provinceId, name: data.province.name });
+
             } catch (error) {
                 console.error('Error fetching initial city:', error);
             }
@@ -104,6 +115,9 @@ x-init="
     console.log('🏙️ City component initialized. Listening for event:', '{{ $provinceEvent }}');
     console.log('🏙️ Initial provinceId:', provinceId);
     init();
+    console.log('🏙️ City component initialized. Listening for event:', '{{ $provinceEvent }}');
+    init();
+
     // Listen to the province event dynamically
     window.addEventListener('{{ $provinceEvent }}', (event) => {
         console.log('🗺️ Province event received in city component:', event.detail);

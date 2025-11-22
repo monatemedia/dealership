@@ -1,10 +1,11 @@
 {{-- resources/views/components/search/search-province.blade.php --}}
 @php
-    // Allow dynamic event name via dispatch-event attribute
     $dispatchEvent = $attributes->get('dispatch-event', 'province-selected');
+    // Get initial value from props (passed from the modal)
+    $initialValue = $attributes->get('initial-value', '');
 @endphp
 <div x-data="{
-    search: '',
+    search: @js($initialValue), // Use initialValue passed from parent
     provinces: [],
     selected: @js($attributes->get('value')),
     selectedName: '',
@@ -39,13 +40,13 @@
 
     async init() {
         if (this.selected) {
-            const response = await fetch(`/api/provinces/${this.selected}`);
-            const data = await response.json();
-            this.selectedName = data.name;
-            this.search = data.name;
+            // ... (original API fetch for selected province ID if needed, but not strictly required if name is passed) ...
+            // Simplified: If we receive a name, use it.
+            this.selectedName = this.search;
+            // The province ID should already be set via x-model if passed as 'value' prop.
         }
 
-        // Watch for manual clearing - only dispatch reset event
+        // WATCH: Watch for manual clearing
         this.$watch('search', (value) => {
             if (value === '' && this.selected !== null) {
                 console.log('🗑️ Province input cleared');
@@ -55,7 +56,6 @@
             }
         });
     },
-
     closeDropdown() {
         this.open = false;
     }
