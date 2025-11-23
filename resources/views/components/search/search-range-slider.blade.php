@@ -9,8 +9,10 @@
 
 <div
     x-data="{
-        range: {{ $initialRange }},
-        maxRange: {{ $maxRange }},
+        // 🔑 FIX: Read initial values directly from the hidden inputs on load
+        // The value of the hidden input should be set by the parent/global search script
+        range: parseInt(document.getElementById('range_km_filter')?.value || 5),
+        maxRange: 1000,
         loadingMax: false,
         cityId: null,
 
@@ -83,33 +85,20 @@
     "
     x-on:filters-reset.window="resetSliderState()"
     x-init="
-        // CRITICAL FIX: IIFE wrapper for safe scope.
-        (() => {
-            const rangeInput = document.getElementById('range_km_filter');
-            const initialCityId = document.getElementById('origin_city_id_filter')?.value;
-            const initialRange = rangeInput ? rangeInput.value : null;
+        let cityIdValue = document.getElementById('origin_city_id_filter')?.value;
 
-            if (initialCityId && initialCityId !== 'null' && initialCityId !== 'undefined') {
-                // Ensure range is an integer, falling back to initialRange prop if input is empty
-                this.range = parseInt(initialRange || this.range);
-                // Fetch max range for the initial city, if set
-                fetchMaxRange(initialCityId);
-            } else {
-                this.range = 5;
-            }
-        })();
+        if (cityIdValue && cityIdValue !== 'null' && cityIdValue !== 'undefined') {
+            this.cityId = cityIdValue;
+            fetchMaxRange(cityIdValue);
+        }
 
-        // 🔑 NEW: Watch for range changes and dispatch event for parent components
         $watch('range', (value) => {
             console.log('📏 Slider range changed to:', value);
-            // Dispatch a custom event that the modal can listen to
             $dispatch('range-changed', { range: value });
         });
     "
     class="py-2">
-
-    {{-- The hidden input uses :value, binding directly to the 'range' state --}}
-    <input type="hidden" name="{{ $name }}" :value="range" id="range_km_filter">
+    <input type="hidden" name="range_km" :value="range" id="range_km_filter">
 
     <div class="flex justify-between mb-2">
         <label for="{{ $name }}" class="text-sm font-medium text-gray-700">

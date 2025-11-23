@@ -1,178 +1,154 @@
-{{-- resources/views/components/search/search-city.blade.php --}}
+{{-- resources/views/components/search/search-city.blade.php (Local Storage Read) --}}
 @php
-    $provinceEvent = $attributes->get('province-event', 'province-selected');
-    $cityEvent = $attributes->get('city-event', 'city-changed');
-    // We expect the city ID to be passed via the 'value' prop, but we'll use an explicit prop for clarity if available
-    $initialCityId = $attributes->get('initial-city-id');
+    $citySelectedEvent = $attributes->get('city-selected-event', 'city-selected');
+    // We need the Local Storage keys defined in the parent/global context
+    $cityIdKey = 'geo_filter_city_id';
+    $cityNameKey = 'geo_filter_city_name';
 @endphp
-<div x-data="{
-    search: '',
-    cities: [],
-    selected: @js($attributes->get('value')),
-    selectedName: '',
-    provinceId: null,
-    open: false,
-    loading: false,
+<div
+    x-data="{
+        search: '',
+        cities: [],
+        selected: null,
+        selectedName: '',
+        open: false,
+        loading: false,
 
-    async searchCities() {
-        if (this.search.length < 2) {
-            this.cities = [];
-            return;
-        }
-        this.loading = true;
-        try {
-            let url = `/api/cities/search?q=${encodeURIComponent(this.search)}`;
-            // Optional filtering: only add province filter if one is selected
-            if (this.provinceId) {
-                url += `&province_id=${this.provinceId}`;
-                console.log('🔍 Fetching cities filtered by province:', this.provinceId);
-            } else {
-                console.log('🔍 Fetching all cities (no province filter)');
+        async searchCities() {
+            if (this.search.length < 2) {
+                this.cities = [];
+                return;
             }
-            const response = await fetch(url);
-            this.cities = await response.json();
-            console.log('✅ Cities received:', this.cities.length, 'results');
-        } catch (error) {
-            console.error('Error fetching cities:', error);
-        }
-        this.loading = false;
-    },
-
-    selectCity(id, name) {
-        this.selected = id;
-        this.selectedName = name;
-        this.open = false;
-        this.search = name;
-
-        console.log('📍 City selected:', { id, name });
-        this.$dispatch('city-selected', { id: id, name: name });
-        this.$dispatch('{{ $cityEvent }}', { id: id });
-    },
-
-    resetCityOnly() {
-        // Only reset city, keep province filter intact
-        console.log('🔄 Resetting city selection (keeping province filter)');
-        this.search = '';
-        this.selected = null;
-        this.selectedName = '';
-        this.cities = [];
-        this.$dispatch('{{ $cityEvent }}', { id: null });
-    },
-
-    resetComponent() {
-        // Full reset: clear both city and province filter
-        console.log('🔄 Full reset: clearing city and province filter');
-        this.search = '';
-        this.selected = null;
-        this.selectedName = '';
-        this.provinceId = null;
-        this.cities = [];
-        this.$dispatch('{{ $cityEvent }}', { id: null });
-    },
-
-    closeDropdown() {
-        this.open = false;
-    },
-
-    async init() {
-        // 1. Load initial city if provided (either via 'value' prop or initial-city-id prop)
-        const initialId = @js($initialCityId) || this.selected;
-
-        if (initialId) {
+            this.loading = true;
             try {
-                const response = await fetch(`/api/cities/${initialId}`);
-                const data = await response.json();
-                this.selected = initialId;
-                this.selectedName = data.name;
-                this.search = data.name;
-                this.provinceId = data.province_id;
-                console.log('🏙️ Initial city loaded:', data.name, 'Province ID:', this.provinceId);
-
-                // 🔑 CRITICAL: Dispatch the province event after loading the city,
-                // so that the province selector (if it's initialized after the city)
-                // can also update its state and pre-select the correct province.
-                this.$dispatch('{{ $provinceEvent }}', { id: this.provinceId, name: data.province.name });
-
+                let url = `/api/cities/search?q=${encodeURIComponent(this.search)}&with_province=true`;
+                const response = await fetch(url);
+                let results = await response.json();
+                this.cities = results.map(city => ({
+                    id: city.id,
+                    name: `${city.name}, ${city.province.name}`,
+                    provinceName: city.province.name
+                }));
+                console.log('✅ Cities received and formatted:', this.cities.length, 'results');
             } catch (error) {
-                console.error('Error fetching initial city:', error);
+                console.error('Error fetching cities:', error);
             }
-        }
+            this.loading = false;
+        },
 
-        // Listen for filter reset
-        window.addEventListener('filters-reset', () => {
-            this.resetComponent();
-        });
+        selectCity(city) {
+            this.selected = city.id;
+            this.selectedName = city.name;
+            this.open = false;
+            this.search = city.name;
+            console.log('📍 City selected:', city);
+            this.$dispatch('{{ $citySelectedEvent }}', {
+                id: city.id,
+                fullName: city.name,
+                provinceName: city.provinceName
+            });
+        },
 
-        // Watch for manual clearing
-        this.$watch('search', (value) => {
-            if (value === '' && this.selected !== null) {
-                this.resetCityOnly();
+        resetCity() {
+            console.log('🔄 Resetting city selection');
+            this.search = '';
+            this.selected = null;
+            this.selectedName = '';
+            this.cities = [];
+            this.$dispatch('{{ $citySelectedEvent }}', { id: null, fullName: '', provinceName: '' });
+        },
+
+        closeDropdown() {
+            this.open = false;
+        },
+
+        selectAll(event) {
+            event.target.select();
+        },
+
+        // New init logic relies on Local Storage first
+        async init() {
+            // Attempt to read the value from the parent's x-bind first (for first load/cleared state)
+            let cityId = this.$el.querySelector('input[type=\'hidden\']').value;
+            let cityName = null;
+
+            // Fallback 1: Read directly from Local Storage, which is more reliable on reload
+            if (!cityId || cityId === '' || cityId === '0') {
+                cityId = localStorage.getItem('{{ $cityIdKey }}');
+                cityName = localStorage.getItem('{{ $cityNameKey }}');
             }
-        });
-    }
-}"
-x-init="
-    console.log('🏙️ City component initialized. Listening for event:', '{{ $provinceEvent }}');
-    console.log('🏙️ Initial provinceId:', provinceId);
-    init();
-    console.log('🏙️ City component initialized. Listening for event:', '{{ $provinceEvent }}');
-    init();
 
-    // Listen to the province event dynamically
-    window.addEventListener('{{ $provinceEvent }}', (event) => {
-        console.log('🗺️ Province event received in city component:', event.detail);
-        const newProvinceId = event.detail.id;
+            if (cityId && cityId !== '' && cityId !== '0') {
+                this.selected = parseInt(cityId);
 
-        // Check if province was cleared (null, empty string, or undefined)
-        if (!newProvinceId || newProvinceId === '' || newProvinceId === null) {
-            console.log('🗑️ Province cleared - resetting city component completely');
-            provinceId = null;
-            resetCityOnly();
-        } else {
-            console.log('🗺️ provinceId updated to:', newProvinceId);
-            provinceId = newProvinceId;
-            resetCityOnly();
+                if (cityName) {
+                    // If the name is already in Local Storage, use it immediately
+                    this.selectedName = cityName;
+                    this.search = cityName;
+                    console.log('🏙️ Initial city loaded from Local Storage:', cityName);
+                } else {
+                    // Fallback 2: Fetch the name via API if only the ID is present
+                    try {
+                        const response = await fetch(`/api/cities/${this.selected}`);
+                        const data = await response.json();
+                        const fullName = `${data.name}, ${data.province.name}`;
+                        this.selectedName = fullName;
+                        this.search = fullName;
+                        console.log('🏙️ Initial city loaded via API fetch:', fullName);
+                    } catch (error) {
+                        console.error('Error fetching initial city:', error);
+                        this.resetCity();
+                    }
+                }
+            } else {
+                this.selected = null;
+                if (this.search === '') {
+                    this.search = 'Search City';
+                }
+            }
+
+            this.$watch('search', (value) => {
+                if (value === '' && this.selected !== null) {
+                    this.resetCity();
+                }
+            });
         }
-    });
-"
-@click.outside="closeDropdown()"
-class="select-container">
-    <input type="hidden" name="{{ $attributes->get('name', 'city_id') }}" x-model="selected">
+    }"
+    x-init="init()"
+    @click.outside="closeDropdown()"
+    class="select-container"
+>
+    <input
+        type="hidden"
+        name="{{ $attributes->get('name', 'origin_city_id') }}"
+        x-model="selected"
+        {{ $attributes->except(['name', 'city-selected-event']) }}
+    >
     <input
         type="text"
         x-model="search"
         @input.debounce.300ms="searchCities()"
-        @focus="open = true"
+        @focus="open = true; selectAll($event)"
         @blur="setTimeout(() => { if (!$el.closest('[x-data]').querySelector('.select-dropdown:hover')) closeDropdown() }, 150)"
-        placeholder="Select City"
+        placeholder="Search City"
         class="select-input"
         autocomplete="off"
     >
-    <div
-        x-show="open"
-        x-transition
-        class="select-dropdown"
-    >
+    <div x-show="open" x-transition="" class="select-dropdown">
         <div class="select-list">
             <template x-if="loading">
                 <div class="select-info">Loading...</div>
             </template>
             <template x-if="!loading && search.length < 2">
-                <div class="select-info">
-                    <span x-show="provinceId">Type at least 2 characters to search cities in selected province</span>
-                    <span x-show="!provinceId">Type at least 2 characters to search all cities</span>
-                </div>
+                <div class="select-info">Type at least 2 characters to search for a city/province</div>
             </template>
             <template x-if="!loading && cities.length === 0 && search.length >= 2">
-                <div class="select-info">
-                    <span x-show="provinceId">No cities found in selected province</span>
-                    <span x-show="!provinceId">No cities found</span>
-                </div>
+                <div class="select-info">No cities found matching your search</div>
             </template>
             <template x-for="city in cities" :key="city.id">
                 <button
                     type="button"
-                    @click="selectCity(city.id, city.name)"
+                    @click="selectCity(city)"
                     class="select-item"
                     x-text="city.name"
                 ></button>

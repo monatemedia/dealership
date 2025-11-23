@@ -2,23 +2,21 @@
 @php
     // Define Local Storage Keys (MUST match geo-search-modal.blade.php)
     $cityIdKey = 'geo_filter_city_id';
-    $cityNameKey = 'geo_filter_city_name';
-    $provinceNameKey = 'geo_filter_province_name';
+    $cityNameKey = 'geo_filter_city_name'; // Holds 'City, Province'
+    $provinceNameKey = 'geo_filter_province_name'; // Still stored, but not used in this display
     $rangeKey = 'geo_filter_range_km';
 @endphp
-
 <section
     x-data="{
         initDisplay() {
             // Load state from local storage on page load
             const cityId = localStorage.getItem('{{ $cityIdKey }}');
-            const cityName = localStorage.getItem('{{ $cityNameKey }}');
-            const provinceName = localStorage.getItem('{{ $provinceNameKey }}');
+            const cityName = localStorage.getItem('{{ $cityNameKey }}'); // This is the full 'City, Province' string
             const range = localStorage.getItem('{{ $rangeKey }}');
 
             const wrapperEl = document.getElementById('geo-display-wrapper');
             const cityEl = document.getElementById('geo-city-display');
-            const provinceEl = document.getElementById('geo-province-display');
+            // 🎯 REMOVED: const provinceEl = document.getElementById('geo-province-display');
             const rangeEl = document.getElementById('geo-range-display');
 
             const cityIdInput = document.getElementById('origin_city_id_filter');
@@ -32,8 +30,13 @@
 
                 // Update the visible display elements
                 if (wrapperEl) wrapperEl.classList.add('hidden');
+
+                // 🎯 FIX: Display the full cityName ('City, Province')
                 if (cityEl) cityEl.textContent = cityName;
-                if (provinceEl) provinceEl.textContent = provinceName ? `, ${provinceName}` : '';
+
+                // 🎯 REMOVED: No separate province element
+                // if (provinceEl) provinceEl.textContent = '';
+
                 if (rangeEl) rangeEl.textContent = ` - ${range || '5'} km`;
             } else {
                 // If no saved data, ensure hidden inputs are clear for default search
@@ -43,7 +46,8 @@
                 // Show default display prompt
                 if (wrapperEl) wrapperEl.classList.remove('hidden');
                 if (cityEl) cityEl.textContent = '';
-                if (provinceEl) provinceEl.textContent = '';
+                // 🎯 REMOVED:
+                // if (provinceEl) provinceEl.textContent = '';
                 if (rangeEl) rangeEl.textContent = '';
             }
         }
@@ -62,7 +66,7 @@
                     <span id="geo-display-wrapper" x-show="!document.getElementById('geo-city-display')?.textContent.trim()">Choose Location</span>
                     {{-- 🔑 Spans for city/province/range—initially empty/hidden, populated by modal JS --}}
                     <span id="geo-city-display" class="font-semibold text-indigo-600"></span>
-                    <span id="geo-province-display" class=""></span>
+                    {{-- 🎯 REMOVED: <span id="geo-province-display" class=""></span> --}}
                     <span id="geo-range-display" class="text-sm text-gray-500"></span>
                 </span>
             </a>
@@ -84,7 +88,7 @@
         <div id="loading-indicator" class="loader-container hidden">
             <div class="loader main">
                 <div class="ball"></div><div class="ball"></div><div class="ball"></div><div class="ball"></div>
-              </div>
+            </div>
         </div>
 
         {{-- No Results Message --}}
@@ -96,7 +100,7 @@
         <div id="load-more-indicator" class="loader-container hidden" style="height: 80px;">
             <div class="loader main">
                 <div class="ball"></div><div class="ball"></div><div class="ball"></div><div class="ball"></div>
-              </div>
+            </div>
         </div>
 
         {{-- End of Results --}}
