@@ -1,103 +1,95 @@
-{{-- resources/views/components/vehicle/geo-search-modal.blade.php (Drop-in Replacement) --}}
+{{-- resources/views/components/vehicle/geo-search-modal.blade.php --}}
 @php
-    // Define Local Storage Keys (MUST match search-results-display.blade.php)
+    // Define only the keys we are actively using for persistence
     $cityIdKey = 'geo_filter_city_id';
     $cityNameKey = 'geo_filter_city_name';
-    $provinceNameKey = 'geo_filter_province_name';
     $rangeKey = 'geo_filter_range_km';
 @endphp
+
 <div
     x-data="{
+        // --- Keys ---
         cityIdKey: '{{ $cityIdKey }}',
         cityNameKey: '{{ $cityNameKey }}',
-        provinceNameKey: '{{ $provinceNameKey }}',
         rangeKey: '{{ $rangeKey }}',
+
+        // --- State ---
         originCityId: null,
         originCityName: '',
-        originProvinceName: '',
         rangeKm: 5,
         isOpen: false,
+
+        handleCitySelect(event) {
+            this.originCityId = event.detail.id;
+            this.originCityName = event.detail.fullName;
+            console.log('handleCitySelect: ID:', this.originCityId, 'Full Name:', this.originCityName);
+        },
+
+        handleRangeChange(event) {
+            this.rangeKm = event.detail.range;
+        },
 
         closeModal() {
             this.isOpen = false;
         },
 
-        handleCitySelect(event) {
-            this.originCityId = event.detail.id;
-            this.originCityName = event.detail.fullName;
-            this.originProvinceName = event.detail.provinceName;
-            console.log('handleCitySelect: ID:', this.originCityId);
-        },
-
-        handleRangeChange(event) {
-            this.rangeKm = event.detail.range;
-            console.log('🎚️ Modal received range update:', this.rangeKm);
-        },
-
         applyLocationFilter() {
-            // ... (Filter application logic remains the same) ...
+            // ⭐️ STEP 1: Update Local Storage ⭐️
             if (this.originCityId) {
                 localStorage.setItem(this.cityIdKey, this.originCityId);
                 localStorage.setItem(this.cityNameKey, this.originCityName);
-                localStorage.setItem(this.provinceNameKey, this.originProvinceName);
                 localStorage.setItem(this.rangeKey, this.rangeKm);
             } else {
+                // If the location is cleared, clear all storage keys
                 localStorage.removeItem(this.cityIdKey);
                 localStorage.removeItem(this.cityNameKey);
-                localStorage.removeItem(this.provinceNameKey);
                 localStorage.removeItem(this.rangeKey);
             }
 
-            const wrapperEl = document.getElementById('geo-display-wrapper');
-            const cityEl = document.getElementById('geo-city-display');
-            const rangeEl = document.getElementById('geo-range-display');
-
+            // ⭐️ STEP 2: Update hidden filter inputs ⭐️
             let cityIdInput = document.getElementById('origin_city_id_filter');
             let rangeKmInput = document.getElementById('range_km_filter');
+            let applyFiltersButton = document.getElementById('apply-filters');
 
             if (cityIdInput) cityIdInput.value = this.originCityId || '';
-            if (rangeKmInput) rangeKmInput.value = this.rangeKm;
+            if (rangeKmInput) rangeKmInput.value = this.rangeKm || '5';
 
-            if (this.originCityId && this.originCityName) {
-                if (wrapperEl) wrapperEl.classList.add('hidden');
-                if (cityEl) {
-                    cityEl.textContent = this.originCityName;
-                    cityEl.classList.remove('hidden');
-                }
-                if (rangeEl) {
-                    rangeEl.textContent = ` - ${this.rangeKm} km`;
-                    rangeEl.classList.remove('hidden');
-                }
-            } else {
-                if (wrapperEl) {
-                    wrapperEl.textContent = 'Choose Location';
-                    wrapperEl.classList.remove('hidden');
-                }
-                if (cityEl) cityEl.classList.add('hidden');
-                if (rangeEl) rangeEl.classList.add('hidden');
-            }
+            // ⭐️ STEP 3: Close modal and trigger search ⭐️
+            this.closeModal();
 
-            document.getElementById('apply-filters')?.click();
-            this.isOpen = false;
+            // Trigger the main search script (VehicleInstantSearch.js)
+            if (applyFiltersButton) applyFiltersButton.click();
         },
 
         initializeState() {
-            const cityId = document.getElementById('origin_city_id_filter')?.value;
-            const range = document.getElementById('range_km_filter')?.value;
+            // Read current filter state from hidden inputs (set by search-results-display on load)
+            const cityIdInput = document.getElementById('origin_city_id_filter');
+            const rangeKmInput = document.getElementById('range_km_filter');
 
+            // Read from Local Storage as a primary source of truth
+            const cityId = localStorage.getItem(this.cityIdKey);
             const cityName = localStorage.getItem(this.cityNameKey);
-            const provinceName = localStorage.getItem(this.provinceNameKey);
+            const range = localStorage.getItem(this.rangeKey);
 
             if (cityId && cityId !== '' && cityId !== '0') {
                 this.originCityId = parseInt(cityId);
                 this.originCityName = cityName || '';
-                this.originProvinceName = provinceName || '';
+
+                // Ensure hidden inputs are populated for server/InstantSearch on subsequent calls
+                if (cityIdInput) cityIdInput.value = cityId;
             } else {
                 this.originCityId = null;
                 this.originCityName = '';
-                this.originProvinceName = '';
+                if (cityIdInput) cityIdInput.value = '';
             }
-            if (range) this.rangeKm = Number(range);
+
+            if (range) {
+                 this.rangeKm = Number(range);
+                 if (rangeKmInput) rangeKmInput.value = range;
+            } else {
+                 this.rangeKm = 5;
+                 if (rangeKmInput) rangeKmInput.value = '5';
+            }
         }
     }"
     x-init="initializeState()"
@@ -137,8 +129,8 @@
                             city-selected-event="city-selected"
                         />
                     </div>
-                    {{-- 2. Range Slider (Component not provided, assuming x-bind:initial-range is correct) --}}
-                    <div class="form-group">
+                    {{-- 2. Range Slider (Using x-bind:initial-range="rangeKm") --}}
+                     <div class="form-group">
                         <label class="mb-medium block">Search Distance:</label>
                         <x-search.search-range-slider
                             name="range_km"

@@ -3,7 +3,6 @@
     // Define Local Storage Keys (MUST match geo-search-modal.blade.php)
     $cityIdKey = 'geo_filter_city_id';
     $cityNameKey = 'geo_filter_city_name'; // Holds 'City, Province'
-    $provinceNameKey = 'geo_filter_province_name'; // Still stored, but not used in this display
     $rangeKey = 'geo_filter_range_km';
 @endphp
 <section
