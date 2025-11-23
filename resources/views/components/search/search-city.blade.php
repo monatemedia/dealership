@@ -1,4 +1,4 @@
-{{-- resources/views/components/search/search-city.blade.php (Local Storage Read) --}}
+{{-- resources/views/components/search/search-city.blade.php (Optimized init() Logic) --}}
 @php
     $citySelectedEvent = $attributes->get('city-selected-event', 'city-selected');
     // We need the Local Storage keys defined in the parent/global context
@@ -13,6 +13,8 @@
         selectedName: '',
         open: false,
         loading: false,
+
+        // ... (searchCities, selectCity, resetCity, closeDropdown, selectAll methods remain the same) ...
 
         async searchCities() {
             if (this.search.length < 2) {
@@ -68,43 +70,38 @@
 
         // New init logic relies on Local Storage first
         async init() {
-            // Attempt to read the value from the parent's x-bind first (for first load/cleared state)
-            let cityId = this.$el.querySelector('input[type=\'hidden\']').value;
-            let cityName = null;
+            // 1. Read City ID and Name from Local Storage
+            const cityId = localStorage.getItem('{{ $cityIdKey }}');
+            const cityName = localStorage.getItem('{{ $cityNameKey }}');
 
-            // Fallback 1: Read directly from Local Storage, which is more reliable on reload
-            if (!cityId || cityId === '' || cityId === '0') {
-                cityId = localStorage.getItem('{{ $cityIdKey }}');
-                cityName = localStorage.getItem('{{ $cityNameKey }}');
-            }
-
+            // 2. Check for a valid City ID
             if (cityId && cityId !== '' && cityId !== '0') {
                 this.selected = parseInt(cityId);
 
                 if (cityName) {
-                    // If the name is already in Local Storage, use it immediately
+                    // ⭐️ OPTIMIZED: If name exists, use it and SKIP API fetch ⭐️
                     this.selectedName = cityName;
                     this.search = cityName;
-                    console.log('🏙️ Initial city loaded from Local Storage:', cityName);
+                    console.log('🏙️ Initial city loaded from Local Storage (Name):', cityName);
                 } else {
-                    // Fallback 2: Fetch the name via API if only the ID is present
+                    // ⚠️ FALLBACK: ID is present but name is missing. Fetch the name.
                     try {
                         const response = await fetch(`/api/cities/${this.selected}`);
                         const data = await response.json();
                         const fullName = `${data.name}, ${data.province.name}`;
                         this.selectedName = fullName;
                         this.search = fullName;
-                        console.log('🏙️ Initial city loaded via API fetch:', fullName);
+                        console.log('🏙️ Initial city loaded via API (Name was missing):', fullName);
                     } catch (error) {
-                        console.error('Error fetching initial city:', error);
+                        console.error('Error fetching initial city (ID found, Name missing):', error);
                         this.resetCity();
                     }
                 }
             } else {
+                // 3. NO ID found in Local Storage. Reset state (if necessary) and show placeholder.
                 this.selected = null;
-                if (this.search === '') {
-                    this.search = 'Search City';
-                }
+                this.search = ''; // Ensure 'search' is empty so the placeholder shows.
+                console.log('🔍 No initial city found in Local Storage. Input cleared.');
             }
 
             this.$watch('search', (value) => {
@@ -118,6 +115,7 @@
     @click.outside="closeDropdown()"
     class="select-container"
 >
+    {{-- This hidden input stores the final ID. --}}
     <input
         type="hidden"
         name="{{ $attributes->get('name', 'origin_city_id') }}"
@@ -130,7 +128,7 @@
         @input.debounce.300ms="searchCities()"
         @focus="open = true; selectAll($event)"
         @blur="setTimeout(() => { if (!$el.closest('[x-data]').querySelector('.select-dropdown:hover')) closeDropdown() }, 150)"
-        placeholder="Search City"
+        placeholder="Milnerton, Western Cape"
         class="select-input"
         autocomplete="off"
     >
