@@ -57,6 +57,9 @@
             // ⭐️ STEP 3: Close modal and trigger search ⭐️
             this.closeModal();
 
+            // 🔑 NEW: Dispatch event to notify listeners (like search-results-display)
+            this.$dispatch('filters-applied');
+
             // Trigger the main search script (VehicleInstantSearch.js)
             if (applyFiltersButton) applyFiltersButton.click();
         },
