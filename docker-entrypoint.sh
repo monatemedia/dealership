@@ -3,34 +3,32 @@ set -e
 
 echo "Running application setup..."
 
-# Remove hot file to force production assets
+# 💥 FIX: Ensure Laravel uses static assets, not the Vite HMR server
 if [ -f "/var/www/html/public/hot" ]; then
     rm /var/www/html/public/hot
     echo "Removed public/hot to force production asset usage."
 fi
 
-# Clear caches
+# Run Laravel setup
+# We will clear all caches (config, route, view) here to ensure
+# fresh variables and routing tables are loaded before Apache starts.
 php artisan config:clear
-php artisan route:clear
-php artisan view:clear
+php artisan route:clear  # ADDED: Clear cached routes
+php artisan view:clear   # ADDED: Clear cached views
 
-# Create storage symlink
+# Create storage symlink (idempotent - won't fail if already exists)
 php artisan storage:link
 
-# Run migrations
 php artisan migrate --force
 
-# Seed database if enabled
+# --- ADDED LOGIC FOR SEEDING ---
 if [ "$SEED_DATABASE" = "true" ]; then
     echo "    INFO  Seeding database..."
     php artisan db:seed --force
     echo "    INFO  Seeding complete."
 fi
+# ---------------------------------
 
-# Import data to Typesense
-echo "    INFO  Importing data to Typesense..."
-php artisan typesense:import
-echo "    INFO  Typesense import complete."
-
+# REPLACED: exec "$@" with the direct call to the Apache foreground process.
 echo "Application setup complete. Starting Apache web server..."
 exec apache2-foreground

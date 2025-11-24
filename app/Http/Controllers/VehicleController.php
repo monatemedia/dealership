@@ -499,7 +499,6 @@ class VehicleController extends Controller
     }
 
     /**
-     * app/Http/Controllers/VehicleController::search
      * Search for vehicles
      */
     public function search(Request $request) // Import request object

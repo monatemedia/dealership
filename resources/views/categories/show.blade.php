@@ -1,35 +1,26 @@
 {{-- resources/views/categories/show.blade.php --}}
 @props([
     'category',
-    'vehicles', // NOTE: This variable is now redundant for rendering, but kept for context.
+    'vehicles',
     'childCategories' => null,
     'childCategoryType' => null,
     'parentCategory' => null,
 ])
+
 @php
-    use Illuminate\Support\Str;
-    $taxonomyService = app('App\Services\TaxonomyRouteService');
-    $config = [];
-    if ($childCategoryType) {
-        $config = $taxonomyService->getConfig($childCategoryType);
-    }
+use Illuminate\Support\Str;
 
-    // Define the category ID for JS filtering
-    $categoryId = $category->id;
+$taxonomyService = app('App\Services\TaxonomyRouteService');
+$config = [];
 
-    // Determine the name of the foreign key based on the category type
-    if ($category instanceof \App\Models\MainCategory) {
-        $foreignKeyName = 'main_category_id';
-    } elseif ($category instanceof \App\Models\Subcategory) {
-        $foreignKeyName = 'subcategory_id';
-    } else {
-        // Fallback if Category is a different type (e.g., VehicleType)
-        $foreignKeyName = 'category_id';
-    }
+if ($childCategoryType) {
+    $config = $taxonomyService->getConfig($childCategoryType);
+}
 @endphp
 
 <x-app-layout :title="$category->name">
     <x-hero.home-slider />
+
     <main>
         {{-- DEBUG: Remove later --}}
         {{-- @if(config('app.debug'))
@@ -53,45 +44,9 @@
             />
         @endif
 
-        {{-- ----------------------------------------------------- --}}
-        {{-- 🎯 INSTANT SEARCH SETUP & CATEGORY FILTERING (New Logic) --}}
-        {{-- ----------------------------------------------------- --}}
+        <x-search-form />
 
-        {{-- 1. MOCK FILTER FORM FOR JS INITIALIZATION --}}
-        <form id="filter-form" style="display:none;">
-            {{--
-                CRITICAL FIX:
-                The input name must match the database column name used for filtering.
-            --}}
-            <input type="hidden" name="{{ $foreignKeyName }}" value="{{ $category->id }}">
-        </form>
-
-        {{-- 2. SIMPLE SEARCH INPUT BAR --}}
-        <section class="section-search">
-            <div class="container">
-                <div class="mb-medium">
-                    <div class="find-a-vehicle-form card p-medium">
-                        <div class="form-group">
-                            <label for="instant-search-input" style="display:block; font-weight:600; margin-bottom:0.5rem;">
-                                Search in {{ $category->name }}
-                            </label>
-                            <input
-                                type="text"
-                                id="instant-search-input"
-                                placeholder="Search by make, model, location..."
-                                style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px;"
-                            />
-                            <small class="text-muted" style="display:block; margin-top: 8px;">
-                                Start typing to search instantly within this category
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        {{-- 3. RESULTS CONTAINER --}}
-        <section class="section-latest-vehicles py-large">
+        <section>
             <div class="container">
                 <h2>
                     @if ($parentCategory)
@@ -101,25 +56,22 @@
                     @endif
                 </h2>
 
-                {{-- Vehicle grid where JS injects results (4 columns via CSS) --}}
-                <div id="search-results" class="vehicle-grid">
-                    {{-- JS will fetch and inject items here --}}
-                </div>
+                @if ($vehicles->count() > 0)
+                    <div class="vehicle-items-listing">
+                        @foreach($vehicles as $vehicle)
+                            <x-vehicle-item
+                                :$vehicle
+                                :is-in-watchlist="$vehicle->favouredUsers->contains(Auth::user())"
+                            />
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center p-large">
+                        There are no published vehicles in this category.
+                    </div>
+                @endif
 
-                {{-- Status Indicators (Required by VehicleInstantSearch.js) --}}
-                <div id="loading-indicator" class="loader-container hidden">
-                    <div class="loader main"><div class="ball"></div><div class="ball"></div><div class="ball"></div><div class="ball"></div></div>
-                </div>
-                <div id="no-results" class="status-container hidden">
-                    <p class="no-results-text">There are no published vehicles in this category.</p>
-                </div>
-                <div id="load-more-indicator" class="loader-container hidden">
-                    <div class="loader main"><div class="ball"></div><div class="ball"></div><div class="ball"></div><div class="ball"></div></div>
-                </div>
-                <div id="end-of-results" class="end-message hidden">
-                    You've reached the end of the list for {{ $category->name }}.
-                </div>
-
+                {{ $vehicles->onEachSide(1)->links() }}
             </div>
         </section>
     </main>

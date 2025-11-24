@@ -6,7 +6,6 @@ use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\VehicleSearchController;
 use App\Http\Controllers\VehicleTypeController;
 use App\Http\Controllers\WatchlistController;
 use Illuminate\Support\Facades\Route;
@@ -75,8 +74,8 @@ require __DIR__ . '/auth.php';
 // -------------------------------
 // PUBLIC SPECIFIC ROUTES
 // -------------------------------
-// Main search page
-Route::get('/vehicles/search', [VehicleSearchController::class, 'index'])
+// Vehicle search (must come before vehicle show)
+Route::get('/vehicle/search', [VehicleController::class, 'search'])
     ->name('vehicle.search');
 
 // Vehicle show with phone

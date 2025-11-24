@@ -1,34 +1,27 @@
-<?php // app/Http/Controllers/Api/ProvinceController.php
+<?php // app/Http/Controllers/ProvinceController.php
 
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Province;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProvinceController extends Controller
 {
-    public function search(Request $request): JsonResponse
+    public function search(Request $request)
     {
         $query = $request->input('q', '');
 
-        if (strlen($query) < 1) {
-            return response()->json([]);
-        }
-
-        $provinces = Province::search($query)
-            ->take(20)
-            ->get()
-            ->map(fn($province) => [
-                'id' => $province->id,
-                'name' => $province->name,
-            ]);
+        $provinces = Province::query()
+            ->where('name', 'LIKE', "%{$query}%")
+            ->orderBy('name')
+            ->limit(20)
+            ->get(['id', 'name']);
 
         return response()->json($provinces);
     }
 
-    public function show(int $id): JsonResponse
+    public function show($id)
     {
         $province = Province::findOrFail($id);
 

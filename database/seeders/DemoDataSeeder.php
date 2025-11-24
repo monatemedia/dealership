@@ -1,5 +1,5 @@
-<?php
-// database/seeders/DemoDataSeeder.php
+<?php // database/seeders/DemoDataSeeder.php
+
 namespace Database\Seeders;
 
 use App\Models\User;
@@ -20,27 +20,10 @@ class DemoDataSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->command->info('Seeding demo data...');
-
-        // Disable Scout auto-indexing during seeding
-        // We'll manually import to Typesense after seeding is complete
-        Vehicle::withoutSyncingToSearch(function () {
-            $this->seedData();
-        });
-
-        $this->command->newLine();
-        $this->command->info('✓ Demo data seeded successfully');
-        $this->command->info('Run "php artisan scout:import App\\\Models\\\Vehicle" to index in Typesense');
-    }
-
-    protected function seedData(): void
-    {
         // Basic users
-        $this->command->info('Creating basic users...');
-        User::factory()->count(3)->create();
+        User::factory()->count(3)->create(); // Create some basic users
 
         // Users with vehicles
-        $this->command->info('Creating users with vehicles...');
         User::factory()
             ->count(2) // Create users with vehicles
             ->has(
