@@ -2933,12 +2933,18 @@ input[type="checkbox"]:checked::after {
     border-radius: 4px;
 }
 
+/* Target the main container class to add spacing */
+.irs {
+    /* Set vertical margin (e.g., 8px top and bottom) */
+    margin: 8px 0 !important;
+}
+
 /* 2. Style the main track (the background) */
 .irs--flat .irs-line {
     /* Match the overall height and use a light color */
     height: 8px !important;
     top: 0 !important;
-    background-color: var(--default-button-bg) !important; /* Use your light gray background */
+    background-color: var(--text-muted-color) !important; /* Use your light gray background */
     border: none !important;
 }
 
@@ -2980,4 +2986,20 @@ input[type="checkbox"]:checked::after {
 .irs--flat .irs-handle:hover,
 .irs--flat .irs-handle:active {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 7. Hide the unwanted inner lines/bars inside the circular handle */
+.irs--flat .irs-handle i {
+    display: none !important;
+}
+
+/* 8. Adjust the handle hover/active effect */
+/* Ensure the hover effect (shadow) applies to the entire circular handle */
+.irs--flat .irs-handle:hover,
+.irs--flat .irs-handle:active,
+.irs--flat .irs-handle.state_active { /* state_active class is applied by JS when dragging */
+    /* Maintain the subtle box-shadow from the previous step */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+    /* Optional: You can change the background color slightly on hover if desired */
+    /* background-color: color-mix(in srgb, var(--primary-color) 85%, black) !important; */
 }
