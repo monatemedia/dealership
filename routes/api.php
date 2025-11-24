@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\CityController;
 use App\Http\Controllers\Api\ManufacturerController;
 use App\Http\Controllers\Api\ModelController;
 use App\Http\Controllers\Api\ProvinceController;
+use App\Http\Controllers\VehicleSearchController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -45,3 +46,27 @@ Route::prefix('cities')->group(function () {
     Route::get('/{id}', [CityController::class, 'show'])
         ->name('api.cities.show');
 });
+
+// -------------------------------
+// INSTANT SEARCH
+// -------------------------------
+Route::get('/vehicles/search', [VehicleSearchController::class, 'instantSearch'])
+    ->name('api.vehicle.search');
+
+Route::get('/vehicles/filter-options', [VehicleSearchController::class, 'getFilterOptions'])
+    ->name('api.vehicles.filter-options');
+
+Route::get('/vehicles/cities/{provinceId}', [VehicleSearchController::class, 'getCitiesByProvince'])
+    ->name('api.vehicles.cities');
+
+// -------------------------------
+// API ROUTES FOR STATIC SEARCH
+// -------------------------------
+Route::get('/subcategories-by-main/{mainCategoryId}', [VehicleSearchController::class, 'getSubcategoriesByMainCategory']);
+Route::get('/vehicle-types-by-sub/{subcategoryId}', [VehicleSearchController::class, 'getVehicleTypesBySubcategory']);
+Route::get('/fuel-types-by-sub/{subcategoryId}', [VehicleSearchController::class, 'getFuelTypesBySubcategory']);
+
+// -------------------------------
+// MAXIMUM RANGE FOR SLIDER
+// -------------------------------
+Route::get('/vehicles/max-range/{cityId}', [VehicleSearchController::class, 'getMaxRange']);

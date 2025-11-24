@@ -1,5 +1,5 @@
 <select name="vehicle_type_id">
-    <option value="">Type</option>
+    <option value="">Vehicle Type</option>
     @foreach ($types as $type)
         <option
             value="{{ $type->id }}"

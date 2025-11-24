@@ -1,36 +1,27 @@
-<?php // app/Http/Controllers/HomeController
-
+<?php // app/Http/Controllers/HomeController.php
 namespace App\Http\Controllers;
 
 use App\Models\MainCategory;
-use App\Models\Vehicle;
-use App\Models\VehicleCategory;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
+// You no longer need to import Cache or LengthAwarePaginator
+// use Illuminate\Support\Facades\Cache;
+// use Illuminate\Pagination\LengthAwarePaginator;
 
 class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        $page = $request->get('page', 1);
+        // NO DATABASE QUERY FOR VEHICLES IS NEEDED HERE.
+        // The front-end (VehicleInstantSearch.js) will handle the initial load
+        // by talking directly to Typesense (or your proxy API).
 
-        $cacheKey = "home-vehicles-page-{$page}";
-
-        $vehicles = Cache::remember($cacheKey, 60, function () use ($page) {
-            return Vehicle::where('published_at', '<', now())
-                ->with(['primaryImage', 'city', 'vehicleCategory', 'vehicleType', 'fuelType', 'manufacturer', 'model', 'favouredUsers'])
-                ->orderBy('published_at', 'desc')
-                ->paginate(30, ['*'], 'page', $page);
-        });
-
-        // dump($vehicles->toArray());
-
-        // Get three vehicle categories for display
+        // Get three vehicle categories for display (This is auxiliary data, caching this small list is optional)
         $categories = MainCategory::take(3)->get();
-        // dd($categories);
 
+        // Pass a null or empty array for the vehicles placeholder data
+        // since the frontend script will immediately replace it.
         return view('home.index', [
-            'vehicles' => $vehicles,
+            'vehicles' => null, // or empty array
             'categories' => $categories,
         ]);
     }

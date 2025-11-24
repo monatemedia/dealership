@@ -1,48 +1,27 @@
+        <!-- resources/views/components/search-form.blade.php -->
         <!-- Find a vehicle form -->
-        <section class="find-a-vehicle">
+        <section class="section-search">
             <div class="container">
-                <form action={{ route('vehicle.search') }} method="GET" class="find-a-vehicle-form card flex p-medium">
-                    <div class="find-a-vehicle-inputs">
-                        <div>
-                            <x-select-manufacturer />
-                        </div>
-                        <div>
-                            <x-select-model />
-                        </div>
-                        <div>
-                            <x-select-province />
-                        </div>
-                        <div>
-                            <x-select-city />
-                        </div>
-                        <div>
-                            <x-select-vehicle-type />
-                        </div>
-                        <div>
-                            <input type="number" placeholder="Year From" name="year_from" />
-                        </div>
-                        <div>
-                            <input type="number" placeholder="Year To" name="year_to" />
-                        </div>
-                        <div>
-                            <input type="number" placeholder="Price From" name="price_from" />
-                        </div>
-                        <div>
-                            <input type="number" placeholder="Price To" name="price_to" />
-                        </div>
-                        <div>
-                            <x-select-fuel-type />
+                {{-- The snippet you provided --}}
+                <div class="mb-medium">
+                    <div class="find-a-vehicle-form card p-medium">
+                        <div class="form-group">
+                            <label class="mb-medium" style="display:block; font-weight:600;">Search Vehicles</label>
+
+                            {{-- 🔑 CRITICAL: Add x-init to reset the input value on every page reload --}}
+                            <input
+                                type="text"
+                                id="instant-search-input"
+                                placeholder="Search by make, model, location, type..."
+                                style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px;"
+                                x-init="$el.value = ''"
+                            />
+                            <small class="text-muted" style="display:block; margin-top: 8px;">
+                                Start typing to search instantly
+                            </small>
                         </div>
                     </div>
-                    <div>
-                        <button type="button" class="btn btn-find-a-vehicle-reset">
-                            Reset
-                        </button>
-                        <button class="btn btn-primary btn-find-a-vehicle-submit">
-                            Search
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
         </section>
         <!--/ Find a vehicle form -->

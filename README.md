@@ -135,22 +135,155 @@ php artisan migrate:fresh --seed --seeder=DemoDataSeeder
 ### How to Start The App Locally
 
 - In the first terminal run
+
 ```sh
 # Start the PHP server
 php artisan serve
 ```
 
 - In a second terminal run
+
 ```sh
 # Start the Vite dev server
-npm run dev
+npm run build && npm run dev
 ```
 
 - In a third terminal run
+
 ```sh
 # Start the queue worker
 php artisan queue:work
 ```
+
+- In a fourth terminal run
+
+```sh
+# Start Typesense and import data
+php artisan typesense:start
+php artisan typesense:create-collections --force --import
+```
+
+---
+
+#### Typesense Artisan Commands
+
+##### Quick Start 🚀
+
+```bash
+# 1. Start Typesense container
+php artisan typesense:start
+
+# 2. Create collections and import data
+php artisan typesense:create-collections --force --import
+
+# 3. Verify everything is working
+php artisan typesense:status
+```
+
+---
+
+##### Core Commands
+
+| Command | Description |
+| :--- | :--- |
+| `php artisan typesense:start` | Starts the Typesense Docker container. Creates new container if it doesn't exist, or starts existing one. Waits for API to be healthy before returning. |
+| `php artisan typesense:stop` | Stops the running Typesense container without removing it. Data is preserved. |
+| `php artisan typesense:status` | Shows Docker container status, API health, and lists all collections with document/field counts. Use this to verify your setup. |
+
+---
+
+##### Data Management 🗃️
+
+| Command | Description |
+| :--- | :--- |
+| `php artisan typesense:create-collections` | Creates collection schemas from `config/scout.php`. Use alone to create empty collections. |
+| `php artisan typesense:create-collections --force` | **Recreates** collections by deleting existing ones first. Required when schema changes. |
+| `php artisan typesense:create-collections --force --import` | **Recommended:** Recreates schemas AND imports all data with progress bars. Imports in correct dependency order: Manufacturer → Model → Province → City → Vehicle. |
+| `php artisan typesense:search "query"` | Test search from command line. Use `--limit=N` to control result count. Great for debugging. |
+
+**Note:** The Vehicle collection includes a `geo_location` geopoint field (25 total fields) for radius-based location filtering.
+
+---
+
+##### Destroy Commands 🛑
+
+⚠️ **Warning:** These commands permanently delete data!
+
+| Command | Description |
+| :--- | :--- |
+| `php artisan typesense:destroy` | Prompts for confirmation, then removes container. Asks about data volume removal. |
+| `php artisan typesense:destroy --force` | Removes container and data volume immediately without prompts. **ALL DATA LOST!** |
+| `php artisan typesense:destroy --keep-volume` | Removes container but preserves the data volume for later use. |
+
+---
+
+##### Common Workflows
+
+**Fresh Setup:**
+```bash
+php artisan typesense:start
+php artisan typesense:create-collections --force --import
+php artisan typesense:status
+```
+
+**After Schema Changes:**
+```bash
+php artisan typesense:create-collections --force --import
+```
+
+**Complete Reset:**
+```bash
+php artisan typesense:destroy --force
+php artisan typesense:start
+php artisan typesense:create-collections --force --import
+```
+
+**Quick Search Test:**
+```bash
+php artisan typesense:search "BMW" --limit=5
+```
+
+---
+
+##### Configuration
+
+Typesense settings are in `config/scout.php` under `model-settings`. Each model has:
+- **collection-schema**: Field definitions and types
+- **search-parameters**: Query configuration (query_by, num_typos, etc.)
+
+Environment variables:
+```env
+TYPESENSE_HOST=dealership-typesense
+TYPESENSE_PORT=8108
+TYPESENSE_API_KEY=your-secret-key
+```
+
+---
+
+##### Troubleshooting
+
+**Container won't start:**
+```bash
+docker info  # Check Docker is running
+docker logs dealership-typesense  # View logs
+php artisan typesense:destroy --force  # Reset completely
+php artisan typesense:start
+```
+
+**No search results:**
+```bash
+php artisan typesense:status  # Check document counts
+php artisan typesense:create-collections --force --import  # Re-import
+```
+
+**Schema field mismatch:**
+```bash
+# Vehicle should show 25 fields (including geo_location)
+php artisan typesense:status
+# If wrong, recreate:
+php artisan typesense:create-collections --force --import
+```
+
 
 ### Prerequisites
 
@@ -293,7 +426,17 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Upload Container To Live Server
   - [X] Map Domain Name
   - [X] Map Email For Account Creation
-  - [ ] Set Up CI/CD
+  - [X] Set Up CI/CD
+- [X] Set Up Typesense Search Engine
+  - [X] Install Laravel Scout
+  - [X] Update Models
+- [ ] Set Up PostGIS Search
+  - [ ] Enable PostGIS
+  - [ ] Add PostGIS Geometry Column
+  - [ ] Create User Address Functionality
+  - [ ] Use In App
+- [ ] Allow Unknown `Manufacturers` and `Models` to be created
+- [ ] Bugfix: App CSS to `carType` and `fueltype` components
 - [ ] Test Create & Edit Pages
 - [ ] Make current Main Categories into **Sections** 
 - [ ] Make current Subcategories into **Categories**
@@ -310,51 +453,202 @@ See the [open issues](https://github.com/monatemedia/dealership/issues) for a fu
 
 
 <!-- CONTRIBUTING -->
-## Contributing
+# Contributing
 
 We use the `GitFlow Branching Model`. To make a contribution, please fork the repo and create a pull request. You can also <a href="https://github.com/monatemedia/dealership/issues/new?labels=bug&template=bug-report---.md">report a bug</a>, or <a href="https://github.com/monatemedia/dealership/issues/new?labels=enhancement&template=feature-request---.md">request a feature</a>.
 
-### GitFlow Branching Model
+## GitFlow Branching Model
 
-This project follows the **GitFlow branching strategy**.  
+This project follows the GitFlow branching strategy with automated CI/CD deployments.
+The goal is to keep `main` always production-ready while using `dev` as an integration branch.
 
-The goal is to keep `main` always production-ready while using `dev` as an integration branch.  
-All work happens in short-lived branches that are deleted after merge. 
-
-Core branches:
-1. `main` → always production-ready, deployed code.
-2. `dev`  → integration branch where features and fixes are merged before going to main.
-
-Short-lived branches (temporary branches, deleted after merge):
-  - `feature/<name>` → for new functionality. Created from `dev`, merged back into `dev`.
-  - `bugfix/<name>` → for fixing bugs. Created from `dev`, merged back into `dev`.
-  - `release/<version>` → staging branch to prepare a version before tagging and merging to `main`. created from `dev`, merged into both `main` and `dev`.
-  - `hotfix/<name>` → for urgent production fixes (branched off `main`, merged back to both `main` and `dev`).
-
-
----
+All work happens in short-lived branches that are deleted after merge.
 
 ### Core Branches
-1. **`main`**  
-   - Always production-ready.  
-   - Code here is what’s deployed.  
 
-2. **`dev`**
-   - Integration branch.  
-   - Features and bugfixes merge here before going to `main`.  
+**`main`** → always production-ready, deployed code. Automatically builds and deploys to production server when code is pushed or when version tags are created.
 
----
+**`dev`** → integration branch where features and fixes are merged before going to production. Used for local development on Docker Desktop.
 
 ### Short-Lived Branches
 
-#### Feature Branches
-- For new functionality.  
-- Created from `dev`, merged back into `dev`.  
+Temporary branches, deleted after merge:
+
+- **`feature/<name>`** → for new functionality. Created from `dev`, merged back into `dev`.
+- **`bugfix/<name>`** → for fixing bugs. Created from `dev`, merged back into `dev`.
+- **`release/<version>`** → staging branch to prepare a version before tagging and merging to `main`. Created from `dev`, merged into both `main` and `dev`. **Automatically deploys to staging environment for testing.**
+- **`hotfix/<name>`** → for urgent production fixes. Branched off `main`, merged back to both `main` and `dev`.
+
+### Deployment Environments
+
+- **Production** → Triggered by pushes to `main` or version tags (e.g., `v1.0.0`). Deploys to production server. **Adminer is NOT included in production.**
+- **Staging** → `release/*` branches automatically deploy to staging environment on VPS for QA/testing. **Adminer is included for database access.**
+- **Local Development** → `dev` branch for development on Docker Desktop. **Adminer is included.**
+
+### Version Management
+
+This project uses **Git tags** as the source of truth for versioning. All deployments are tracked with semantic versioning (e.g., `v1.0.0`, `v2.1.5`).
+
+**Docker images are tagged with:**
+- `:staging` - Latest staging release
+- `:production` - Latest production release
+- `:v1.0.0` - Specific version number
+- `:abc123def` - Git commit SHA (for traceability)
+
+**Image tags are automatically managed** - the `IMAGE_TAG` environment variable in `.env` is updated during deployment.
+
+## Complete Release Workflow Example
+
+Here's a complete example from start to finish:
+
+### Scenario: Releasing version 1.2.0
+
+**Week 1-2: Development**
+```bash
+# Create and work on features
+git checkout dev
+git checkout -b feature/vehicle-search
+# ... work on feature ...
+git push origin feature/vehicle-search
+# Merge to dev via PR
+```
+
+**Week 3: Prepare Release**
+```bash
+# Create release branch
+git checkout dev
+git pull origin dev
+git checkout -b release/1.2.0
+
+# Update version numbers in your code
+# - composer.json
+# - package.json
+# - Any version constants
+
+git add .
+git commit -m "Bump version to 1.2.0"
+git push origin release/1.2.0
+```
+
+**🧪 Automatic Staging Deployment happens now**
+- Test thoroughly on staging environment
+- Fix any bugs found
+- Push bug fixes to `release/1.2.0` branch
+
+**Week 4: Deploy to Production**
+```bash
+# Step 1: Merge to main
+git checkout main
+git pull origin main
+git merge release/1.2.0
+git push origin main
+
+# Step 2: Create and push tag (THIS IS CRITICAL!)
+git tag -a v1.2.0 -m "Release 1.2.0: Add vehicle search and favorites"
+git push origin v1.2.0
+
+# Step 3: Merge back to dev
+git checkout dev
+git pull origin dev
+git merge release/1.2.0
+git push origin dev
+
+# Step 4: Clean up
+git branch -d release/1.2.0
+git push origin --delete release/1.2.0
+```
+
+**🚀 Production Deployment happens automatically**
+- GitHub Actions deploys to production
+- Visit GitHub Releases to add release notes
+
+**Add Release Notes on GitHub:**
+1. Go to: `https://github.com/your-username/dealership/releases/tag/v1.2.0`
+2. Click "Edit release"
+3. Add details:
+   ```markdown
+   ## What's New
+   - Added advanced vehicle search with filters
+   - Implemented user favorites feature
+   - Improved search performance by 40%
+   
+   ## Bug Fixes
+   - Fixed pagination on search results
+   - Resolved image upload timeout issues
+   
+   ## Breaking Changes
+   None
+   
+   ## Migration Notes
+   No database migrations required
+   ```
+
+**Week 4+: Monitor Production**
+- Watch for any issues
+- Prepare hotfix if critical bugs are found
+
+### If a Critical Bug is Found
 
 ```bash
-# CREATE A FEATURE BRANCH
-# ---------------------
+# Create hotfix
+git checkout main
+git pull origin main
+git checkout -b hotfix/fix-search-crash
 
+# Fix the bug, test locally
+git add .
+git commit -m "Fix search crash on empty query"
+git push origin hotfix/fix-search-crash
+
+# Deploy hotfix
+git checkout main
+git merge hotfix/fix-search-crash
+git push origin main
+
+# Create patch version tag
+git tag -a v1.2.1 -m "Hotfix 1.2.1: Fix search crash on empty query"
+git push origin v1.2.1
+
+# Merge to dev
+git checkout dev
+git merge hotfix/fix-search-crash
+git push origin dev
+
+# Clean up
+git branch -d hotfix/fix-search-crash
+git push origin --delete hotfix/fix-search-crash
+```
+
+---
+
+## Working with Branches
+
+### Core Branches
+
+#### main
+
+Always production-ready. Code here is what's deployed to production.
+
+**Triggers automatic deployment to production when:**
+- Code is pushed to `main`
+- A version tag is created (e.g., `v1.0.0`)
+
+#### dev
+
+Integration branch. Features and bugfixes merge here before going to production. Used for local development.
+
+---
+
+## Short-Lived Branches
+
+### Feature Branches
+
+For new functionality.
+Created from `dev`, merged back into `dev`.
+
+#### CREATE A FEATURE BRANCH
+
+```bash
 # Make sure you're on dev
 git checkout dev
 
@@ -369,10 +663,11 @@ git push origin feature/<name>
 
 # List all branches that contain the tip commit of your feature branch
 git branch --contains feature/<name>
+```
 
-# MERGE FEATURE BRANCH
-# --------------------
+#### MERGE FEATURE BRANCH
 
+```bash
 # Make sure all your work is committed on the feature branch
 git status
 git add .
@@ -408,10 +703,11 @@ git push origin --delete feature/<name>
 
 # Get existing local and remote branches
 git branch --all
+```
 
-# DELETE AN UNWANTED FEATURE BRANCH
-# --------------------
+#### DELETE AN UNWANTED FEATURE BRANCH
 
+```bash
 # Switch back to dev
 git checkout dev
 
@@ -431,39 +727,47 @@ Merge via Pull Request into `dev`.
 
 ---
 
-#### Undo Last Commit
-- For undoing your last commit.    
+### Undo Last Commit
+
+For undoing your last commit.
+
+#### UNDO THE LAST COMMIT BUT KEEP YOUR CODE CHANGES (UNCOMMITTED)
 
 ```bash
-# UNDO THE LAST COMMIT BUT KEEP YOUR CODE CHANGES (UNCOMMITTED)
 # - The commit is undone
 # - All your changes stay staged and ready to recommit
-# ---------------------
 git reset --soft HEAD~1
+```
 
-# UNDO THE LAST COMMIT AND UNSTAGE THE FILES (KEEP IN WORKING DIRECTORY)
+#### UNDO THE LAST COMMIT AND UNSTAGE THE FILES (KEEP IN WORKING DIRECTORY)
+
+```bash
 # - The commit is undone
 # - Files are unstaged but still modified in your working directory.
-# ---------------------
 git reset --mixed HEAD~1
+```
 
-# COMPLETELY DISCARD THE LAST COMMIT AND ALL ITS CHANGES
+#### COMPLETELY DISCARD THE LAST COMMIT AND ALL ITS CHANGES
+
+```bash
 # - The commit and all associated changes are deleted.
 # - Your local dev matches the state before that commit.
-# ---------------------
 git reset --hard HEAD~1
+```
 
-# OPTIONAL CLEANUP
+#### OPTIONAL CLEANUP
+
+```bash
 # - If you want to discard both commits and exactly match remote origin/dev
-# ---------------------
 git reset --hard origin/dev
 ```
+
 ---
 
-#### Bugfix Branches
+### Bugfix Branches
 
-* For fixing bugs (not urgent production issues).
-* Created from `dev`, merged back into `dev`.
+For fixing bugs (not urgent production issues).
+Created from `dev`, merged back into `dev`.
 
 ```bash
 git checkout dev
@@ -477,35 +781,119 @@ Merge via Pull Request into `dev`.
 
 ---
 
-#### Release Branches
+### Release Branches
 
-* For preparing a version before tagging and merging into production.
-* Created from `dev`, merged into both `main` and `dev`.
+For preparing a version before tagging and merging into production.
+Created from `dev`, merged into both `main` and `dev`.
+
+**Release branches are automatically deployed to the staging environment for QA and testing.**
+
+#### CREATE AND DEPLOY TO STAGING
 
 ```bash
+# Make sure dev is up to date
 git checkout dev
 git pull origin dev
-git checkout -b release/<version>
-# final tweaks, version bumps
-git push origin release/<version>
+
+# Create release branch with version number
+git checkout -b release/1.0.0
+
+# Make final tweaks, version bumps
+# Update version in composer.json, package.json, etc.
+
+# Push to trigger automatic staging deployment
+git push origin release/1.0.0
 ```
 
-Merge via Pull Request into both `main` and `dev`.
-Tag the release on `main`:
+**🧪 Automatic Staging Deployment:**
+- GitHub Actions builds Docker image tagged as `:staging` and `:v1.0.0`
+- Image is deployed to staging server automatically
+- Adminer is available for database access
+- Server's `.env` is updated with `IMAGE_TAG=v1.0.0`
+
+#### TEST ON STAGING
+
+Visit your staging environment and thoroughly test all functionality.
+
+#### PROMOTE TO PRODUCTION
+
+After successful testing on staging, it's time to deploy to production. Follow these steps carefully:
+
+**Step 1: Merge release to main**
+```bash
+# Switch to main branch
+git checkout main
+
+# Make sure main is up to date
+git pull origin main
+
+# Merge the release branch
+git merge release/1.0.0
+
+# Push to main
+git push origin main
+```
+
+**Step 2: Create and push the version tag**
+
+This is **critical** - the tag triggers the production deployment and creates a GitHub Release.
 
 ```bash
-git checkout main
-git pull origin main
-git tag -a v<version> -m "Release v<version>"
-git push origin v<version>
+# Still on main branch
+# Create an annotated tag with a message
+git tag -a v1.0.0 -m "Release version 1.0.0"
+
+# Push the tag to trigger production deployment
+git push origin v1.0.0
 ```
+
+⚠️ **Important:** Always use the `-a` flag (annotated tag) and include a meaningful message with `-m`.
+
+**Step 3: Merge back to dev**
+
+Keep `dev` updated with the production changes:
+
+```bash
+# Switch to dev
+git checkout dev
+
+# Make sure dev is up to date
+git pull origin dev
+
+# Merge the release branch
+git merge release/1.0.0
+
+# Push to dev
+git push origin dev
+```
+
+**Step 4: Clean up the release branch**
+```bash
+# Delete the local release branch
+git branch -d release/1.0.0
+
+# Delete the remote release branch
+git push origin --delete release/1.0.0
+```
+
+**🚀 Automatic Production Deployment:**
+- GitHub Actions detects the `v1.0.0` tag
+- Builds Docker image tagged as `:production` and `:v1.0.0`
+- Image is deployed to production server automatically
+- Adminer is NOT included in production (security)
+- Server's `.env` is updated with `IMAGE_TAG=v1.0.0`
+
+**GitHub Release:**
+The version tag automatically creates a GitHub Release at `https://github.com/your-username/dealership/releases/tag/v1.0.0`. You can add release notes there describing what's new, what's fixed, and any breaking changes.
 
 ---
 
-#### Hotfix Branches
+### Hotfix Branches
 
-* For urgent production fixes.
-* Created from `main`, merged back into both `main` and `dev`.
+For urgent production fixes.
+Created from `main`, merged back into both `main` and `dev`.
+
+#### CREATE HOTFIX
 
 ```bash
 git checkout main
@@ -515,40 +903,265 @@ git checkout -b hotfix/<name>
 git push origin hotfix/<name>
 ```
 
-Merge via Pull Request into both `main` and `dev`.
-Tag the hotfix on `main`:
+#### DEPLOY HOTFIX
 
 ```bash
-git tag -a v<version+patch> -m "Hotfix v<version+patch>"
-git push origin v<version+patch>
+# Merge to main
+git checkout main
+git merge hotfix/<name>
+git push origin main
+
+# Create patch version tag
+git tag -a v1.0.1 -m "Hotfix: <description>"
+git push origin v1.0.1
+
+# Merge back to dev
+git checkout dev
+git merge hotfix/<name>
+git push origin dev
+
+# Delete hotfix branch
+git branch -d hotfix/<name>
+git push origin --delete hotfix/<name>
+```
+
+Merge via Pull Request into both `main` and `dev`.
+
+**Optional: Test on staging before merging**
+If needed, you can manually deploy the hotfix branch to staging for testing before merging to production.
+
+---
+
+## Version Management
+
+### Semantic Versioning
+
+We use semantic versioning: `MAJOR.MINOR.PATCH` (e.g., `v1.0.0`, `v2.3.5`)
+
+- **MAJOR** - Breaking changes (e.g., `v1.0.0` → `v2.0.0`)
+- **MINOR** - New features (backwards compatible) (e.g., `v1.0.0` → `v1.1.0`)
+- **PATCH** - Bug fixes (e.g., `v1.0.0` → `v1.0.1`)
+
+### Git Tagging Quick Reference
+
+**Creating tags:**
+
+```bash
+# Annotated tag (REQUIRED - use this!)
+git tag -a v1.0.0 -m "Release version 1.0.0"
+
+# Push a specific tag
+git push origin v1.0.0
+
+# Push all tags at once (use with caution)
+git push origin --tags
+```
+
+**Listing tags:**
+
+```bash
+# List all tags
+git tag
+
+# List tags matching a pattern
+git tag -l "v1.*"
+
+# Show tag details
+git show v1.0.0
+```
+
+**Deleting tags (if you made a mistake):**
+
+```bash
+# Delete local tag
+git tag -d v1.0.0
+
+# Delete remote tag
+git push origin --delete v1.0.0
+```
+
+**Common tagging mistakes to avoid:**
+
+❌ **DON'T** create lightweight tags: `git tag v1.0.0` (missing `-a`)
+✅ **DO** create annotated tags: `git tag -a v1.0.0 -m "message"`
+
+❌ **DON'T** forget to push tags after creating them
+✅ **DO** remember: `git push origin v1.0.0`
+
+❌ **DON'T** use inconsistent version formats (`1.0.0` vs `v1.0.0`)
+✅ **DO** always prefix with `v`: `v1.0.0`, `v2.1.5`
+
+### When to Increment Version Numbers
+
+**Increment MAJOR (v1.0.0 → v2.0.0):**
+- Breaking API changes
+- Major architectural changes
+- Database migrations that require manual intervention
+- Removing deprecated features
+
+**Increment MINOR (v1.0.0 → v1.1.0):**
+- New features added
+- New API endpoints
+- New functionality that doesn't break existing code
+- Regular releases from `release/*` branches
+
+**Increment PATCH (v1.0.0 → v1.0.1):**
+- Bug fixes
+- Security patches
+- Performance improvements
+- Hotfixes from `hotfix/*` branches
+
+### Version Numbering Examples
+
+Starting from `v1.0.0`:
+
+```bash
+# First feature release
+git tag -a v1.1.0 -m "Release 1.1.0: Add vehicle search feature"
+
+# Bug fix
+git tag -a v1.1.1 -m "Hotfix 1.1.1: Fix search pagination bug"
+
+# Another feature release
+git tag -a v1.2.0 -m "Release 1.2.0: Add user favorites"
+
+# Major breaking change
+git tag -a v2.0.0 -m "Release 2.0.0: New API structure (breaking changes)"
+```
+
+### Checking Current Version
+
+**On your server:**
+```bash
+# Check configured version
+cat .env | grep IMAGE_TAG
+
+# Check running containers
+docker compose ps
+
+# List all available versions
+docker images ghcr.io/monatemedia/dealership
+
+# View image details
+docker compose config | grep "image:"
+```
+
+### Rolling Back to Previous Version
+
+If you need to rollback to a previous version:
+
+```bash
+# SSH into your server
+cd /path/to/project
+
+# Update IMAGE_TAG in .env
+echo "IMAGE_TAG=v1.0.0" >> .env  # Change to desired version
+
+# Restart containers
+docker compose down
+docker compose up -d
+
+# Or for production (without Adminer)
+docker compose up -d dealership-web dealership-queue dealership-db
+```
+
+### Running Adminer Locally
+
+For local development with Adminer:
+
+```bash
+docker compose --profile dev up -d
+```
+
+For staging with Adminer:
+
+```bash
+docker compose --profile staging up -d
+```
+
+For production (no Adminer):
+
+```bash
+docker compose up -d dealership-web dealership-queue dealership-db
 ```
 
 ---
 
-### Standard Workflow
+## Standard Workflow
 
 1. Fork or clone the project.
-2. Create your branch (`feature/*`, `bugfix/*`, `release/*`, or `hotfix/*`).
-3. Commit your changes:
 
+2. Create your branch (`feature/*`, `bugfix/*`, `release/*`, or `hotfix/*`).
+
+3. Commit your changes:
    ```bash
    git commit -m "Meaningful message"
    ```
-4. Push to remote:
 
+4. Push to remote:
    ```bash
    git push origin branch-name
    ```
+
 5. Open a Pull Request into the correct target branch.
+
+6. After merge, **deployments happen automatically** via GitHub Actions.
 
 ---
 
-### Summary of Branch Sources
+## Summary of Branch Sources
 
-* `feature/*` → from `dev`, merge into `dev`.
-* `bugfix/*` → from `dev`, merge into `dev`.
-* `release/*` → from `dev`, merge into `main` + `dev`.
-* `hotfix/*` → from `main`, merge into `main` + `dev`.
+- `feature/*` → from `dev`, merge into `dev`.
+- `bugfix/*` → from `dev`, merge into `dev`.
+- `release/*` → from `dev`, merge into `main` + `dev`. **Auto-deploys to staging.**
+- `hotfix/*` → from `main`, merge into `main` + `dev`. **Auto-deploys to production.**
+
+---
+
+## CI/CD Deployment Flow
+
+### Automatic Deployments
+
+| Trigger | Environment | Docker Tags | Adminer |
+|---------|-------------|-------------|---------|
+| Push to `release/*` | Staging | `:staging`, `:v1.0.0` | ✅ Yes |
+| Push to `main` | Production | `:production`, `:v1.0.0` | ❌ No |
+| Push tag `v1.0.0` | Production | `:production`, `:v1.0.0` | ❌ No |
+| Local dev | Development | `:dev` | ✅ Yes |
+
+### Required GitHub Secrets
+
+**For Staging (Current VPS):**
+- `PAT` - GitHub Personal Access Token
+- `SSH_PRIVATE_KEY` - SSH key for VPS
+- `SSH_HOST` - VPS IP address
+- `SSH_USER` - SSH username
+- `WORK_DIR` - Project directory path
+
+**For Production (When Ready):**
+- `PRODUCTION_SSH_KEY` - SSH key for production server
+- `PRODUCTION_HOST` - Production server IP
+- `PRODUCTION_USER` - Production SSH username
+- `PRODUCTION_WORK_DIR` - Production project directory
+
+### Workflow Location
+
+`.github/workflows/docker-publish.yml`
+
+---
+
+## Best Practices
+
+1. **Always create release branches from dev** - never from feature branches
+2. **Test thoroughly on staging** before merging to main
+3. **Use semantic versioning** for all releases
+4. **Tag releases immediately** after merging to main
+5. **Keep release notes** in GitHub Releases
+6. **Never push directly to main** - always use pull requests
+7. **Clean up branches** after merging
+8. **Monitor GitHub Actions** for deployment status
+9. **Keep `.env` files secure** - never commit them
+10. **Use Adminer only in dev/staging** - never expose in production
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

@@ -1,4 +1,5 @@
-@props(['vehicle', 'isInWatchlist' => false])
+{{-- resources/views/components/vehicle-item.blade.php --}}
+@props(['vehicle', 'isInWatchlist' => false, 'distanceKm' => null])
 
 <div class="vehicle-item card">
     <a href="{{ route('vehicle.show', $vehicle) }}">
@@ -10,11 +11,13 @@
     </a>
     <div class="p-medium">
         <div class="flex items-center justify-between">
+            {{-- 🔑 LOCATION: Keep the City/Province here, without the distance --}}
             <small class="m-0 text-muted">{{ $vehicle->city->name }}, {{ $vehicle->city->province->name }}</small>
                 <button
                     class="btn-heart text-primary"
                     data-url="{{ route('watchlist.storeDestroy', $vehicle) }}"
                 >
+                    {{-- ... (SVG code for heart button) ... --}}
                     <svg
                          xmlns="http://www.w3.org/2000/svg"
                          fill="none"
@@ -43,7 +46,17 @@
         <h2 class="vehicle-item-title">
             {{ $vehicle->getTitle() }}
         </h2>
-        <p class="vehicle-item-price">R {{ number_format($vehicle->price, 0, '.', ' ') }}</p>
+
+        {{-- 🔑 NEW: Price and Distance Container (Flexbox) --}}
+        <div class="flex items-center justify-between">
+            <p class="vehicle-item-price">R {{ number_format($vehicle->price, 0, '.', ' ') }}</p>
+            @if (!empty($distanceKm))
+                {{-- Add a utility class for smaller text in the distance --}}
+                <span class="vehicle-card-distance-badge text-primary">{{ $distanceKm }} km away</span>
+            @endif
+        </div>
+        {{-- 🔑 End New --}}
+
         <hr />
         <div class="vehicle-item-badges">
             {{-- @dd($vehicle) --}}
