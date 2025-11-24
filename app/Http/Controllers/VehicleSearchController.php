@@ -23,6 +23,7 @@ class VehicleSearchController extends Controller
         $perPage = 12;
         $originCityId = $request->input('origin_city_id');
         $rangeKm = $request->input('range_km');
+        $sort = $request->input('sort'); // 🆕 Get the sort parameter
 
         // Vehicle Item Card Distance Variables
         $originCity = null; // Initialize
@@ -32,12 +33,12 @@ class VehicleSearchController extends Controller
         try {
             // Build Scout query
             $builder = Vehicle::search($query);
+            $builderOptions = []; // Initialize array for Typesense options
 
-            // 🔑 STEP 1: Get Origin City and Apply Typesense native geo-filtering
+            // 🔑 STEP 1: Get Origin City and Apply Typesense native geo-filtering (No change here)
             if ($originCityId && $rangeKm && (int)$originCityId > 0 && (float)$rangeKm > 0) {
                 // Get origin city coordinates
                 $originCity = City::find((int)$originCityId);
-
                 if ($originCity && $originCity->latitude && $originCity->longitude) {
                     $lat = (float) $originCity->latitude;
                     $lon = (float) $originCity->longitude;
@@ -49,29 +50,76 @@ class VehicleSearchController extends Controller
                         'lon' => $lon,
                         'range_km' => $radiusKm,
                     ]);
-
                     // Use Typesense's geopoint filtering
-                    // Format: geo_location:(lat, lon, radius_km)
-                    $builder->options([
-                        'filter_by' => "geo_location:($lat, $lon, {$radiusKm} km)"
-                    ]);
+                    $builderOptions['filter_by'] = "geo_location:($lat, $lon, {$radiusKm} km)";
                 }
             }
 
-            // Apply Taxonomy Filters
+            // 🆕 STEP 2: Handle Sorting Logic
+            $sortBy = '';
+            if ($sort) {
+                // Determine the field and direction from the dropdown value
+                if (str_starts_with($sort, '-')) {
+                    $field = ltrim($sort, '-');
+                    $sortBy = "{$field}:desc";
+                } else {
+                    $field = $sort;
+                    $sortBy = "{$field}:asc";
+                }
+            }
+            // Apply sorting if set
+            if ($sortBy) {
+                $builderOptions['sort_by'] = $sortBy;
+            }
+
+            // Apply all builder options (filter_by and sort_by)
+            if (!empty($builderOptions)) {
+                $builder->options($builderOptions);
+            }
+
+            // 🆕 STEP 3: Apply ALL other Filters from the sidebar (The old "Taxonomy Filters" block is expanded)
+
+            // Category and Manufacturer Filters
             if ($request->filled('main_category_id')) {
                 $builder->where('main_category_id', (int) $request->input('main_category_id'));
             }
             if ($request->filled('subcategory_id')) {
                 $builder->where('subcategory_id', (int) $request->input('subcategory_id'));
             }
-
-            // Apply other filters
             if ($request->filled('manufacturer_id')) {
                 $builder->where('manufacturer_id', (int) $request->input('manufacturer_id'));
             }
+            if ($request->filled('model_id')) {
+                $builder->where('model_id', (int) $request->input('model_id'));
+            }
+            if ($request->filled('vehicle_type_id')) {
+                $builder->where('vehicle_type_id', (int) $request->input('vehicle_type_id'));
+            }
+            if ($request->filled('fuel_type_id')) {
+                $builder->where('fuel_type_id', (int) $request->input('fuel_type_id'));
+            }
+
+            // Numerical Range Filters (Year, Price, Mileage)
+            if ($request->filled('year_from')) {
+                $builder->where('year', '>=', (int) $request->input('year_from'));
+            }
+            if ($request->filled('year_to')) {
+                $builder->where('year', '<=', (int) $request->input('year_to'));
+            }
+            if ($request->filled('price_from')) {
+                $builder->where('price', '>=', (int) $request->input('price_from'));
+            }
+            if ($request->filled('price_to')) {
+                $builder->where('price', '<=', (int) $request->input('price_to'));
+            }
+            // Max Mileage Filter
             if ($request->filled('mileage')) {
                 $builder->where('mileage', '<=', (int) $request->input('mileage'));
+            }
+
+            // City Filter (Note: This is the user's *selected* city, which is separate from the originCityId used for GEO-filtering)
+            if ($request->filled('city_id')) {
+                $builder->where('city_id', (int) $request->input('city_id'));
             }
 
             // Execute search and paginate

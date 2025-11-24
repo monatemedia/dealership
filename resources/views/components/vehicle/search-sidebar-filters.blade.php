@@ -20,22 +20,24 @@
     <section class="find-a-vehicle">
         <form id="filter-form" class="find-a-vehicle-form card flex p-medium" x-data="{
             selectedMainCategory: '{{ request('main_category_id', '') }}',
-
             init() {
-                // 🔑 NEW: On sidebar initialization, read state from Local Storage
+                console.log('SIDEBAR INIT: Reading geo-filters...');
                 const storedCityId = localStorage.getItem('{{ $cityIdKey }}');
                 const storedRangeKm = localStorage.getItem('{{ $rangeKey }}');
 
-                // Set hidden inputs based on Local Storage, falling back to request/default
                 document.getElementById('origin_city_id_filter').value = storedCityId || '{{ request('origin_city_id', '') }}';
-                document.getElementById('range_km_filter').value = storedRangeKm || '{{ request('range_km', 5) }}';
-            },
 
+                // 🔑 FIX 1: Only set the range input if a city is explicitly set (either stored or in request). Otherwise, leave it empty.
+                const initialRange = (storedCityId || '{{ request('origin_city_id', '') }}') ? (storedRangeKm || '{{ request('range_km', 5) }}') : '';
+
+                document.getElementById('range_km_filter').value = initialRange;
+                console.log(`SIDEBAR INIT: origin_city_id_filter: ${document.getElementById('origin_city_id_filter').value}, range_km_filter: ${document.getElementById('range_km_filter').value}`);
+            },
             resetFilters() {
+                console.log('SIDEBAR RESET: Starting filter reset...');
                 // 1. Reset Alpine state
                 this.selectedMainCategory = '';
                 this.$dispatch('main-category-selected', { id: '' });
-                this.$dispatch('filters-reset');
 
                 // 2. Reset standard form inputs (e.g., year, price, etc.)
                 document.getElementById('filter-form').reset();
@@ -44,10 +46,14 @@
                 localStorage.removeItem('{{ $cityIdKey }}');
                 localStorage.removeItem('{{ $rangeKey }}');
                 document.getElementById('origin_city_id_filter').value = '';
-                document.getElementById('range_km_filter').value = '5';
+                // 🔑 CRITICAL FIX 2: Set range to EMPTY STRING on reset.
+                document.getElementById('range_km_filter').value = '';
+                console.log(`SIDEBAR RESET: Inputs cleared. range_km_filter: ${document.getElementById('range_km_filter').value}`);
+
+                // 4. Dispatch the reset event to trigger component resets (including the slider)
+                this.$dispatch('filters-reset');
             }
         }" x-init="init()">
-
             {{-- 🆕 HIDDEN FIELDS FOR GEO-SEARCH (These will now be set in x-init) --}}
             <input type="hidden" name="origin_city_id" id="origin_city_id_filter" value="">
             <input type="hidden" name="range_km" id="range_km_filter" value="">

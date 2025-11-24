@@ -1,4 +1,4 @@
-<?php
+<?php // app/Console/Commands/ExtractDependenciesCommand.php
 
 namespace App\Console\Commands;
 

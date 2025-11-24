@@ -2923,4 +2923,61 @@ input[type="checkbox"]:checked::after {
     color: #dc3545; /* Red color */
 }
 
+/* resources/css/app.css (Ion.RangeSlider Styling) */
 
+/* 1. Reset the entire slider container */
+.irs--flat {
+    /* Set the desired track height and remove standard padding/borders */
+    height: 8px !important;
+    padding: 0 !important;
+    border-radius: 4px;
+}
+
+/* 2. Style the main track (the background) */
+.irs--flat .irs-line {
+    /* Match the overall height and use a light color */
+    height: 8px !important;
+    top: 0 !important;
+    background-color: var(--default-button-bg) !important; /* Use your light gray background */
+    border: none !important;
+}
+
+/* 3. Style the filled connection (the progress bar) */
+.irs--flat .irs-bar {
+    /* Use your primary orange color for the filled track */
+    height: 8px !important;
+    top: 0 !important;
+    background-color: var(--primary-color) !important;
+    border: none !important;
+}
+
+/* 4. Style the Handle/Thumb */
+.irs--flat .irs-handle {
+    /* Set the desired size (18px) and positioning */
+    width: 18px !important;
+    height: 18px !important;
+    top: -5px !important; /* Center 18px handle on 8px track: (18-8)/2 = 5 */
+
+    /* Shape and Color */
+    background-color: var(--primary-color) !important;
+    border-radius: 50% !important;
+    border: 3px solid var(--fbc-white, #fff) !important; /* White inner ring */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* 5. Hide unnecessary elements (min/max/labels/grid) */
+.irs--flat .irs-min,
+.irs--flat .irs-max,
+.irs--flat .irs-from,
+.irs--flat .irs-to,
+.irs--flat .irs-single,
+.irs--flat .irs-grid-text,
+.irs--flat .irs-shadow {
+    display: none !important;
+}
+
+/* 6. Ensure the handle doesn't move when active/hovering */
+.irs--flat .irs-handle:hover,
+.irs--flat .irs-handle:active {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}

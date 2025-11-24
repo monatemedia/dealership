@@ -4,6 +4,16 @@ import axios from 'axios';
 import Alpine from 'alpinejs';
 import { VehicleInstantSearch } from './VehicleInstantSearch'; // Import the class
 
+// Import jQuery and make it global for Slider
+import $ from 'jquery';
+window.$ = window.jQuery = $;
+
+// Import the slider library (it attaches itself to jQuery)
+import 'ion-rangeslider';
+
+// Import the Ion.RangeSlider CSS
+import 'ion-rangeslider/css/ion.rangeSlider.min.css'; // You can customize this later
+
 document.addEventListener("DOMContentLoaded", function () {
 
   // ----------------------------

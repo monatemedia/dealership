@@ -21,7 +21,6 @@ export class VehicleInstantSearch {
         this.isLoading = false;
         this.hasMoreResults = true;
         this.totalResultsCount = 0;
-
         // Filters will contain all form inputs, including geo-search parameters (origin_city_id, range_km)
         this.currentFilters = {};
 
@@ -54,7 +53,9 @@ export class VehicleInstantSearch {
                 console.log('🔍 Apply filters button clicked');
                 this.currentPage = 1;
                 this.hasMoreResults = true;
-                this.updateFilters(); // Re-read filters including the new geo values
+                this.updateFilters(); // Re-read filters
+                // 🔑 FIX: Ensure sort value is captured when filters are applied
+                if (this.sortDropdown) this.currentSort = this.sortDropdown.value;
                 console.log('📊 Current filters:', this.currentFilters);
                 this.performSearch(true);
             });
@@ -76,10 +77,14 @@ export class VehicleInstantSearch {
 
         // 4. Sort Dropdown
         if (this.sortDropdown) {
+             // 🔑 FIX: Set initial sort state
+             this.currentSort = this.sortDropdown.value;
+
             this.sortDropdown.addEventListener('change', (e) => {
                 this.currentPage = 1;
                 this.hasMoreResults = true;
                 this.updateFilters();
+                // 🔑 CRITICAL FIX: Capture the selected sort value
                 this.currentSort = e.target.value;
                 this.performSearch(true);
             });
@@ -89,12 +94,13 @@ export class VehicleInstantSearch {
         this.setupInfiniteScroll();
 
         // 6. FIX: Custom Listener for Geo-Search Updates
-        // Assuming your Alpine component dispatches this event after setting the form values.
-        window.addEventListener('geo-filters-updated', () => {
-            console.log('Vehicle Instant Search: Received GEO update event. Triggering search...');
+        // 🔑 FIX: Update to listen for 'filters-applied' from the modal component
+        window.addEventListener('filters-applied', () => {
+            console.log('Vehicle Instant Search: Received FILTERS APPLIED event. Triggering search...');
             this.currentPage = 1;
             this.hasMoreResults = true;
             this.updateFilters(); // Re-read the newly set hidden inputs
+            if (this.sortDropdown) this.currentSort = this.sortDropdown.value; // Capture sort
             this.performSearch(true);
         });
 
@@ -110,7 +116,6 @@ export class VehicleInstantSearch {
                 const scrollPosition = window.innerHeight + window.scrollY;
                 const pageHeight = document.documentElement.scrollHeight;
                 const threshold = 300;
-
                 if (scrollPosition >= pageHeight - threshold) {
                     if (!this.isLoading && this.hasMoreResults) {
                         this.currentPage++;
@@ -123,39 +128,48 @@ export class VehicleInstantSearch {
 
     updateFilters() {
         this.currentFilters = {};
-
         // 1. Read from filter form if it exists (search page)
         if (this.filterForm) {
             const formData = new FormData(this.filterForm);
             for (let [key, value] of formData.entries()) {
                 // Only include non-empty values
-                if (value) this.currentFilters[key] = value;
+                // 🔑 FIX 1: Filter out values that are explicitly empty strings, zero, or "null" (though the latter shouldn't happen)
+                if (value !== '' && value !== '0' && value !== 'null') {
+                    this.currentFilters[key] = value;
+                }
             }
         }
 
-        // 2. 🔑 CRITICAL: Always read geo-location filters from specific hidden inputs
-        // These exist outside the form on the home page
+        // 2. CRITICAL: Always re-read geo-location filters from specific hidden inputs
+        // This is necessary because formData might not correctly capture values set via JS after init.
         const originCityInput = document.getElementById('origin_city_id_filter');
         const rangeKmInput = document.getElementById('range_km_filter');
 
+        // 🔑 CRITICAL FIX 2: Explicitly check for a value for both fields before adding to filters.
+        // We only add the city ID if it exists AND is not empty.
         if (originCityInput && originCityInput.value) {
             this.currentFilters['origin_city_id'] = originCityInput.value;
             console.log('📍 Geo-filter: origin_city_id =', originCityInput.value);
-        }
 
-        if (rangeKmInput && rangeKmInput.value) {
-            this.currentFilters['range_km'] = rangeKmInput.value;
-            console.log('📏 Geo-filter: range_km =', rangeKmInput.value);
+            // We only include range_km if the city is set AND the range input has a value.
+            if (rangeKmInput && rangeKmInput.value) {
+                this.currentFilters['range_km'] = rangeKmInput.value;
+                console.log('📏 Geo-filter: range_km =', rangeKmInput.value);
+            }
+        } else {
+             // 🔑 FIX 3: Explicitly ensure range_km is NOT in the filters if origin_city_id is missing.
+             // This prevents a previous 'range_km' filter from persisting if the city was cleared.
+             delete this.currentFilters['origin_city_id'];
+             delete this.currentFilters['range_km'];
         }
     }
 
     async performSearch(clearResults = true) {
         if (this.isLoading) return;
-
         this.isLoading = true;
         this.showLoading(clearResults);
 
-        // All necessary filters, including origin_city_id and range_km, are in this.currentFilters
+        // All necessary filters, including origin_city_id, range_km, and sort are passed to URLSearchParams
         const params = new URLSearchParams({
             q: this.currentQuery,
             page: this.currentPage,
@@ -168,21 +182,17 @@ export class VehicleInstantSearch {
         try {
             const response = await fetch(`/api/vehicles/search?${params.toString()}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
             const data = await response.json();
 
             // 🔑 IMPORTANT: Verify that the backend is returning the rendered HTML for each hit
             if (data.hits && data.hits.length > 0 && typeof data.hits[0] !== 'string') {
                 console.error('BACKEND CHECK FAILED: The frontend requires the "hits" array to contain HTML strings (Blade-rendered cards). Please ensure your Laravel Scout search endpoint renders each hit before returning the JSON payload.');
             }
-
             this.totalResultsCount = data.nbHits;
             this.hasMoreResults = this.currentPage < data.nbPages;
-
             this.renderResults(data, clearResults);
             this.updateStats(data);
             this.updateEndMessage();
-
         } catch (error) {
             console.error('Search error:', error);
             this.showError();

@@ -18,6 +18,8 @@
                     </div>
                     <select class="sort-dropdown" id="sort-dropdown">
                         <option value="">Order By</option>
+                        <option value="closest">Closest to me</option>
+                        <option value="furthest">Furthest from me</option>
                         <option value="price">Price Asc</option>
                         <option value="-price">Price Desc</option>
                         <option value="year">Year Asc</option>
