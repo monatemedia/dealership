@@ -115,9 +115,16 @@ class CreateTypesenseCollections extends Command
      */
     protected function waitForTypesense(array $config): void
     {
-        $host = $config['host'];
-        $port = $config['port'];
-        $protocol = $config['protocol'];
+        // 🛑 CRITICAL FIX: Read the host/port/protocol from the first node in the 'nodes' array.
+        $node = $config['nodes'][0] ?? null;
+
+        if (!$node) {
+            throw new Exception('Typesense configuration is missing the required "nodes" array.');
+        }
+
+        $host = $node['host'];
+        $port = $node['port'];
+        $protocol = $node['protocol'];
         $healthUrl = "{$protocol}://{$host}:{$port}/health";
 
         $this->info("    INFO  Waiting for Typesense to be ready at {$healthUrl}...");
@@ -128,7 +135,8 @@ class CreateTypesenseCollections extends Command
         while ((time() - $startTime) < self::TYPESENSE_WAIT_TIMEOUT) {
             try {
                 // Use Laravel's HTTP client for an API check
-                $response = Http::timeout(5)->get($healthUrl);
+                // Note: If you don't have Http:: installed/imported, use the alternative below
+                $response = \Illuminate\Support\Facades\Http::timeout(5)->get($healthUrl);
 
                 // Check for a healthy status and readiness
                 if ($response->successful() && $response->json('ok') === true) {
