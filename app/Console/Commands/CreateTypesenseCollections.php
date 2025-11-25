@@ -4,13 +4,28 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Typesense\Client as TypesenseClient;
+use Illuminate\Support\Facades\Http;
+use Exception;
 
 class CreateTypesenseCollections extends Command
 {
+    /**
+    * The maximum number of seconds to wait for Typesense to be ready.
+    */
+    private const TYPESENSE_WAIT_TIMEOUT = 60;
+
+    /**
+     * Summary of signature
+     * @var string
+     */
     protected $signature = 'typesense:create-collections
         {--force : Delete existing collections}
         {--import : Automatically import data after creating collections}';
 
+    /**
+     * Summary of description
+     * @var string
+     */
     protected $description = 'Create Typesense collections with correct schemas and optionally import data';
 
     // Order matters - dependencies first
@@ -29,7 +44,14 @@ class CreateTypesenseCollections extends Command
 
         try {
             $config = config('scout.typesense.client-settings');
+
+            // 🛑 Wait for Typesense to be responsive before connecting
+            $this->waitForTypesense($config);
+
             $client = new TypesenseClient($config);
+
+            $this->info('🔧 Creating Typesense collections...');
+            $this->newLine();
 
             // Get schemas for all models
             $schemas = $this->getCollectionSchemas();
@@ -79,10 +101,53 @@ class CreateTypesenseCollections extends Command
             }
 
             return 0;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error('❌ Failed to create collections: ' . $e->getMessage());
             return 1;
         }
+    }
+
+    /**
+     * Waits for the Typesense service to become healthy and ready.
+     * @param array $config Typesense client configuration.
+     * @return void
+     * @throws Exception If Typesense is not ready after timeout.
+     */
+    protected function waitForTypesense(array $config): void
+    {
+        $host = $config['host'];
+        $port = $config['port'];
+        $protocol = $config['protocol'];
+        $healthUrl = "{$protocol}://{$host}:{$port}/health";
+
+        $this->info("    INFO  Waiting for Typesense to be ready at {$healthUrl}...");
+
+        $startTime = time();
+        $isReady = false;
+
+        while ((time() - $startTime) < self::TYPESENSE_WAIT_TIMEOUT) {
+            try {
+                // Use Laravel's HTTP client for an API check
+                $response = Http::timeout(5)->get($healthUrl);
+
+                // Check for a healthy status and readiness
+                if ($response->successful() && $response->json('ok') === true) {
+                    $isReady = true;
+                    break;
+                }
+            } catch (\Throwable $e) {
+                // Connection error, keep retrying
+            }
+
+            $this->line("    INFO  Typesense not ready yet. Waiting 5 seconds...");
+            sleep(5);
+        }
+
+        if (!$isReady) {
+            throw new Exception('Typesense service failed to become ready within the timeout period.');
+        }
+
+        $this->info("    INFO  Typesense is ready. Continuing setup.");
     }
 
     protected function createCollection($client, $schema)

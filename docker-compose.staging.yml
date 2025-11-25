@@ -75,6 +75,25 @@ services:
     networks:
       - proxy-network
 
+  dealership-typesense:
+    image: typesense/typesense:29.0
+    container_name: ${DOCKER_CONTAINER_NAME}-typesense
+    restart: always
+    command: '--data-dir /data --api-key=${TYPESENSE_API_KEY} --enable-cors'
+    environment:
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY}
+    volumes:
+      - dealership-typesense-data:/data
+    ports:
+      - "${DOCKER_TYPESENSE_PORT:-8108}:8108"
+    networks:
+      - proxy-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8108/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   dealership-db:
     image: postgres:18
     container_name: ${DOCKER_CONTAINER_NAME}-db
