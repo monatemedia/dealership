@@ -29,7 +29,8 @@ fi
 
 # Import data to Typesense
 echo "    INFO  Importing data to Typesense..."
-php artisan typesense:import
+# Use the comprehensive command to ensure collections are created if they don't exist
+php artisan typesense:create-collections --force --import
 echo "    INFO  Typesense import complete."
 
 echo "Application setup complete. Starting Apache web server..."

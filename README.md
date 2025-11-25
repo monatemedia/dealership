@@ -430,11 +430,12 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [X] Set Up Typesense Search Engine
   - [X] Install Laravel Scout
   - [X] Update Models
-- [ ] Set Up PostGIS Search
-  - [ ] Enable PostGIS
-  - [ ] Add PostGIS Geometry Column
-  - [ ] Create User Address Functionality
-  - [ ] Use In App
+- [X] Set Up PostGIS Search
+  - [X] Enable PostGIS
+  - [X] Add PostGIS Geometry Column
+  - [X] Create User Address Functionality
+  - [X] Use In App
+- [ ] Set Up Production Docker Containers for TypeSense
 - [ ] Allow Unknown `Manufacturers` and `Models` to be created
 - [ ] Bugfix: App CSS to `carType` and `fueltype` components
 - [ ] Test Create & Edit Pages
