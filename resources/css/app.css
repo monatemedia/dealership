@@ -2923,83 +2923,89 @@ input[type="checkbox"]:checked::after {
     color: #dc3545; /* Red color */
 }
 
-/* resources/css/app.css (Ion.RangeSlider Styling) */
 
-/* 1. Reset the entire slider container */
-.irs--flat {
-    /* Set the desired track height and remove standard padding/borders */
-    height: 8px !important;
-    padding: 0 !important;
-    border-radius: 4px;
+
+/* ===========================
+   Range Slider Styling
+   ============================ */
+/* ... existing css ... */
+
+/* Range Slider Styling */
+.range-slider-input {
+    -webkit-appearance: none; /* Remove default webkit styles */
+    appearance: none;
+    width: 100%;
+    height: 0.5rem; /* Match track height */
+    background: transparent !important; /* Force transparent container to remove "box" look */
+    border: none !important; /* Force no border */
+    box-shadow: none !important; /* Remove any default shadows */
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    outline: none; /* Remove default focus outline */
 }
 
-/* Target the main container class to add spacing */
-.irs {
-    /* Set vertical margin (e.g., 8px top and bottom) */
-    margin: 8px 0 !important;
+/* Remove extra border in Firefox */
+.range-slider-input::-moz-focus-outer {
+    border: 0;
 }
 
-/* 2. Style the main track (the background) */
-.irs--flat .irs-line {
-    /* Match the overall height and use a light color */
-    height: 8px !important;
-    top: 0 !important;
-    background-color: var(--text-muted-color) !important; /* Use your light gray background */
-    border: none !important;
+/* Webkit Track (Chrome/Safari/Edge) */
+.range-slider-input::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 0.5rem; /* 8px */
+    background: #e5e7eb; /* Gray-200 */
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.15s ease-in-out;
 }
 
-/* 3. Style the filled connection (the progress bar) */
-.irs--flat .irs-bar {
-    /* Use your primary orange color for the filled track */
-    height: 8px !important;
-    top: 0 !important;
-    background-color: var(--primary-color) !important;
-    border: none !important;
+/* Firefox Track */
+.range-slider-input::-moz-range-track {
+    width: 100%;
+    height: 0.5rem; /* 8px */
+    background: #e5e7eb; /* Gray-200 */
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.15s ease-in-out;
 }
 
-/* 4. Style the Handle/Thumb */
-.irs--flat .irs-handle {
-    /* Set the desired size (18px) and positioning */
-    width: 18px !important;
-    height: 18px !important;
-    top: -5px !important; /* Center 18px handle on 8px track: (18-8)/2 = 5 */
-
-    /* Shape and Color */
-    background-color: var(--primary-color) !important;
-    border-radius: 50% !important;
-    border: 3px solid var(--fbc-white, #fff) !important; /* White inner ring */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+/* Webkit Thumb (Chrome/Safari/Edge) */
+.range-slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.25rem; /* 20px */
+    height: 1.25rem;
+    border-radius: 50%;
+    background: var(--primary-color, #3b82f6); /* Use your variable or fallback */
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border: 2px solid #ffffff;
+    margin-top: -0.375rem; /* Center thumb on track: (8px - 20px) / 2 */
 }
 
-/* 5. Hide unnecessary elements (min/max/labels/grid) */
-.irs--flat .irs-min,
-.irs--flat .irs-max,
-.irs--flat .irs-from,
-.irs--flat .irs-to,
-.irs--flat .irs-single,
-.irs--flat .irs-grid-text,
-.irs--flat .irs-shadow {
-    display: none !important;
+/* Firefox Thumb */
+.range-slider-input::-moz-range-thumb {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background: var(--primary-color, #3b82f6);
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border: 2px solid #ffffff;
+    /* Firefox centers thumb automatically */
 }
 
-/* 6. Ensure the handle doesn't move when active/hovering */
-.irs--flat .irs-handle:hover,
-.irs--flat .irs-handle:active {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+/* Focus States */
+.range-slider-input:focus {
+    outline: none;
 }
 
-/* 7. Hide the unwanted inner lines/bars inside the circular handle */
-.irs--flat .irs-handle i {
-    display: none !important;
+/* Add focus ring to thumb for better visuals */
+.range-slider-input:focus::-webkit-slider-thumb {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 }
 
-/* 8. Adjust the handle hover/active effect */
-/* Ensure the hover effect (shadow) applies to the entire circular handle */
-.irs--flat .irs-handle:hover,
-.irs--flat .irs-handle:active,
-.irs--flat .irs-handle.state_active { /* state_active class is applied by JS when dragging */
-    /* Maintain the subtle box-shadow from the previous step */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-    /* Optional: You can change the background color slightly on hover if desired */
-    /* background-color: color-mix(in srgb, var(--primary-color) 85%, black) !important; */
+.range-slider-input:focus::-moz-range-thumb {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 }

@@ -3,16 +3,8 @@
 import axios from 'axios';
 import Alpine from 'alpinejs';
 import { VehicleInstantSearch } from './VehicleInstantSearch'; // Import the class
+import { SearchRangeSlider } from './search/SearchRangeSlider';
 
-// Import jQuery and make it global for Slider
-import $ from 'jquery';
-window.$ = window.jQuery = $;
-
-// Import the slider library (it attaches itself to jQuery)
-import 'ion-rangeslider';
-
-// Import the Ion.RangeSlider CSS
-import 'ion-rangeslider/css/ion.rangeSlider.min.css'; // You can customize this later
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -917,106 +909,17 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // ----------------------------
-  // Initialize Slider
+  // Initialize Range Slider
   // ----------------------------
+    // Find all elements marked as range slider containers
+    const sliderContainers = document.querySelectorAll('.js-search-range-slider');
 
-// 🟢 REGISTER ALPINE RANGE SLIDER COMPONENT
-// This moves the complex logic out of the Blade template to prevent syntax errors.
-Alpine.data('rangeSlider', (initialRange, maxRange, name) => ({
-    // Initial State
-    range: initialRange,
-    maxRange: maxRange,
-    loadingMax: false,
-    cityId: null,
-
-    // Lifecycle Hook for Initial Load
-    init() {
-        const initialCityIdInput = document.getElementById('origin_city_id_filter');
-        const rangeFilterInput = document.getElementById(`${name}_filter`);
-
-        // 1. Calculate Initial Range (Priority: Persisted value > Blade default (e.g., 5))
-        let calculatedRange = initialRange;
-        if (rangeFilterInput && rangeFilterInput.value) {
-            const parsedValue = parseInt(rangeFilterInput.value);
-            if (parsedValue && parsedValue >= 5) {
-                calculatedRange = parsedValue;
-            }
-        }
-
-        // Set the initial state correctly.
-        this.range = calculatedRange;
-
-        // 2. Check for Initial City Filter
-        const initialCityId = initialCityIdInput?.value;
-        if (initialCityId && initialCityId !== 'null' && initialCityId !== 'undefined') {
-            console.log('INIT: Detected initial City ID:', initialCityId, 'Initial Range:', this.range, 'Fetching max range...');
-            this.fetchMaxRange(initialCityId);
-        } else {
-            console.log('INIT: No initial City ID detected. Default range:', this.range);
-        }
-    },
-
-    // Async function to fetch the max range based on the selected city
-    async fetchMaxRange(id) {
-        // CRITICAL: Capture current range *before* async operation
-        const currentRangeBeforeFetch = this.range;
-        const cityIdString = id !== null && id !== undefined ? String(id) : null;
-        this.cityId = cityIdString;
-
-        if (!this.cityId || this.loadingMax) {
-            if (!this.cityId) {
-                this.maxRange = maxRange; // Reset to the default max (e.g., 1500)
-                this.range = 5;          // Reset to the default min
-            }
-            return;
-        }
-
-        this.loadingMax = true;
-        try {
-            const response = await fetch(`/api/vehicles/max-range/${this.cityId}`);
-            const data = await response.json();
-            console.log('MAX RANGE API RESPONSE:', data.max_range_km);
-
-            const newMax = data.max_range_km || 1500;
-            this.maxRange = newMax;
-
-            // Ensure the current range doesn't exceed the new max.
-            this.range = Math.min(currentRangeBeforeFetch, this.maxRange);
-
-            console.log('Range state after fetchMaxRange update (city active):', this.range);
-
-        } catch (error) {
-            console.error('Error fetching max range:', error);
-            this.maxRange = 1500;
-        } finally {
-            this.loadingMax = false;
-        }
-    },
-
-    // Handler for the city-changed event
-    handleCityFilterChange(id) {
-        console.log('RANGE SLIDER RECEIVED CITY EVENT:', id);
-
-        // Use the current Alpine state for the range value before fetching the max.
-        const currentRange = this.range;
-
-        // Fetch max range, which will update this.range to Math.min(currentRange, newMax)
-        this.fetchMaxRange(id);
-
-        this.$nextTick(() => {
-            const rangeFilterInput = document.getElementById(`${name}_filter`);
-            const finalRange = rangeFilterInput ? rangeFilterInput.value : 'N/A';
-            console.log('CONFIRMATION: Hidden Input value after processing:', finalRange);
+    if (sliderContainers.length > 0) {
+        sliderContainers.forEach(container => {
+            new SearchRangeSlider(container);
         });
-    },
-
-    // Handler for the filters-reset event
-    resetSliderState() {
-        this.range = 5;
-        this.maxRange = maxRange; // maxRange is the initial default passed via Blade
-        this.cityId = null;
+        console.log(`Bootstrapped ${sliderContainers.length} range sliders.`);
     }
-}));
 
   // ----------------------------
   // Start Alpine
@@ -1056,3 +959,5 @@ Alpine.data('rangeSlider', (initialRange, maxRange, name) => ({
     distance: "50%",
   });
 });
+
+console.log('Application JavaScript entry point loaded successfully.');

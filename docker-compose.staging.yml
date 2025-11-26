@@ -1,10 +1,12 @@
 services:
   dealership-web:
-    image: ghcr.io/monatemedia/${DOCKER_CONTAINER_NAME}:${IMAGE_TAG:-staging}
+    image: ghcr.io/monatemedia/dealership:${IMAGE_TAG:-staging}
     container_name: ${DOCKER_CONTAINER_NAME}-web
     depends_on:
       dealership-db:
         condition: service_healthy
+      dealership-typesense:
+        condition: service_started
     restart: always
     entrypoint: /bin/bash -c "echo 'Waiting for database connection...'; until (exec 6<>/dev/tcp/dealership-db/5432) 2>/dev/null; do echo 'Database not ready, sleeping for 1 second...'; sleep 1; done; echo 'Database is ready. Executing application setup...'; /usr/local/bin/docker-entrypoint.sh"
     environment:
@@ -22,6 +24,12 @@ services:
       APP_DEBUG: ${APP_DEBUG}
       APP_URL: ${APP_URL}
       APP_TIMEZONE: ${APP_TIMEZONE}
+      # Typesense
+      SCOUT_DRIVER: typesense
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY}
+      TYPESENSE_HOST: dealership-typesense
+      TYPESENSE_PORT: 8108
+      TYPESENSE_PROTOCOL: http
       # Seeding
       SEED_DATABASE: ${SEED_DATABASE:-false}
       # Nginx Proxy
@@ -43,11 +51,13 @@ services:
       - proxy-network
 
   dealership-queue:
-    image: ghcr.io/monatemedia/dealership:${IMAGE_TAG:-staging-1.0.0}
+    image: ghcr.io/monatemedia/dealership:${IMAGE_TAG:-staging}
     container_name: ${DOCKER_CONTAINER_NAME}-queue
     depends_on:
       dealership-db:
         condition: service_healthy
+      dealership-typesense:
+        condition: service_started
     restart: always
     entrypoint: /bin/bash -c "echo 'Waiting for database connection...'; until (exec 6<>/dev/tcp/dealership-db/5432) 2>/dev/null; do echo 'Database not ready, sleeping for 1 second...'; sleep 1; done; echo 'Database is ready. Starting queue worker...'; php artisan queue:work --verbose --tries=3 --timeout=300 --sleep=3 --max-jobs=1000"
     environment:
@@ -65,6 +75,12 @@ services:
       APP_DEBUG: ${APP_DEBUG}
       APP_URL: ${APP_URL}
       APP_TIMEZONE: ${APP_TIMEZONE}
+      # Typesense
+      SCOUT_DRIVER: typesense
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY}
+      TYPESENSE_HOST: dealership-typesense
+      TYPESENSE_PORT: 8108
+      TYPESENSE_PROTOCOL: http
     env_file:
       - .env
     volumes:
@@ -88,14 +104,9 @@ services:
       - "${DOCKER_TYPESENSE_PORT:-8108}:8108"
     networks:
       - proxy-network
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8108/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   dealership-db:
-    image: postgres:18
+    image: postgis/postgis:18-3.6-alpine
     container_name: ${DOCKER_CONTAINER_NAME}-db
     restart: always
     environment:
@@ -132,9 +143,13 @@ services:
       - "${DOCKER_ADMINER_PORT}:8080"
     networks:
       - proxy-network
+    profiles:
+      - dev
+      - staging
 
 volumes:
   dealership-db-data:
+  dealership-typesense-data:
 
 networks:
   proxy-network:

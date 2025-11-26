@@ -34,7 +34,7 @@ RUN npm run build
 # STAGE 3: PRODUCTION (Official PHP Base Image) 🚀
 # Includes GD fix and image optimization tools.
 # ============================================
-FROM php:8.4-apache-bookworm AS final
+FROM php:8.5-apache-bookworm AS final
 
 # 1. Install System Dependencies
 RUN set -ex; \

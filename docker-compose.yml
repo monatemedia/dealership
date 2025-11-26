@@ -123,7 +123,7 @@ services:
       retries: 5
 
   dealership-db:
-    image: postgres:18
+    image: postgis/postgis:18-3.6-alpine
     container_name: ${DOCKER_CONTAINER_NAME}-db
     restart: always
     environment:
