@@ -3009,3 +3009,49 @@ input[type="checkbox"]:checked::after {
 .range-slider-input:focus::-moz-range-thumb {
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 }
+
+
+
+/* ===========================
+   GEO LOCATION LINK
+   ============================ */
+
+/* Base container styles (replaces inline-flex, items-center, transition-colors, duration-150) */
+.geo-location-link {
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.15s ease-in-out, opacity 0.15s ease-in-out;
+}
+
+/* Icon spacing (replaces mr-1.5) */
+.geo-icon-spacing {
+    margin-right: 0.375rem; /* 6 pixels */
+}
+
+/* Styles for when there are NO listings (replaces text-gray-400 and cursor-default) */
+.geo-link-inactive {
+    color: var(--text-muted-color); /* Use the muted text color */
+    cursor: default;
+    opacity: 0.7;
+}
+
+/* Active link style: ensures the cursor is a pointer when clickable */
+.geo-location-link:not(.geo-link-inactive) {
+    cursor: pointer;
+}
+
+/* Hover effect for active links */
+.geo-location-link:not(.geo-link-inactive):hover {
+    color: var(--primary-color-hover); /* Use the hover color for a distinct change */
+}
+
+/* City name color (replaces text-indigo-600) */
+.geo-city-color {
+    color: var(--link-color); /* Use the primary link color */
+}
+
+/* Range text style (replaces text-sm and text-gray-500) */
+.geo-range-text {
+    font-size: 0.875rem; /* 14 pixels */
+    color: var(--text-muted-color);
+}

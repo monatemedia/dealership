@@ -193,9 +193,18 @@ export class VehicleInstantSearch {
             this.renderResults(data, clearResults);
             this.updateStats(data);
             this.updateEndMessage();
+
+            // 🆕 CRITICAL ADDITION: Dispatch event after every search with the hit count
+            window.dispatchEvent(new CustomEvent('search-updated', {
+                detail: { totalHits: this.totalResultsCount }
+            }));
         } catch (error) {
             console.error('Search error:', error);
             this.showError();
+            // 🆕 Also dispatch update on failure, reporting 0 hits
+            window.dispatchEvent(new CustomEvent('search-updated', {
+                detail: { totalHits: 0 }
+            }));
         } finally {
             this.isLoading = false;
             this.hideLoading();
