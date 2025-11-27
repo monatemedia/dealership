@@ -3010,48 +3010,53 @@ input[type="checkbox"]:checked::after {
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 }
 
+/* -------------------------------------------------------
+   Geo Location Link Styles
+   -------------------------------------------------------
+*/
 
-
-/* ===========================
-   GEO LOCATION LINK
-   ============================ */
-
-/* Base container styles (replaces inline-flex, items-center, transition-colors, duration-150) */
+/* Base container */
 .geo-location-link {
     display: inline-flex;
     align-items: center;
     transition: color 0.15s ease-in-out, opacity 0.15s ease-in-out;
+    /* Default color if no specific state class overrides it (usually inherits from body) */
 }
 
-/* Icon spacing (replaces mr-1.5) */
-.geo-icon-spacing {
-    margin-right: 0.375rem; /* 6 pixels */
-}
-
-/* Styles for when there are NO listings (replaces text-gray-400 and cursor-default) */
+/* 1. INACTIVE STATE (No listings / Default) */
 .geo-link-inactive {
-    color: var(--text-muted-color); /* Use the muted text color */
+    color: var(--text-muted-color);
     cursor: default;
     opacity: 0.7;
 }
 
-/* Active link style: ensures the cursor is a pointer when clickable */
+/* 2. ACTIVE STATE (Listings available) */
 .geo-location-link:not(.geo-link-inactive) {
     cursor: pointer;
+    /* 🔑 FIX: Set the parent color to Orange so the Icon matches the text */
+    color: var(--link-color);
 }
 
-/* Hover effect for active links */
+/* 3. HOVER STATE (Darker Orange) */
 .geo-location-link:not(.geo-link-inactive):hover {
-    color: var(--primary-color-hover); /* Use the hover color for a distinct change */
+    color: var(--primary-color-hover);
 }
 
-/* City name color (replaces text-indigo-600) */
+/* Icon spacing */
+.geo-icon-spacing {
+    margin-right: 0.375rem;
+}
+
+/* City Name Text */
 .geo-city-color {
-    color: var(--link-color); /* Use the primary link color */
+    /* 🔑 FIX: Inherit from parent so it takes the Orange (Active) or Dark Orange (Hover) */
+    color: inherit;
+    font-weight: 600;
 }
 
-/* Range text style (replaces text-sm and text-gray-500) */
+/* Range Text */
 .geo-range-text {
-    font-size: 0.875rem; /* 14 pixels */
-    color: var(--text-muted-color);
+    /* 🔑 FIX: Inherit from parent to match Icon and City color */
+    color: inherit;
+    font-size: 0.875rem;
 }

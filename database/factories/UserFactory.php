@@ -1,4 +1,4 @@
-<?php // database/factories/UserFactory.php
+<?php
 
 namespace Database\Factories;
 
@@ -23,6 +23,10 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        // Per Laravel's documentation, $this->faker should be automatically
+        // available via the parent Factory class, provided all Composer
+        // dependencies are installed.
+
         return [
             'name' => $this->faker->name(),
             'email' => $this->faker->unique()->safeEmail(),

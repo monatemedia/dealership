@@ -5,14 +5,18 @@ FROM composer:2 AS composer-builder
 RUN apk add --no-cache git
 WORKDIR /app
 COPY composer.json composer.lock ./
+# Use "--no-dev" for production builds
+# FIX 1: Added --ignore-platform-reqs to bypass the PHP version check in the builder image.
 RUN composer install \
-    --no-dev \
+    --ignore-platform-reqs \
     --no-scripts \
     --no-interaction \
     --prefer-dist \
     --optimize-autoloader
 COPY . .
-RUN composer dump-autoload --optimize --no-dev
+# FIX 2: Ensures dev dependencies (like Faker) are included in the optimized autoloader.
+# Use "--no-dev" for production builds
+RUN composer dump-autoload --optimize
 # --------------------------------------------
 
 # ============================================
@@ -34,7 +38,7 @@ RUN npm run build
 # STAGE 3: PRODUCTION (Official PHP Base Image) 🚀
 # Includes GD fix and image optimization tools.
 # ============================================
-FROM php:8.5-apache-bookworm AS final
+FROM php:8.4-apache-bookworm AS final
 
 # 1. Install System Dependencies
 RUN set -ex; \

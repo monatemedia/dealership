@@ -1,4 +1,4 @@
-# ./github/workflows/docker-publish.yml
+# .github/workflows/docker-publish.yml
 name: publish
 
 on:
