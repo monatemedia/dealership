@@ -104,32 +104,35 @@ Here's a blank template to get started.
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+To get started locally, follow these instructions
+
+## Create `.env` File
+
+```sh
+# Local Development with Postgres and GIS Enabled.   
+cp .env.example .env
+
+# Docker Development
+cp .env.docker-desktop .env
+```
 
 ### Running The Seeders
 
-- **For local development:** Just run the standard command. This will execute DatabaseSeeder, which in turn runs your DevelopmentSeeder.
+- **For local development (App Structure):** Run the standard command to seed necessary application functionality, such as the database structure and content for dropdown menus from configuration files. This process does not create fake demo data.
 
 ```sh
 # Seed the data
 php artisan migrate:fresh --seed
 ```
 
-- **For production deployment:** Explicitly specify the ProductionSeeder in your deployment script. This ensures no fake data ever touches your live database. The `--force` flag is required to run seeders in a production environment.
+- **For local development (Demo Data):** Use the custom db:demo command to populate the database with fake user, vehicle, and image records for development and testing. This command runs the DemoDataSeeder and accepts an optional --count option to run the seeder multiple times.
 
 ```sh
-php artisan db:seed --class=ProductionSeeder --force
-```
+# Seed a standard set of demo data
+php artisan db:demo
 
-- **For testing or specific tasks:** You can run any individual seeder you need.
-
-```sh
-# Just refresh the locations
-php artisan db:seed --class=LocationSeeder
-
-# Or refresh only the demo data after a migration
-php artisan migrate:fresh --seed --seeder=DemoDataSeeder
+# Run the seeder 10 times to generate more data
+php artisan db:demo --count=10
 ```
 
 ### How to Start The App Locally

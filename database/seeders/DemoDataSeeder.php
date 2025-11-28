@@ -1,5 +1,5 @@
-<?php
-// database/seeders/DemoDataSeeder.php
+<?php // database/seeders/DemoDataSeeder.php
+
 namespace Database\Seeders;
 
 use App\Models\User;

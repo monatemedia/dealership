@@ -1,4 +1,4 @@
-<?php
+<?php // app/Console/Commands/DemoCommand.php
 
 namespace App\Console\Commands;
 
@@ -6,41 +6,36 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Database\Seeders\DemoDataSeeder;
 
-/**
- * Artisan command to run the specific DemoDataSeeder.
- * Signature: db:demo
- */
 class DemoCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     * This registers the command as `php artisan db:demo`.
-     * @var string
-     */
-    protected $signature = 'db:demo';
+    protected $signature = 'db:demo {--count=1 : Number of times to run the seeder}';
 
-    /**
-     * The console command description.
-     * @var string
-     */
     protected $description = 'Runs the DemoDataSeeder to populate the database with development/demo records.';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(): int
     {
-        $this->info('Starting demo database seeding...');
+        $count = (int) $this->option('count');
 
-        // Call the built-in 'db:seed' command, specifying the DemoDataSeeder class
-        Artisan::call('db:seed', [
-            '--class' => DemoDataSeeder::class,
-            // The following flag prevents prompting for confirmation in production,
-            // though custom commands are usually safe for dev environments.
-            '--force' => true
-        ], $this->output);
+        $this->info("Running demo seeder {$count} time(s)...");
 
-        $this->info('Demo seeding finished.');
+        // Progress bar
+        $bar = $this->output->createProgressBar($count);
+        $bar->start();
+
+        for ($i = 0; $i < $count; $i++) {
+            Artisan::call('db:seed', [
+                '--class' => DemoDataSeeder::class,
+                '--force' => true,
+            ]);
+
+            $bar->advance();
+        }
+
+        $bar->finish();
+        $this->newLine(2);
+
+        $this->info('All demo runs completed.');
+
         return Command::SUCCESS;
     }
 }
