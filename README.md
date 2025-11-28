@@ -106,13 +106,13 @@ Here's a blank template to get started.
 
 To get started locally, follow these instructions
 
-## Create `.env` File
+### Create `.env` File
 
 ```sh
 # Local Development with Postgres and GIS Enabled.   
-cp .env.example .env
+cp .env.local .env
 
-# Docker Development
+# Docker Desktop Development with Containers
 cp .env.docker-desktop .env
 ```
 

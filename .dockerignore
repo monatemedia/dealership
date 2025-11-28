@@ -21,7 +21,8 @@ Dockerfile*
 # No .env files except .env.example
 .env
 .env.*
-!.env.example
+!.env.docker-desktop
+!.env.local
 
 # Development
 /storage/*.key
