@@ -37,7 +37,7 @@
 <h3 align="center">Dealership</h3>
 
   <p align="center">
-    This project is a vehicle selling platform designed to connect buyers and sellers through a user-friendly web application. It allows dealerships and individual sellers to list vehicles with detailed specifications, images, and pricing, while providing buyers with powerful search and filtering tools to find the right vehicle. The application supports account management, inventory tracking, and secure communication between buyers and sellers, ensuring a streamlined and efficient vehicle marketplace experience.
+    A vehicle selling platform designed to connect buyers and sellers through a user-friendly web based application. It allows dealerships and individual sellers to list vehicles with detailed specifications, images, and pricing, while providing buyers with powerful search and filtering tools to find the right vehicle. The application supports account management, inventory tracking, and secure communication between buyers and sellers, ensuring a streamlined and efficient vehicle marketplace experience.
     <br />
     <a href="https://github.com/monatemedia/dealership"><strong>Explore the docs »</strong></a>
     <br />
@@ -85,7 +85,7 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-Here's a blank template to get started. 
+Dealership is a SaaS that connects buyers and sellers of bikes, cars, and commercial vehicles.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -1272,6 +1272,6 @@ Project Link: [https://github.com/monatemedia/dealership](https://github.com/mon
 [Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
 [Laravel-url]: https://laravel.com
 [Alpine.js]: https://img.shields.io/badge/alpinejs-white.svg?style=for-the-badge&logo=alpinedotjs&logoColor=%238BC0D0
-[Alpine.org-url]: https://alpinejs.dev/
+[Alpine.js-url]: https://alpinejs.dev/
 [Python.org]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54
 [Python.org-url]: https://www.python.org/

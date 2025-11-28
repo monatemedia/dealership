@@ -19,9 +19,11 @@ class DemoCommand extends Command
         // 💡 NEW: Check for the presence of the Faker library (which is a dev dependency)
         if (!class_exists(\Faker\Factory::class)) {
             $this->error("\n❌ Faker Library Missing (Dev Dependencies)");
+            $this->newLine();
 
             // Explain the problem
             $this->warn("It appears the 'Faker\\Factory' class is missing. This usually means your application was built without Composer development dependencies.");
+            $this->newLine();
             $this->line("The `db:demo` command requires dev dependencies (including Faker) to populate the database.");
 
             // Suggest the solution
@@ -33,6 +35,7 @@ class DemoCommand extends Command
             $this->newLine();
             $this->line("You can confirm the status of your current build by running this command inside the container:");
             $this->comment("docker exec dealership-web composer show fakerphp/faker");
+            $this->newLine();
             $this->line("If the command fails, the dependency is definitely missing.");
 
             return Command::FAILURE;
