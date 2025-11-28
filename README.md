@@ -118,23 +118,115 @@ To get started locally, follow these instructions
 
 When running the application you need to have the following installed
 
-* PHP >8.4
-* Composer version >2.7.1
-* Laravel >12
-* Node >22.17.1
+* PHP version > 8.2.12
+* Composer version > 2.7.1
+* Laravel version > 12.37.0
+* Node version > 22.17.1
+* PostgreSQL version > 18 with PostGIS enabled
 
 #### Required PHP Extensions
 
-
+##### Install on Debian Based Linux (Ubuntu, Mint, Zorin)
 
   ```sh
-  # Install PHP GD and in config/image.php set driver to gd in .ini file
-  sudo apt update && sudo apt install php-gd
+  # ====================================
+  # Debian Family - uses apt package manager
+  # ====================================
 
-  # Install Required CLI Tools To Support WebP Image generation
-  sudo apt install jpegoptim optipng pngquant gifsicle svgo webp
-  
+  # Update package list and install PHP GD extension
+  sudo apt update && sudo apt install -y php-gd
+
+  # Install image optimization tools
+  sudo apt install -y jpegoptim optipng pngquant gifsicle webp
+
+  # Install SVGO (requires Node.js)
+  sudo apt install -y nodejs npm
+  sudo npm install -g svgo
+
+  # Verify installations
+  php -m | grep gd
+  jpegoptim --version
+  optipng -v
+  pngquant --version
+  gifsicle --version
+  cwebp -version
+  svgo --version
   ```
+
+##### Install on Mac
+
+  ```sh
+  # ====================================
+  # macOS - uses Homebrew
+  # ====================================
+
+  # Install Homebrew if not already installed
+  # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+  # Install PHP (includes GD extension)
+  brew install php
+
+  # Install image optimization tools
+  brew install jpegoptim optipng pngquant gifsicle webp
+
+  # Install SVGO (requires Node.js)
+  brew install node
+  npm install -g svgo
+
+  # Verify installations
+  php -m | grep gd
+  jpegoptim --version
+  optipng -v
+  pngquant --version
+  gifsicle --version
+  cwebp -version
+  svgo --version
+  ```
+
+##### Install on Windows
+
+  ```sh
+  # Install PHP (includes GD extension by default)
+  choco install php -y
+
+  # Install image optimization tools
+  choco install jpegoptim -y
+  choco install optipng -y
+  choco install pngquant -y
+  choco install gifsicle -y
+  choco install webp -y
+
+  # Note: SVGO requires Node.js
+  choco install nodejs -y
+  npm install -g svgo
+
+  # Refresh environment variables
+  refreshenv
+
+  # Verify installations
+  php -m | findstr gd
+  jpegoptim --version
+  optipng -v
+  pngquant --version
+  gifsicle --version
+  cwebp -version
+  svgo --version
+  ```
+
+---
+
+#### Required PostGIS Extensions
+
+To enable the PostGIS extension in PostgreSQL, connect to your database with a superuser account and run the SQL command:
+
+  ```sh
+  # Enable postgis
+  CREATE EXTENSION postgis;
+  ```
+
+You can do this in a SQL client like psql or a graphical tool such as pgAdmin.
+
+---
 
 ### Create `.env` File
 
@@ -142,6 +234,8 @@ When running the application you need to have the following installed
 # Local Development with Postgres and GIS Enabled.   
 cp .env.local .env
 ```
+
+---
 
 ### Running The Seeders
 
@@ -152,15 +246,21 @@ cp .env.local .env
 php artisan migrate:fresh --seed
 ```
 
-- **For local development (Demo Data):** Use the custom db:demo command to populate the database with fake user, vehicle, and image records for development and testing. This command runs the DemoDataSeeder and accepts an optional --count option to run the seeder multiple times.
+- **For local development (Demo Data):** Use the custom db:demo command to populate the database with fake user, vehicle, and image records for development and testing. This command runs the DemoDataSeeder.
 
 ```sh
 # Seed a standard set of demo data
 php artisan db:demo
+```
 
+This command also accepts an optional --count option to run the seeder multiple times.
+
+```sh
 # Run the seeder 10 times to generate more data
 php artisan db:demo --count=10
 ```
+
+---
 
 ### How to Start The App Locally
 
