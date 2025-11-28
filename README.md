@@ -37,7 +37,7 @@
 <h3 align="center">Dealership</h3>
 
   <p align="center">
-    A vehicle selling platform designed to connect buyers and sellers through a user-friendly web based application. It allows dealerships and individual sellers to list vehicles with detailed specifications, images, and pricing, while providing buyers with powerful search and filtering tools to find the right vehicle. The application supports account management, inventory tracking, and secure communication between buyers and sellers, ensuring a streamlined and efficient vehicle marketplace experience.
+    A vehicle marketplace that connects buyers and sellers through a user-friendly web based application. It allows dealerships and individual sellers to list vehicles with detailed specifications, images, and pricing, while providing buyers with powerful search and filtering tools to find the right vehicle. The application supports account management, inventory tracking, and secure communication between buyers and sellers, ensuring a streamlined and efficient vehicle marketplace experience.
     <br />
     <a href="https://github.com/monatemedia/dealership"><strong>Explore the docs »</strong></a>
     <br />
@@ -93,9 +93,11 @@ Dealership is a SaaS that connects buyers and sellers of bikes, cars, and commer
 
 ### Built With
 
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![AlpineJS][Alpine.js]][Alpine.js-url]
-* [![Python][Python.org]][Python.org-url]
+  [![Laravel][Laravel.com]][Laravel-url]
+  [![AlpineJS][Alpine.js]][Alpine.js-url]
+  [![Python][Python.org]][Python.org-url]
+  [![GitHub][GitHub.com]][GitHub.com-url]
+  [![GitHub-Actions][GitHub-Actions]][GitHub-Actions-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -1275,3 +1277,7 @@ Project Link: [https://github.com/monatemedia/dealership](https://github.com/mon
 [Alpine.js-url]: https://alpinejs.dev/
 [Python.org]: https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54
 [Python.org-url]: https://www.python.org/
+[GitHub.com]: https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white
+[GitHub.com-url]: https://github.com/
+[GitHub-Actions]: https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white
+[GitHub-Actions-url]: https://github.com/
