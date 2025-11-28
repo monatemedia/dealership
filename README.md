@@ -97,10 +97,14 @@ Dealership is a SaaS that connects buyers and sellers of bikes, cars, and commer
 
   [![AlpineJS][Alpine.js]][Alpine.js-url]
 
+  [![Postgres][Postgresql.org]][Postgresql-url]
+
   [![Python][Python.org]][Python.org-url]
 
   [![GitHub][GitHub.com]][GitHub.com-url]
-  
+
+  [![Docker][Docker]][Docker-url]
+
   [![GitHub-Actions][GitHub-Actions]][GitHub-Actions-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -1285,3 +1289,7 @@ Project Link: [https://github.com/monatemedia/dealership](https://github.com/mon
 [GitHub.com-url]: https://github.com/
 [GitHub-Actions]: https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white
 [GitHub-Actions-url]: https://github.com/
+[Docker]: https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white
+[Docker-url]: https://www.docker.com/
+[Postgresql.org]: https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white
+[Postgresql-url]: https://www.docker.com/
