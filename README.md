@@ -94,9 +94,13 @@ Dealership is a SaaS that connects buyers and sellers of bikes, cars, and commer
 ### Built With
 
   [![Laravel][Laravel.com]][Laravel-url]
+
   [![AlpineJS][Alpine.js]][Alpine.js-url]
+
   [![Python][Python.org]][Python.org-url]
+
   [![GitHub][GitHub.com]][GitHub.com-url]
+  
   [![GitHub-Actions][GitHub-Actions]][GitHub-Actions-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
