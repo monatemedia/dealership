@@ -116,35 +116,23 @@ To get started locally, follow these instructions
 
 ### Prerequisites
 
-#### Prerequisites At OS Level
+When running the application you need to have the following installed
+
+* PHP >8.4
+* Composer version >2.7.1
+* Laravel >12
+* Node >22.17.1
+
+#### Required PHP Extensions
+
+
 
   ```sh
-  # Install PHP GD and set in .ini file
+  # Install PHP GD and in config/image.php set driver to gd in .ini file
   sudo apt update && sudo apt install php-gd
 
-  # Or Install ImageMagick
-  # In config/image.php set driver to imagemagick
-  sudo apt update && sudo apt install imagemagick
-
-  # Install Required CLI Tools To Support WebP
+  # Install Required CLI Tools To Support WebP Image generation
   sudo apt install jpegoptim optipng pngquant gifsicle svgo webp
-  
-  ```
-
-#### Prerequisites At Application Level
-
-  ```sh
-  # Create Storage Link
-  php artisan storage:link
-
-  # Install Intervention Image
-  # composer require intervention/image
-
-  # Install Spatie Image Optimizer
-  # composer require spatie/laravel-image-optimizer
-
-  # Publish Spatie Config
-  # php artisan vendor:publish --provider="Spatie\LaravelImageOptimizer\ImageOptimizerServiceProvider" --tag="config"
   
   ```
 
