@@ -114,6 +114,40 @@ Dealership is a SaaS that connects buyers and sellers of bikes, cars, and commer
 
 To get started locally, follow these instructions
 
+### Prerequisites
+
+#### Prerequisites At OS Level
+
+  ```sh
+  # Install PHP GD and set in .ini file
+  sudo apt update && sudo apt install php-gd
+
+  # Or Install ImageMagick
+  # In config/image.php set driver to imagemagick
+  sudo apt update && sudo apt install imagemagick
+
+  # Install Required CLI Tools To Support WebP
+  sudo apt install jpegoptim optipng pngquant gifsicle svgo webp
+  
+  ```
+
+#### Prerequisites At Application Level
+
+  ```sh
+  # Create Storage Link
+  php artisan storage:link
+
+  # Install Intervention Image
+  # composer require intervention/image
+
+  # Install Spatie Image Optimizer
+  # composer require spatie/laravel-image-optimizer
+
+  # Publish Spatie Config
+  # php artisan vendor:publish --provider="Spatie\LaravelImageOptimizer\ImageOptimizerServiceProvider" --tag="config"
+  
+  ```
+
 ### Create `.env` File
 
 ```sh
