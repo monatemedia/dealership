@@ -99,8 +99,6 @@ Here's a blank template to get started.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- GETTING STARTED -->
 ## Getting Started
 
@@ -111,9 +109,6 @@ To get started locally, follow these instructions
 ```sh
 # Local Development with Postgres and GIS Enabled.   
 cp .env.local .env
-
-# Docker Desktop Development with Containers
-cp .env.docker-desktop .env
 ```
 
 ### Running The Seeders
@@ -286,6 +281,55 @@ php artisan typesense:status
 # If wrong, recreate:
 php artisan typesense:create-collections --force --import
 ```
+
+<!-- GETTING STARTED WITH DOCKER -->
+## 🏗️ Docker Build Environment Control
+
+Our Docker build process is designed to optimize image size for production while allowing the inclusion of development dependencies (like Faker for seeding) in test and staging environments. This is controlled by a single **build argument** in the `Dockerfile`.
+
+### Create `.env` File
+
+```sh
+# Local Development with Postgres and GIS Enabled.   
+cp .env.local .env
+
+# Docker Desktop Development with Containers
+cp .env.docker-desktop .env
+```
+
+
+### 📦 Composer Dependencies (`--no-dev`)
+
+By default, the `dealership-web` image is built for **production** and excludes all Composer development dependencies (using the `--no-dev` flag) to minimize the final image size and reduce the attack surface.
+
+This behavior can be switched using the `INSTALL_DEV_DEPENDENCIES` build argument.
+
+| Scenario | Goal | Command to Build | `INSTALL_DEV_DEPENDENCIES` |
+| :--- | :--- | :--- | :--- |
+| **Production / Default** | **Exclude** dev packages for small, secure image. | `docker compose build dealership-web` | `false` (default) |
+| **Test / Seeding / Staging** | **Include** dev packages (e.g., Faker) for data generation. | `docker compose build --build-arg INSTALL_DEV_DEPENDENCIES=true dealership-web` | `true` |
+
+### How It Works
+
+The `Dockerfile` contains logic in the `composer-builder` stage that checks the value of the argument:
+
+```dockerfile
+# Dockerfile snippet:
+ARG INSTALL_DEV_DEPENDENCIES=false
+
+RUN COMPOSER_INSTALL_FLAGS="..."; \
+    if [ "$INSTALL_DEV_DEPENDENCIES" != "true" ]; then \
+        COMPOSER_INSTALL_FLAGS="$COMPOSER_INSTALL_FLAGS --no-dev"; \
+    fi; \
+    composer install ... $COMPOSER_INSTALL_FLAGS
+# ...
+```
+
+  * When the argument is **omitted** (default `false`), the `--no-dev` flag is added to both `composer install` and `composer dump-autoload`.
+  * When the argument is explicitly set to **`true`**, the `--no-dev` flag is skipped, and all dependencies are included.
+
+This ensures you have reliable, reproducible builds for all environments from a single source file.
+
 
 
 ### Prerequisites

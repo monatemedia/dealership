@@ -4,19 +4,31 @@
 FROM composer:2 AS composer-builder
 RUN apk add --no-cache git
 WORKDIR /app
+
+# 💡 NEW: Define a build argument with a default value of 'false'
+ARG INSTALL_DEV_DEPENDENCIES=false
+
 COPY composer.json composer.lock ./
-# Use "--no-dev" for production builds
-# FIX 1: Added --ignore-platform-reqs to bypass the PHP version check in the builder image.
-RUN composer install \
-    --ignore-platform-reqs \
-    --no-scripts \
-    --no-interaction \
-    --prefer-dist \
-    --optimize-autoloader
+
+# Conditionally set the COMPOSER_INSTALL_FLAGS
+# This uses a simple shell ternary operator: [ condition ] && true_value || false_value
+# If INSTALL_DEV_DEPENDENCIES is NOT 'true', we use '--no-dev'
+RUN COMPOSER_INSTALL_FLAGS="--no-scripts --no-interaction --prefer-dist --optimize-autoloader"; \
+    if [ "$INSTALL_DEV_DEPENDENCIES" != "true" ]; then \
+    COMPOSER_INSTALL_FLAGS="$COMPOSER_INSTALL_FLAGS --no-dev"; \
+    fi; \
+    echo "Composer install flags: $COMPOSER_INSTALL_FLAGS"; \
+    # FIX 1: Added --ignore-platform-reqs to bypass the PHP version check in the builder image.
+    composer install --ignore-platform-reqs $COMPOSER_INSTALL_FLAGS
+
 COPY . .
-# FIX 2: Ensures dev dependencies (like Faker) are included in the optimized autoloader.
-# Use "--no-dev" for production builds
-RUN composer dump-autoload --optimize
+
+# Pass the flag to dump-autoload as well for strict consistency
+RUN DUMP_AUTOLOAD_FLAGS="--optimize"; \
+    if [ "$INSTALL_DEV_DEPENDENCIES" != "true" ]; then \
+    DUMP_AUTOLOAD_FLAGS="$DUMP_AUTOLOAD_FLAGS --no-dev"; \
+    fi; \
+    composer dump-autoload $DUMP_AUTOLOAD_FLAGS
 # --------------------------------------------
 
 # ============================================
