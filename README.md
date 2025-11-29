@@ -421,34 +421,33 @@ Our Docker build process is designed to optimize image size for production while
 
 ### Create `.env` File
 
-```sh
-# Local Development with Postgres and GIS Enabled.   
-cp .env.local .env
+Before running any commands, copy your environment configuration:
 
+```sh
 # Docker Desktop Development with Containers
 cp .env.docker-desktop .env
 ```
 
+-----
 
 ### 📦 Composer Dependencies (`--no-dev`)
 
 By default, the `dealership-web` image is built for **production** and excludes all Composer development dependencies (using the `--no-dev` flag) to minimize the final image size and reduce the attack surface.
 
-This behavior can be switched using the `INSTALL_DEV_DEPENDENCIES` build argument.
+This behavior is controlled using the `INSTALL_DEV_DEPENDENCIES` build argument, which applies to **all services** built from the main Dockerfile.
 
 | Scenario | Goal | Command to Build | `INSTALL_DEV_DEPENDENCIES` |
 | :--- | :--- | :--- | :--- |
 | **Production / Default** | **Exclude** dev packages for small, secure image. | `docker compose build dealership-web` | `false` (default) |
 | **Test / Seeding / Staging** | **Include** dev packages (e.g., Faker) for data generation. | `docker compose build --build-arg INSTALL_DEV_DEPENDENCIES=true dealership-web` | `true` |
 
-### How It Works
+#### How It Works
 
 The `Dockerfile` contains logic in the `composer-builder` stage that checks the value of the argument:
 
 ```dockerfile
 # Dockerfile snippet:
 ARG INSTALL_DEV_DEPENDENCIES=false
-
 RUN COMPOSER_INSTALL_FLAGS="..."; \
     if [ "$INSTALL_DEV_DEPENDENCIES" != "true" ]; then \
         COMPOSER_INSTALL_FLAGS="$COMPOSER_INSTALL_FLAGS --no-dev"; \
@@ -460,43 +459,31 @@ RUN COMPOSER_INSTALL_FLAGS="..."; \
   * When the argument is **omitted** (default `false`), the `--no-dev` flag is added to both `composer install` and `composer dump-autoload`.
   * When the argument is explicitly set to **`true`**, the `--no-dev` flag is skipped, and all dependencies are included.
 
-This ensures you have reliable, reproducible builds for all environments from a single source file.
+-----
 
+## 🚀 Running the Application and Data Setup
 
+### 1\. Start the Core Services
 
-### Prerequisites
+The main services (`web`, `queue`, `db`, `typesense`) are now started cleanly without waiting for heavy data generation. They only run essential commands like database migrations.
 
-#### Prerequisites At OS Level
+```sh
+# Start the core application and infrastructure services
+docker compose up -d
+```
 
-  ```sh
-  # Install PHP GD and set in .ini file
-  sudo apt update && sudo apt install php-gd
+### 2\. Generate Development Data (If Needed)
 
-  # Or Install ImageMagick
-  # In config/image.php set driver to imagemagick
-  sudo apt update && sudo apt install imagemagick
+If you need fake data (e.g., 10,000 listings) for local development, you must run the **`dealership-setup`** service. This service is designed to run the slow `php artisan db:demo` command and then rebuild the Typesense index. Running `php artisan db:demo` directly will create five users. Two of theusers will have 50 cars each for a total of 100 cars.
 
-  # Install Required CLI Tools To Support WebP
-  sudo apt install jpegoptim optipng pngquant gifsicle svgo webp
-  
-  ```
+⚠️ **Prerequisite:** You must first **build the image** with `INSTALL_DEV_DEPENDENCIES=true` (as shown in the table above) before running this command.
 
-#### Prerequisites At Application Level
+```sh
+# Run the one-off setup container to generate 10,000 listings and import them to Typesense
+docker compose run --rm dealership-setup
+```
 
-  ```sh
-  # Create Storage Link
-  php artisan storage:link
-
-  # Install Intervention Image
-  # composer require intervention/image
-
-  # Install Spatie Image Optimizer
-  # composer require spatie/laravel-image-optimizer
-
-  # Publish Spatie Config
-  # php artisan vendor:publish --provider="Spatie\LaravelImageOptimizer\ImageOptimizerServiceProvider" --tag="config"
-  
-  ```
+---
 
 ### Installation
 

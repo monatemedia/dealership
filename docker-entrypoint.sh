@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "Running application setup..."
+echo "Running production application setup..."
 
 # Remove hot file to force production assets
 if [ -f "/var/www/html/public/hot" ]; then
@@ -20,18 +20,14 @@ php artisan storage:link
 # Run migrations
 php artisan migrate --force
 
-# Seed database if enabled
+# Seed database if enabled (Only basic db:seed is left)
 if [ "$SEED_DATABASE" = "true" ]; then
     echo "    INFO  Seeding database..."
     php artisan db:seed --force
     echo "    INFO  Seeding complete."
 fi
 
-# Import data to Typesense
-echo "    INFO  Importing data to Typesense..."
-# Use the comprehensive command to ensure collections are created if they don't exist
-php artisan typesense:create-collections --force --import
-echo "    INFO  Typesense import complete."
+# ⚠️ REMOVED: Conditional Demo/Dev Setup logic (db:demo and typesense:import)
 
 echo "Application setup complete. Starting Apache web server..."
 exec apache2-foreground

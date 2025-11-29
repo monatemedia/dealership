@@ -13,8 +13,12 @@ services:
       dealership-db:
         condition: service_healthy # Ensure DB is healthy before starting
     restart: always
-    # FIX: Switched to /bin/bash -c to ensure /dev/tcp connection check is supported.
-    entrypoint: /bin/bash -c "echo 'Waiting for database connection...'; until (exec 6<>/dev/tcp/dealership-db/5432) 2>/dev/null; do echo 'Database not ready, sleeping for 1 second...'; sleep 1; done; echo 'Database is ready. Executing application setup...'; /usr/local/bin/docker-entrypoint.sh"
+
+    # ✅ FIX: Use the simple script entrypoint directly
+    entrypoint: /usr/local/bin/docker-entrypoint.sh
+    # ✅ FIX: Use the simple command
+    command: apache2-foreground
+
     environment:
       # Database
       DB_CONNECTION: pgsql
@@ -71,7 +75,8 @@ services:
     image: dealership-queue:local
     container_name: ${DOCKER_CONTAINER_NAME}-queue
     depends_on:
-      dealership-web:
+      # ✅ FIX: Only depend on the database being ready
+      dealership-db:
         condition: service_healthy
     restart: always
     entrypoint: /bin/bash -c "echo 'Waiting for database connection...'; until (exec 6<>/dev/tcp/dealership-db/5432) 2>/dev/null; do echo 'Database not ready, sleeping for 1 second...'; sleep 1; done; echo 'Database is ready. Starting queue worker...'; php artisan queue:work --verbose --tries=3 --timeout=300 --sleep=3 --max-jobs=1000"
@@ -100,6 +105,34 @@ services:
       # 3. Mount cache
       - ./bootstrap/cache:/var/www/html/bootstrap/cache
     mem_limit: 512M
+    networks:
+      - proxy-network
+
+  dealership-setup:
+    build: .
+    image: dealership-setup:local
+    container_name: ${DOCKER_CONTAINER_NAME}-setup
+    depends_on:
+      dealership-db:
+        condition: service_healthy # Wait for the DB
+    environment:
+      # These environment variables ensure the script can access the DB
+      DB_CONNECTION: pgsql
+      DB_HOST: dealership-db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - ./.env
+
+    # ✅ FIX: Override the image's ENTRYPOINT to /bin/bash
+    # This prevents the image's default ENTRYPOINT (docker-entrypoint.sh) from running.
+    entrypoint: /bin/bash
+
+    # ✅ FIX: Now the command is passed as an argument to /bin/bash
+    command: ["/usr/local/bin/docker-dev-setup.sh"]
+
     networks:
       - proxy-network
 

@@ -146,10 +146,20 @@ COPY . /var/www/html
 COPY --from=composer-builder /app/vendor ./vendor
 COPY --from=node-builder /app/public/build ./public/build
 
+# Propagate the ARG to an ENV variable for the entrypoint script to read
+ARG INSTALL_DEV_DEPENDENCIES=false
+ENV INSTALL_DEV_DEPENDENCIES=$INSTALL_DEV_DEPENDENCIES
+
 # Custom Entrypoint
 COPY docker-entrypoint.sh /usr/local/bin/
+# 💡 NEW: Copy the separate dev setup script
+COPY docker-dev-setup.sh /usr/local/bin/
+
 RUN dos2unix /usr/local/bin/docker-entrypoint.sh && \
-    chmod +x /usr/local/bin/docker-entrypoint.sh
+    chmod +x /usr/local/bin/docker-entrypoint.sh && \
+    # 💡 NEW: Permission the dev setup script
+    dos2unix /usr/local/bin/docker-dev-setup.sh && \
+    chmod +x /usr/local/bin/docker-dev-setup.sh
 
 # Set proper ownership and permissions for cache/storage
 RUN chown -R www-data:www-data /var/www/html && \
