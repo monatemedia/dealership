@@ -426,20 +426,20 @@ Before running any commands, copy your environment configuration:
 ```sh
 # Docker Desktop Development with Containers
 cp .env.docker-desktop .env
-```
+````
 
 -----
 
 ### 📦 Composer Dependencies (`--no-dev`)
 
-By default, the `dealership-web` image is built for **production** and excludes all Composer development dependencies (using the `--no-dev` flag) to minimize the final image size and reduce the attack surface.
+By default, our Docker image is built for **production** and excludes all Composer development dependencies (using the `--no-dev` flag) to minimize the final image size and reduce the attack surface.
 
-This behavior is controlled using the `INSTALL_DEV_DEPENDENCIES` build argument, which applies to **all services** built from the main Dockerfile.
+This behavior is controlled by the `INSTALL_DEV_DEPENDENCIES` build argument, which applies to **all services** built from the main Dockerfile (`dealership-web`, `dealership-queue`, and the one-off `dealership-setup`).
 
-| Scenario | Goal | Command to Build | `INSTALL_DEV_DEPENDENCIES` |
+| Scenario | Goal | Recommended Build Command | `INSTALL_DEV_DEPENDENCIES` |
 | :--- | :--- | :--- | :--- |
-| **Production / Default** | **Exclude** dev packages for small, secure image. | `docker compose build dealership-web` | `false` (default) |
-| **Test / Seeding / Staging** | **Include** dev packages (e.g., Faker) for data generation. | `docker compose build --build-arg INSTALL_DEV_DEPENDENCIES=true dealership-web` | `true` |
+| **Production / Default** | **Exclude** dev packages for small, secure image. | `docker compose build` | `false` (default) |
+| **Development Setup** | **Include** dev packages (e.g., Faker) for data generation. | **`docker compose build --build-arg INSTALL_DEV_DEPENDENCIES=true dealership-setup`** | `true` |
 
 #### How It Works
 
@@ -456,8 +456,8 @@ RUN COMPOSER_INSTALL_FLAGS="..."; \
 # ...
 ```
 
-  * When the argument is **omitted** (default `false`), the `--no-dev` flag is added to both `composer install` and `composer dump-autoload`.
-  * When the argument is explicitly set to **`true`**, the `--no-dev` flag is skipped, and all dependencies are included.
+  * When the argument is **omitted** (default `false`), the `--no-dev` flag is added, and dev dependencies are excluded.
+  * When the argument is explicitly set to **`true`**, the `--no-dev` flag is skipped, and all dependencies (including Faker) are installed.
 
 -----
 
@@ -465,25 +465,31 @@ RUN COMPOSER_INSTALL_FLAGS="..."; \
 
 ### 1\. Start the Core Services
 
-The main services (`web`, `queue`, `db`, `typesense`) are now started cleanly without waiting for heavy data generation. They only run essential commands like database migrations.
+These commands start the persistent infrastructure and application services. They run migrations but **do not** run slow data seeding.
 
 ```sh
-# Start the core application and infrastructure services
+# Start the core application and infrastructure services (Web, Queue, DB, Typesense)
 docker compose up -d
 ```
 
 ### 2\. Generate Development Data (If Needed)
 
-If you need fake data (e.g., 10,000 listings) for local development, you must run the **`dealership-setup`** service. This service is designed to run the slow `php artisan db:demo` command and then rebuild the Typesense index. Running `php artisan db:demo` directly will create five users. Two of theusers will have 50 cars each for a total of 100 cars.
+If you need fake data (e.g., 10,000 listings) for local development, you must use the dedicated one-off setup container.
 
-⚠️ **Prerequisite:** You must first **build the image** with `INSTALL_DEV_DEPENDENCIES=true` (as shown in the table above) before running this command.
+1.  **Build the `dealership-setup` image with dev dependencies** (see table above).
+2.  **Run the setup container** to execute the slow data seeding (`db:demo`) and Typesense import.
+
+<!-- end list -->
 
 ```sh
+# Ensure the image is built with dev dependencies first!
+docker compose build --build-arg INSTALL_DEV_DEPENDENCIES=true dealership-setup
+
 # Run the one-off setup container to generate 10,000 listings and import them to Typesense
 docker compose run --rm dealership-setup
 ```
 
----
+-----
 
 ### Installation
 
