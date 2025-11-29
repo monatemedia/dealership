@@ -136,6 +136,10 @@ services:
     networks:
       - proxy-network
 
+    # ✅ FIX 1: Tag setup as staging-only
+    profiles:
+      - staging
+
   dealership-typesense:
     image: typesense/typesense:29.0
     container_name: ${DOCKER_CONTAINER_NAME}-typesense
@@ -193,6 +197,9 @@ services:
       - "${DOCKER_ADMINER_PORT}:8080"
     networks:
       - proxy-network
+    # ✅ FIX 2: Tag Adminer as staging-only
+    profiles:
+      - staging
 
 volumes:
   dealership-db-data:
