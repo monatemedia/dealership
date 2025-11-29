@@ -86,6 +86,9 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
+          # Pass build-arg INSTALL_DEV_DEPENDENCIES=true only for staging branches
+          build-args: |
+            INSTALL_DEV_DEPENDENCIES=${{ contains(github.ref, 'refs/heads/release/') }}
 
       - name: Output deployment info
         run: |
