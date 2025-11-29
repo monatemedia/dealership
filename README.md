@@ -479,7 +479,6 @@ If you need fake data (e.g., 10,000 listings) for local development, you must us
 1.  **Build the `dealership-setup` image with dev dependencies** (see table above).
 2.  **Run the setup container** to execute the slow data seeding (`db:demo`) and Typesense import.
 
-<!-- end list -->
 
 ```sh
 # Ensure the image is built with dev dependencies first!
