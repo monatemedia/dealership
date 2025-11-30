@@ -21,7 +21,7 @@
         </x-slot:image>
 
         <x-hero.heading level="h1">
-            Buy <strong>{{ $categoryName }}</strong> <br>
+            <strong>{{ $categoryName }}</strong> <br>
             in <strong>South Africa</strong>
         </x-hero.heading>
 

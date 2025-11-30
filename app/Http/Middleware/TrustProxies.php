@@ -1,4 +1,4 @@
-<?php
+<?php // app/Http/Middleware/TrustProxies.php
 
 namespace App\Http\Middleware;
 
