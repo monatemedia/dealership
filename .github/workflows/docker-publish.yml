@@ -197,41 +197,11 @@ jobs:
       - name: Add Production Server to Known Hosts
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
 
-      - name: Pull and Deploy to Production
+      - name: Pull and Deploy to Production (TEST CONNECTION)
         run: |
+          # 🚨 TEMPORARY CRITICAL TEST: Check connection status and verbose output
+          # If this fails, the issue is a hard firewall block or key rejection.
           ssh -vvv ${{ env.USER }}@${{ env.HOST }} 'exit'
-
-          # The -vvv flag is critical for debugging the connection!
-          ssh -vvv ${{ env.USER }}@${{ env.HOST }} << 'EOF'
-            set -e
-            cd ${{ env.WORK_DIR }}
-
-            # 1. Update IMAGE_TAG and Pull (Restored Logic)
-            if grep -q "^IMAGE_TAG=" .env; then
-              sed -i 's|^IMAGE_TAG=.*|IMAGE_TAG=v${{ env.VERSION }}|' .env
-            else
-              echo "IMAGE_TAG=v${{ env.VERSION }}" >> .env
-            fi
-            echo "🚀 Deploying to PRODUCTION: v${{ env.VERSION }}"
-            docker compose pull ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }}
-
-            # 2. Stop all existing services
-            docker compose down
-
-            # 3. Run the essential setup container (Migrations/Core Seeders)
-            echo "🚀 Running essential setup (Migrations/Core Seeders)..."
-            # The init service will start, run the slow seeders, and exit.
-            # This relies on the production docker-compose having the actuallyfind-init service defined.
-            docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
-
-            echo "✅ Essential setup complete. Starting main services..."
-
-            # 4. Start the main application services
-            # Only start the DB, Typesense, Web, and Queue services
-            docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE} ${DB_SERVICE} ${TYPESENSE_SERVICE}
-
-            echo "⏳ Waiting for web container to boot..."
-            sleep 15
 
       - name: External Health Check
         run: |
