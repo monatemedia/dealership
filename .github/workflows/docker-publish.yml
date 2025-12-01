@@ -18,48 +18,46 @@ jobs:
   publish:
     name: Publish Docker Image
     runs-on: ubuntu-latest
-
     outputs:
       image-tag: ${{ steps.set-tag.outputs.tag }}
       version-tag: ${{ steps.set-tag.outputs.version }}
-      environment: ${{ steps.set-tag.outputs.environment }}
-
+      app-url: ${{ steps.set-tag.outputs.app-url }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetch all history for tags
+          fetch-depth: 0
 
-      - name: Determine image tag and environment
+      - name: Determine image tag, environment, and APP_URL
         id: set-tag
         run: |
-          # Check if this is a tag push
+          # Define URLs based on your provided .env files
+          STAGING_URL="https://dealership.monatemedia.com"
+          PRODUCTION_URL="https://actuallyfind.com"
+
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION="${GITHUB_REF#refs/tags/v}"
             echo "tag=v$VERSION" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
-            echo "environment=release" >> $GITHUB_OUTPUT
+            echo "app-url=$PRODUCTION_URL" >> $GITHUB_OUTPUT
             echo "📦 Building tagged release: v$VERSION"
-
           elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
             VERSION="${LATEST_TAG#v}"
             echo "tag=production" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
-            echo "environment=production" >> $GITHUB_OUTPUT
+            echo "app-url=$PRODUCTION_URL" >> $GITHUB_OUTPUT
             echo "🚀 Building production from tag: $LATEST_TAG"
-
           elif [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
             VERSION="${GITHUB_REF#refs/heads/release/}"
             echo "tag=staging" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
-            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "app-url=$STAGING_URL" >> $GITHUB_OUTPUT
             echo "🧪 Building staging release: $VERSION"
-
           else
             VERSION="dev-$(git rev-parse --short HEAD)"
             echo "tag=dev" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
-            echo "environment=development" >> $GITHUB_OUTPUT
+            echo "app-url=$STAGING_URL" >> $GITHUB_OUTPUT
             echo "🔧 Building development: $VERSION"
           fi
 
@@ -87,8 +85,8 @@ jobs:
 
       - name: Output deployment info
         run: |
-          echo "🎯 Environment: ${{ steps.set-tag.outputs.environment }}"
           echo "📌 Version: ${{ steps.set-tag.outputs.version }}"
+          echo "🌐 APP URL: ${{ steps.set-tag.outputs.app-url }}"
           echo "🏷️  Image Tags:"
           echo "   • ${{ env.IMAGE_NAME }}:${{ steps.set-tag.outputs.tag }}"
           echo "   • ${{ env.IMAGE_NAME }}:v${{ steps.set-tag.outputs.version }}"
@@ -99,76 +97,81 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/heads/release/')
-
+    # Map existing secrets and hardcoded values for the script
+    env:
+      APP_URL: ${{ needs.publish.outputs.app-url }}
+      VERSION: ${{ needs.publish.outputs.version-tag }}
+      HOST: ${{ secrets.SSH_HOST }}
+      USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      WORK_DIR: ${{ secrets.WORK_DIR }}
+      # Hardcoded static service names used in the staging docker-compose.yml
+      WEB_SERVICE: dealership-web
+      QUEUE_SERVICE: dealership-queue
+      HOST_PORT: ${{ env.DOCKER_LARAVEL_PORT }}
     steps:
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ env.SSH_KEY }}
 
       - name: Add Server to Known Hosts
-        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+        run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
 
-      - name: Pull and Deploy to Staging
-        env:
-          VERSION: ${{ needs.publish.outputs.version-tag }}
+      - name: Pull and Deploy to Staging (with Integrated Health Check)
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            set -e  # Exit on any error
+          ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
+            set -e
+            cd ${{ env.WORK_DIR }}
 
-            cd ${{ secrets.WORK_DIR }}
-
-            # Update .env with the versioned tag
+            # 1. Update IMAGE_TAG
             if grep -q "^IMAGE_TAG=" .env; then
-              sed -i 's|^IMAGE_TAG=.*|IMAGE_TAG=v${{ needs.publish.outputs.version-tag }}|' .env
+              sed -i 's|^IMAGE_TAG=.*|IMAGE_TAG=v${{ env.VERSION }}|' .env
             else
-              echo "IMAGE_TAG=v${{ needs.publish.outputs.version-tag }}" >> .env
+              echo "IMAGE_TAG=v${{ env.VERSION }}" >> .env
             fi
 
-            echo "🧪 Deploying to STAGING: v${{ needs.publish.outputs.version-tag }}"
+            echo "🧪 Deploying to STAGING: v${{ env.VERSION }}"
 
-            # Pull the versioned image
-            docker compose pull dealership-web dealership-queue
-
-            # Stop containers
+            # 2. Pull, Stop, and Start containers using static service names
+            docker compose pull ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }}
             docker compose down
-
-            # Start containers with new image (including Adminer for staging)
             docker compose --profile staging up -d
 
-            # Wait for containers to be ready
             echo "⏳ Waiting for containers to start..."
-            sleep 10
+            sleep 20
 
-            # Fix permissions - this runs INSIDE the container, so no host permission issues
+            # 3. Fix permissions using static web service name
             echo "🔧 Fixing storage permissions..."
-            docker exec dealership-web chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
-            docker exec dealership-web chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
+            docker exec ${{ env.WEB_SERVICE }} chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
+            docker exec ${{ env.WEB_SERVICE }} chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
 
-            # Note: Cache clearing is already in docker-entrypoint.sh
-
-            # Show running containers
             echo "📦 Running containers:"
             docker compose ps
 
-            # Clean up old images (keep last 5 versions)
-            echo "🧹 Cleaning up old images..."
-            docker images ghcr.io/${{ github.actor }}/dealership --format "{{.ID}} {{.Tag}}" | grep -v "buildcache" | tail -n +6 | awk '{print $1}' | xargs -r docker rmi 2>/dev/null || true
+            # 4. Integrated Health Check (Internal)
+            echo "🏥 Performing internal health check..."
+            URL_TO_CHECK="http://localhost:${{ env.HOST_PORT }}"
+            response=$(curl -s -o /dev/null -w "%{http_code}" $URL_TO_CHECK || echo "000")
 
-            echo "✅ Staging deployment complete: v${{ needs.publish.outputs.version-tag }}"
+            if [ "$response" = "200" ]; then
+                echo "✅ Staging deployment complete: v${{ env.VERSION }}"
+            else
+                echo "❌ Internal health check failed (HTTP $response)"
+                docker logs ${{ env.WEB_SERVICE }} # Log the correct static container
+                exit 1
+            fi
           EOF
 
-      - name: Health Check
+      - name: External Health Check
         run: |
-          echo "🏥 Performing health check..."
-          sleep 20
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://dealership.monatemedia.com || echo "000")
-
+          echo "🌐 Performing external health check..."
+          sleep 5
+          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.APP_URL }} || echo "000")
           if [ "$response" = "200" ]; then
-            echo "✅ Health check passed (HTTP $response)"
+            echo "✅ External health check passed (HTTP $response)"
           else
-            echo "❌ Health check failed (HTTP $response)"
-            docker logs dealership-web
+            echo "❌ External health check failed (HTTP $response) at ${{ env.APP_URL }}"
             exit 1
           fi
 
@@ -181,76 +184,84 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
-    environment:
-      name: production
-      url: https://actuallyfind.com
-
+    environment: "production"
+    # Map existing secrets and hardcoded values for the script
+    env:
+      APP_URL: ${{ needs.publish.outputs.app-url }}
+      VERSION: ${{ needs.publish.outputs.version-tag }}
+      HOST: ${{ secrets.PRODUCTION_HOST }}
+      USER: ${{ secrets.PRODUCTION_USER }}
+      SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+      WORK_DIR: ${{ secrets.PRODUCTION_WORK_DIR }}
+      # Hardcoded static service names used in the production docker-compose.yml
+      WEB_SERVICE: actuallyfind-web
+      QUEUE_SERVICE: actuallyfind-queue
+      DB_SERVICE: actuallyfind-db
+      TYPESENSE_SERVICE: actuallyfind-typesense
+      HOST_PORT: ${{ env.DOCKER_LARAVEL_PORT }}
     steps:
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          ssh-private-key: ${{ env.SSH_KEY }}
 
       - name: Add Production Server to Known Hosts
-        run: ssh-keyscan -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+        run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
 
       - name: Pull and Deploy to Production
-        env:
-          VERSION: ${{ needs.publish.outputs.version-tag }}
         run: |
-          ssh ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
-            set -e  # Exit on any error
+          ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
+            set -e
+            cd ${{ env.WORK_DIR }}
 
-            cd ${{ secrets.PRODUCTION_WORK_DIR }}
-
-            # Update .env with the versioned tag
+            # 1. Update IMAGE_TAG
             if grep -q "^IMAGE_TAG=" .env; then
-              sed -i 's|^IMAGE_TAG=.*|IMAGE_TAG=v${{ needs.publish.outputs.version-tag }}|' .env
+              sed -i 's|^IMAGE_TAG=.*|IMAGE_TAG=v${{ env.VERSION }}|' .env
             else
-              echo "IMAGE_TAG=v${{ needs.publish.outputs.version-tag }}" >> .env
+              echo "IMAGE_TAG=v${{ env.VERSION }}" >> .env
             fi
 
-            echo "🚀 Deploying to PRODUCTION: v${{ needs.publish.outputs.version-tag }}"
+            echo "🚀 Deploying to PRODUCTION: v${{ env.VERSION }}"
 
-            # Pull the versioned image
-            docker compose pull actuallyfind-web actuallyfind-queue
+            # 2. Pull, Stop, and Start containers using static service names
+            docker compose pull ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }}
+            docker compose down ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }}
+            docker compose up -d ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }} ${{ env.DB_SERVICE }} ${{ env.TYPESENSE_SERVICE }}
 
-            # Stop containers
-            docker compose down actuallyfind-web actuallyfind-queue
-
-            # Start containers with new image (NO Adminer in production)
-            docker compose up -d actuallyfind-web actuallyfind-queue actuallyfind-db actuallyfind-typesense
-
-            # Wait for containers to be ready
             echo "⏳ Waiting for containers to start..."
-            sleep 10
+            sleep 20
 
-            # Fix permissions
+            # 3. Fix permissions using static web service name
             echo "🔧 Fixing storage permissions..."
-            docker exec actuallyfind-web chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
-            docker exec actuallyfind-web chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
+            docker exec ${{ env.WEB_SERVICE }} chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
+            docker exec ${{ env.WEB_SERVICE }} chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
 
-            # Show running containers
             echo "📦 Running containers:"
             docker compose ps
 
-            # Clean up old images (keep last 5 versions)
-            echo "🧹 Cleaning up old images..."
-            docker images ghcr.io/${{ github.actor }}/dealership --format "{{.ID}} {{.Tag}}" | grep -v "buildcache" | tail -n +6 | awk '{print $1}' | xargs -r docker rmi 2>/dev/null || true
+            # 4. Integrated Health Check (Internal)
+            echo "🏥 Performing internal health check..."
+            URL_TO_CHECK="http://localhost:${{ env.HOST_PORT }}"
+            response=$(curl -s -o /dev/null -w "%{http_code}" $URL_TO_CHECK || echo "000")
 
-            echo "✅ Production deployment complete: v${{ needs.publish.outputs.version-tag }}"
+            if [ "$response" = "200" ]; then
+                echo "✅ Production deployment complete: v${{ env.VERSION }}"
+            else
+                echo "❌ Internal health check failed (HTTP $response)"
+                docker logs ${{ env.WEB_SERVICE }} # Log the correct static container
+                exit 1
+            fi
           EOF
 
-      - name: Health Check
+      - name: External Health Check
         run: |
-          echo "🏥 Performing health check..."
-          sleep 10
-          response=$(curl -s -o /dev/null -w "%{http_code}" https://actuallyfind.com || echo "000")
-
+          echo "🌐 Performing external health check..."
+          sleep 5
+          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.APP_URL }} || echo "000")
           if [ "$response" = "200" ]; then
-            echo "✅ Health check passed (HTTP $response)"
+            echo "✅ External health check passed (HTTP $response)"
           else
-            echo "❌ Health check failed (HTTP $response)"
+            echo "❌ External health check failed (HTTP $response) at ${{ env.APP_URL }}"
             exit 1
           fi
 
@@ -267,10 +278,6 @@ jobs:
           tag_name: ${{ github.ref_name }}
           release_name: Release ${{ github.ref_name }}
           body: |
-            ## What's New in ${{ github.ref_name }}
-
-            <!-- Add your release notes here -->
-
             ## Deployment Info
             - **Version**: ${{ needs.publish.outputs.version-tag }}
             - **Environment**: Production
