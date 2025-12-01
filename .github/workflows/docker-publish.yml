@@ -199,19 +199,18 @@ jobs:
 
       - name: Pull and Deploy to Production
         run: |
-          # Use -vvv for verbosity (as discussed in previous interaction)
+          # The -vvv flag is critical for debugging the connection!
           ssh -vvv ${{ env.USER }}@${{ env.HOST }} << 'EOF'
             set -e
             cd ${{ env.WORK_DIR }}
 
-            # 1. Update IMAGE_TAG and Pull
+            # 1. Update IMAGE_TAG and Pull (Restored Logic)
             if grep -q "^IMAGE_TAG=" .env; then
               sed -i 's|^IMAGE_TAG=.*|IMAGE_TAG=v${{ env.VERSION }}|' .env
             else
               echo "IMAGE_TAG=v${{ env.VERSION }}" >> .env
             fi
             echo "🚀 Deploying to PRODUCTION: v${{ env.VERSION }}"
-            # We only pull the web/queue services, the others are static DB/Typesense
             docker compose pull ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }}
 
             # 2. Stop all existing services
