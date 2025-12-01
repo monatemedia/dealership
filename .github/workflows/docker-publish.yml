@@ -34,7 +34,6 @@ jobs:
         run: |
           # Check if this is a tag push
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            # Extract version from tag (e.g., v1.0.0 -> 1.0.0)
             VERSION="${GITHUB_REF#refs/tags/v}"
             echo "tag=v$VERSION" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
@@ -42,7 +41,6 @@ jobs:
             echo "📦 Building tagged release: v$VERSION"
 
           elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            # Get the latest tag for production builds
             LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
             VERSION="${LATEST_TAG#v}"
             echo "tag=production" >> $GITHUB_OUTPUT
@@ -51,7 +49,6 @@ jobs:
             echo "🚀 Building production from tag: $LATEST_TAG"
 
           elif [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
-            # Extract version from branch name (e.g., release/1.0.0 -> 1.0.0)
             VERSION="${GITHUB_REF#refs/heads/release/}"
             echo "tag=staging" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
@@ -59,7 +56,6 @@ jobs:
             echo "🧪 Building staging release: $VERSION"
 
           else
-            # Development/other branches
             VERSION="dev-$(git rev-parse --short HEAD)"
             echo "tag=dev" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
@@ -86,7 +82,6 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
-          # Pass build-arg INSTALL_DEV_DEPENDENCIES=true only for staging branches
           build-args: |
             INSTALL_DEV_DEPENDENCIES=${{ contains(github.ref, 'refs/heads/release/') }}
 
@@ -119,6 +114,8 @@ jobs:
           VERSION: ${{ needs.publish.outputs.version-tag }}
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            set -e  # Exit on any error
+
             cd ${{ secrets.WORK_DIR }}
 
             # Update .env with the versioned tag
@@ -133,19 +130,49 @@ jobs:
             # Pull the versioned image
             docker compose pull dealership-web dealership-queue
 
-            # Recreate containers with new image (including Adminer for staging)
-            docker compose --profile staging up -d --force-recreate
+            # Stop containers
+            docker compose down
+
+            # Start containers with new image (including Adminer for staging)
+            docker compose --profile staging up -d
+
+            # Wait for containers to be ready
+            echo "⏳ Waiting for containers to start..."
+            sleep 10
+
+            # Fix permissions - this runs INSIDE the container, so no host permission issues
+            echo "🔧 Fixing storage permissions..."
+            docker exec dealership-web chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
+            docker exec dealership-web chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
+
+            # Note: Cache clearing is already in docker-entrypoint.sh
 
             # Show running containers
+            echo "📦 Running containers:"
             docker compose ps
 
             # Clean up old images (keep last 5 versions)
+            echo "🧹 Cleaning up old images..."
             docker images ghcr.io/${{ github.actor }}/dealership --format "{{.ID}} {{.Tag}}" | grep -v "buildcache" | tail -n +6 | awk '{print $1}' | xargs -r docker rmi 2>/dev/null || true
 
             echo "✅ Staging deployment complete: v${{ needs.publish.outputs.version-tag }}"
           EOF
 
+      - name: Health Check
+        run: |
+          echo "🏥 Performing health check..."
+          sleep 5
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://dealership.monatemedia.com || echo "000")
+
+          if [ "$response" = "200" ]; then
+            echo "✅ Health check passed (HTTP $response)"
+          else
+            echo "❌ Health check failed (HTTP $response)"
+            exit 1
+          fi
+
       - name: Cleanup SSH Keys
+        if: always()
         run: rm -rf ~/.ssh
 
   deploy-production:
@@ -153,6 +180,9 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: production
+      url: https://actuallyfind.com
 
     steps:
       - name: Setup SSH Agent
@@ -168,6 +198,8 @@ jobs:
           VERSION: ${{ needs.publish.outputs.version-tag }}
         run: |
           ssh ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
+            set -e  # Exit on any error
+
             cd ${{ secrets.PRODUCTION_WORK_DIR }}
 
             # Update .env with the versioned tag
@@ -180,19 +212,68 @@ jobs:
             echo "🚀 Deploying to PRODUCTION: v${{ needs.publish.outputs.version-tag }}"
 
             # Pull the versioned image
-            docker compose pull dealership-web dealership-queue
+            docker compose pull actuallyfind-web actuallyfind-queue
 
-            # Recreate containers with new image
-            docker compose up -d --force-recreate dealership-web dealership-queue
+            # Stop containers
+            docker compose down actuallyfind-web actuallyfind-queue
+
+            # Start containers with new image (NO Adminer in production)
+            docker compose up -d actuallyfind-web actuallyfind-queue actuallyfind-db actuallyfind-typesense
+
+            # Wait for containers to be ready
+            echo "⏳ Waiting for containers to start..."
+            sleep 10
+
+            # Fix permissions
+            echo "🔧 Fixing storage permissions..."
+            docker exec actuallyfind-web chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
+            docker exec actuallyfind-web chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
 
             # Show running containers
+            echo "📦 Running containers:"
             docker compose ps
 
             # Clean up old images (keep last 5 versions)
+            echo "🧹 Cleaning up old images..."
             docker images ghcr.io/${{ github.actor }}/dealership --format "{{.ID}} {{.Tag}}" | grep -v "buildcache" | tail -n +6 | awk '{print $1}' | xargs -r docker rmi 2>/dev/null || true
 
             echo "✅ Production deployment complete: v${{ needs.publish.outputs.version-tag }}"
           EOF
 
+      - name: Health Check
+        run: |
+          echo "🏥 Performing health check..."
+          sleep 5
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://actuallyfind.com || echo "000")
+
+          if [ "$response" = "200" ]; then
+            echo "✅ Health check passed (HTTP $response)"
+          else
+            echo "❌ Health check failed (HTTP $response)"
+            exit 1
+          fi
+
       - name: Cleanup SSH Keys
+        if: always()
         run: rm -rf ~/.ssh
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## What's New in ${{ github.ref_name }}
+
+            <!-- Add your release notes here -->
+
+            ## Deployment Info
+            - **Version**: ${{ needs.publish.outputs.version-tag }}
+            - **Environment**: Production
+            - **Deployed**: ${{ github.event.head_commit.timestamp }}
+            - **Commit**: ${{ github.sha }}
+          draft: false
+          prerelease: false
