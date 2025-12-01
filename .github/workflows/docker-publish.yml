@@ -199,6 +199,9 @@ jobs:
 
       - name: Pull and Deploy to Production
         run: |
+          # 🚨 TEMPORARY TEST: Only attempting to connect and print verbose output
+          ssh -vvv ${{ env.USER }}@${{ env.HOST }} 'exit'
+
           # The -vvv flag is critical for debugging the connection!
           ssh -vvv ${{ env.USER }}@${{ env.HOST }} << 'EOF'
             set -e
