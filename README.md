@@ -1322,6 +1322,27 @@ docker compose up -d dealership-web dealership-queue dealership-db
 
 ---
 
+### Deployment Permissions
+
+The CI/CD pipeline automatically handles storage permissions after each deployment. The workflow:
+
+1. Deploys new Docker image
+2. Starts containers
+3. **Fixes permissions inside the container** (no host permission issues)
+4. Performs health check
+
+**Manual Permission Fix (if needed):**
+```bash
+# Staging
+docker exec dealership-web chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+docker exec dealership-web chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Production
+docker exec actuallyfind-web chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+docker exec actuallyfind-web chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+```
+---
+
 ## Best Practices
 
 1. **Always create release branches from dev** - never from feature branches

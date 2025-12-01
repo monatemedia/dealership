@@ -162,7 +162,7 @@ jobs:
         run: |
           echo "🏥 Performing health check..."
           sleep 10
-          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.APP_URL }} || echo "000")
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://dealership.monatemedia.com || echo "000")
 
           if [ "$response" = "200" ]; then
             echo "✅ Health check passed (HTTP $response)"
@@ -244,7 +244,7 @@ jobs:
         run: |
           echo "🏥 Performing health check..."
           sleep 10
-          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.APP_URL }} || echo "000")
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://actuallyfind.com || echo "000")
 
           if [ "$response" = "200" ]; then
             echo "✅ Health check passed (HTTP $response)"
