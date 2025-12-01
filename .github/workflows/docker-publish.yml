@@ -4,10 +4,10 @@ name: publish
 on:
   push:
     branches:
-      - "main" # Production deployment
-      - "release/**" # Staging deployment
+      # We only need the branch trigger for staging/release branches
+      - "release/**"
     tags:
-      - "v*" # Version tags (e.g., v1.0.0, v2.1.5)
+      - "v*" # Production deployments rely solely on this trigger
   workflow_dispatch: # Allow manual triggers
 
 env:
@@ -199,7 +199,6 @@ jobs:
 
       - name: Pull and Deploy to Production
         run: |
-          # 🚨 TEMPORARY TEST: Only attempting to connect and print verbose output
           ssh -vvv ${{ env.USER }}@${{ env.HOST }} 'exit'
 
           # The -vvv flag is critical for debugging the connection!
