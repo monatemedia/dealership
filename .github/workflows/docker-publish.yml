@@ -97,6 +97,7 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/heads/release/')
+
     # Map existing secrets and hardcoded values for the script
     env:
       APP_URL: ${{ needs.publish.outputs.app-url }}
