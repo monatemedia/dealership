@@ -653,8 +653,8 @@ Temporary branches, deleted after merge:
 
 ### Deployment Environments
 
-- **Production** → Triggered by pushes to `main` or version tags (e.g., `v1.0.0`). Deploys to production server. **Adminer is NOT included in production.**
-- **Staging** → `release/*` branches automatically deploy to staging environment on VPS for QA/testing. **Adminer is included for database access.**
+- **Production** → Triggered by pushes to `main` or version tags (e.g., `v1.0.0`). Deploys to production server. **The essential setup service (`actuallyfind-init`) runs migrations and mandatory seeders once per deployment.** Adminer is NOT included in production.
+- **Staging** → `release/*` branches automatically deploy to staging environment on VPS for QA/testing. **The essential setup service (`dealership-init`) runs migrations and mandatory seeders once per deployment.** Adminer is included for database access.
 - **Local Development** → `dev` branch for development on Docker Desktop. **Adminer is included.**
 
 ### Version Management
@@ -703,6 +703,7 @@ git push origin release/1.2.0
 ```
 
 **🧪 Automatic Staging Deployment happens now**
+- **Critical Step:** The CI/CD pipeline automatically runs the dedicated **Essential Setup Service** (`dealership-init`) to execute migrations and mandatory, slow seeders (e.g., car data) before starting the main web application.
 - Test thoroughly on staging environment
 - Fix any bugs found
 - Push bug fixes to `release/1.2.0` branch
@@ -978,8 +979,11 @@ git push origin release/1.0.0
 ```
 
 **🧪 Automatic Staging Deployment:**
-- GitHub Actions builds Docker image tagged as `:staging` and `:v1.0.0`
-- Image is deployed to staging server automatically
+- GitHub Actions detects the push to `release/*`
+- **Critical Step:** The `dealership-init` service runs migrations and mandatory seeders, then exits.
+- The main application services (`dealership-web`, `dealership-queue`) are started.
+- Health checks are performed after the web server has fully booted.
+- Docker image tagged as `:staging` and `:v1.0.0` is deployed.
 - Adminer is available for database access
 - Server's `.env` is updated with `IMAGE_TAG=v1.0.0`
 
