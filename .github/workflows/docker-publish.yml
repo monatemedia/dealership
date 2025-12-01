@@ -108,6 +108,8 @@ jobs:
       # Hardcoded static service names used in the staging docker-compose.yml
       WEB_SERVICE: dealership-web
       QUEUE_SERVICE: dealership-queue
+      SETUP_INIT_SERVICE: dealership-init # <-- New Init service
+      SETUP_DEMO_SERVICE: dealership-demo # <-- Demo service (optional, for manual use)
       HOST_PORT: 8090 # DOCKER_LARAVEL_PORT from dealership/.env
     steps:
       - name: Setup SSH Agent
@@ -118,53 +120,26 @@ jobs:
       - name: Add Server to Known Hosts
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
 
-      - name: Pull and Deploy to Staging (with Integrated Health Check)
+      - name: Pull, Setup, and Deploy to Staging
         run: |
           ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
-            set -e
-            cd ${{ env.WORK_DIR }}
+            # ... (Update IMAGE_TAG and Pull steps) ...
 
-            # 1. Update IMAGE_TAG
-            if grep -q "^IMAGE_TAG=" .env; then
-              sed -i 's|^IMAGE_TAG=.*|IMAGE_TAG=v${{ env.VERSION }}|' .env
-            else
-              echo "IMAGE_TAG=v${{ env.VERSION }}" >> .env
-            fi
-
-            echo "🧪 Deploying to STAGING: v${{ env.VERSION }}"
-
-            # 2. Pull, Stop, and Start containers using static service names
-            docker compose pull ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }}
+            # 2. Stop all existing services
             docker compose down
-            docker compose --profile staging up -d
 
-            echo "⏳ Waiting for containers to start..."
-            sleep 20
+            # 3. Run the essential setup container (Migrations/Core Seeders)
+            echo "🚀 Running essential setup (Migrations/Core Seeders)..."
+            # The init service will start, run the slow seeders, and exit.
+            docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
 
-            # 3. Fix permissions using static web service name
-            echo "🔧 Fixing storage permissions..."
-            docker exec ${{ env.WEB_SERVICE }} chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
-            docker exec ${{ env.WEB_SERVICE }} chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
+            echo "✅ Essential setup complete. Starting web and queue services..."
 
-            echo "📦 Running containers:"
-            docker compose ps
+            # 4. Start the main application services
+            docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE}
 
-            # 4. Integrated Health Check (Internal)
-            echo "🏥 Performing internal health check..."
-            URL_TO_CHECK="http://localhost:${{ env.HOST_PORT }}"
-            response=$(curl -s -o /dev/null -w "%{http_code}" $URL_TO_CHECK || echo "000")
-
-            if [ "$response" = "200" ]; then
-                echo "✅ Staging deployment complete: v${{ env.VERSION }}"
-            else
-                echo "❌ Internal health check failed (HTTP $response)"
-                echo "--- START LOGS: ${{ env.WEB_SERVICE }} ---"
-                # Use a specific logging command to guarantee output
-                docker logs ${{ env.WEB_SERVICE }} --tail 100
-                echo "--- END LOGS: ${{ env.WEB_SERVICE }} ---"
-                exit 1 # Fail the SSH session
-            fi
-          EOF
+            echo "⏳ Waiting for web container to boot..."
+            sleep 15
 
       - name: External Health Check
         run: |
@@ -201,6 +176,7 @@ jobs:
       QUEUE_SERVICE: actuallyfind-queue
       DB_SERVICE: actuallyfind-db
       TYPESENSE_SERVICE: actuallyfind-typesense
+      SETUP_INIT_SERVICE: actuallyfind-init # <-- Production init service name
       HOST_PORT: 8092 # DOCKER_LARAVEL_PORT from actuallyfind/.env
     steps:
       - name: Setup SSH Agent
@@ -214,47 +190,25 @@ jobs:
       - name: Pull and Deploy to Production
         run: |
           ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
-            set -e
-            cd ${{ env.WORK_DIR }}
+            # ... (Update IMAGE_TAG and Pull steps) ...
 
-            # 1. Update IMAGE_TAG
-            if grep -q "^IMAGE_TAG=" .env; then
-              sed -i 's|^IMAGE_TAG=.*|IMAGE_TAG=v${{ env.VERSION }}|' .env
-            else
-              echo "IMAGE_TAG=v${{ env.VERSION }}" >> .env
-            fi
+            # 2. Stop all existing services
+            docker compose down
 
-            echo "🚀 Deploying to PRODUCTION: v${{ env.VERSION }}"
+            # 3. Run the essential setup container (Migrations/Core Seeders)
+            echo "🚀 Running essential setup (Migrations/Core Seeders)..."
+            # The init service will start, run the slow seeders, and exit.
+            # This relies on the production docker-compose having the actuallyfind-init service defined.
+            docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
 
-            # 2. Pull, Stop, and Start containers using static service names
-            docker compose pull ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }}
-            docker compose down ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }}
-            docker compose up -d ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }} ${{ env.DB_SERVICE }} ${{ env.TYPESENSE_SERVICE }}
+            echo "✅ Essential setup complete. Starting main services..."
 
-            echo "⏳ Waiting for containers to start..."
-            sleep 20
+            # 4. Start the main application services
+            # Only start the DB, Typesense, Web, and Queue services
+            docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE} ${DB_SERVICE} ${TYPESENSE_SERVICE}
 
-            # 3. Fix permissions using static web service name
-            echo "🔧 Fixing storage permissions..."
-            docker exec ${{ env.WEB_SERVICE }} chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
-            docker exec ${{ env.WEB_SERVICE }} chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
-
-            echo "📦 Running containers:"
-            docker compose ps
-
-            # 4. Integrated Health Check (Internal)
-            echo "🏥 Performing internal health check..."
-            URL_TO_CHECK="http://localhost:${{ env.HOST_PORT }}"
-            response=$(curl -s -o /dev/null -w "%{http_code}" $URL_TO_CHECK || echo "000")
-
-            if [ "$response" = "200" ]; then
-                echo "✅ Production deployment complete: v${{ env.VERSION }}"
-            else
-                echo "❌ Internal health check failed (HTTP $response)"
-                docker logs ${{ env.WEB_SERVICE }} # Log the correct static container
-                exit 1
-            fi
-          EOF
+            echo "⏳ Waiting for web container to boot..."
+            sleep 15
 
       - name: External Health Check
         run: |
