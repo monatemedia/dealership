@@ -123,7 +123,17 @@ jobs:
       - name: Pull, Setup, and Deploy to Staging
         run: |
           ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
-            # ... (Update IMAGE_TAG and Pull steps) ...
+            set -e
+            cd ${{ env.WORK_DIR }}
+
+            # 1. Update IMAGE_TAG and Pull
+            if grep -q "^IMAGE_TAG=" .env; then
+              sed -i 's|^IMAGE_TAG=.*|IMAGE_TAG=v${{ env.VERSION }}|' .env
+            else
+              echo "IMAGE_TAG=v${{ env.VERSION }}" >> .env
+            fi
+            echo "🧪 Deploying to STAGING: v${{ env.VERSION }}"
+            docker compose pull ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }}
 
             # 2. Stop all existing services
             docker compose down
@@ -189,8 +199,20 @@ jobs:
 
       - name: Pull and Deploy to Production
         run: |
-          ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
-            # ... (Update IMAGE_TAG and Pull steps) ...
+          # Use -vvv for verbosity (as discussed in previous interaction)
+          ssh -vvv ${{ env.USER }}@${{ env.HOST }} << 'EOF'
+            set -e
+            cd ${{ env.WORK_DIR }}
+
+            # 1. Update IMAGE_TAG and Pull
+            if grep -q "^IMAGE_TAG=" .env; then
+              sed -i 's|^IMAGE_TAG=.*|IMAGE_TAG=v${{ env.VERSION }}|' .env
+            else
+              echo "IMAGE_TAG=v${{ env.VERSION }}" >> .env
+            fi
+            echo "🚀 Deploying to PRODUCTION: v${{ env.VERSION }}"
+            # We only pull the web/queue services, the others are static DB/Typesense
+            docker compose pull ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }}
 
             # 2. Stop all existing services
             docker compose down
