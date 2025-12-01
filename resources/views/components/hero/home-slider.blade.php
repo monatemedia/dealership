@@ -21,8 +21,8 @@
         </x-slot:image>
 
         <x-hero.heading level="h1">
-            Find <strong>{{ $categoryName }}</strong> <br>
-            in <strong>South Africa</strong>
+            {{ $categoryName }} in <br>
+            <strong>South Africa</strong>
         </x-hero.heading>
 
         <x-hero.text>
