@@ -97,7 +97,6 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/heads/release/')
-
     # Map existing secrets and hardcoded values for the script
     env:
       APP_URL: ${{ needs.publish.outputs.app-url }}
@@ -109,7 +108,7 @@ jobs:
       # Hardcoded static service names used in the staging docker-compose.yml
       WEB_SERVICE: dealership-web
       QUEUE_SERVICE: dealership-queue
-      HOST_PORT: ${{ env.DOCKER_LARAVEL_PORT }}
+      HOST_PORT: 8090 # DOCKER_LARAVEL_PORT from dealership/.env
     steps:
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -199,7 +198,7 @@ jobs:
       QUEUE_SERVICE: actuallyfind-queue
       DB_SERVICE: actuallyfind-db
       TYPESENSE_SERVICE: actuallyfind-typesense
-      HOST_PORT: ${{ env.DOCKER_LARAVEL_PORT }}
+      HOST_PORT: 8092 # DOCKER_LARAVEL_PORT from actuallyfind/.env
     steps:
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
