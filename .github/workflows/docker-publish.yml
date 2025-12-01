@@ -158,8 +158,11 @@ jobs:
                 echo "✅ Staging deployment complete: v${{ env.VERSION }}"
             else
                 echo "❌ Internal health check failed (HTTP $response)"
-                docker logs ${{ env.WEB_SERVICE }} # Log the correct static container
-                exit 1
+                echo "--- START LOGS: ${{ env.WEB_SERVICE }} ---"
+                # Use a specific logging command to guarantee output
+                docker logs ${{ env.WEB_SERVICE }} --tail 100
+                echo "--- END LOGS: ${{ env.WEB_SERVICE }} ---"
+                exit 1 # Fail the SSH session
             fi
           EOF
 
