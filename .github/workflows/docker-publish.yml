@@ -199,8 +199,6 @@ jobs:
 
       - name: Pull and Deploy to Production (TEST CONNECTION)
         run: |
-          # 🚨 TEMPORARY CRITICAL TEST: Check connection status and verbose output
-          # If this fails, the issue is a hard firewall block or key rejection.
           ssh -vvv ${{ env.USER }}@${{ env.HOST }} 'exit'
 
       - name: External Health Check
