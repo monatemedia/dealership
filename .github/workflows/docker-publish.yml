@@ -161,13 +161,14 @@ jobs:
       - name: Health Check
         run: |
           echo "🏥 Performing health check..."
-          sleep 10
+          sleep 20
           response=$(curl -s -o /dev/null -w "%{http_code}" https://dealership.monatemedia.com || echo "000")
 
           if [ "$response" = "200" ]; then
             echo "✅ Health check passed (HTTP $response)"
           else
             echo "❌ Health check failed (HTTP $response)"
+            docker logs dealership-web
             exit 1
           fi
 
