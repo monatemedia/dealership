@@ -110,8 +110,10 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ env.SSH_KEY }}
+
       - name: Add Server to Known Hosts
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
+
       - name: Copy docker-compose.yml and Deploy to Staging # Changed name for clarity
         run: |
           # The scp command should be here too if staging uses a local docker-compose.yml
@@ -192,6 +194,33 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
           log-public-key: true
+
+      - name: Add Server to Known Hosts
+        # This step is correct and successful based on logs
+        run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
+
+      - name: Add Server to Known Hosts
+        # This step is correct and successful based on logs
+        run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
+
+      - name: Upload docker-compose.yml
+        # VITAL: This step must be separate and must exit on SCP failure.
+        # We ensure strict exit-on-error behavior.
+        run: |
+          set -e
+          echo "Uploading docker-compose.yml to remote host: ${{ env.USER }}@${{ env.HOST }}:${{ env.WORK_DIR }}/docker-compose.yml"
+          scp -o StrictHostKeyChecking=no \
+            ./docker-compose.yml \
+            ${{ env.USER }}@${{ env.HOST }}:${{ env.WORK_DIR }}/docker-compose.yml
+        # Note: If this step fails with a permission error, the workflow stops here.
+
+      - name: Run Remote Deployment Script
+        run: |
+          set -e
+          TARGET_DIR="${{ env.WORK_DIR }}"
+          NEW_IMAGE_TAG="${{ needs.publish.outputs.version-tag }}"
+
+          echo "Connecting to remote host: ${{ env.HOST }}"
 
       # 3. Add Host Key (Existing)
       - name: Add SSH Known Host
