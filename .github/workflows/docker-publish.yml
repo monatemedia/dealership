@@ -188,22 +188,30 @@ jobs:
             set -e
 
             # ----------------------------------------------------------------
-            # 🔥 THE FIX: Wrap $WORK_DIR in double quotes to handle spaces.
+            # 🔥 NEW DEBUGGING & FIX: Check if directory exists before changing into it.
+            TARGET_DIR="$WORK_DIR"
+            echo "Attempting to change directory to: \${TARGET_DIR}"
+
+            if [ ! -d "\${TARGET_DIR}" ]; then
+              echo "🚨 ERROR: Target working directory '\${TARGET_DIR}' does not exist on the remote host."
+              exit 1
+            fi
+
             # Change to the working directory
-            cd "$WORK_DIR"
+            cd "\${TARGET_DIR}"
             # ----------------------------------------------------------------
 
             # --- Check for docker-compose.yml on remote server ---
             if [ ! -f "docker-compose.yml" ]; then
-              echo "🚨 ERROR: 'docker-compose.yml' not found in $WORK_DIR. Deployment aborted."
+              echo "🚨 ERROR: 'docker-compose.yml' not found in \$(pwd). Deployment aborted."
               ls -lha
               exit 1
             fi
             # ----------------------------------------------------------------------------------------
 
             # 1. Update IMAGE_TAG in the remote .env file with the new version
-            # Note: $VERSION was '0.0.22' in the GHA environment, so we use that as the tag.
-            NEW_IMAGE_TAG="v0.0.22"
+            # 🔥 FIX: Dynamically use the GHA $VERSION variable (now 0.0.23) and prepend 'v'.
+            NEW_IMAGE_TAG="v$VERSION"
 
             # The dollar signs ($) for variables below MUST be escaped (e.g., \${NEW_IMAGE_TAG}, \${WEB_SERVICE})
             # so the remote shell (not the GHA runner) expands them.
