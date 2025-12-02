@@ -1,11 +1,13 @@
+# .github/workflows/docker-publish.yml
+
 name: publish
 on:
   push:
     branches:
-      # We only need the branch trigger for staging/release branches
-      - "release/**"
+      - "main" # Production deployment
+      - "release/**" # Staging deployment
     tags:
-      - "v*" # Production deployments rely solely on this trigger
+      - "v*" # Version tags (e.g., v1.0.0, v2.1.5)
   workflow_dispatch: # Allow manual triggers
 
 env:
@@ -25,30 +27,40 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Step to determine the version tag and environment URL
       - name: Determine image tag, environment, and APP_URL
         id: set-tag
         run: |
           STAGING_URL="https://dealership.monatemedia.com"
           PRODUCTION_URL="https://actuallyfind.com"
+
+          # Logic for Tagged Releases (Production)
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION="${GITHUB_REF#refs/tags/v}"
+            # Use 'production' tag for main branch and version tags
             echo "tag=production" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "app-url=$PRODUCTION_URL" >> $GITHUB_OUTPUT
-            echo "📦 Building tagged release: v$VERSION"
+            echo "📦 Building tagged release: v$VERSION (Production)"
+
+          # Logic for Main Branch (Production)
           elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
             VERSION="${LATEST_TAG#v}"
             echo "tag=production" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "app-url=$PRODUCTION_URL" >> $GITHUB_OUTPUT
-            echo "🚀 Building production from tag: $LATEST_TAG"
+            echo "🚀 Building production from latest tag: $LATEST_TAG"
+
+          # Logic for Release Branches (Staging)
           elif [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
             VERSION="${GITHUB_REF#refs/heads/release/}"
             echo "tag=staging" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "app-url=$STAGING_URL" >> $GITHUB_OUTPUT
             echo "🧪 Building staging release: $VERSION"
+
+          # Default (Development/Temporary)
           else
             VERSION="dev-$(git rev-parse --short HEAD)"
             echo "tag=dev" >> $GITHUB_OUTPUT
@@ -56,16 +68,22 @@ jobs:
             echo "app-url=$STAGING_URL" >> $GITHUB_OUTPUT
             echo "🔧 Building development: $VERSION"
           fi
+          # Ensure a sensible tag is available for the next steps
+          if [[ -z "${VERSION}" ]]; then
+            echo "Error: Failed to determine version tag." >&2
+            exit 1
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # ⭐ FIX 1: Use the dedicated Docker Login action with GITHUB_TOKEN
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }} # Use the default token for better security/permissions
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
@@ -96,7 +114,7 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/heads/release/')
-    # ... (Staging job configuration, which is assumed to be working)
+    # Map existing secrets and hardcoded values for the script
     env:
       APP_URL: ${{ needs.publish.outputs.app-url }}
       VERSION: ${{ needs.publish.outputs.version-tag }}
@@ -104,14 +122,14 @@ jobs:
       USER: ${{ secrets.SSH_USER }}
       SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       WORK_DIR: ${{ secrets.WORK_DIR }}
+      # Hardcoded static service names used in the staging docker-compose.yml
       WEB_SERVICE: dealership-web
       QUEUE_SERVICE: dealership-queue
       SETUP_INIT_SERVICE: dealership-init
-      SETUP_DEMO_SERVICE: dealership-demo
       HOST_PORT: 8090
     steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v4
+      # Ensure docker-compose.yml is available
+      - uses: actions/checkout@v4
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -122,33 +140,48 @@ jobs:
       - name: Copy docker-compose.yml and Deploy to Staging
         run: |
           set -e
+          # ⭐ FIX: Clean up secrets to prevent whitespace errors in SSH
           CLEAN_USER=$(echo "${{ env.USER }}" | tr -d '[:space:]')
           CLEAN_HOST=$(echo "${{ env.HOST }}" | tr -d '[:space:]')
           TARGET_DIR="${{ env.WORK_DIR }}"
           NEW_IMAGE_TAG="${{ env.VERSION }}"
+
+          # Pass service names as local shell variables for use in remote script
           WEB_SERVICE="${{ env.WEB_SERVICE }}"
           QUEUE_SERVICE="${{ env.QUEUE_SERVICE }}"
           SETUP_INIT_SERVICE="${{ env.SETUP_INIT_SERVICE }}"
 
-          echo "Uploading docker-compose.yml to remote host..."
+          # ⭐ FIX: SCP the docker-compose file to the remote server
+          echo "1. Uploading docker-compose.yml to remote host: ${TARGET_DIR}"
           scp -o StrictHostKeyChecking=no ./docker-compose.yml "${CLEAN_USER}@${CLEAN_HOST}:${TARGET_DIR}/"
 
+          echo "2. Starting remote deployment..."
+          # Use unquoted EOF to allow shell variables to be expanded by the runner
           ssh "${CLEAN_USER}@${CLEAN_HOST}" << EOF
             set -e
             cd "${TARGET_DIR}"
             echo "✅ Successfully changed directory to \$(pwd)"
 
+            # Update IMAGE_TAG in the remote .env file
             if grep -q "^IMAGE_TAG=" .env; then
               sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${NEW_IMAGE_TAG}|" .env
             else
               echo "IMAGE_TAG=${NEW_IMAGE_TAG}" >> .env
             fi
-            echo "🧪 Deploying to STAGING: ${NEW_IMAGE_TAG}"
+            echo "🧪 Deploying STAGING image tag: ${NEW_IMAGE_TAG}"
+
+            # Pull new image versions
             docker compose pull "\${WEB_SERVICE}" "\${QUEUE_SERVICE}"
+
+            # Stop existing services
             docker compose down
+
+            # Run the essential setup container
             echo "🚀 Running essential setup (Migrations/Core Seeders)..."
             docker compose up "\${SETUP_INIT_SERVICE}" --remove-orphans --abort-on-container-exit
             echo "✅ Essential setup complete. Starting web and queue services..."
+
+            # Start the main application services
             docker compose up -d "\${WEB_SERVICE}" "\${QUEUE_SERVICE}"
             echo "⏳ Waiting for web container to boot..."
             sleep 15
@@ -157,6 +190,7 @@ jobs:
 
       - name: External Health Check
         run: |
+          echo "🌐 Performing external health check..."
           sleep 5
           response=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.APP_URL }} || echo "000")
           if [ "$response" = "200" ]; then
@@ -181,37 +215,34 @@ jobs:
       VERSION: ${{ needs.publish.outputs.version-tag }}
       HOST: ${{ secrets.PRODUCTION_HOST }}
       USER: ${{ secrets.PRODUCTION_USER }}
-      WORK_DIR: ${{ secrets.PRODUCTION_WORK_DIR }}
-      # Use the new SSH key secret name for consistency
       SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+      WORK_DIR: ${{ secrets.PRODUCTION_WORK_DIR }}
       # Hardcoded static service names used in the production docker-compose.yml
       WEB_SERVICE: actuallyfind-web
       QUEUE_SERVICE: actuallyfind-queue
       DB_SERVICE: actuallyfind-db
       TYPESENSE_SERVICE: actuallyfind-typesense
       SETUP_INIT_SERVICE: actuallyfind-init # <-- Production init service name
-      HOST_PORT: 8092 # DOCKER_LARAVEL_PORT from actuallyfind/.env
+      HOST_PORT: 8092
     steps:
-      # 1. Checkout Code (Existing)
+      # Ensure docker-compose.yml is available (must checkout the tag/commit version)
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           ref: v${{ env.VERSION }}
-      # 2. Setup SSH Agent (Existing)
-      - name: Set up SSH private key
+
+      - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ env.SSH_KEY }}
-          log-public-key: true
-      - name: Add Server to Known Hosts
+      - name: Add Production Server to Known Hosts
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy Docker Compose File and Run Deployment Script
+      - name: Copy docker-compose.yml and Deploy to Production
         shell: bash
         run: |
           set -e
-          # --- VARIABLE CLEANUP ---
-          # Aggressively strip all whitespace (including trailing newlines)
+          # ⭐ FIX: Clean up secrets to prevent whitespace errors in SSH
           CLEAN_USER=$(echo "${{ env.USER }}" | tr -d '[:space:]')
           CLEAN_HOST=$(echo "${{ env.HOST }}" | tr -d '[:space:]')
           TARGET_DIR="${{ env.WORK_DIR }}"
@@ -224,54 +255,45 @@ jobs:
           TYPESENSE_SERVICE="${{ env.TYPESENSE_SERVICE }}"
           SETUP_INIT_SERVICE="${{ env.SETUP_INIT_SERVICE }}"
 
-          echo "Cleaned Host: ${CLEAN_HOST}"
-          echo "Cleaned User: ${CLEAN_USER}"
-
-          # --- FIX: SCP the configuration file ---
-          echo "1. Uploading docker-compose.yml to remote host..."
+          # ⭐ FIX 2: SCP the docker-compose file to the remote server
+          echo "1. Uploading docker-compose.yml to remote host: ${TARGET_DIR}"
           scp -o StrictHostKeyChecking=no ./docker-compose.yml "${CLEAN_USER}@${CLEAN_HOST}:${TARGET_DIR}/"
 
           echo "2. Starting remote deployment on ${CLEAN_HOST}..."
-          # Start the SSH session, variables are expanded by the runner because EOF is unquoted
+          # Use unquoted EOF to allow shell variables to be expanded by the runner
           ssh "${CLEAN_USER}@${CLEAN_HOST}" << EOF
             set -e
-            # 1. Change to the target directory
+
+            # IMPORTANT: Change to the correct production directory
             cd "${TARGET_DIR}"
             echo "✅ Successfully changed directory to \$(pwd)"
 
-            # 2. CHECK: Verify the docker-compose.yml file is present
-            if [ ! -f docker-compose.yml ]; then
-              echo "❌ FATAL ERROR: docker-compose.yml is missing after SCP. Check permissions."
-              exit 1
-            fi
-            echo "✅ docker-compose.yml verified."
-
-            # 3. Update IMAGE_TAG in the remote .env file
+            # Update IMAGE_TAG in the remote .env file
             if grep -q "^IMAGE_TAG=" .env; then
               sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${NEW_IMAGE_TAG}|" .env
             else
               echo "IMAGE_TAG=${NEW_IMAGE_TAG}" >> .env
             fi
-            echo "🚀 Deploying to PRODUCTION: ${NEW_IMAGE_TAG}"
-            grep "IMAGE_TAG" .env
+            echo "🚀 Deploying PRODUCTION image tag: ${NEW_IMAGE_TAG}"
 
-            # 4. Pull all necessary services (Use shell variables defined locally in the run step)
-            docker compose -f docker-compose.yml pull "\${WEB_SERVICE}" "\${QUEUE_SERVICE}" "\${DB_SERVICE}" "\${TYPESENSE_SERVICE}" "\${SETUP_INIT_SERVICE}"
+            # Pull all necessary services (Uses remote docker-compose.yml)
+            docker compose pull "\${WEB_SERVICE}" "\${QUEUE_SERVICE}" "\${DB_SERVICE}" "\${TYPESENSE_SERVICE}" "\${SETUP_INIT_SERVICE}"
 
-            # 5. Stop all existing services
-            docker compose -f docker-compose.yml down
+            # Stop all existing services
+            docker compose down
 
-            # 6. Run the essential setup container (Migrations/Core Seeders)
+            # Run the essential setup container (Migrations/Core Seeders)
             echo "🚀 Running essential setup (Migrations/Core Seeders)..."
-            docker compose -f docker-compose.yml up "\${SETUP_INIT_SERVICE}" --remove-orphans --abort-on-container-exit
-            echo "✅ Essential setup complete. Starting all services..."
+            docker compose up "\${SETUP_INIT_SERVICE}" --remove-orphans --abort-on-container-exit
+            echo "✅ Essential setup complete. Starting main services..."
 
-            # 7. Start the main application services
-            docker compose -f docker-compose.yml up -d "\${WEB_SERVICE}" "\${QUEUE_SERVICE}" "\${DB_SERVICE}" "\${TYPESENSE_SERVICE}"
+            # Start the main application services
+            docker compose up -d "\${WEB_SERVICE}" "\${QUEUE_SERVICE}" "\${DB_SERVICE}" "\${TYPESENSE_SERVICE}"
             echo "⏳ Waiting for web container to boot..."
             sleep 15
           EOF
           echo "✅ Deployment script completed successfully."
+
       - name: External Health Check
         run: |
           echo "🌐 Performing external health check..."
@@ -283,9 +305,11 @@ jobs:
             echo "❌ External health check failed (HTTP $response) at ${{ env.APP_URL }}"
             exit 1
           fi
+
       - name: Cleanup SSH Keys
         if: always()
         run: rm -rf ~/.ssh
+
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/create-release@v1
