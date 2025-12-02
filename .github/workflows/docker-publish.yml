@@ -183,44 +183,58 @@ jobs:
         run: |
           ssh ${{ env.USER }}@${{ env.HOST }} << EOF
             set -e
-            cd ${{ env.WORK_DIR }}
+
+            # Change to the working directory
+            cd ***
 
             # --- FIX: Check for docker-compose.yml on remote server to prevent "not found" error ---
             if [ ! -f "docker-compose.yml" ]; then
-              echo "🚨 ERROR: 'docker-compose.yml' not found in ${{ env.WORK_DIR }}. Deployment aborted."
-              # List files for debugging (optional)
+              echo "🚨 ERROR: 'docker-compose.yml' not found in ***. Deployment aborted."
               ls -lha
               exit 1
             fi
             # ----------------------------------------------------------------------------------------
 
             # 1. Update IMAGE_TAG in the remote .env file with the new version
-            # GHA interpolates the value into this variable definition on the remote shell.
-            NEW_IMAGE_TAG="v${{ env.VERSION }}"
+            # GHA interpolates 'v0.0.21' into this string, which is then assigned on the remote server.
+            NEW_IMAGE_TAG="v0.0.21"
+
+            # NOTE: The dollar signs ($) for the variables below MUST be escaped (\$DB_DATABASE, \${NEW_IMAGE_TAG}, etc.)
+            # or the GHA runner will try to expand them locally, resulting in an empty script.
+
             if grep -q "^IMAGE_TAG=" .env; then
               # Use explicit curly braces for robust variable expansion in sed
-              # We use | as the sed delimiter in case $NEW_IMAGE_TAG contains slashes (less likely for versions, but good practice)
-              sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${NEW_IMAGE_TAG}|" .env
+              # Escape the dollar sign here so the variable is expanded by the remote shell (not the GHA runner's shell)
+              sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=\${NEW_IMAGE_TAG}|" .env
             else
-              # Use explicit curly braces for robust variable expansion
-              echo "IMAGE_TAG=${NEW_IMAGE_TAG}" >> .env
+              # Append new tag, ensuring the dollar sign is escaped
+              echo "IMAGE_TAG=\${NEW_IMAGE_TAG}" >> .env
             fi
-            # Use explicit curly braces to ensure the version tag is echoed
-            echo "🚀 Deploying to PRODUCTION: ${NEW_IMAGE_TAG}"
+
+            # Use explicit curly braces and escape the dollar sign to ensure the version tag is echoed on the remote host
+            echo "🚀 Deploying to PRODUCTION: \${NEW_IMAGE_TAG}"
+
             # --- DEBUGGING LINE ADDED ---
             echo "📝 Remote .env content for IMAGE_TAG:"
             grep "IMAGE_TAG" .env
+
             # 2. Pull all necessary services (now using the correct tag from the updated .env)
-            docker compose pull ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }} ${{ env.DB_SERVICE }} ${{ env.TYPESENSE_SERVICE }}
+            # Escape the dollar signs for service variables
+            docker compose pull \${WEB_SERVICE} \${QUEUE_SERVICE} \${DB_SERVICE} \${TYPESENSE_SERVICE} \${SETUP_INIT_SERVICE}
+
             # 3. Stop all existing services
             docker compose down
+
             # 4. Run the essential setup container (Migrations/Core Seeders)
             echo "🚀 Running essential setup (Migrations/Core Seeders)..."
-            # The init service will start, run the slow commands, and exit.
-            docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
+            # Escape the dollar sign for service variables
+            docker compose up \${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
             echo "✅ Essential setup complete. Starting all services..."
+
             # 5. Start the main application services
-            docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE} ${DB_SERVICE} ${TYPESENSE_SERVICE}
+            # Escape the dollar signs for service variables
+            docker compose up -d \${WEB_SERVICE} \${QUEUE_SERVICE} \${DB_SERVICE} \${TYPESENSE_SERVICE}
+
             echo "⏳ Waiting for web container to boot..."
             sleep 15
           EOF
