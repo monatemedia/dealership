@@ -214,6 +214,10 @@ jobs:
             # Use explicit curly braces to ensure the version tag is echoed
             echo "🚀 Deploying to PRODUCTION: ${NEW_IMAGE_TAG}"
 
+            # --- DEBUGGING LINE ADDED ---
+            echo "📝 Remote .env content for IMAGE_TAG:"
+            grep "IMAGE_TAG" .env
+
             # 2. Pull all necessary services (now using the correct tag from the updated .env)
             docker compose pull ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }} ${{ env.DB_SERVICE }} ${{ env.TYPESENSE_SERVICE }}
 
