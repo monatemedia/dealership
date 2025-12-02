@@ -192,16 +192,18 @@ jobs:
           ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts || true
 
       - name: Pull and Deploy to Production (Docker Compose)
-        # This step now performs the full deployment with the corrected service names
+        # We must use '<< EOF' (unquoted) to allow GHA to interpolate ${{ env.VERSION }}
         run: |
-          ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
+          ssh ${{ env.USER }}@${{ env.HOST }} << EOF
             set -e
             cd ${{ env.WORK_DIR }}
 
             # 1. Update IMAGE_TAG in the remote .env file with the new version
+            # The version is injected by GHA here: v${{ env.VERSION }}
             NEW_IMAGE_TAG="v${{ env.VERSION }}"
             if grep -q "^IMAGE_TAG=" .env; then
               # If IMAGE_TAG exists, substitute the line
+              # We use | as the sed delimiter in case $NEW_IMAGE_TAG contains slashes (less likely for versions, but good practice)
               sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=$NEW_IMAGE_TAG|" .env
             else
               # If IMAGE_TAG doesn't exist, append it to the file
