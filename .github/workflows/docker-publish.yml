@@ -194,27 +194,25 @@ jobs:
       - name: Pull and Deploy to Production (Docker Compose)
         # Use '<< EOF' (unquoted) to allow GHA to interpolate ${{ env.VERSION }}
         run: |
-          ssh ${{ env.USER }}@${{ env.HOST }} << EOF
+          # Change the run step to quote the EOF delimiter:
+          ssh $USER@$HOST << 'EOF'
             set -e
-            cd ${{ env.WORK_DIR }}
+            cd $WORK_DIR
 
             # 1. Update IMAGE_TAG in the remote .env file with the new version
-            # GHA interpolates the value into this variable definition on the remote shell.
-            NEW_IMAGE_TAG="v${{ env.VERSION }}"
+            # NEW_IMAGE_TAG is correctly defined and used *only* on the remote server
+            NEW_IMAGE_TAG="v0.0.19"
 
             if grep -q "^IMAGE_TAG=" .env; then
-              # Use explicit curly braces for robust variable expansion in sed
-              # We use | as the sed delimiter in case $NEW_IMAGE_TAG contains slashes (less likely for versions, but good practice)
+              # The variable $NEW_IMAGE_TAG is now correctly expanded on the remote host
               sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${NEW_IMAGE_TAG}|" .env
             else
-              # Use explicit curly braces for robust variable expansion
               echo "IMAGE_TAG=${NEW_IMAGE_TAG}" >> .env
             fi
 
-            # Use explicit curly braces to ensure the version tag is echoed
+            # This debug line will now correctly show the tag "v0.0.19"
             echo "🚀 Deploying to PRODUCTION: ${NEW_IMAGE_TAG}"
 
-            # --- DEBUGGING LINE ADDED ---
             echo "📝 Remote .env content for IMAGE_TAG:"
             grep "IMAGE_TAG" .env
 
