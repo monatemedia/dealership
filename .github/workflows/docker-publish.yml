@@ -192,19 +192,25 @@ jobs:
         # Ensure all necessary environment variables (HOST, USER, WORK_DIR, etc.) are set in the job or workflow context.
         run: |
           # This is the command you should execute in your workflow, just before the main 'ssh << EOF' block.
-          # It copies the local docker-compose.yml to the remote server's $WORK_DIR.
           echo "Uploading docker-compose.yml to remote host..."
-          scp -o StrictHostKeyChecking=no ./docker-compose.yml $USER@$HOST:$WORK_DIR/docker-compose.yml
+          # FIXED: The remote path is now securely quoted to ensure $WORK_DIR is expanded correctly.
+          scp -o StrictHostKeyChecking=no ./docker-compose.yml $USER@$HOST:"$WORK_DIR/docker-compose.yml"
 
           # Then, your existing deployment script follows:
           ssh $USER@$HOST << EOF
             set -e
             TARGET_DIR="$WORK_DIR"
 
-            # The file is now guaranteed to be here, so we remove the mkdir/cd block
-            # and jump straight into deployment.
+            # Change to the target directory where docker-compose.yml should live
             cd "\${TARGET_DIR}"
             echo "✅ Successfully changed directory to \$(pwd)"
+
+            # CHECK: Verify the docker-compose.yml file is present
+            if [ ! -f docker-compose.yml ]; then
+              echo "❌ ERROR: docker-compose.yml not found in the remote directory."
+              exit 1
+            fi
+            echo "✅ docker-compose.yml verified."
 
             # 1. Update IMAGE_TAG in the remote .env file with the new version
             NEW_IMAGE_TAG="v$VERSION"
@@ -219,19 +225,23 @@ jobs:
             echo "📝 Remote .env content for IMAGE_TAG:"
             grep "IMAGE_TAG" .env
 
-            # 2. Pull all necessary services (Now docker-compose.yml is present)
-            docker compose pull \${WEB_SERVICE} \${QUEUE_SERVICE} \${DB_SERVICE} \${TYPESENSE_SERVICE} \${SETUP_INIT_SERVICE}
+            # 2. Pull all necessary services
+            # FIXED: Explicitly use -f docker-compose.yml to eliminate "no configuration file provided" error.
+            docker compose -f docker-compose.yml pull \${WEB_SERVICE} \${QUEUE_SERVICE} \${DB_SERVICE} \${TYPESENSE_SERVICE} \${SETUP_INIT_SERVICE}
 
             # 3. Stop all existing services
-            docker compose down
+            # FIXED: Use -f flag
+            docker compose -f docker-compose.yml down
 
             # 4. Run the essential setup container (Migrations/Core Seeders)
             echo "🚀 Running essential setup (Migrations/Core Seeders)..."
-            docker compose up \${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
+            # FIXED: Use -f flag
+            docker compose -f docker-compose.yml up \${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
             echo "✅ Essential setup complete. Starting all services..."
 
             # 5. Start the main application services
-            docker compose up -d \${WEB_SERVICE} \${QUEUE_SERVICE} \${DB_SERVICE} \${TYPESENSE_SERVICE}
+            # FIXED: Use -f flag
+            docker compose -f docker-compose.yml up -d \${WEB_SERVICE} \${QUEUE_SERVICE} \${DB_SERVICE} \${TYPESENSE_SERVICE}
 
             echo "⏳ Waiting for web container to boot..."
             sleep 15
