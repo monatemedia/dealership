@@ -185,7 +185,7 @@ jobs:
         with:
           repository: ${{ env.REPO }}
           ref: ${{ env.VERSION }}
-          # ... (other options)
+          # ... (other additional options)
 
       # 2. Setup SSH Agent (Existing)
       - name: Set up SSH private key
