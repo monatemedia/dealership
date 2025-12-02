@@ -35,7 +35,7 @@ jobs:
 
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION="${GITHUB_REF#refs/tags/v}"
-            echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+            echo "tag=production" >> $GITHUB_OUTPUT # Tagged releases deploy as 'production'
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "app-url=$PRODUCTION_URL" >> $GITHUB_OUTPUT
             echo "📦 Building tagged release: v$VERSION"
@@ -122,23 +122,35 @@ jobs:
       - name: Pull, Setup, and Deploy to Staging
         run: |
           ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
-            # ... (Update IMAGE_TAG and Pull steps) ...
+            # 1. Change to the application directory
+            cd ${{ env.WORK_DIR }} || exit 1
 
-            # 2. Stop all existing services
+            # 2. Define the image tag and pull the latest image
+            DEPLOY_TAG=${{ needs.publish.outputs.image-tag }}
+            FULL_IMAGE_NAME="${{ env.IMAGE_NAME }}:${DEPLOY_TAG}"
+
+            echo "📥 Pulling latest image: ${FULL_IMAGE_NAME}"
+            docker pull ${FULL_IMAGE_NAME}
+
+            # 3. Export the Image Tag for docker-compose to use
+            # This assumes your remote docker-compose file uses APP_IMAGE_TAG or similar
+            export APP_IMAGE_TAG=${DEPLOY_TAG}
+
+            # 4. Stop all existing services
             docker compose down
 
-            # 3. Run the essential setup container (Migrations/Core Seeders)
+            # 5. Run the essential setup container (Migrations/Core Seeders)
             echo "🚀 Running essential setup (Migrations/Core Seeders)..."
             # The init service will start, run the slow seeders, and exit.
             docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
 
             echo "✅ Essential setup complete. Starting web and queue services..."
-
-            # 4. Start the main application services
+            # 6. Start the main application services
             docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE}
 
             echo "⏳ Waiting for web container to boot..."
             sleep 15
+          EOF
 
       - name: External Health Check
         run: |
@@ -162,6 +174,11 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     environment: "production"
+
+    # FIX 2: Grant write permissions for creating GitHub Releases
+    permissions:
+      contents: write
+
     # Map existing secrets and hardcoded values for the script
     env:
       APP_URL: ${{ needs.publish.outputs.app-url }}
@@ -189,25 +206,37 @@ jobs:
       - name: Pull and Deploy to Production
         run: |
           ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
-            # ... (Update IMAGE_TAG and Pull steps) ...
+            # 1. Change to the application directory (FIX 1)
+            cd ${{ env.WORK_DIR }} || exit 1
 
-            # 2. Stop all existing services
+            # 2. Define the image tag and pull the latest image (FIX 1)
+            DEPLOY_TAG=${{ needs.publish.outputs.image-tag }}
+            FULL_IMAGE_NAME="${{ env.IMAGE_NAME }}:${{ needs.publish.outputs.image-tag }}"
+
+            echo "📥 Pulling latest image: ${FULL_IMAGE_NAME}"
+            docker pull ${FULL_IMAGE_NAME}
+
+            # 3. Export the Image Tag for docker-compose to use
+            # This assumes your remote docker-compose file uses APP_IMAGE_TAG or similar
+            export APP_IMAGE_TAG=${DEPLOY_TAG}
+
+            # 4. Stop all existing services
             docker compose down
 
-            # 3. Run the essential setup container (Migrations/Core Seeders)
+            # 5. Run the essential setup container (Migrations/Core Seeders)
             echo "🚀 Running essential setup (Migrations/Core Seeders)..."
             # The init service will start, run the slow seeders, and exit.
             # This relies on the production docker-compose having the actuallyfind-init service defined.
             docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
 
             echo "✅ Essential setup complete. Starting main services..."
-
-            # 4. Start the main application services
+            # 6. Start the main application services
             # Only start the DB, Typesense, Web, and Queue services
             docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE} ${DB_SERVICE} ${TYPESENSE_SERVICE}
 
             echo "⏳ Waiting for web container to boot..."
             sleep 15
+          EOF
 
       - name: External Health Check
         run: |
