@@ -182,39 +182,25 @@ jobs:
       - name: Deploy to Production
         # Ensure all necessary environment variables (HOST, USER, WORK_DIR, etc.) are set in the job or workflow context.
         run: |
-          # The ssh-keyscan step ran successfully earlier, now proceeding with deployment script.
+          # This is the command you should execute in your workflow, just before the main 'ssh << EOF' block.
+          # It copies the local docker-compose.yml to the remote server's $WORK_DIR.
 
+          echo "Uploading docker-compose.yml to remote host..."
+          scp -o StrictHostKeyChecking=no ./docker-compose.yml $USER@$HOST:$WORK_DIR/docker-compose.yml
+
+          # Then, your existing deployment script follows:
           ssh $USER@$HOST << EOF
             set -e
-
-            # ----------------------------------------------------------------
             TARGET_DIR="$WORK_DIR"
-            echo "Attempting to change directory to: \${TARGET_DIR}"
 
-            # 🔥 FIX: Create the directory if it doesn't exist using mkdir -p
-            echo "Attempting to create target directory if missing..."
-            mkdir -p "\${TARGET_DIR}"
-
-            # Change to the working directory. This will now succeed.
+            # The file is now guaranteed to be here, so we remove the mkdir/cd block
+            # and jump straight into deployment.
             cd "\${TARGET_DIR}"
             echo "✅ Successfully changed directory to \$(pwd)"
-            # ----------------------------------------------------------------
-
-            # --- Check for docker-compose.yml on remote server ---
-            if [ ! -f "docker-compose.yml" ]; then
-              echo "🚨 WARNING: 'docker-compose.yml' not found in \$(pwd). Proceeding with deployment."
-              # We remove the exit 1 here, assuming the docker compose pull/up might still work
-              # if the file is generated later, but it's better practice to ensure it exists.
-              # For now, we allow it to continue and let the docker commands fail if missing.
-            fi
-            # ----------------------------------------------------------------------------------------
 
             # 1. Update IMAGE_TAG in the remote .env file with the new version
-            # 🔥 FIX: Dynamically use the GHA \$VERSION variable (now 0.0.24) and prepend 'v'.
             NEW_IMAGE_TAG="v$VERSION"
 
-            # The dollar signs ($) for variables below MUST be escaped (e.g., \${NEW_IMAGE_TAG}, \${WEB_SERVICE})
-            # so the remote shell (not the GHA runner) expands them.
             if grep -q "^IMAGE_TAG=" .env; then
               sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=\${NEW_IMAGE_TAG}|" .env
             else
@@ -222,12 +208,10 @@ jobs:
             fi
 
             echo "🚀 Deploying to PRODUCTION: \${NEW_IMAGE_TAG}"
-
-            # --- DEBUGGING LINE ADDED ---
             echo "📝 Remote .env content for IMAGE_TAG:"
             grep "IMAGE_TAG" .env
 
-            # 2. Pull all necessary services (now using the correct tag from the updated .env)
+            # 2. Pull all necessary services (Now docker-compose.yml is present)
             docker compose pull \${WEB_SERVICE} \${QUEUE_SERVICE} \${DB_SERVICE} \${TYPESENSE_SERVICE} \${SETUP_INIT_SERVICE}
 
             # 3. Stop all existing services
