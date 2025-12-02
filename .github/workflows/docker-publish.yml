@@ -199,10 +199,6 @@ jobs:
         # This step is correct and successful based on logs
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
 
-      - name: Add Server to Known Hosts
-        # This step is correct and successful based on logs
-        run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
-
       - name: Upload docker-compose.yml
         # VITAL: This step must be separate and must exit on SCP failure.
         # We ensure strict exit-on-error behavior.
@@ -221,6 +217,21 @@ jobs:
           NEW_IMAGE_TAG="${{ needs.publish.outputs.version-tag }}"
 
           echo "Connecting to remote host: ${{ env.HOST }}"
+
+          # The EOF block uses single quotes ('EOF') to prevent local variable expansion.
+          ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
+            set -e
+
+            # 1. Change to the target directory
+            cd "${TARGET_DIR}"
+            echo "✅ Successfully changed directory to $(pwd)"
+
+            # 2. CHECK: Verify the docker-compose.yml file is present (Should now pass)
+            if [ ! -f docker-compose.yml ]; then
+              echo "❌ FATAL ERROR: docker-compose.yml is missing after SCP. Check permissions."
+              exit 1
+            fi
+            echo "✅ docker-compose.yml verified."
 
       # 3. Add Host Key (Existing)
       - name: Add SSH Known Host
