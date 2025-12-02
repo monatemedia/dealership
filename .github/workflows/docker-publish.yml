@@ -174,7 +174,6 @@ jobs:
       SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
       WORK_DIR: ${{ secrets.PRODUCTION_WORK_DIR }}
       # Hardcoded static service names used in the production docker-compose.yml
-      # These now match the updated remote file: actuallyfind-*
       WEB_SERVICE: actuallyfind-web
       QUEUE_SERVICE: actuallyfind-queue
       DB_SERVICE: actuallyfind-db
@@ -189,7 +188,6 @@ jobs:
 
       - name: Add Production Host Key via ssh-keyscan
         # Dynamically fetches the current server key.
-        # Added '|| true' to proceed even if keyscan fails due to transient issues.
         run: |
           ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts || true
 
@@ -199,17 +197,32 @@ jobs:
           ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
             set -e
             cd ${{ env.WORK_DIR }}
-            echo "🚀 Deploying to PRODUCTION: v${{ env.VERSION }}"
-            # Pull all necessary services (now using correct names)
+
+            # 1. Update IMAGE_TAG in the remote .env file with the new version
+            NEW_IMAGE_TAG="v${{ env.VERSION }}"
+            if grep -q "^IMAGE_TAG=" .env; then
+              # If IMAGE_TAG exists, substitute the line
+              sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=$NEW_IMAGE_TAG|" .env
+            else
+              # If IMAGE_TAG doesn't exist, append it to the file
+              echo "IMAGE_TAG=$NEW_IMAGE_TAG" >> .env
+            fi
+
+            echo "🚀 Deploying to PRODUCTION: $NEW_IMAGE_TAG"
+
+            # 2. Pull all necessary services (now using the correct tag from the updated .env)
             docker compose pull ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }} ${{ env.DB_SERVICE }} ${{ env.TYPESENSE_SERVICE }}
-            # Stop all existing services
+
+            # 3. Stop all existing services
             docker compose down
-            # Run the essential setup container (Migrations/Core Seeders)
+
+            # 4. Run the essential setup container (Migrations/Core Seeders)
             echo "🚀 Running essential setup (Migrations/Core Seeders)..."
             # The init service will start, run the slow commands, and exit.
             docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
             echo "✅ Essential setup complete. Starting all services..."
-            # Start the main application services
+
+            # 5. Start the main application services
             docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE} ${DB_SERVICE} ${TYPESENSE_SERVICE}
             echo "⏳ Waiting for web container to boot..."
             sleep 15
