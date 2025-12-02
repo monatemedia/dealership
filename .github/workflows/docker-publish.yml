@@ -1,6 +1,4 @@
-# .github/workflows/docker-publish.yml
 name: publish
-
 on:
   push:
     branches:
@@ -125,7 +123,6 @@ jobs:
           ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
             set -e
             cd ${{ env.WORK_DIR }}
-
             # 1. Update IMAGE_TAG and Pull
             if grep -q "^IMAGE_TAG=" .env; then
               sed -i 's|^IMAGE_TAG=.*|IMAGE_TAG=v${{ env.VERSION }}|' .env
@@ -134,20 +131,15 @@ jobs:
             fi
             echo "🧪 Deploying to STAGING: v${{ env.VERSION }}"
             docker compose pull ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }}
-
             # 2. Stop all existing services
             docker compose down
-
             # 3. Run the essential setup container (Migrations/Core Seeders)
             echo "🚀 Running essential setup (Migrations/Core Seeders)..."
             # The init service will start, run the slow seeders, and exit.
             docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
-
             echo "✅ Essential setup complete. Starting web and queue services..."
-
             # 4. Start the main application services
             docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE}
-
             echo "⏳ Waiting for web container to boot..."
             sleep 15
 
@@ -194,9 +186,10 @@ jobs:
         with:
           ssh-private-key: ${{ env.SSH_KEY }}
 
-      - name: Inject Production Host Key
-        # This step manually injects the server's public key to bypass firewall issues
-        run: echo "${{ secrets.KNOWN_HOSTS_ENTRY }}" >> ~/.ssh/known_hosts
+      - name: Add Production Host Key via ssh-keyscan
+        # Dynamically fetches the current server key to avoid 'Host key verification failed'
+        run: |
+          ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
 
       - name: Pull and Deploy to Production (Docker Compose)
         # This step now performs the full deployment
@@ -207,16 +200,13 @@ jobs:
             echo "🚀 Deploying to PRODUCTION: v${{ env.VERSION }}"
             # Pull all necessary services
             docker compose pull ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }} ${{ env.DB_SERVICE }} ${{ env.TYPESENSE_SERVICE }}
-
             # Stop all existing services
             docker compose down
-
             # Run the essential setup container (Migrations/Core Seeders)
             echo "🚀 Running essential setup (Migrations/Core Seeders)..."
             # The init service will start, run the slow commands, and exit.
             docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
             echo "✅ Essential setup complete. Starting all services..."
-
             # Start the main application services
             docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE} ${DB_SERVICE} ${TYPESENSE_SERVICE}
             echo "⏳ Waiting for web container to boot..."
