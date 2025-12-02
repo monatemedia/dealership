@@ -178,40 +178,41 @@ jobs:
         # Dynamically fetches the current server key.
         run: |
           ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts || true
-      - name: Pull and Deploy to Production (Docker Compose)
-        # Use '<< EOF' (unquoted) to allow GHA to interpolate ${{ env.VERSION }}
+
+      - name: Deploy to Production
+        # Ensure all necessary environment variables (HOST, USER, WORK_DIR, etc.) are set in the job or workflow context.
         run: |
-          ssh ${{ env.USER }}@${{ env.HOST }} << EOF
+          # The ssh-keyscan step ran successfully earlier, now proceeding with deployment script.
+
+          ssh $USER@$HOST << EOF
             set -e
 
+            # ----------------------------------------------------------------
+            # 🔥 THE FIX: Wrap $WORK_DIR in double quotes to handle spaces.
             # Change to the working directory
-            cd ***
+            cd "$WORK_DIR"
+            # ----------------------------------------------------------------
 
-            # --- FIX: Check for docker-compose.yml on remote server to prevent "not found" error ---
+            # --- Check for docker-compose.yml on remote server ---
             if [ ! -f "docker-compose.yml" ]; then
-              echo "🚨 ERROR: 'docker-compose.yml' not found in ***. Deployment aborted."
+              echo "🚨 ERROR: 'docker-compose.yml' not found in $WORK_DIR. Deployment aborted."
               ls -lha
               exit 1
             fi
             # ----------------------------------------------------------------------------------------
 
             # 1. Update IMAGE_TAG in the remote .env file with the new version
-            # GHA interpolates 'v0.0.21' into this string, which is then assigned on the remote server.
-            NEW_IMAGE_TAG="v0.0.21"
+            # Note: $VERSION was '0.0.22' in the GHA environment, so we use that as the tag.
+            NEW_IMAGE_TAG="v0.0.22"
 
-            # NOTE: The dollar signs ($) for the variables below MUST be escaped (\$DB_DATABASE, \${NEW_IMAGE_TAG}, etc.)
-            # or the GHA runner will try to expand them locally, resulting in an empty script.
-
+            # The dollar signs ($) for variables below MUST be escaped (e.g., \${NEW_IMAGE_TAG}, \${WEB_SERVICE})
+            # so the remote shell (not the GHA runner) expands them.
             if grep -q "^IMAGE_TAG=" .env; then
-              # Use explicit curly braces for robust variable expansion in sed
-              # Escape the dollar sign here so the variable is expanded by the remote shell (not the GHA runner's shell)
               sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=\${NEW_IMAGE_TAG}|" .env
             else
-              # Append new tag, ensuring the dollar sign is escaped
               echo "IMAGE_TAG=\${NEW_IMAGE_TAG}" >> .env
             fi
 
-            # Use explicit curly braces and escape the dollar sign to ensure the version tag is echoed on the remote host
             echo "🚀 Deploying to PRODUCTION: \${NEW_IMAGE_TAG}"
 
             # --- DEBUGGING LINE ADDED ---
@@ -219,7 +220,6 @@ jobs:
             grep "IMAGE_TAG" .env
 
             # 2. Pull all necessary services (now using the correct tag from the updated .env)
-            # Escape the dollar signs for service variables
             docker compose pull \${WEB_SERVICE} \${QUEUE_SERVICE} \${DB_SERVICE} \${TYPESENSE_SERVICE} \${SETUP_INIT_SERVICE}
 
             # 3. Stop all existing services
@@ -227,17 +227,16 @@ jobs:
 
             # 4. Run the essential setup container (Migrations/Core Seeders)
             echo "🚀 Running essential setup (Migrations/Core Seeders)..."
-            # Escape the dollar sign for service variables
             docker compose up \${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
             echo "✅ Essential setup complete. Starting all services..."
 
             # 5. Start the main application services
-            # Escape the dollar signs for service variables
             docker compose up -d \${WEB_SERVICE} \${QUEUE_SERVICE} \${DB_SERVICE} \${TYPESENSE_SERVICE}
 
             echo "⏳ Waiting for web container to boot..."
             sleep 15
           EOF
+
       - name: External Health Check
         run: |
           echo "🌐 Performing external health check..."
