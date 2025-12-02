@@ -7,7 +7,6 @@ on:
     tags:
       - "v*" # Production deployments rely solely on this trigger
   workflow_dispatch: # Allow manual triggers
-
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ghcr.io/${{ github.actor }}/dealership
@@ -110,16 +109,13 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ env.SSH_KEY }}
-
       - name: Add Server to Known Hosts
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
-
       - name: Copy docker-compose.yml and Deploy to Staging # Changed name for clarity
         run: |
-          # The scp command should be here too if staging uses a local docker-compose.yml
           echo "Uploading docker-compose.yml to remote host..."
-          scp -o StrictHostKeyChecking=no ./docker-compose.yml ${{ env.USER }}@${{ env.HOST }}:${{ env.WORK_DIR }}/docker-compose.yml
-
+          # FIX APPLIED: Upload to directory using trailing slash (/)
+          scp -o StrictHostKeyChecking=no ./docker-compose.yml ${{ env.USER }}@${{ env.HOST }}:"${{ env.WORK_DIR }}/"
           ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
             set -e
             cd ${{ env.WORK_DIR }}
@@ -178,23 +174,18 @@ jobs:
       TYPESENSE_SERVICE: actuallyfind-typesense
       SETUP_INIT_SERVICE: actuallyfind-init # <-- Production init service name
       HOST_PORT: 8092 # DOCKER_LARAVEL_PORT from actuallyfind/.env
-
     steps:
       # 1. Checkout Code (Existing)
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          repository: ${{ env.REPO }}
           ref: v${{ env.VERSION }}
-          # ... (other additional options)
-
       # 2. Setup SSH Agent (Existing)
       - name: Set up SSH private key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
           log-public-key: true
-
       - name: Add Server to Known Hosts
         # This step is correct and successful based on logs
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
@@ -204,73 +195,26 @@ jobs:
         # We ensure strict exit-on-error behavior.
         run: |
           set -e
-          echo "Uploading docker-compose.yml to remote host: ${{ env.USER }}@${{ env.HOST }}:${{ env.WORK_DIR }}/docker-compose.yml"
+          echo "Uploading docker-compose.yml to remote host: ${{ env.USER }}@${{ env.HOST }}:${{ env.WORK_DIR }}/"
+          # FIX APPLIED: Upload to directory using quotes and trailing slash (/)
           scp -o StrictHostKeyChecking=no \
             ./docker-compose.yml \
-            ${{ env.USER }}@${{ env.HOST }}:${{ env.WORK_DIR }}/docker-compose.yml
-        # Note: If this step fails with a permission error, the workflow stops here.
+            ${{ env.USER }}@${{ env.HOST }}:"${{ env.WORK_DIR }}/"
 
       - name: Run Remote Deployment Script
         run: |
           set -e
           TARGET_DIR="${{ env.WORK_DIR }}"
-          NEW_IMAGE_TAG="${{ needs.publish.outputs.version-tag }}"
+          NEW_IMAGE_TAG="${{ env.VERSION }}"
 
           echo "Connecting to remote host: ${{ env.HOST }}"
-
           # The EOF block uses single quotes ('EOF') to prevent local variable expansion.
+          # We use shell variables defined above for reference inside the remote script.
           ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
             set -e
-
             # 1. Change to the target directory
             cd "${TARGET_DIR}"
             echo "✅ Successfully changed directory to $(pwd)"
-
-            # 2. CHECK: Verify the docker-compose.yml file is present (Should now pass)
-            if [ ! -f docker-compose.yml ]; then
-              echo "❌ FATAL ERROR: docker-compose.yml is missing after SCP. Check permissions."
-              exit 1
-            fi
-            echo "✅ docker-compose.yml verified."
-
-      # 3. Add Host Key (Existing)
-      - name: Add SSH Known Host
-        run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts || true
-
-      # 4. EXPLICIT STEP: Upload docker-compose.yml (NEW/FIXED)
-      # This step must be separate to ensure its success before proceeding.
-      - name: Upload Docker Compose File via SCP
-        run: |
-          echo "Uploading docker-compose.yml to remote host..."
-          scp -o StrictHostKeyChecking=no \
-            ./docker-compose.yml \
-            ${{ env.USER }}@${{ env.HOST }}:"${{ env.WORK_DIR }}/docker-compose.yml"
-        env:
-          # Use the VERSION from the environment for NEW_IMAGE_TAG
-          NEW_IMAGE_TAG: ${{ env.VERSION }}
-
-      # 5. EXPLICIT STEP: Execute Remote Deployment (Cleaned up)
-      - name: Remote Deployment via SSH
-        run: |
-          set -e
-          # We define TARGET_DIR and NEW_IMAGE_TAG as local shell variables for the SSH script to reference.
-          # We pull the values from the step environment variables defined below.
-          TARGET_DIR="${{ env.TARGET_DIR }}"
-          NEW_IMAGE_TAG="${{ env.NEW_IMAGE_TAG }}"
-
-          echo "Connecting to remote host: ${{ env.HOST }}"
-
-          # The EOF block uses single quotes ('EOF') so that the local shell variables
-          # ${TARGET_DIR} and ${NEW_IMAGE_TAG} are NOT expanded locally, but treated
-          # as literal strings to be expanded by the remote shell when they are defined above
-          # in the 'run' block as shell variables.
-          ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
-            set -e
-
-            # 1. Change to the target directory
-            cd "${TARGET_DIR}"
-            echo "✅ Successfully changed directory to $(pwd)"
-
             # 2. CHECK: Verify the docker-compose.yml file is present (Should now pass)
             if [ ! -f docker-compose.yml ]; then
               echo "❌ FATAL ERROR: docker-compose.yml is missing after SCP. Check permissions."
@@ -284,7 +228,6 @@ jobs:
             else
               echo "IMAGE_TAG=${NEW_IMAGE_TAG}" >> .env
             fi
-
             echo "🚀 Deploying to PRODUCTION: ${NEW_IMAGE_TAG}"
             grep "IMAGE_TAG" .env
 
@@ -301,15 +244,9 @@ jobs:
 
             # 7. Start the main application services
             docker compose -f docker-compose.yml up -d actuallyfind-web actuallyfind-queue actuallyfind-db actuallyfind-typesense
-
             echo "⏳ Waiting for web container to boot..."
             sleep 15
           EOF
-        env:
-          # Pass the workflow environment variables used in the SSH script
-          NEW_IMAGE_TAG: ${{ needs.publish.outputs.version-tag }}
-          # These environment variables must be passed so they are available inside the run block
-          TARGET_DIR: ${{ secrets.PRODUCTION_WORK_DIR }}
 
       - name: External Health Check
         run: |
@@ -322,9 +259,11 @@ jobs:
             echo "❌ External health check failed (HTTP $response) at ${{ env.APP_URL }}"
             exit 1
           fi
+
       - name: Cleanup SSH Keys
         if: always()
         run: rm -rf ~/.ssh
+
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/create-release@v1
