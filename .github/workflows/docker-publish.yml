@@ -177,46 +177,62 @@ jobs:
       TYPESENSE_SERVICE: actuallyfind-typesense
       SETUP_INIT_SERVICE: actuallyfind-init # <-- Production init service name
       HOST_PORT: 8092 # DOCKER_LARAVEL_PORT from actuallyfind/.env
+
     steps:
-      - name: Checkout repository code # ADDED: Necessary for local file access (e.g., docker-compose.yml)
+      # 1. Checkout Code (Existing)
+      - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Setup SSH Agent
+        with:
+          repository: ${{ env.REPO }}
+          ref: ${{ env.VERSION }}
+          # ... (other options)
+
+      # 2. Setup SSH Agent (Existing)
+      - name: Set up SSH private key
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ env.SSH_KEY }}
-      - name: Add Production Host Key via ssh-keyscan
-        # Dynamically fetches the current server key.
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+          log-public-key: true
+
+      # 3. Add Host Key (Existing)
+      - name: Add SSH Known Host
+        run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts || true
+
+      # 4. EXPLICIT STEP: Upload docker-compose.yml (NEW/FIXED)
+      # This step must be separate to ensure its success before proceeding.
+      - name: Upload Docker Compose File via SCP
         run: |
-          ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts || true
-      - name: Deploy to Production
-        # Ensure all necessary environment variables (HOST, USER, WORK_DIR, etc.) are set in the job or workflow context.
-        run: |
-          # This is the command you should execute in your workflow, just before the main 'ssh << EOF' block.
           echo "Uploading docker-compose.yml to remote host..."
-          # FIXED: The remote path is now securely quoted to ensure $WORK_DIR is expanded correctly.
-          scp -o StrictHostKeyChecking=no ./docker-compose.yml $USER@$HOST:"$WORK_DIR/docker-compose.yml"
+          scp -o StrictHostKeyChecking=no \
+            ./docker-compose.yml \
+            ${{ env.USER }}@${{ env.HOST }}:"${{ env.WORK_DIR }}/docker-compose.yml"
+        env:
+          # Use the VERSION from the environment for NEW_IMAGE_TAG
+          NEW_IMAGE_TAG: ${{ env.VERSION }}
 
-          # Then, your existing deployment script follows:
-          ssh $USER@$HOST << EOF
+      # 5. EXPLICIT STEP: Execute Remote Deployment (Cleaned up)
+      - name: Remote Deployment via SSH
+        run: |
+          set -e
+          # We define TARGET_DIR and NEW_IMAGE_TAG as local shell variables for the SSH script to reference.
+          # We pull the values from the step environment variables defined below.
+          TARGET_DIR="${{ env.TARGET_DIR }}"
+          NEW_IMAGE_TAG="${{ env.NEW_IMAGE_TAG }}"
+
+          echo "Connecting to remote host: ${{ env.HOST }}"
+
+          # The EOF block uses single quotes ('EOF') so that the local shell variables
+          # ${TARGET_DIR} and ${NEW_IMAGE_TAG} are NOT expanded locally, but treated
+          # as literal strings to be expanded by the remote shell when they are defined above
+          # in the 'run' block as shell variables.
+          ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
             set -e
-            TARGET_DIR="$WORK_DIR"
-
-            # Change to the target directory where docker-compose.yml should live
-            cd "\${TARGET_DIR}"
-            echo "✅ Successfully changed directory to \$(pwd)"
-
-            # CHECK: Verify the docker-compose.yml file is present
-            if [ ! -f docker-compose.yml ]; then
-              echo "❌ ERROR: docker-compose.yml not found in the remote directory."
-              exit 1
-            fi
-            echo "✅ docker-compose.yml verified."
 
             # 1. Change to the target directory
-            cd "\${TARGET_DIR}"
-            echo "✅ Successfully changed directory to \$(pwd)"
+            cd "${TARGET_DIR}"
+            echo "✅ Successfully changed directory to $(pwd)"
 
-            # 2. CHECK: Verify the docker-compose.yml file is present (This check should now pass)
+            # 2. CHECK: Verify the docker-compose.yml file is present (Should now pass)
             if [ ! -f docker-compose.yml ]; then
               echo "❌ FATAL ERROR: docker-compose.yml is missing after SCP. Check permissions."
               exit 1
@@ -225,12 +241,12 @@ jobs:
 
             # 3. Update IMAGE_TAG in the remote .env file
             if grep -q "^IMAGE_TAG=" .env; then
-              sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=\${NEW_IMAGE_TAG}|" .env
+              sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${NEW_IMAGE_TAG}|" .env
             else
-              echo "IMAGE_TAG=\${NEW_IMAGE_TAG}" >> .env
+              echo "IMAGE_TAG=${NEW_IMAGE_TAG}" >> .env
             fi
 
-            echo "🚀 Deploying to PRODUCTION: \${NEW_IMAGE_TAG}"
+            echo "🚀 Deploying to PRODUCTION: ${NEW_IMAGE_TAG}"
             grep "IMAGE_TAG" .env
 
             # 4. Pull all necessary services
@@ -250,6 +266,11 @@ jobs:
             echo "⏳ Waiting for web container to boot..."
             sleep 15
           EOF
+        env:
+          # Pass the workflow environment variables used in the SSH script
+          NEW_IMAGE_TAG: ${{ needs.publish.outputs.version-tag }}
+          # These environment variables must be passed so they are available inside the run block
+          TARGET_DIR: ${{ secrets.PRODUCTION_WORK_DIR }}
 
       - name: External Health Check
         run: |
