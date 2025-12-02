@@ -221,24 +221,26 @@ jobs:
           TARGET_DIR="${{ env.WORK_DIR }}"
           NEW_IMAGE_TAG="${{ env.VERSION }}"
 
-          # The ssh command block (<< 'EOF') where the file is checked.
-          ssh "${{ env.USER }}@${{ env.HOST }}" << 'EOF'
+          # The ssh command block (<< EOF)
+          # IMPORTANT: Removed the single quotes from 'EOF' to allow local variable substitution.
+          ssh "<Your_User>@<Your_Host>" << EOF
             set -e
 
             # 1. Change to the target directory
+            # The value of TARGET_DIR is now correctly inserted here by the local shell
+            # before the SSH command is executed on the remote host.
             cd "${TARGET_DIR}"
-            echo "✅ Successfully changed directory to $(pwd)"
+            echo "✅ Successfully changed directory to \$(pwd)"
 
             # 2. CHECK: Verify the docker-compose.yml file is present
             if [ ! -f docker-compose.yml ]; then
               echo "❌ FATAL ERROR: docker-compose.yml is missing after SCP. Check permissions."
-              # If the failure persists, verify that the remote user has write/read permissions
-              # for the ${TARGET_DIR} path.
               exit 1
             fi
             echo "✅ docker-compose.yml verified."
 
             # 3. Update IMAGE_TAG in the remote .env file
+            # NEW_IMAGE_TAG is also correctly inserted here.
             if grep -q "^IMAGE_TAG=" .env; then
               sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${NEW_IMAGE_TAG}|" .env
             else
