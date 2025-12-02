@@ -7,7 +7,6 @@ on:
     tags:
       - "v*" # Production deployments rely solely on this trigger
   workflow_dispatch: # Allow manual triggers
-
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ghcr.io/${{ github.actor }}/dealership
@@ -24,14 +23,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Determine image tag, environment, and APP_URL
         id: set-tag
         run: |
           # Define URLs based on your provided .env files
           STAGING_URL="https://dealership.monatemedia.com"
           PRODUCTION_URL="https://actuallyfind.com"
-
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION="${GITHUB_REF#refs/tags/v}"
             echo "tag=v$VERSION" >> $GITHUB_OUTPUT
@@ -58,14 +55,11 @@ jobs:
             echo "app-url=$STAGING_URL" >> $GITHUB_OUTPUT
             echo "🔧 Building development: $VERSION"
           fi
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Login to GitHub Container Registry
         run: |
           echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
@@ -80,7 +74,6 @@ jobs:
           cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
           build-args: |
             INSTALL_DEV_DEPENDENCIES=${{ contains(github.ref, 'refs/heads/release/') }}
-
       - name: Output deployment info
         run: |
           echo "📌 Version: ${{ steps.set-tag.outputs.version }}"
@@ -114,10 +107,8 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ env.SSH_KEY }}
-
       - name: Add Server to Known Hosts
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
-
       - name: Pull, Setup, and Deploy to Staging
         run: |
           ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
@@ -142,7 +133,6 @@ jobs:
             docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE}
             echo "⏳ Waiting for web container to boot..."
             sleep 15
-
       - name: External Health Check
         run: |
           echo "🌐 Performing external health check..."
@@ -154,7 +144,6 @@ jobs:
             echo "❌ External health check failed (HTTP $response) at ${{ env.APP_URL }}"
             exit 1
           fi
-
       - name: Cleanup SSH Keys
         if: always()
         run: rm -rf ~/.ssh
@@ -185,55 +174,56 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ env.SSH_KEY }}
-
       - name: Add Production Host Key via ssh-keyscan
         # Dynamically fetches the current server key.
         run: |
           ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts || true
-
       - name: Pull and Deploy to Production (Docker Compose)
         # Use '<< EOF' (unquoted) to allow GHA to interpolate ${{ env.VERSION }}
         run: |
-          # Change the run step to quote the EOF delimiter:
-          ssh $USER@$HOST << 'EOF'
+          ssh ${{ env.USER }}@${{ env.HOST }} << EOF
             set -e
-            cd $WORK_DIR
+            cd ${{ env.WORK_DIR }}
+
+            # --- FIX: Check for docker-compose.yml on remote server to prevent "not found" error ---
+            if [ ! -f "docker-compose.yml" ]; then
+              echo "🚨 ERROR: 'docker-compose.yml' not found in ${{ env.WORK_DIR }}. Deployment aborted."
+              # List files for debugging (optional)
+              ls -lha
+              exit 1
+            fi
+            # ----------------------------------------------------------------------------------------
 
             # 1. Update IMAGE_TAG in the remote .env file with the new version
-            # NEW_IMAGE_TAG is correctly defined and used *only* on the remote server
-            NEW_IMAGE_TAG="v0.0.19"
-
+            # GHA interpolates the value into this variable definition on the remote shell.
+            NEW_IMAGE_TAG="v${{ env.VERSION }}"
             if grep -q "^IMAGE_TAG=" .env; then
-              # The variable $NEW_IMAGE_TAG is now correctly expanded on the remote host
+              # Use explicit curly braces for robust variable expansion in sed
+              # We use | as the sed delimiter in case $NEW_IMAGE_TAG contains slashes (less likely for versions, but good practice)
               sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${NEW_IMAGE_TAG}|" .env
             else
+              # Use explicit curly braces for robust variable expansion
               echo "IMAGE_TAG=${NEW_IMAGE_TAG}" >> .env
             fi
-
-            # This debug line will now correctly show the tag "v0.0.19"
+            # Use explicit curly braces to ensure the version tag is echoed
             echo "🚀 Deploying to PRODUCTION: ${NEW_IMAGE_TAG}"
-
+            # --- DEBUGGING LINE ADDED ---
             echo "📝 Remote .env content for IMAGE_TAG:"
             grep "IMAGE_TAG" .env
-
             # 2. Pull all necessary services (now using the correct tag from the updated .env)
             docker compose pull ${{ env.WEB_SERVICE }} ${{ env.QUEUE_SERVICE }} ${{ env.DB_SERVICE }} ${{ env.TYPESENSE_SERVICE }}
-
             # 3. Stop all existing services
             docker compose down
-
             # 4. Run the essential setup container (Migrations/Core Seeders)
             echo "🚀 Running essential setup (Migrations/Core Seeders)..."
             # The init service will start, run the slow commands, and exit.
             docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
             echo "✅ Essential setup complete. Starting all services..."
-
             # 5. Start the main application services
             docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE} ${DB_SERVICE} ${TYPESENSE_SERVICE}
             echo "⏳ Waiting for web container to boot..."
             sleep 15
           EOF
-
       - name: External Health Check
         run: |
           echo "🌐 Performing external health check..."
@@ -245,11 +235,9 @@ jobs:
             echo "❌ External health check failed (HTTP $response) at ${{ env.APP_URL }}"
             exit 1
           fi
-
       - name: Cleanup SSH Keys
         if: always()
         run: rm -rf ~/.ssh
-
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/create-release@v1
