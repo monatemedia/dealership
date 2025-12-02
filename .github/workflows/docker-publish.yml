@@ -184,7 +184,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ env.REPO }}
-          ref: ${{ env.VERSION }}
+          ref: v${{ env.VERSION }}
           # ... (other additional options)
 
       # 2. Setup SSH Agent (Existing)
