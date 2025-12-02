@@ -195,40 +195,25 @@ jobs:
         run: |
           set -e
 
-          # Define variables from environment for clarity in the shell
-          USER="${{ env.USER }}"
-          HOST="${{ env.HOST }}"
-          WORK_DIR="${{ env.WORK_DIR }}"
+          # --- VARIABLE CLEANUP (The Fix) ---
+          # Aggressively strip all whitespace (including trailing newlines)
+          # from the environment variables before using them in the SSH command.
+          CLEAN_USER=$(echo "${USER}" | tr -d '[:space:]')
+          CLEAN_HOST=$(echo "${HOST}" | tr -d '[:space:]')
 
-          echo "1. Ensuring remote directory exists on ${HOST}..."
-          # Connect via SSH to create the directory if it doesn't exist
-          ssh -o StrictHostKeyChecking=no "${USER}@${HOST}" "mkdir -p '${WORK_DIR}'"
+          # Define local variables from cleaned environment values
+          TARGET_DIR="${WORK_DIR}"
+          NEW_IMAGE_TAG="${VERSION}"
 
-          echo "2. Uploading docker-compose.yml to remote host: ${USER}@${HOST}:${WORK_DIR}/"
-          # Use SCP to transfer the file into the verified directory.
-          # The quotes around ${WORK_DIR} prevent issues with spaces/special characters.
-          scp -o StrictHostKeyChecking=no \
-            ./docker-compose.yml \
-            "${USER}@${HOST}:${WORK_DIR}/"
+          echo "Cleaned Host: ${CLEAN_HOST}"
+          echo "Cleaned User: ${CLEAN_USER}"
 
-          echo "✅ docker-compose.yml uploaded successfully."
-
-      - name: Remote Deployment Execution
-        # This step remains mostly the same, but the file existence should now pass.
-        # The TARGET_DIR variable in this step MUST match the WORK_DIR used in the SCP step.
-        run: |
-          # ... your existing SSH block starts here ...
-          TARGET_DIR="${{ env.WORK_DIR }}"
-          NEW_IMAGE_TAG="${{ env.VERSION }}"
-
-          # The ssh command block (<< EOF)
-          # IMPORTANT: Removed the single quotes from 'EOF' to allow local variable substitution.
-          ssh "<Your_User>@<Your_Host>" << EOF
+          # The ssh command block
+          # NOTE: Using the cleaned variables for the connection string
+          ssh "${CLEAN_USER}@${CLEAN_HOST}" << EOF
             set -e
 
             # 1. Change to the target directory
-            # The value of TARGET_DIR is now correctly inserted here by the local shell
-            # before the SSH command is executed on the remote host.
             cd "${TARGET_DIR}"
             echo "✅ Successfully changed directory to \$(pwd)"
 
@@ -240,7 +225,6 @@ jobs:
             echo "✅ docker-compose.yml verified."
 
             # 3. Update IMAGE_TAG in the remote .env file
-            # NEW_IMAGE_TAG is also correctly inserted here.
             if grep -q "^IMAGE_TAG=" .env; then
               sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${NEW_IMAGE_TAG}|" .env
             else
@@ -265,6 +249,8 @@ jobs:
             echo "⏳ Waiting for web container to boot..."
             sleep 15
           EOF
+
+          echo "✅ Deployment script completed successfully."
 
       - name: External Health Check
         run: |
