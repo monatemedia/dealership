@@ -7,6 +7,7 @@ on:
     tags:
       - "v*" # Production deployments rely solely on this trigger
   workflow_dispatch: # Allow manual triggers
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ghcr.io/${{ github.actor }}/dealership
@@ -103,14 +104,20 @@ jobs:
       SETUP_DEMO_SERVICE: dealership-demo # <-- Demo service (optional, for manual use)
       HOST_PORT: 8090 # DOCKER_LARAVEL_PORT from dealership/.env
     steps:
+      - name: Checkout repository code # ADDED: Necessary for local file access (e.g., docker-compose.yml)
+        uses: actions/checkout@v4
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ env.SSH_KEY }}
       - name: Add Server to Known Hosts
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
-      - name: Pull, Setup, and Deploy to Staging
+      - name: Copy docker-compose.yml and Deploy to Staging # Changed name for clarity
         run: |
+          # The scp command should be here too if staging uses a local docker-compose.yml
+          echo "Uploading docker-compose.yml to remote host..."
+          scp -o StrictHostKeyChecking=no ./docker-compose.yml ${{ env.USER }}@${{ env.HOST }}:${{ env.WORK_DIR }}/docker-compose.yml
+
           ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
             set -e
             cd ${{ env.WORK_DIR }}
@@ -133,6 +140,7 @@ jobs:
             docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE}
             echo "⏳ Waiting for web container to boot..."
             sleep 15
+          EOF
       - name: External Health Check
         run: |
           echo "🌐 Performing external health check..."
@@ -170,6 +178,8 @@ jobs:
       SETUP_INIT_SERVICE: actuallyfind-init # <-- Production init service name
       HOST_PORT: 8092 # DOCKER_LARAVEL_PORT from actuallyfind/.env
     steps:
+      - name: Checkout repository code # ADDED: Necessary for local file access (e.g., docker-compose.yml)
+        uses: actions/checkout@v4
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -178,13 +188,11 @@ jobs:
         # Dynamically fetches the current server key.
         run: |
           ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts || true
-
       - name: Deploy to Production
         # Ensure all necessary environment variables (HOST, USER, WORK_DIR, etc.) are set in the job or workflow context.
         run: |
           # This is the command you should execute in your workflow, just before the main 'ssh << EOF' block.
           # It copies the local docker-compose.yml to the remote server's $WORK_DIR.
-
           echo "Uploading docker-compose.yml to remote host..."
           scp -o StrictHostKeyChecking=no ./docker-compose.yml $USER@$HOST:$WORK_DIR/docker-compose.yml
 
@@ -228,7 +236,6 @@ jobs:
             echo "⏳ Waiting for web container to boot..."
             sleep 15
           EOF
-
       - name: External Health Check
         run: |
           echo "🌐 Performing external health check..."
