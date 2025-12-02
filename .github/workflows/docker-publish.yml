@@ -212,9 +212,18 @@ jobs:
             fi
             echo "✅ docker-compose.yml verified."
 
-            # 1. Update IMAGE_TAG in the remote .env file with the new version
-            NEW_IMAGE_TAG="v$VERSION"
+            # 1. Change to the target directory
+            cd "\${TARGET_DIR}"
+            echo "✅ Successfully changed directory to \$(pwd)"
 
+            # 2. CHECK: Verify the docker-compose.yml file is present (This check should now pass)
+            if [ ! -f docker-compose.yml ]; then
+              echo "❌ FATAL ERROR: docker-compose.yml is missing after SCP. Check permissions."
+              exit 1
+            fi
+            echo "✅ docker-compose.yml verified."
+
+            # 3. Update IMAGE_TAG in the remote .env file
             if grep -q "^IMAGE_TAG=" .env; then
               sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=\${NEW_IMAGE_TAG}|" .env
             else
@@ -222,30 +231,26 @@ jobs:
             fi
 
             echo "🚀 Deploying to PRODUCTION: \${NEW_IMAGE_TAG}"
-            echo "📝 Remote .env content for IMAGE_TAG:"
             grep "IMAGE_TAG" .env
 
-            # 2. Pull all necessary services
-            # FIXED: Explicitly use -f docker-compose.yml to eliminate "no configuration file provided" error.
-            docker compose -f docker-compose.yml pull \${WEB_SERVICE} \${QUEUE_SERVICE} \${DB_SERVICE} \${TYPESENSE_SERVICE} \${SETUP_INIT_SERVICE}
+            # 4. Pull all necessary services
+            docker compose -f docker-compose.yml pull actuallyfind-web actuallyfind-queue actuallyfind-db actuallyfind-typesense actuallyfind-init
 
-            # 3. Stop all existing services
-            # FIXED: Use -f flag
+            # 5. Stop all existing services
             docker compose -f docker-compose.yml down
 
-            # 4. Run the essential setup container (Migrations/Core Seeders)
+            # 6. Run the essential setup container (Migrations/Core Seeders)
             echo "🚀 Running essential setup (Migrations/Core Seeders)..."
-            # FIXED: Use -f flag
-            docker compose -f docker-compose.yml up \${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
+            docker compose -f docker-compose.yml up actuallyfind-init --remove-orphans --abort-on-container-exit
             echo "✅ Essential setup complete. Starting all services..."
 
-            # 5. Start the main application services
-            # FIXED: Use -f flag
-            docker compose -f docker-compose.yml up -d \${WEB_SERVICE} \${QUEUE_SERVICE} \${DB_SERVICE} \${TYPESENSE_SERVICE}
+            # 7. Start the main application services
+            docker compose -f docker-compose.yml up -d actuallyfind-web actuallyfind-queue actuallyfind-db actuallyfind-typesense
 
             echo "⏳ Waiting for web container to boot..."
             sleep 15
           EOF
+
       - name: External Health Check
         run: |
           echo "🌐 Performing external health check..."
