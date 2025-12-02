@@ -166,9 +166,8 @@ jobs:
     env:
       APP_URL: ${{ needs.publish.outputs.app-url }}
       VERSION: ${{ needs.publish.outputs.version-tag }}
-      HOST: ${{ secrets.SSH_HOST }}
-      USER: ${{ secrets.SSH_USER }}
-      SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      HOST: ${{ secrets.PRODUCTION_HOST }}
+      USER: ${{ secrets.PRODUCTION_USER }}
       WORK_DIR: ${{ secrets.PRODUCTION_WORK_DIR }}
       # Hardcoded static service names used in the production docker-compose.yml
       WEB_SERVICE: actuallyfind-web
@@ -191,7 +190,7 @@ jobs:
       - name: Set up SSH private key
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
+          ssh-private-key: ${{ secrets.PRODUCTION_SSH_KEY }}
           log-public-key: true
 
       # 3. Add Host Key (Existing)
