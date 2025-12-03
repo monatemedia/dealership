@@ -21,7 +21,7 @@
         </x-slot:image>
 
         <x-hero.heading level="h1">
-            {{ $categoryName }} in <br>
+           Best {{ $categoryName }} in <br>
             <strong>Mzansi</strong>
         </x-hero.heading>
 
