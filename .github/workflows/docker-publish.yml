@@ -232,6 +232,10 @@ jobs:
             echo "⏳ Waiting 10 seconds for the newly built container to stabilize..."
             sleep 10
 
+            # *** THE FIX: Ensure the swap script is executable ***
+            echo "🛠️ Granting execute permission to the swap script..."
+            chmod +x actuallyfind-swap.sh
+
             # 7. ATOMIC SWITCH: Execute the dedicated swap script
             echo "⚡ Executing the atomic Blue/Green swap script..."
             # The swap script handles finding LIVE/TARGET, setting VIRTUAL_HOST, and removing old traffic.
