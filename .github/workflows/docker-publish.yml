@@ -216,20 +216,18 @@ jobs:
           pwd
           echo "Listing contents of current directory:"
           ls -l
-
-          # Verify the file is where the second checkout put it (the workspace root)
-          if [ ! -f "app-code/deploy-prod.sh" ]; then
-            echo "ERROR: deploy-prod.sh was not found in the current directory."
-            exit 1
+          # Verify the file is now in the workspace root, *not* app-code/
+          if [ ! -f "deploy-prod.sh" ]; then
+              echo "ERROR: deploy-prod.sh was not found in the current directory."
+              exit 1
           fi
           # --- END DIAGNOSTICS ---
-
           # 1. SCP the deploy script to the remote server
           # The key is automatically available because of the ssh-agent step
+          # Use the correct path for the source file: ./deploy-prod.sh
           scp -o StrictHostKeyChecking=no \
-              app-code/deploy-prod.sh \
+              ./deploy-prod.sh \
               ${{ env.USER }}@${{ env.HOST }}:${{ env.WORK_DIR }}/deploy-prod.sh
-
           # 2. Ensure the swap script is executable on the remote server
           ssh ${{ env.USER }}@${{ env.HOST }} 'chmod +x ${{ env.WORK_DIR }}/actuallyfind-swop.sh'
 
@@ -247,7 +245,7 @@ jobs:
             export TYPESENSE_SERVICE="${{ env.TYPESENSE_SERVICE }}" && \
             export SETUP_INIT_SERVICE="${{ env.SETUP_INIT_SERVICE }}" && \
             export QUEUE_SERVICE="${{ env.QUEUE_SERVICE }}" && \
-            app-code/deploy-prod.sh'
+            ${{ env.WORK_DIR }}/deploy-prod.sh'
 
       # The External Health Check remains the same, checking the public URL
       - name: External Health Check (Public URL)
