@@ -200,16 +200,16 @@ jobs:
           ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
             # --- Blue/Green Deployment Logic ---
             # 1. Change to the application directory
-            cd ${{ env.WORK_DIR }} || exit 1
+            # Use && to ensure the script stops if cd fails
+            cd ${WORK_DIR} && \
 
             # 2. Define the image tag and pull the latest image
-            DEPLOY_TAG=${{ needs.publish.outputs.image-tag }}
-            FULL_IMAGE_NAME="${{ env.IMAGE_NAME }}:${{ needs.publish.outputs.image-tag }}"
+            DEPLOY_TAG=production
+            FULL_IMAGE_NAME="${IMAGE_NAME}:${DEPLOY_TAG}"
             echo "📥 Pulling latest image: ${FULL_IMAGE_NAME}"
             docker pull ${FULL_IMAGE_NAME}
 
             # 3. Export the Image Tag for docker-compose to use
-            # FIXED: Changed APP_IMAGE_TAG to IMAGE_TAG to match docker-compose.yml
             export IMAGE_TAG=${DEPLOY_TAG}
 
             # 4. Bring up the core services (DB/Typesense) and ensure all web slots are defined,
@@ -218,32 +218,32 @@ jobs:
             echo "🚀 Ensuring all core services and web slots (inactive/active) are running the new image..."
             # We explicitly pass VIRTUAL_HOST_SET="" here to ensure the newly started container is NOT live yet.
             VIRTUAL_HOST_SET="" docker compose up -d \
-              actuallyfind-web-blue \
-              actuallyfind-web-green \
-              ${{ env.DB_SERVICE }} \
-              ${{ env.TYPESENSE_SERVICE }}
+              ${WEB_SERVICE_BASE}-blue \
+              ${WEB_SERVICE_BASE}-green \
+              ${DB_SERVICE} \
+              ${TYPESENSE_SERVICE}
 
             # 5. Run the essential setup container (Migrations/Core Seeders)
+            # This will now use the fixed docker-init-setup.sh logic.
             echo "✨ Running essential setup (Migrations/Core Seeders)..."
-            # This uses the image defined by the new IMAGE_TAG export.
-            docker compose up ${{ env.SETUP_INIT_SERVICE }} --remove-orphans --abort-on-container-exit
+            docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
 
             # 6. Wait for the new container to stabilize (passes health check)
             echo "⏳ Waiting 10 seconds for the newly built container to stabilize..."
             sleep 10
 
-            # *** THE FIX: Ensure the swap script is executable ***
+            # 7. Granting execute permission to the swap script (as done previously)
             echo "🛠️ Granting execute permission to the swap script..."
             chmod +x actuallyfind-swap.sh
 
-            # 7. ATOMIC SWITCH: Execute the dedicated swap script
+            # 8. ATOMIC SWITCH: Execute the dedicated swap script
             echo "⚡ Executing the atomic Blue/Green swap script..."
-            # The swap script handles finding LIVE/TARGET, setting VIRTUAL_HOST, and removing old traffic.
-            BASE_DOMAIN="${{ env.PRODUCTION_BASE_DOMAIN }}" ./actuallyfind-swap.sh
+            # BASE_DOMAIN is passed as an empty string or the actual domain if needed by the swap script.
+            BASE_DOMAIN="${APP_URL}" ./actuallyfind-swap.sh
 
-            # 8. Restart the Queue service to connect to the new code base
+            # 9. Restart the Queue service to connect to the new code base
             echo "🔁 Restarting Queue service with new code..."
-            docker compose restart ${{ env.QUEUE_SERVICE }}
+            docker compose restart ${QUEUE_SERVICE}
 
             echo "✅ Deployment complete. Traffic is now routed to the new container."
           EOF

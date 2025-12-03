@@ -1065,6 +1065,38 @@ docker rm -f dealership-web dealership-queue dealership-db dealership-typesense 
 **GitHub Release:**
 The version tag automatically creates a GitHub Release at `https://github.com/your-username/dealership/releases/tag/v1.0.0`. You can add release notes there describing what's new, what's fixed, and any breaking changes.
 
+**Step 5: Clean up the server**
+```bash
+# 1. Remove the 'dealership' stack and its containers/volumes
+docker rm -f dealership-web dealership-queue dealership-db dealership-typesense dealership-adminer
+
+# 2. Clean up dangling Docker resources
+docker system prune -af --volumes
+
+# 3. Clear package cache
+sudo apt-get clean
+
+# 4. Truncate large log files
+sudo truncate -s 0 /var/log/syslog
+sudo truncate -s 0 /var/log/kern.log
+sudo truncate -s 0 /var/log/auth.log
+
+# 5. Remove old rotated logs
+sudo rm -f /var/log/*.gz
+sudo rm -f /var/log/*.[0-9]
+
+# 6. Vacuum systemd journal (optional, keeps last 50MB)
+sudo journalctl --vacuum-size=50M
+
+# 7. Verify free disk space
+df -h /
+
+# 8. Verify inode space
+df -i /
+```
+
+This ensures the production server is clean, and prevents disk-full errors.
+
 ---
 
 ### Hotfix Branches
@@ -1162,12 +1194,15 @@ git push origin --delete v1.0.0
 **Common tagging mistakes to avoid:**
 
 ❌ **DON'T** create lightweight tags: `git tag v1.0.0` (missing `-a`)
+
 ✅ **DO** create annotated tags: `git tag -a v1.0.0 -m "message"`
 
 ❌ **DON'T** forget to push tags after creating them
+
 ✅ **DO** remember: `git push origin v1.0.0`
 
 ❌ **DON'T** use inconsistent version formats (`1.0.0` vs `v1.0.0`)
+
 ✅ **DO** always prefix with `v`: `v1.0.0`, `v2.1.5`
 
 ### When to Increment Version Numbers
