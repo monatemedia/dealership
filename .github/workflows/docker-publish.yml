@@ -209,15 +209,28 @@ jobs:
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
 
       # 3. Upload the deployment script to the remote server
-      # The script is now in the root directory due to the second checkout step.
-      - name: Upload Deployment Script
+      - name: Transfer Deployment Script and Set Permissions
         run: |
-          # The key is automatically available to scp because of the ssh-agent step
-          # This should now work as ./deploy-prod.sh is in the current working directory
+          # --- DIAGNOSTICS ---
+          echo "Current Working Directory:"
+          pwd
+          echo "Listing contents of current directory:"
+          ls -l
+
+          # Verify the file is where the second checkout put it (the workspace root)
+          if [ ! -f "./deploy-prod.sh" ]; then
+            echo "ERROR: deploy-prod.sh was not found in the current directory."
+            exit 1
+          fi
+          # --- END DIAGNOSTICS ---
+
+          # 1. SCP the deploy script to the remote server
+          # The key is automatically available because of the ssh-agent step
           scp -o StrictHostKeyChecking=no \
               ./deploy-prod.sh \
               ${{ env.USER }}@${{ env.HOST }}:${{ env.WORK_DIR }}/deploy-prod.sh
-          # Also ensure the swap script is executable (just in case)
+
+          # 2. Ensure the swap script is executable on the remote server
           ssh ${{ env.USER }}@${{ env.HOST }} 'chmod +x ${{ env.WORK_DIR }}/actuallyfind-swop.sh'
 
       # 4. Execute the script remotely (existing step)
