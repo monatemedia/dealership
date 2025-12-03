@@ -195,7 +195,7 @@ jobs:
         with:
           repository: ${{ github.repository }}
           ref: "main"
-          sparse-checkout: app-codedeploy-prod.sh
+          sparse-checkout: app-code/deploy-prod.sh
           sparse-checkout-cone-mode: false
           # Checkout into the root directory (where scp expects it)
           path: .
@@ -211,22 +211,23 @@ jobs:
       # 3. Upload the deployment script to the remote server
       - name: Transfer Deployment Script and Set Permissions
         run: |
-          # --- DIAGNOSTICS --- (Optional, but good to keep for the next run)
+          # --- DIAGNOSTICS ---
           echo "Current Working Directory:"
           pwd
           echo "Listing contents of app-code directory:"
-          ls -l app-code/ # Check inside app-code
+          ls -l app-code/ # This should now list the file
           # Verify the file is where the second checkout put it
           if [ ! -f "app-code/deploy-prod.sh" ]; then
-              echo "ERROR: deploy-prod.sh was not found in the current directory."
+              echo "ERROR: deploy-prod.sh was not found in the current directory, even after correction."
               exit 1
           fi
           # --- END DIAGNOSTICS ---
+
           # 1. SCP the deploy script to the remote server
-          # *** CHANGE 2: Use the correct source path (./app-code/deploy-prod.sh) ***
           scp -o StrictHostKeyChecking=no \
               ./app-code/deploy-prod.sh \
               ${{ env.USER }}@${{ env.HOST }}:${{ env.WORK_DIR }}/deploy-prod.sh
+
           # 2. Ensure the swap script is executable on the remote server
           ssh ${{ env.USER }}@${{ env.HOST }} 'chmod +x ${{ env.WORK_DIR }}/actuallyfind-swop.sh'
 
