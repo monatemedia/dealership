@@ -1050,6 +1050,9 @@ git branch -d release/1.0.0
 
 # Delete the remote release branch
 git push origin --delete release/1.0.0
+
+# Remove the 'dealership' stack and its containers/volumes
+docker rm -f dealership-web dealership-queue dealership-db dealership-typesense dealership-adminer
 ```
 
 **🚀 Automatic Production Deployment:**
