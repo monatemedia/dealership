@@ -1,4 +1,3 @@
-# .github/workflows/docker-publish.yml
 name: publish
 on:
   push:
@@ -20,12 +19,10 @@ jobs:
       image-tag: ${{ steps.set-tag.outputs.tag }}
       version-tag: ${{ steps.set-tag.outputs.version }}
       app-url: ${{ steps.set-tag.outputs.app-url }}
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       # *** FIX 1: Using $GITHUB_OUTPUT instead of ::set-output to eliminate deprecation warnings ***
       - name: Determine image tag, environment, and APP_URL
         id: set-tag
@@ -33,7 +30,6 @@ jobs:
           # Define URLs based on your provided .env files
           STAGING_URL="https://dealership.monatemedia.com"
           PRODUCTION_URL="https://actuallyfind.com"
-
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION="${GITHUB_REF#refs/tags/v}"
             # Use GITHUB_OUTPUT file for production tag
@@ -64,14 +60,11 @@ jobs:
             echo "app-url=$STAGING_URL" >> $GITHUB_OUTPUT
             echo "🔧 Building development: $VERSION"
           fi
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Login to GitHub Container Registry
         run: |
           echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
@@ -86,7 +79,6 @@ jobs:
           cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
           build-args: |
             INSTALL_DEV_DEPENDENCIES=${{ contains(github.ref, 'refs/heads/release/') }}
-
       - name: Output deployment info
         run: |
           echo "📌 Version: ${{ steps.set-tag.outputs.version }}"
@@ -187,41 +179,52 @@ jobs:
       SETUP_INIT_SERVICE: actuallyfind-init
       HOST_PORT: 8092
     steps:
-      # 1. NEW
-      - name: Checkout Repository
-        # We ensure no specific 'ref' is passed here,
-        # allowing it to checkout the commit tied to the tag/release event.
-        # If the file 'deploy-prod.sh' is definitely in the repository root
-        # at the time of the trigger commit, this should be sufficient.
+      # 1. Checkout Application Code (gets the code tied to the tag/trigger)
+      - name: Checkout Application Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-          # If the file is missing from the tagged commit,
-          # you might need to fetch the main branch specifically:
-          # ref: 'main'
+          # Application code is checked out into a subdirectory to keep the root clean
+          path: app-code
+
+      # 2. Checkout the latest deployment script from the 'main' branch
+      # This ensures we always have the most up-to-date deployment logic,
+      # which might not be included in an older release tag.
+      - name: Checkout latest deploy-prod.sh script
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: "main"
+          sparse-checkout: deploy-prod.sh
+          sparse-checkout-cone-mode: false
+          # Checkout into the root directory (where scp expects it)
+          path: .
 
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ env.SSH_KEY }}
+
       - name: Add Production Server to Known Hosts
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
 
-      # 2. NEW: Upload the deployment script to the remote server
+      # 3. Upload the deployment script to the remote server
+      # The script is now in the root directory due to the second checkout step.
       - name: Upload Deployment Script
         run: |
           # The key is automatically available to scp because of the ssh-agent step
+          # This should now work as ./deploy-prod.sh is in the current working directory
           scp -o StrictHostKeyChecking=no \
               ./deploy-prod.sh \
               ${{ env.USER }}@${{ env.HOST }}:${{ env.WORK_DIR }}/deploy-prod.sh
-
           # Also ensure the swap script is executable (just in case)
           ssh ${{ env.USER }}@${{ env.HOST }} 'chmod +x ${{ env.WORK_DIR }}/actuallyfind-swop.sh'
 
-      # 3. Execute the script remotely (existing step)
+      # 4. Execute the script remotely (existing step)
       - name: Execute Deployment Script (Zero Downtime)
         run: |
           # Pass all necessary environment variables and execute the script remotely
+          # The deploy-prod.sh script should now be in the remote WORK_DIR
           ssh ${{ env.USER }}@${{ env.HOST }} \
             'export WORK_DIR="${{ env.WORK_DIR }}" && \
             export IMAGE_NAME="${{ env.IMAGE_NAME }}" && \
@@ -245,9 +248,11 @@ jobs:
             echo "❌ External health check failed (HTTP $response) at ${{ env.APP_URL }}"
             exit 1
           fi
+
       - name: Cleanup SSH Keys
         if: always()
         run: rm -rf ~/.ssh
+
       # *** FIX 2 & 3: Switched to softprops/action-gh-release@v1 to eliminate deprecation warnings from the action itself ***
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
