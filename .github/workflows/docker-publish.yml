@@ -197,8 +197,9 @@ jobs:
           ref: "main"
           sparse-checkout: app-code/deploy-prod.sh
           sparse-checkout-cone-mode: false
-          # Checkout into the root directory (where scp expects it)
-          path: .
+          # **CHANGE THE PATH HERE** to a new, temporary directory
+          path: deploy-script # <-- This is the important change
+          fetch-depth: 1
 
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -225,7 +226,7 @@ jobs:
 
           # 1. SCP the deploy script to the remote server
           scp -o StrictHostKeyChecking=no \
-              ./app-code/deploy-prod.sh \
+              ./deploy-script/app-code/deploy-prod.sh \
               ${{ env.USER }}@${{ env.HOST }}:${{ env.WORK_DIR }}/deploy-prod.sh
 
           # 2. Ensure the swap script is executable on the remote server
