@@ -187,6 +187,11 @@ jobs:
       SETUP_INIT_SERVICE: actuallyfind-init
       HOST_PORT: 8092
     steps:
+      # 1. NEW: Checkout the repository to get the deploy-prod.sh file
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -194,12 +199,21 @@ jobs:
       - name: Add Production Server to Known Hosts
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
 
-      # *** ZERO-DOWNTIME DEPLOYMENT (BLUE/GREEN): Execute the dedicated script ***
-      # We replace the large inline block with a clean call to the remote script.
-      - name: Pull and Deploy to Production (Zero Downtime)
+      # 2. NEW: Upload the deployment script to the remote server
+      - name: Upload Deployment Script
         run: |
-          # We pass all necessary environment variables to the remote session
-          # and execute the encapsulated deployment logic.
+          # The key is automatically available to scp because of the ssh-agent step
+          scp -o StrictHostKeyChecking=no \
+              ./deploy-prod.sh \
+              ${{ env.USER }}@${{ env.HOST }}:${{ env.WORK_DIR }}/deploy-prod.sh
+
+          # Also ensure the swap script is executable (just in case)
+          ssh ${{ env.USER }}@${{ env.HOST }} 'chmod +x ${{ env.WORK_DIR }}/actuallyfind-swop.sh'
+
+      # 3. Execute the script remotely (existing step)
+      - name: Execute Deployment Script (Zero Downtime)
+        run: |
+          # Pass all necessary environment variables and execute the script remotely
           ssh ${{ env.USER }}@${{ env.HOST }} \
             'export WORK_DIR="${{ env.WORK_DIR }}" && \
             export IMAGE_NAME="${{ env.IMAGE_NAME }}" && \
