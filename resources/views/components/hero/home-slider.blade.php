@@ -21,8 +21,8 @@
         </x-slot:image>
 
         <x-hero.heading level="h1">
-           Best {{ $categoryName }} in <br>
-            <strong>Mzansi</strong>
+           {{ $categoryName }} in <br>
+            <strong>South Africa</strong>
         </x-hero.heading>
 
         <x-hero.text>
