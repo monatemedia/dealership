@@ -187,10 +187,18 @@ jobs:
       SETUP_INIT_SERVICE: actuallyfind-init
       HOST_PORT: 8092
     steps:
-      # 1. NEW: Checkout the repository to get the deploy-prod.sh file
-      - uses: actions/checkout@v4
+      # 1. NEW
+      - name: Checkout Repository
+        # We ensure no specific 'ref' is passed here,
+        # allowing it to checkout the commit tied to the tag/release event.
+        # If the file 'deploy-prod.sh' is definitely in the repository root
+        # at the time of the trigger commit, this should be sufficient.
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          # If the file is missing from the tagged commit,
+          # you might need to fetch the main branch specifically:
+          # ref: 'main'
 
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
