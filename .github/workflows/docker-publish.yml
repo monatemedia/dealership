@@ -194,15 +194,11 @@ jobs:
       - name: Add Production Server to Known Hosts
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
 
-      # *** MODIFIED FOR ZERO-DOWNTIME DEPLOYMENT (BLUE/GREEN) ***
+      # *** ZERO-DOWNTIME DEPLOYMENT (BLUE/GREEN): Use the dedicated swap script ***
       - name: Pull and Deploy to Production (Zero Downtime)
         run: |
-          # The production URL for the proxy
-          PROXY_HOST="actuallyfind.com"
-
-          ssh ${{ env.USER }}@${{ env.HOST }} << EOF
+          ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
             # --- Blue/Green Deployment Logic ---
-
             # 1. Change to the application directory
             cd ${{ env.WORK_DIR }} || exit 1
 
@@ -213,68 +209,39 @@ jobs:
             docker pull ${FULL_IMAGE_NAME}
 
             # 3. Export the Image Tag for docker-compose to use
-            export APP_IMAGE_TAG=${DEPLOY_TAG}
+            # FIXED: Changed APP_IMAGE_TAG to IMAGE_TAG to match docker-compose.yml
+            export IMAGE_TAG=${DEPLOY_TAG}
 
-            # 4. Determine which service is currently LIVE (Blue or Green)
-            # Find the container that has the VIRTUAL_HOST env variable set to the PROXY_HOST
-            LIVE_SLOT=\$(docker compose ps -q | xargs -I {} docker inspect -f '{{.Name}} {{range .Config.Env}}{{if contains . "VIRTUAL_HOST"}}LIVE{{end}}{{end}}' {} | grep "LIVE" | awk -F'/' '{print \$2}' | sed 's/-//g' | grep -E 'blue|green' || echo "blue")
+            # 4. Bring up the core services (DB/Typesense) and ensure all web slots are defined,
+            # but without the VIRTUAL_HOST_SET environment variable (which is handled by the swap script).
+            # This ensures the inactive slot is running the new image, but isn't receiving traffic.
+            echo "🚀 Ensuring all core services and web slots (inactive/active) are running the new image..."
+            # We explicitly pass VIRTUAL_HOST_SET="" here to ensure the newly started container is NOT live yet.
+            VIRTUAL_HOST_SET="" docker compose up -d \
+              actuallyfind-web-blue \
+              actuallyfind-web-green \
+              ${{ env.DB_SERVICE }} \
+              ${{ env.TYPESENSE_SERVICE }}
 
-            # Determine the INACTIVE (deployment) slot
-            if [ "\$LIVE_SLOT" == "blue" ]; then
-              LIVE_SERVICE="${{ env.WEB_SERVICE_BASE }}-blue"
-              INACTIVE_SERVICE="${{ env.WEB_SERVICE_BASE }}-green"
-              INACTIVE_PORT=8001
-            else
-              LIVE_SERVICE="${{ env.WEB_SERVICE_BASE }}-green"
-              INACTIVE_SERVICE="${{ env.WEB_SERVICE_BASE }}-blue"
-              INACTIVE_PORT=8000
-            fi
-
-            echo "🌐 Current LIVE service: \$LIVE_SERVICE"
-            echo "🧪 Deploying to INACTIVE service: \$INACTIVE_SERVICE (Port \$INACTIVE_PORT)"
-
-            # 5. Bring up the new Web container (INACTIVE slot), DB, and Typesense
-            # This uses the 'up --scale' command with '--no-recreate' to ensure no downtime
-            echo "🚀 Starting new web container (\$INACTIVE_SERVICE) alongside the live one..."
-
-            # Export the VIRTUAL_PORT for the inactive service, but NOT the VIRTUAL_HOST yet
-            export VIRTUAL_PORT_TARGET="\$INACTIVE_PORT"
-
-            # Use 'docker compose up' to ensure the inactive slot is running the new image,
-            # but without the VIRTUAL_HOST variable (must be done in the compose file)
-            docker compose up -d \$INACTIVE_SERVICE ${{ env.DB_SERVICE }} ${{ env.TYPESENSE_SERVICE }}
-
-            # 6. Run the essential setup container (Migrations/Core Seeders)
+            # 5. Run the essential setup container (Migrations/Core Seeders)
             echo "✨ Running essential setup (Migrations/Core Seeders)..."
+            # This uses the image defined by the new IMAGE_TAG export.
             docker compose up ${{ env.SETUP_INIT_SERVICE }} --remove-orphans --abort-on-container-exit
 
-            # 7. Wait for the new web service to stabilize and run a final health check
-            echo "⏳ Waiting for new web container to boot and pass health checks..."
-            sleep 20
+            # 6. Wait for the new container to stabilize (passes health check)
+            echo "⏳ Waiting 10 seconds for the newly built container to stabilize..."
+            sleep 10
 
-            # 8. ATOMIC SWITCH (The Zero-Downtime Event)
+            # 7. ATOMIC SWITCH: Execute the dedicated swap script
+            echo "⚡ Executing the atomic Blue/Green swap script..."
+            # The swap script handles finding LIVE/TARGET, setting VIRTUAL_HOST, and removing old traffic.
+            BASE_DOMAIN="${{ env.PRODUCTION_BASE_DOMAIN }}" ./actuallyfind-swap.sh
 
-            # First, stop the LIVE service gracefully (to remove its VIRTUAL_HOST and traffic)
-            # The proxy will detect its absence, but traffic is briefly handled by the proxy.
-            echo "🛑 Stopping LIVE service (\$LIVE_SERVICE) to remove VIRTUAL_HOST..."
-            docker compose stop -t 5 \$LIVE_SERVICE
-
-            # Next, restart the INACTIVE service WITH the VIRTUAL_HOST set
-            # This is done by dynamically overriding the environment variable.
-            # IMPORTANT: This assumes your remote compose file uses VIRTUAL_HOST for the proxy
-            echo "⚡ Restarting INACTIVE service (\$INACTIVE_SERVICE) WITH VIRTUAL_HOST..."
-            VIRTUAL_HOST_SET="${PROXY_HOST}" docker compose up -d \$INACTIVE_SERVICE
-
-            # 9. Stop and remove the old containers (optional cleanup)
-            echo "🗑️ Removing old service..."
-            docker compose rm -f \$LIVE_SERVICE
-
-            # 10. Restart the Queue service to connect to the new code base
-            # This is the only brief interruption (queue workers restart).
+            # 8. Restart the Queue service to connect to the new code base
             echo "🔁 Restarting Queue service with new code..."
             docker compose restart ${{ env.QUEUE_SERVICE }}
 
-            echo "✅ Deployment complete. New service (\$INACTIVE_SERVICE) is live."
+            echo "✅ Deployment complete. Traffic is now routed to the new container."
           EOF
 
       # The External Health Check remains the same, checking the public URL
@@ -289,6 +256,7 @@ jobs:
             echo "❌ External health check failed (HTTP $response) at ${{ env.APP_URL }}"
             exit 1
           fi
+
       - name: Cleanup SSH Keys
         if: always()
         run: rm -rf ~/.ssh
