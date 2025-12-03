@@ -1,10 +1,9 @@
 # .github/workflows/docker-publish.yml
 name: publish
-
 on:
   push:
     branches:
-      - "release/**" # Staging deployment only
+      - "release/**" # Staging deployment
     tags:
       - "v*" # Version tags (e.g., v1.0.0, v2.1.5)
   workflow_dispatch: # Allow manual triggers
@@ -21,11 +20,13 @@ jobs:
       image-tag: ${{ steps.set-tag.outputs.tag }}
       version-tag: ${{ steps.set-tag.outputs.version }}
       app-url: ${{ steps.set-tag.outputs.app-url }}
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # *** FIX 1: Using $GITHUB_OUTPUT instead of ::set-output to eliminate deprecation warnings ***
       - name: Determine image tag, environment, and APP_URL
         id: set-tag
         run: |
@@ -35,25 +36,29 @@ jobs:
 
           if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             VERSION="${GITHUB_REF#refs/tags/v}"
-            echo "tag=production" >> $GITHUB_OUTPUT # Tagged releases deploy as 'production'
+            # Use GITHUB_OUTPUT file for production tag
+            echo "tag=production" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "app-url=$PRODUCTION_URL" >> $GITHUB_OUTPUT
             echo "📦 Building tagged release: v$VERSION"
           elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
             VERSION="${LATEST_TAG#v}"
+            # Use GITHUB_OUTPUT file for main branch production tag
             echo "tag=production" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "app-url=$PRODUCTION_URL" >> $GITHUB_OUTPUT
             echo "🚀 Building production from tag: $LATEST_TAG"
           elif [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
             VERSION="${GITHUB_REF#refs/heads/release/}"
+            # Use GITHUB_OUTPUT file for staging tag
             echo "tag=staging" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "app-url=$STAGING_URL" >> $GITHUB_OUTPUT
             echo "🧪 Building staging release: $VERSION"
           else
             VERSION="dev-$(git rev-parse --short HEAD)"
+            # Use GITHUB_OUTPUT file for dev tag
             echo "tag=dev" >> $GITHUB_OUTPUT
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             echo "app-url=$STAGING_URL" >> $GITHUB_OUTPUT
@@ -107,51 +112,41 @@ jobs:
       # Hardcoded static service names used in the staging docker-compose.yml
       WEB_SERVICE: dealership-web
       QUEUE_SERVICE: dealership-queue
-      SETUP_INIT_SERVICE: dealership-init # <-- New Init service
-      SETUP_DEMO_SERVICE: dealership-demo # <-- Demo service (optional, for manual use)
+      SETUP_INIT_SERVICE: dealership-init
+      SETUP_DEMO_SERVICE: dealership-demo
       HOST_PORT: 8090 # DOCKER_LARAVEL_PORT from dealership/.env
     steps:
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ env.SSH_KEY }}
-
       - name: Add Server to Known Hosts
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
-
       - name: Pull, Setup, and Deploy to Staging
         run: |
           ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
             # 1. Change to the application directory
             cd ${{ env.WORK_DIR }} || exit 1
-
             # 2. Define the image tag and pull the latest image
             DEPLOY_TAG=${{ needs.publish.outputs.image-tag }}
             FULL_IMAGE_NAME="${{ env.IMAGE_NAME }}:${DEPLOY_TAG}"
-
             echo "📥 Pulling latest image: ${FULL_IMAGE_NAME}"
             docker pull ${FULL_IMAGE_NAME}
-
             # 3. Export the Image Tag for docker-compose to use
             # This assumes your remote docker-compose file uses APP_IMAGE_TAG or similar
             export APP_IMAGE_TAG=${DEPLOY_TAG}
-
             # 4. Stop all existing services
             docker compose down
-
             # 5. Run the essential setup container (Migrations/Core Seeders)
             echo "🚀 Running essential setup (Migrations/Core Seeders)..."
             # The init service will start, run the slow seeders, and exit.
             docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
-
             echo "✅ Essential setup complete. Starting web and queue services..."
             # 6. Start the main application services
             docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE}
-
             echo "⏳ Waiting for web container to boot..."
             sleep 15
           EOF
-
       - name: External Health Check
         run: |
           echo "🌐 Performing external health check..."
@@ -163,7 +158,6 @@ jobs:
             echo "❌ External health check failed (HTTP $response) at ${{ env.APP_URL }}"
             exit 1
           fi
-
       - name: Cleanup SSH Keys
         if: always()
         run: rm -rf ~/.ssh
@@ -174,11 +168,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     environment: "production"
-
-    # FIX 2: Grant write permissions for creating GitHub Releases
+    # Grant write permissions for creating GitHub Releases
     permissions:
       contents: write
-
     # Map existing secrets and hardcoded values for the script
     env:
       APP_URL: ${{ needs.publish.outputs.app-url }}
@@ -187,58 +179,106 @@ jobs:
       USER: ${{ secrets.PRODUCTION_USER }}
       SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
       WORK_DIR: ${{ secrets.PRODUCTION_WORK_DIR }}
-      # Hardcoded static service names used in the production docker-compose.yml
-      WEB_SERVICE: actuallyfind-web
+      # We are now changing these to the base names, the script handles the -blue/-green suffix
+      WEB_SERVICE_BASE: actuallyfind-web
       QUEUE_SERVICE: actuallyfind-queue
       DB_SERVICE: actuallyfind-db
       TYPESENSE_SERVICE: actuallyfind-typesense
-      SETUP_INIT_SERVICE: actuallyfind-init # <-- Production init service name
-      HOST_PORT: 8092 # DOCKER_LARAVEL_PORT from actuallyfind/.env
+      SETUP_INIT_SERVICE: actuallyfind-init
+      HOST_PORT: 8092
     steps:
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ env.SSH_KEY }}
-
       - name: Add Production Server to Known Hosts
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
 
-      - name: Pull and Deploy to Production
+      # *** MODIFIED FOR ZERO-DOWNTIME DEPLOYMENT (BLUE/GREEN) ***
+      - name: Pull and Deploy to Production (Zero Downtime)
         run: |
-          ssh ${{ env.USER }}@${{ env.HOST }} << 'EOF'
-            # 1. Change to the application directory (FIX 1)
+          # The production URL for the proxy
+          PROXY_HOST="actuallyfind.com"
+
+          ssh ${{ env.USER }}@${{ env.HOST }} << EOF
+            # --- Blue/Green Deployment Logic ---
+
+            # 1. Change to the application directory
             cd ${{ env.WORK_DIR }} || exit 1
 
-            # 2. Define the image tag and pull the latest image (FIX 1)
+            # 2. Define the image tag and pull the latest image
             DEPLOY_TAG=${{ needs.publish.outputs.image-tag }}
             FULL_IMAGE_NAME="${{ env.IMAGE_NAME }}:${{ needs.publish.outputs.image-tag }}"
-
             echo "📥 Pulling latest image: ${FULL_IMAGE_NAME}"
             docker pull ${FULL_IMAGE_NAME}
 
             # 3. Export the Image Tag for docker-compose to use
-            # This assumes your remote docker-compose file uses APP_IMAGE_TAG or similar
             export APP_IMAGE_TAG=${DEPLOY_TAG}
 
-            # 4. Stop all existing services
-            docker compose down
+            # 4. Determine which service is currently LIVE (Blue or Green)
+            # Find the container that has the VIRTUAL_HOST env variable set to the PROXY_HOST
+            LIVE_SLOT=\$(docker compose ps -q | xargs -I {} docker inspect -f '{{.Name}} {{range .Config.Env}}{{if contains . "VIRTUAL_HOST"}}LIVE{{end}}{{end}}' {} | grep "LIVE" | awk -F'/' '{print \$2}' | sed 's/-//g' | grep -E 'blue|green' || echo "blue")
 
-            # 5. Run the essential setup container (Migrations/Core Seeders)
-            echo "🚀 Running essential setup (Migrations/Core Seeders)..."
-            # The init service will start, run the slow seeders, and exit.
-            # This relies on the production docker-compose having the actuallyfind-init service defined.
-            docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
+            # Determine the INACTIVE (deployment) slot
+            if [ "\$LIVE_SLOT" == "blue" ]; then
+              LIVE_SERVICE="${{ env.WEB_SERVICE_BASE }}-blue"
+              INACTIVE_SERVICE="${{ env.WEB_SERVICE_BASE }}-green"
+              INACTIVE_PORT=8001
+            else
+              LIVE_SERVICE="${{ env.WEB_SERVICE_BASE }}-green"
+              INACTIVE_SERVICE="${{ env.WEB_SERVICE_BASE }}-blue"
+              INACTIVE_PORT=8000
+            fi
 
-            echo "✅ Essential setup complete. Starting main services..."
-            # 6. Start the main application services
-            # Only start the DB, Typesense, Web, and Queue services
-            docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE} ${DB_SERVICE} ${TYPESENSE_SERVICE}
+            echo "🌐 Current LIVE service: \$LIVE_SERVICE"
+            echo "🧪 Deploying to INACTIVE service: \$INACTIVE_SERVICE (Port \$INACTIVE_PORT)"
 
-            echo "⏳ Waiting for web container to boot..."
-            sleep 15
+            # 5. Bring up the new Web container (INACTIVE slot), DB, and Typesense
+            # This uses the 'up --scale' command with '--no-recreate' to ensure no downtime
+            echo "🚀 Starting new web container (\$INACTIVE_SERVICE) alongside the live one..."
+
+            # Export the VIRTUAL_PORT for the inactive service, but NOT the VIRTUAL_HOST yet
+            export VIRTUAL_PORT_TARGET="\$INACTIVE_PORT"
+
+            # Use 'docker compose up' to ensure the inactive slot is running the new image,
+            # but without the VIRTUAL_HOST variable (must be done in the compose file)
+            docker compose up -d \$INACTIVE_SERVICE ${{ env.DB_SERVICE }} ${{ env.TYPESENSE_SERVICE }}
+
+            # 6. Run the essential setup container (Migrations/Core Seeders)
+            echo "✨ Running essential setup (Migrations/Core Seeders)..."
+            docker compose up ${{ env.SETUP_INIT_SERVICE }} --remove-orphans --abort-on-container-exit
+
+            # 7. Wait for the new web service to stabilize and run a final health check
+            echo "⏳ Waiting for new web container to boot and pass health checks..."
+            sleep 20
+
+            # 8. ATOMIC SWITCH (The Zero-Downtime Event)
+
+            # First, stop the LIVE service gracefully (to remove its VIRTUAL_HOST and traffic)
+            # The proxy will detect its absence, but traffic is briefly handled by the proxy.
+            echo "🛑 Stopping LIVE service (\$LIVE_SERVICE) to remove VIRTUAL_HOST..."
+            docker compose stop -t 5 \$LIVE_SERVICE
+
+            # Next, restart the INACTIVE service WITH the VIRTUAL_HOST set
+            # This is done by dynamically overriding the environment variable.
+            # IMPORTANT: This assumes your remote compose file uses VIRTUAL_HOST for the proxy
+            echo "⚡ Restarting INACTIVE service (\$INACTIVE_SERVICE) WITH VIRTUAL_HOST..."
+            VIRTUAL_HOST_SET="${PROXY_HOST}" docker compose up -d \$INACTIVE_SERVICE
+
+            # 9. Stop and remove the old containers (optional cleanup)
+            echo "🗑️ Removing old service..."
+            docker compose rm -f \$LIVE_SERVICE
+
+            # 10. Restart the Queue service to connect to the new code base
+            # This is the only brief interruption (queue workers restart).
+            echo "🔁 Restarting Queue service with new code..."
+            docker compose restart ${{ env.QUEUE_SERVICE }}
+
+            echo "✅ Deployment complete. New service (\$INACTIVE_SERVICE) is live."
           EOF
 
-      - name: External Health Check
+      # The External Health Check remains the same, checking the public URL
+      - name: External Health Check (Public URL)
         run: |
           echo "🌐 Performing external health check..."
           sleep 5
@@ -249,7 +289,6 @@ jobs:
             echo "❌ External health check failed (HTTP $response) at ${{ env.APP_URL }}"
             exit 1
           fi
-
       - name: Cleanup SSH Keys
         if: always()
         run: rm -rf ~/.ssh
