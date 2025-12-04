@@ -1,0 +1,210 @@
+services:
+  dealership-web:
+    # REMOVE the 'image:' key for local build/development
+    # image: ghcr.io/monatemedia/dealership:latest
+
+    # ADD the 'build:' key to tell Docker Compose where to find the Dockerfile
+    build: .
+    # Optional: You can still tag the locally built image with a name if you want to push it later
+    image: dealership-web:local
+
+    container_name: ${DOCKER_CONTAINER_NAME}-web
+    depends_on:
+      dealership-db:
+        condition: service_healthy # Ensure DB is healthy before starting
+    restart: always
+
+    # ✅ FIX: Use the simple script entrypoint directly
+    entrypoint: /usr/local/bin/docker-entrypoint.sh
+    # ✅ FIX: Use the simple command
+    command: apache2-foreground
+
+    environment:
+      # Database
+      DB_CONNECTION: pgsql
+      DB_HOST: dealership-db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # App
+      APP_NAME: ${APP_NAME}
+      APP_ENV: ${APP_ENV}
+      APP_KEY: ${APP_KEY}
+      APP_DEBUG: ${APP_DEBUG}
+      APP_URL: ${APP_URL}
+      APP_TIMEZONE: ${APP_TIMEZONE}
+      # Seeding (set to true to run seeders on startup)
+      SEED_DATABASE: ${SEED_DATABASE:-false}
+      # Nginx Proxy (only used on server)
+      VIRTUAL_HOST: ${DOCKER_CONTAINER_NAME}.${BASE_DOMAIN}
+      # --- FIX: LETSENCRYPT_HOST must match VIRTUAL_HOST exactly ---
+      LETSENCRYPT_HOST: ${DOCKER_CONTAINER_NAME}.${BASE_DOMAIN}
+      VIRTUAL_PORT: 80
+    env_file:
+      - .env
+    volumes:
+      # 1. Mount the .env file
+      - ./.env:/var/www/html/.env
+      # 2. Mount persistent storage
+      - ./storage:/var/www/html/storage
+      # 3. Mount cache
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+      # --- Mount the entrypoint script ---
+      - ./docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
+      # ----------------------------------------------------------------
+    mem_limit: 512M
+    tty: true
+    ports:
+      - "${DOCKER_LARAVEL_PORT}:80"
+    networks:
+      - proxy-network
+    # NEW: Add a health check to signal readiness after entrypoint/migrations finish
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost"] # Check that the web server is up and responsive
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # NEW: Queue Worker Service for Image Processing
+  dealership-queue:
+
+    # ADD the 'build:' key to tell Docker Compose where to find the Dockerfile
+    build: .
+    # Optional: You can still tag the locally built image with a name if you want to push it later
+    image: dealership-queue:local
+    container_name: ${DOCKER_CONTAINER_NAME}-queue
+    depends_on:
+      # ✅ FIX: Only depend on the database being ready
+      dealership-db:
+        condition: service_healthy
+    restart: always
+    entrypoint: /bin/bash -c "echo 'Waiting for database connection...'; until (exec 6<>/dev/tcp/dealership-db/5432) 2>/dev/null; do echo 'Database not ready, sleeping for 1 second...'; sleep 1; done; echo 'Database is ready. Starting queue worker...'; php artisan queue:work --verbose --tries=3 --timeout=300 --sleep=3 --max-jobs=1000"
+    environment:
+      # Database
+      DB_CONNECTION: pgsql
+      DB_HOST: dealership-db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # App
+      APP_NAME: ${APP_NAME}
+      APP_ENV: ${APP_ENV}
+      APP_KEY: ${APP_KEY}
+      APP_DEBUG: ${APP_DEBUG}
+      APP_URL: ${APP_URL}
+      APP_TIMEZONE: ${APP_TIMEZONE}
+    env_file:
+      - .env
+    volumes:
+      # 1. Mount the .env file
+      - ./.env:/var/www/html/.env
+      # 2. Mount persistent storage (critical for image processing!)
+      - ./storage:/var/www/html/storage
+      # 3. Mount cache
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    mem_limit: 512M
+    networks:
+      - proxy-network
+
+  dealership-setup:
+    build: .
+    image: dealership-setup:local
+    container_name: ${DOCKER_CONTAINER_NAME}-setup
+    depends_on:
+      dealership-db:
+        condition: service_healthy # Wait for the DB
+    environment:
+      # These environment variables ensure the script can access the DB
+      DB_CONNECTION: pgsql
+      DB_HOST: dealership-db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - ./.env
+
+    # ✅ FIX: Override the image's ENTRYPOINT to /bin/bash
+    # This prevents the image's default ENTRYPOINT (docker-entrypoint.sh) from running.
+    entrypoint: /bin/bash
+
+    # ✅ FIX: Now the command is passed as an argument to /bin/bash
+    command: ["/usr/local/bin/docker-dev-setup.sh"]
+
+    networks:
+      - proxy-network
+
+    # ✅ FIX 1: Tag setup as staging-only
+    profiles:
+      - staging
+
+  dealership-typesense:
+    image: typesense/typesense:29.0
+    container_name: ${DOCKER_CONTAINER_NAME}-typesense
+    restart: always
+    command: '--data-dir /data --api-key=${TYPESENSE_API_KEY} --enable-cors'
+    environment:
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY}
+    volumes:
+      - dealership-typesense-data:/data
+    ports:
+      - "${DOCKER_TYPESENSE_PORT:-8108}:8108"
+    networks:
+      - proxy-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8108/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  dealership-db:
+    image: postgis/postgis:18-3.6-alpine
+    container_name: ${DOCKER_CONTAINER_NAME}-db
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - .env
+    volumes:
+      - dealership-db-data:/var/lib/postgresql
+    ports:
+      - "${DOCKER_POSTGRES_PORT}:5432"
+    networks:
+      - proxy-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  dealership-adminer:
+    image: adminer:latest
+    container_name: ${DOCKER_CONTAINER_NAME}-adminer
+    depends_on:
+      - dealership-db
+    restart: always
+    environment:
+      ADMINER_DEFAULT_SERVER: dealership-db
+      ADMINER_DESIGN: nette
+      VIRTUAL_HOST: ${DOCKER_CONTAINER_NAME}-adminer.${BASE_DOMAIN}
+      LETSENCRYPT_HOST: ${DOCKER_CONTAINER_NAME}-adminer.${BASE_DOMAIN}
+      VIRTUAL_PORT: 8080
+    ports:
+      - "${DOCKER_ADMINER_PORT}:8080"
+    networks:
+      - proxy-network
+    # ✅ FIX 2: Tag Adminer as staging-only
+    profiles:
+      - staging
+
+volumes:
+  dealership-db-data:
+  dealership-typesense-data:
+
+networks:
+  proxy-network:
+    external: true

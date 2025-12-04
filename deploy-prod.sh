@@ -49,7 +49,7 @@ VIRTUAL_HOST_SET="" docker compose --env-file .env -f docker-compose.yml up -d \
 # 5. Run the essential setup container (Migrations/Core Seeders)
 echo "✨ Running essential setup (Migrations/Core Seeders)..."
 # --- CRITICAL FIX: Add --env-file .env to load DB secrets for the INIT container ---
-docker compose --env-file .env -f docker-compose.yml up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
+docker compose -f docker-compose.yml up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
 echo "✅ Essential setup complete."
 
 # 6. Wait for the new container to stabilize (passes health check)
