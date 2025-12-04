@@ -2,34 +2,44 @@
 # docker-init-setup.sh
 set -e
 
-# --- CRITICAL FIX: Load ALL secrets from the mounted .env file ---
-# This forces the shell to load DB_PASSWORD, APP_URL, etc.,
-# which prevents Laravel from using an empty/default value.
-
-# Check if the .env file exists and load it
 ENV_FILE="/var/www/html/.env"
-if [ -f "$ENV_FILE" ]; then
-    echo "Loading environment variables from $ENV_FILE..."
-    # Read each line and export non-commented, non-empty key=value pairs
-    # Note: This is a safe way to source environment variables without eval
-    while IFS= read -r line || [[ -n "$line" ]]; do
-        # Ignore comments and empty lines
-        [[ "$line" =~ ^#.* ]] || [[ -z "$line" ]] && continue
 
-        # Check for key=value and export it
-        key=$(echo "$line" | cut -d'=' -f1)
-        value=$(echo "$line" | cut -d'=' -f2-)
-        if [[ -n "$key" && -n "$value" ]]; then
-            export "$key=$value"
-        fi
-    done < "$ENV_FILE"
-    echo "Environment variables exported to shell."
-else
+if [ ! -f "$ENV_FILE" ]; then
     echo "ERROR: .env file not found at $ENV_FILE. Aborting setup."
     exit 1
 fi
 
-# --- Environment Variables (Now guaranteed to be set) ---
+echo "Loading environment variables from $ENV_FILE..."
+
+# Function to safely extract and export a variable from the .env file
+# This bypasses potential line-reading issues and handles whitespace/quotes better.
+safe_export() {
+    local key="$1"
+    # Use grep to find the key, strip leading/trailing whitespace, remove comments,
+    # and then extract the value. Uses sed to handle quoted/unquoted values.
+    local value=$(grep "^${key}=" "$ENV_FILE" | head -n 1 | sed -E 's/^[[:space:]]*[^=]+=//' | sed -E 's/^[[:space:]]*//' | sed -E 's/[[:space:]]*$//' | sed -E 's/^"|"$//g')
+
+    # Export the variable
+    export "$key=$value"
+    # We echo a generic message for security, preventing the password from being logged
+    if [ "$key" != "DB_PASSWORD" ]; then
+        echo "Exported $key"
+    else
+        echo "Exported $key (Secret)"
+    fi
+}
+
+# --- Export Required Variables ---
+safe_export "DB_CONNECTION"
+safe_export "DB_HOST"
+safe_export "DB_PORT"
+safe_export "DB_DATABASE"
+safe_export "DB_USERNAME"
+safe_export "DB_PASSWORD"
+
+echo "Environment variables exported to shell."
+
+# --- Proceed with DB Wait Logic (Remains the same and should pass) ---
 DB_HOST=${DB_HOST:-actuallyfind-db}
 DB_PORT=${DB_PORT:-5432}
 DB_NAME=${DB_DATABASE}
@@ -37,7 +47,6 @@ DB_USER=${DB_USERNAME}
 
 echo "Waiting for database ($DB_NAME) at $DB_HOST:$DB_PORT to be ready..."
 
-# The DB wait loop uses PGPASSWORD, which is now guaranteed to be set by the sourced .env file
 while true; do
     PGPASSWORD=${DB_PASSWORD} pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t 1
     if [ $? -eq 0 ]; then
@@ -51,7 +60,7 @@ echo "Database ready. Running essential setup..."
 
 # 1. Run Migrations
 echo "    INFO  Running Migrations..."
-# php artisan now runs with the full environment exported, including DB_PASSWORD
+# This relies on the shell environment being correctly populated above
 php artisan migrate --force
 
 # 2. Run Essential Seeders (The slow ones)
