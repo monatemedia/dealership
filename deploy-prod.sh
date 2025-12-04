@@ -1,9 +1,9 @@
 #!/bin/bash
-#
-# This script is executed on the production server via SSH by the GitHub Actions workflow.
-# It performs the zero-downtime blue/green deployment.
-#
-# Environment variables (passed from the GitHub Action):
+
+## This script is executed on the production server via SSH by the GitHub Actions workflow.
+## It performs the zero-downtime blue/green deployment.
+
+## Environment variables (passed from the GitHub Action):
 # - WORK_DIR: The application's working directory on the server.
 # - IMAGE_NAME: The full name of the Docker image registry (e.g., ghcr.io/user/repo)
 # - APP_URL: The public URL for health checking.
@@ -13,7 +13,6 @@
 # - SETUP_INIT_SERVICE: Service name for migrations/setup.
 # - QUEUE_SERVICE: Queue service name.
 # - DEPLOY_TAG: The tag of the image to deploy (always 'production').
-#
 
 set -euo pipefail
 
@@ -39,9 +38,8 @@ echo "🏷️ Exported IMAGE_TAG=${IMAGE_TAG}"
 # but without the VIRTUAL_HOST_SET environment variable (which is handled by the swap script).
 # This ensures the inactive slot is running the new image, but isn't receiving traffic yet.
 echo "🚀 Ensuring all core services and web slots (inactive/active) are running the new image..."
-
 # We explicitly pass VIRTUAL_HOST_SET="" here to ensure the newly started container is NOT live yet.
-VIRTUAL_HOST_SET="" docker compose up -d \
+VIRTUAL_HOST_SET="" docker compose -f docker-compose.yml up -d \
   ${WEB_SERVICE_BASE}-blue \
   ${WEB_SERVICE_BASE}-green \
   ${DB_SERVICE} \
@@ -49,7 +47,7 @@ VIRTUAL_HOST_SET="" docker compose up -d \
 
 # 5. Run the essential setup container (Migrations/Core Seeders)
 echo "✨ Running essential setup (Migrations/Core Seeders)..."
-docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
+docker compose -f docker-compose.yml up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
 echo "✅ Essential setup complete."
 
 # 6. Wait for the new container to stabilize (passes health check)
@@ -68,7 +66,7 @@ BASE_DOMAIN="${APP_URL}" ./actuallyfind-swap.sh
 
 # 9. Restart the Queue service to connect to the new code base
 echo "🔁 Restarting Queue service with new code..."
-docker compose restart ${QUEUE_SERVICE}
+docker compose -f docker-compose.yml restart ${QUEUE_SERVICE}
 
 echo "✅ Deployment complete. Traffic is now routed to the new container."
 echo "--- Blue/Green Deployment Finished ---"
