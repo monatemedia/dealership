@@ -237,6 +237,7 @@ jobs:
             SEED_DATABASE=false
 
             # Internal Database Config (used by Laravel)
+            DB_CONNECTION=pgsql
             DB_HOST=actuallyfind-db
             DB_PORT=5432
             DB_DATABASE=actuallyfind_db
