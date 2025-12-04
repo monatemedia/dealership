@@ -186,16 +186,27 @@ jobs:
           fetch-depth: 1
           # Application code is checked out into a subdirectory to keep the root clean
           path: app-code
-
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ env.SSH_KEY }}
-
       - name: Add Production Server to Known Hosts
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
 
-      # 3. Upload the deployment script to the remote server
+      # --- NEW STEP TO CREATE .env FILE ---
+      - name: 📝 Create Production .env file on VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.HOST }}
+          username: ${{ env.USER }}
+          key: ${{ env.SSH_KEY }}
+          script: |
+            # Navigate to the correct directory and write the secret content to .env
+            cd ${{ env.WORK_DIR }}
+            echo "${{ secrets.PROD_ENV_FILE_CONTENT }}" > .env
+            echo "✅ Production .env file created on VPS."
+      # ------------------------------------
+      # 2. Upload the deployment script to the remote server
       - name: Transfer Deployment Script and Set Permissions
         run: |
           # --- DIAGNOSTICS ---
@@ -203,16 +214,13 @@ jobs:
           pwd
           echo "Listing contents of app-code directory:"
           ls -l app-code/
-
           # 1. FIX THE DIAGNOSTIC CHECK
           # Check the file location provided by the *first* checkout: app-code/deploy-prod.sh
           if [ ! -f "app-code/deploy-prod.sh" ]; then
               echo "ERROR: deploy-prod.sh was not found in the app-code directory."
               exit 1
           fi
-
           # --- END DIAGNOSTICS ---
-
           # 2. FIX THE SCP COMMAND
           # SCP the necessary deployment and setup scripts to the VPS
           scp -o StrictHostKeyChecking=no \
@@ -221,14 +229,12 @@ jobs:
               ./app-code/docker-entrypoint.sh \
               ./app-code/docker-init-setup.sh \
               ${USER}@${HOST}:${WORK_DIR}/
-
           # 3. Ensure the swap script is executable on the remote server
           ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/actuallyfind-swop.sh"
-
           # 4. Ensure the deploy script is executable on the remote server
           ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/deploy-prod.sh"
 
-      # 4. Execute the script remotely (existing step)
+      # 3. Execute the script remotely (existing step)
       - name: Execute Deployment Script (Zero Downtime)
         run: |
           # Pass all necessary environment variables and execute the script remotely
