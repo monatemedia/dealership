@@ -13,8 +13,8 @@
 # - SETUP_INIT_SERVICE: Service name for migrations/setup.
 # - QUEUE_SERVICE: Queue service name.
 # - DEPLOY_TAG: The tag of the image to deploy (always 'production').
+# - DOCKER_*_PORT: Host port variables (now passed directly from the Action)
 
-# Enable strict error checking
 set -euo pipefail
 
 DEPLOY_TAG="production"
@@ -22,29 +22,24 @@ FULL_IMAGE_NAME="${IMAGE_NAME}:${DEPLOY_TAG}"
 
 echo "--- Starting Blue/Green Deployment on Remote Server ---"
 
-# The workflow step executing this script now performs 'cd ${WORK_DIR}' first,
-# so we can use relative paths here.
-
-# 1. Verify working directory (Safety check)
+# 1. Change to the application directory
+# NOTE: The CI workflow step now handles the 'cd ${WORK_DIR}' command *before* executing this script.
 echo "✅ Current working directory is: $(pwd)"
-if [ "$(basename "$(pwd)")" != "$(basename "${WORK_DIR}")" ]; then
-    echo "ERROR: Script not executed from the correct WORK_DIR. Exiting."
-    exit 1
-fi
 
 # 2. Pull the latest Docker image
 echo "📥 Pulling latest image: ${FULL_IMAGE_NAME}"
 docker pull ${FULL_IMAGE_NAME}
 
 # 3. Export the Image Tag for docker-compose to use
+# (Assumes docker-compose.yml uses IMAGE_TAG environment variable)
 export IMAGE_TAG=${DEPLOY_TAG}
 echo "🏷️ Exported IMAGE_TAG=${IMAGE_TAG}"
 
-# 4. Bring up the core services and ensure all web slots are defined,
-# loading variables explicitly from .env.
+# 4. Bring up the core services (DB/Typesense) and ensure all web slots are defined,
+# loading variables explicitly from .env for the application secrets.
 echo "🚀 Ensuring all core services and web slots (inactive/active) are running the new image..."
-# We explicitly pass VIRTUAL_HOST_SET="" here to ensure the newly started container is NOT live yet.
-# *** FIX APPLIED: Added --env-file .env to load application secrets ***
+# The DOCKER_*_PORT variables are exported from the CI step.
+# VIRTUAL_HOST_SET is passed as an empty variable to keep the new web containers offline.
 VIRTUAL_HOST_SET="" docker compose --env-file .env -f docker-compose.yml up -d \
   ${WEB_SERVICE_BASE}-blue \
   ${WEB_SERVICE_BASE}-green \
@@ -53,7 +48,7 @@ VIRTUAL_HOST_SET="" docker compose --env-file .env -f docker-compose.yml up -d \
 
 # 5. Run the essential setup container (Migrations/Core Seeders)
 echo "✨ Running essential setup (Migrations/Core Seeders)..."
-# *** FIX APPLIED: Added --env-file .env to load application secrets ***
+# Pass --env-file .env to ensure the INIT service has access to DB credentials.
 docker compose --env-file .env -f docker-compose.yml up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
 echo "✅ Essential setup complete."
 
@@ -63,17 +58,17 @@ sleep 10
 
 # 7. Granting execute permission to the swap script
 echo "🛠️ Granting execute permission to the swap script..."
-# NOTE: This assumes 'actuallyfind-swap.sh' is also present in ${WORK_DIR}
-chmod +x actuallyfind-swap.sh
+# NOTE: This assumes 'actuallyfind-swop.sh' is also present in ${WORK_DIR}
+chmod +x actuallyfind-swop.sh
 
 # 8. ATOMIC SWITCH: Execute the dedicated swap script
 echo "⚡ Executing the atomic Blue/Green swap script..."
 # BASE_DOMAIN is passed as the actual domain
-BASE_DOMAIN="${APP_URL}" ./actuallyfind-swap.sh
+BASE_DOMAIN="${APP_URL}" ./actuallyfind-swop.sh
 
 # 9. Restart the Queue service to connect to the new code base
 echo "🔁 Restarting Queue service with new code..."
-# *** FIX APPLIED: Added --env-file .env to load application secrets ***
+# Pass --env-file .env to ensure the queue service has access to app credentials.
 docker compose --env-file .env -f docker-compose.yml restart ${QUEUE_SERVICE}
 echo "✅ Deployment complete. Traffic is now routed to the new container."
 

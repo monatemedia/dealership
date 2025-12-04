@@ -163,6 +163,7 @@ jobs:
     # Grant write permissions for creating GitHub Releases
     permissions:
       contents: write
+
     # Map existing secrets and hardcoded values for the script
     env:
       APP_URL: ${{ needs.publish.outputs.app-url }}
@@ -171,13 +172,21 @@ jobs:
       USER: ${{ secrets.PRODUCTION_USER }}
       SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
       WORK_DIR: ${{ secrets.PRODUCTION_WORK_DIR }}
-      # We are now changing these to the base names, the script handles the -blue/-green suffix
+
+      # Service base names
       WEB_SERVICE_BASE: actuallyfind-web
       QUEUE_SERVICE: actuallyfind-queue
       DB_SERVICE: actuallyfind-db
       TYPESENSE_SERVICE: actuallyfind-typesense
       SETUP_INIT_SERVICE: actuallyfind-init
-      HOST_PORT: 8092
+
+      # --- NEW PRODUCTION PORTS (Host-side port mappings) ---
+      DOCKER_LARAVEL_PORT: 8100
+      DOCKER_POSTGRES_PORT: 5445
+      DOCKER_ADMINER_PORT: 8101
+      DOCKER_TYPESENSE_PORT: 8118
+      # -----------------------------------------------------
+
     steps:
       # 1. Checkout Application Code (gets the code tied to the tag/trigger)
       - name: Checkout Application Code
@@ -186,26 +195,69 @@ jobs:
           fetch-depth: 1
           # Application code is checked out into a subdirectory to keep the root clean
           path: app-code
+
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ env.SSH_KEY }}
+
       - name: Add Production Server to Known Hosts
         run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
 
-      # --- NEW STEP TO CREATE .env FILE ---
+      # --- UPDATED CREATE .env FILE (Using Here-Doc for safety) ---
+      # This step now focuses on writing the secrets and static config,
+      # but NOT the port mappings, as they are passed directly to docker compose.
       - name: 📝 Create Production .env file on VPS
         uses: appleboy/ssh-action@master
         with:
           host: ${{ env.HOST }}
           username: ${{ env.USER }}
           key: ${{ env.SSH_KEY }}
+          # Assuming you set up secrets like PROD_DB_PASSWORD, PROD_TYPESENSE_API_KEY, etc.
+          # You will need to create these secrets in GitHub if they don't exist.
           script: |
-            # Navigate to the correct directory and write the secret content to .env
             cd ${{ env.WORK_DIR }}
-            echo "${{ secrets.PROD_ENV_FILE_CONTENT }}" > .env
-            echo "✅ Production .env file created on VPS."
+
+            # Use Here-Doc to securely write the application secrets and static config.
+            cat << EOF > .env
+            # Application Secrets (Critical for Laravel/App)
+            APP_KEY=${{ secrets.PROD_APP_KEY }}
+            DB_PASSWORD=${{ secrets.PROD_DB_PASSWORD }}
+            TYPESENSE_API_KEY=${{ secrets.PROD_TYPESENSE_API_KEY }}
+            MAIL_PASSWORD=${{ secrets.PROD_MAIL_PASSWORD }}
+
+            # Static Application Configuration
+            DOCKER_CONTAINER_NAME=actuallyfind
+            ENVIRONMENT=production
+            BASE_DOMAIN=actuallyfind.com
+            APP_NAME=ActuallyFind
+            APP_ENV=production
+            APP_DEBUG=false
+            APP_URL=${{ env.APP_URL }}
+            SEED_DATABASE=false
+
+            # Internal Database Config (used by Laravel)
+            DB_HOST=actuallyfind-db
+            DB_PORT=5432
+            DB_DATABASE=actuallyfind_db
+            DB_USERNAME=ACTUAL_PROD_DB_USER # Keep this literal if not a secret
+
+            # Internal Typesense Config (used by Laravel)
+            TYPESENSE_HOST=actuallyfind-typesense
+            TYPESENSE_PORT=8108
+
+            # Add other static config here (MAIL_USERNAME, GOOGLE_CLIENT_ID, etc.)
+            MAIL_USERNAME=ACTUAL_PROD_MAIL_USERNAME
+            VITE_APP_NAME=ActuallyFind
+
+            # NOTE: Port variables (DOCKER_*_PORT) are NOT included here,
+            # they are passed directly to the 'docker compose' commands.
+
+            EOF
+            echo "✅ Production .env file securely re-created on VPS."
+
       # ------------------------------------
+
       # 2. Upload the deployment script to the remote server
       - name: Transfer Deployment Script and Set Permissions
         run: |
@@ -238,7 +290,6 @@ jobs:
       - name: Execute Deployment Script (Zero Downtime)
         run: |
           # Pass all necessary environment variables and execute the script remotely
-          # The deploy-prod.sh script should now be in the remote WORK_DIR
           ssh ${{ env.USER }}@${{ env.HOST }} \
             'cd ${{ env.WORK_DIR }} && \
             export WORK_DIR="${{ env.WORK_DIR }}" && \
@@ -249,6 +300,14 @@ jobs:
             export TYPESENSE_SERVICE="${{ env.TYPESENSE_SERVICE }}" && \
             export SETUP_INIT_SERVICE="${{ env.SETUP_INIT_SERVICE }}" && \
             export QUEUE_SERVICE="${{ env.QUEUE_SERVICE }}" && \
+
+            # --- PASS NEW PORT VARIABLES DIRECTLY TO THE SHELL ---
+            export DOCKER_LARAVEL_PORT="${{ env.DOCKER_LARAVEL_PORT }}" && \
+            export DOCKER_POSTGRES_PORT="${{ env.DOCKER_POSTGRES_PORT }}" && \
+            export DOCKER_ADMINER_PORT="${{ env.DOCKER_ADMINER_PORT }}" && \
+            export DOCKER_TYPESENSE_PORT="${{ env.DOCKER_TYPESENSE_PORT }}" && \
+            # -----------------------------------------------------
+
             ./deploy-prod.sh'
 
       # The External Health Check remains the same, checking the public URL
