@@ -157,11 +157,11 @@ services:
     container_name: actuallyfind-db
     restart: always
     environment:
-      POSTGRES_DB: ${DB_DATABASE}
-      POSTGRES_USER: ${DB_USERNAME}
+      # CRITICAL FIX: Explicitly set the variables here for Docker Compose
+      # to guarantee the DB initializes with the correct user/pass.
+      POSTGRES_DB: actuallyfind_db
+      POSTGRES_USER: ACTUAL_PROD_DB_USER
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    env_file:
-      - .env
     volumes:
       - actuallyfind-db-data:/var/lib/postgresql
     ports:

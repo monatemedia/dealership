@@ -32,11 +32,13 @@ safe_export() {
 safe_export "DB_CONNECTION"
 safe_export "DB_HOST"
 safe_export "DB_PORT"
-safe_export "DB_DATABASE"
-safe_export "DB_USERNAME"
 safe_export "DB_PASSWORD"
 # Also export APP_KEY as migrations often require it for encryption
 safe_export "APP_KEY"
+
+# Set the literals here to GUARANTEE they match the DB container setup
+DB_DATABASE="actuallyfind_db"
+DB_USERNAME="ACTUAL_PROD_DB_USER"
 
 echo "Environment variables exported to shell."
 
