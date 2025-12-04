@@ -214,13 +214,15 @@ jobs:
           # --- END DIAGNOSTICS ---
 
           # 2. FIX THE SCP COMMAND
-          # SCP the deploy script using the correct path from the first checkout
+          # SCP the necessary deployment and setup scripts to the VPS
           scp -o StrictHostKeyChecking=no \
               ./app-code/deploy-prod.sh \
-              ${USER}@${HOST}:${WORK_DIR}/deploy-prod.sh # Using environment variables
+              ./app-code/actuallyfind-swop.sh \
+              ./app-code/docker-entrypoint.sh \
+              ./app-code/docker-init-setup.sh \
+              ${USER}@${HOST}:${WORK_DIR}/
 
           # 3. Ensure the swap script is executable on the remote server
-          # (Keep this command as is)
           ssh ${USER}@${HOST} 'chmod +x ${WORK_DIR}/actuallyfind-swop.sh'
 
       # 4. Execute the script remotely (existing step)
