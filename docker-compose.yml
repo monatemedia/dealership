@@ -125,10 +125,6 @@ services:
     depends_on:
       actuallyfind-db:
         condition: service_healthy
-    # *** CRITICAL FIX: REMOVED redundant 'environment' block ***
-    # Now relies entirely on the mounted .env file for Laravel's secrets.
-    env_file:
-      - ./.env
     entrypoint: /bin/bash
     command: ["/usr/local/bin/docker-init-setup.sh"]
     volumes:
