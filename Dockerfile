@@ -109,7 +109,7 @@ RUN set -ex; \
     libjpeg62-turbo \
     libpng16-16 \
     libfreetype6 \
-    libwebp7; \
+    libwebp7 \
     postgresql-client; \
     \
     # Remove build dependencies
