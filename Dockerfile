@@ -61,6 +61,9 @@ RUN set -ex; \
     libzip4 \
     dos2unix \
     \
+    # Add postgresql-client for pg_isready
+    postgresql-client \
+    \
     # Image Optimization CLI Tools
     jpegoptim \
     optipng \
@@ -107,6 +110,7 @@ RUN set -ex; \
     libpng16-16 \
     libfreetype6 \
     libwebp7; \
+    postgresql-client; \
     \
     # Remove build dependencies
     apt-get purge -y --auto-remove \
