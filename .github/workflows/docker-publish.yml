@@ -285,6 +285,8 @@ jobs:
           ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/actuallyfind-swop.sh"
           # 4. Ensure the deploy script is executable on the remote server
           ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/deploy-prod.sh"
+          # 5. FIX: Ensure the docker-entrypoint.sh is executable on the remote server
+          ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/docker-entrypoint.sh"
 
       # 3. Execute the script remotely (existing step)
       - name: Execute Deployment Script (Zero Downtime)
