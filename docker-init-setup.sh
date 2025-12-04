@@ -16,12 +16,17 @@ DB_USER=${DB_USERNAME}
 
 echo "Waiting for database ($DB_NAME) at $DB_HOST:$DB_PORT to be ready..."
 
-# The fix: Use pg_isready to confirm the database is out of recovery mode
-# and fully accepting connections before running migrations.
-# Note: PGPASSWORD is used to pass the password to pg_isready securely.
-# The loop exits when pg_isready returns 0 (ready).
+# The fix: Separate PGPASSWORD assignment and use a standard loop format.
+# We run the command inside the loop to ensure PGPASSWORD is set for each check.
+while true; do
+    # Run pg_isready command, supplying the password via PGPASSWORD variable
+    PGPASSWORD=${DB_PASSWORD} pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t 1
 
-PGPASSWORD=${DB_PASSWORD} until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t 1; do
+    # Check the exit code of pg_isready (0 means ready)
+    if [ $? -eq 0 ]; then
+        break
+    fi
+
     echo "Database not ready or still in recovery mode, sleeping for 2 seconds..."
     sleep 2
 done
