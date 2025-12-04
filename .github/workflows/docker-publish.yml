@@ -223,7 +223,7 @@ jobs:
               ${USER}@${HOST}:${WORK_DIR}/
 
           # 3. Ensure the swap script is executable on the remote server
-          ssh ${USER}@${HOST} 'chmod +x ${WORK_DIR}/actuallyfind-swop.sh'
+          ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/actuallyfind-swop.sh"
 
       # 4. Execute the script remotely (existing step)
       - name: Execute Deployment Script (Zero Downtime)
