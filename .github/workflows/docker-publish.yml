@@ -129,12 +129,7 @@ jobs:
             export APP_IMAGE_TAG=${DEPLOY_TAG}
             # 4. Stop all existing services
             docker compose down
-            # 5. Run the essential setup container (Migrations/Core Seeders)
-            echo "🚀 Running essential setup (Migrations/Core Seeders)..."
-            # The init service will start, run the slow seeders, and exit.
-            docker compose up ${SETUP_INIT_SERVICE} --remove-orphans --abort-on-container-exit
-            echo "✅ Essential setup complete. Starting web and queue services..."
-            # 6. Start the main application services
+            # 5. Start the main application services
             docker compose up -d ${WEB_SERVICE} ${QUEUE_SERVICE}
             echo "⏳ Waiting for web container to boot..."
             sleep 15
