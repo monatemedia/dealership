@@ -124,7 +124,7 @@ services:
     restart: always
     command: '--data-dir /data --api-key=${TYPESENSE_API_KEY} --enable-cors'
     environment:
-      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY}
+      TYPESENSE_API_KEY: ${PRODUCTION_TYPESENSE_API_KEY}
     volumes:
       - actuallyfind-typesense-data:/data
     ports:

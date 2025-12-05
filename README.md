@@ -653,8 +653,8 @@ Temporary branches, deleted after merge:
 
 ### Deployment Environments
 
-- **Production** → Triggered by pushes to `main` or version tags (e.g., `v1.0.0`). Deploys to production server. **The essential setup service (`actuallyfind-init`) runs migrations and mandatory seeders once per deployment.** Adminer is NOT included in production.
-- **Staging** → `release/*` branches automatically deploy to staging environment on VPS for QA/testing. **The essential setup service (`dealership-init`) runs migrations and mandatory seeders once per deployment.** Adminer is included for database access.
+- **Production** → Triggered by creating version tags (e.g., `v1.0.0`). Deploys to production server.  Adminer is NOT included in production.
+- **Staging** → `release/*` branches automatically deploy to staging environment on VPS for QA/testing.  Adminer is included for database access.
 - **Local Development** → `dev` branch for development on Docker Desktop. **Adminer is included.**
 
 ### Version Management
