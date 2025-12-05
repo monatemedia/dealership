@@ -93,8 +93,8 @@ fi
 echo "🛠️ Running migrations and setup on the inactive container (${TARGET_SLOT})..."
 
 # 8.1. Safely parse the .env file to get key=value pairs, including the newly set APP_KEY.
-# FIX: Use relative path '.env'
-ENV_VARIABLES=$(grep -E '^(DB_.*|APP_KEY|TYPESENSE_API_KEY)=' .env | grep -v '^#')
+# New Line: Explicitly list the necessary DB environment variables
+ENV_VARIABLES=$(grep -E '^(DB_CONNECTION|DB_HOST|DB_PORT|DB_DATABASE|DB_USERNAME|DB_PASSWORD|APP_KEY|TYPESENSE_API_KEY)=' .env | grep -v '^#')
 
 # 8.2. Convert key=value pairs into a string of -e flags.
 ENV_FLAGS=$(echo "$ENV_VARIABLES" | tr '\n' ' ' | sed 's/ -e / -e /g' | sed 's/^/-e /')
