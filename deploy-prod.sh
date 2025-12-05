@@ -67,7 +67,7 @@ sleep 30
 echo "🛠️ Running migrations and setup on the inactive container (${TARGET_SLOT})..."
 # New: Explicitly sources the mounted .env file to ensure DB_PASSWORD is set
 # before php artisan runs. We must use 'set -a' to export variables found in the sourced file.
-docker exec ${TARGET_SLOT} sh -c "set -a && source /var/www/html/.env && set +a && php artisan migrate --force && php artisan db:seed --force"
+docker exec ${TARGET_SLOT} sh -c "set -a && . /var/www/html/.env && set +a && php artisan migrate --force && php artisan db:seed --force"
 
 # 8. Granting execute permission to the swap script
 echo "🛠️ Granting execute permission to the swap script..."
