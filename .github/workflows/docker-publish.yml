@@ -253,6 +253,18 @@ jobs:
 
       # ------------------------------------
 
+      - name: 🔐 Fix Remote Directory Permissions
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.HOST }}
+          username: ${{ env.USER }}
+          key: ${{ env.SSH_KEY }}
+          script: |
+            # Ensure the user has write permissions for the directory itself
+            # This is commonly needed after a manual file deletion or cleanup
+            chmod 775 ${{ env.WORK_DIR }}
+            echo "✅ Corrected permissions on target directory: ${{ env.WORK_DIR }}"
+
       # 2. Upload the deployment script to the remote server
       - name: Transfer Deployment Script and Set Permissions
         run: |
