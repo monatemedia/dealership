@@ -248,19 +248,19 @@ jobs:
           host: ${{ env.HOST }}
           username: ${{ env.USER }}
           key: ${{ env.SSH_KEY }}
-          # Assuming you set up secrets like PROD_DB_PASSWORD, PROD_TYPESENSE_API_KEY, etc.
-          # You will need to create these secrets in GitHub if they don't exist.
           script: |
             cd ${{ env.WORK_DIR }}
+
+            # --- NEW LOGIC: READ AND PRESERVE EXISTING APP_KEY ---
+            EXISTING_APP_KEY=$(grep '^APP_KEY=' .env 2>/dev/null)
 
             # Use Here-Doc to securely write the application secrets and static config.
             cat << EOF > .env
             # Application Secrets (Critical for Laravel/App)
-            APP_KEY=${{ secrets.PRODUCTION_APP_KEY }}
+            # APP_KEY is intentionally omitted here; it is preserved or generated later.
             DB_PASSWORD=${{ secrets.PRODUCTION_DB_PASSWORD }}
             TYPESENSE_API_KEY=${{ secrets.PRODUCTION_TYPESENSE_API_KEY }}
             MAIL_PASSWORD=${{ secrets.PRODUCTION_MAIL_PASSWORD }}
-
             # Static Application Configuration
             DOCKER_CONTAINER_NAME=actuallyfind
             ENVIRONMENT=production
@@ -270,26 +270,32 @@ jobs:
             APP_DEBUG=false
             APP_URL=${{ env.APP_URL }}
             SEED_DATABASE=false
-
             # Internal Database Config (used by Laravel)
             DB_CONNECTION=pgsql
             DB_HOST=actuallyfind-db
             DB_PORT=5432
             DB_DATABASE=actuallyfind_db
-            DB_USERNAME=ACTUAL_PROD_DB_USER # Keep this literal if not a secret
-
+            DB_USERNAME=ACTUAL_PROD_DB_USER
             # Internal Typesense Config (used by Laravel)
             TYPESENSE_HOST=actuallyfind-typesense
             TYPESENSE_PORT=8108
-
+            # The key Laravel will look for:
+            TYPESENSE_API_KEY=${{ secrets.PRODUCTION_TYPESENSE_API_KEY }}
             # Add other static config here (MAIL_USERNAME, GOOGLE_CLIENT_ID, etc.)
             MAIL_USERNAME=ACTUAL_PROD_MAIL_USERNAME
             VITE_APP_NAME=ActuallyFind
-
-            # NOTE: Port variables (DOCKER_*_PORT) are NOT included here,
-            # they are passed directly to the 'docker compose' commands.
-
             EOF
+
+            # --- Re-append the existing key (if found) or leave a placeholder ---
+            if [ -n "$EXISTING_APP_KEY" ]; then
+                # Append the existing line (e.g., APP_KEY=base64:...)
+                echo "$EXISTING_APP_KEY" >> .env
+                echo "✅ Existing APP_KEY preserved."
+            else
+                # Append a blank APP_KEY line (which we will replace later)
+                echo "APP_KEY=" >> .env
+                echo "ℹ️ APP_KEY line added. Will be generated on first run."
+            fi
             echo "✅ Production .env file securely re-created on VPS."
 
       # ------------------------------------

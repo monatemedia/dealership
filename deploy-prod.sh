@@ -63,51 +63,73 @@ echo "🎯 Identified TARGET_SLOT for deployment and setup: ${TARGET_SLOT}"
 echo "⏳ Waiting 30 seconds for the newly built container to stabilize..."
 sleep 30
 
-# --- 7. RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER ---
+# --- NEW STEP 7: APP_KEY MANAGEMENT (CREATE IF MISSING) ---
+echo "🔑 Checking and generating APP_KEY..."
+# Use grep to check if the APP_KEY has a value assigned
+if grep -q '^APP_KEY=$' ${WORK_DIR}/.env; then
+    echo "⚠️ APP_KEY is missing a value. Generating a new one..."
+
+    # 1. Generate the key inside the container and capture the output
+    NEW_KEY=$(docker exec ${TARGET_SLOT} php artisan key:generate --show)
+
+    # 2. Extract the base64 value (e.g., 'base64:...')
+    # Laravel's output is often just the key string. We assume it's clean.
+    KEY_VALUE=$(echo "$NEW_KEY" | tail -n 1)
+
+    # 3. Replace the old placeholder line with the new key in the host .env file
+    # Use 'sed' on the host machine. The new key replaces the old placeholder.
+    sed -i "/^APP_KEY=/c\APP_KEY=$KEY_VALUE" ${WORK_DIR}/.env
+
+    if [ $? -ne 0 ]; then
+        echo "❌ Failed to generate and update APP_KEY."
+        exit 1
+    fi
+    echo "✅ New APP_KEY generated and saved to ${WORK_DIR}/.env"
+else
+    echo "✅ APP_KEY already exists and is in use."
+fi
+
+
+# --- NEW STEP 8: RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER (Fixed Parsing) ---
 echo "🛠️ Running migrations and setup on the inactive container (${TARGET_SLOT})..."
 
-# 1. Safely parse the .env file to get key=value pairs, ignoring comments and blanks.
-# The `docker exec` command will load these key=value pairs as environment variables.
-# We explicitly get all relevant Laravel/DB variables.
-DB_VARS=$(grep -E '^(DB_.*|APP_KEY|TYPESENSE_API_KEY)=' /home/edward/actuallyfind/.env | grep -v '^#')
+# 1. Safely parse the .env file to get key=value pairs, including the newly set APP_KEY.
+# We ensure the output is space-separated.
+ENV_VARIABLES=$(grep -E '^(DB_.*|APP_KEY|TYPESENSE_API_KEY)=' ${WORK_DIR}/.env | grep -v '^#')
 
-# 2. Execute migrations, passing the parsed variables as environment flags (-e).
-# This bypasses the nested shell's environment issues and guarantees Laravel sees the secrets.
-# We run the command once for migrate and then again for seed.
+# 2. Convert key=value pairs into a string of -e flags.
+# We use 'tr' to replace newlines with a space, then 'sed' to prepend '-e ' to each variable.
+# We add a leading '-e ' to the final string.
+ENV_FLAGS=$(echo "$ENV_VARIABLES" | tr '\n' ' ' | sed 's/ -e / -e /g' | sed 's/^/-e /')
 
-docker exec \
-    ${DB_VARS} \
-    ${TARGET_SLOT} \
-    php artisan migrate --force --no-interaction
+# 3. Execute migrations using the constructed -e flags.
+docker exec ${ENV_FLAGS} ${TARGET_SLOT} php artisan migrate --force --no-interaction
 
 # Check if migrations succeeded before seeding
 if [ $? -eq 0 ]; then
-    docker exec \
-        ${DB_VARS} \
-        ${TARGET_SLOT} \
-        php artisan db:seed --force --no-interaction
+    docker exec ${ENV_FLAGS} ${TARGET_SLOT} php artisan db:seed --force --no-interaction
 
     if [ $? -ne 0 ]; then
         echo "❌ Database Seeding Failed!"
         exit 1
     fi
 else
-    echo "❌ Database Migration Failed! Check logs for authentication error."
+    echo "❌ Database Migration Failed! Check logs."
     exit 1
 fi
 echo "✅ Migrations and seeding complete."
 
-# 8. Granting execute permission to the swap script
+# 9. Granting execute permission to the swap script
 echo "🛠️ Granting execute permission to the swap script..."
 # NOTE: This assumes 'actuallyfind-swop.sh' is also present in ${WORK_DIR}
 chmod +x actuallyfind-swop.sh
 
-# 9. ATOMIC SWITCH: Execute the dedicated swap script
+# 10. ATOMIC SWITCH: Execute the dedicated swap script
 echo "⚡ Executing the atomic Blue/Green swap script..."
 # BASE_DOMAIN is passed as the actual domain
 BASE_DOMAIN="${APP_URL}" ./actuallyfind-swop.sh
 
-# 10. Restart the Queue service to connect to the new code base
+# 11. Restart the Queue service to connect to the new code base
 echo "🔁 Restarting Queue service with new code..."
 # Pass --env-file .env to ensure the queue service has access to app credentials.
 docker compose --env-file .env -f docker-compose.yml restart ${QUEUE_SERVICE}
