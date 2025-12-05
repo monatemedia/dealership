@@ -284,7 +284,6 @@ jobs:
             export WEB_SERVICE_BASE="${{ env.WEB_SERVICE_BASE }}" && \
             export DB_SERVICE="${{ env.DB_SERVICE }}" && \
             export TYPESENSE_SERVICE="${{ env.TYPESENSE_SERVICE }}" && \
-            export SETUP_INIT_SERVICE="${{ env.SETUP_INIT_SERVICE }}" && \
             export QUEUE_SERVICE="${{ env.QUEUE_SERVICE }}" && \
 
             # --- PASS NEW PORT VARIABLES DIRECTLY TO THE SHELL ---
