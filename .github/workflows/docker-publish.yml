@@ -282,15 +282,15 @@ jobs:
               ./app-code/deploy-prod.sh \
               ./app-code/actuallyfind-swop.sh \
               ./app-code/docker-entrypoint.sh \
+              ./app-code/docker-compose.yml \
               ${USER}@${HOST}:${WORK_DIR}/
 
-          # --- ADD THIS LINE FOR THE DEPLOYMENT SCRIPT ---
-          # FIX: Ensure the main deployment script is executable
+          # 1: Ensure the main deployment script is executable
           ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/deploy-prod.sh"
-          # ---------------------------------------------
 
           # 2. Ensure the swap script is executable on the remote server
           ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/actuallyfind-swop.sh"
+
           # 3. FIX: Ensure the docker-entrypoint.sh is executable on the remote server
           ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/docker-entrypoint.sh"
 
