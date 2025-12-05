@@ -178,7 +178,6 @@ jobs:
       QUEUE_SERVICE: actuallyfind-queue
       DB_SERVICE: actuallyfind-db
       TYPESENSE_SERVICE: actuallyfind-typesense
-      SETUP_INIT_SERVICE: actuallyfind-init
 
       # --- NEW PRODUCTION PORTS (Host-side port mappings) ---
       DOCKER_LARAVEL_PORT: 8100
@@ -262,31 +261,16 @@ jobs:
       # 2. Upload the deployment script to the remote server
       - name: Transfer Deployment Script and Set Permissions
         run: |
-          # --- DIAGNOSTICS ---
-          echo "Current Working Directory:"
-          pwd
-          echo "Listing contents of app-code directory:"
-          ls -l app-code/
-          # 1. FIX THE DIAGNOSTIC CHECK
-          # Check the file location provided by the *first* checkout: app-code/deploy-prod.sh
-          if [ ! -f "app-code/deploy-prod.sh" ]; then
-              echo "ERROR: deploy-prod.sh was not found in the app-code directory."
-              exit 1
-          fi
-          # --- END DIAGNOSTICS ---
-          # 2. FIX THE SCP COMMAND
+          # 1. FIX THE SCP COMMAND
           # SCP the necessary deployment and setup scripts to the VPS
           scp -o StrictHostKeyChecking=no \
-              ./app-code/deploy-prod.sh \
               ./app-code/actuallyfind-swop.sh \
               ./app-code/docker-entrypoint.sh \
               ./app-code/docker-init-setup.sh \
               ${USER}@${HOST}:${WORK_DIR}/
-          # 3. Ensure the swap script is executable on the remote server
+          # 2. Ensure the swap script is executable on the remote server
           ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/actuallyfind-swop.sh"
-          # 4. Ensure the deploy script is executable on the remote server
-          ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/deploy-prod.sh"
-          # 5. FIX: Ensure the docker-entrypoint.sh is executable on the remote server
+          # 3. FIX: Ensure the docker-entrypoint.sh is executable on the remote server
           ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/docker-entrypoint.sh"
 
       # 3. Execute the script remotely (existing step)
