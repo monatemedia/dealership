@@ -259,6 +259,7 @@ jobs:
           # 1. FIX THE SCP COMMAND
           # SCP the necessary deployment and setup scripts to the VPS
           scp -o StrictHostKeyChecking=no \
+              ./deploy-prod.sh \
               ./app-code/actuallyfind-swop.sh \
               ./app-code/docker-entrypoint.sh \
               ${USER}@${HOST}:${WORK_DIR}/
