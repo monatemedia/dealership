@@ -248,10 +248,10 @@ jobs:
             # Use Here-Doc to securely write the application secrets and static config.
             cat << EOF > .env
             # Application Secrets (Critical for Laravel/App)
-            APP_KEY=${{ secrets.PROD_APP_KEY }}
-            DB_PASSWORD=${{ secrets.PROD_DB_PASSWORD }}
-            TYPESENSE_API_KEY=${{ secrets.PROD_TYPESENSE_API_KEY }}
-            MAIL_PASSWORD=${{ secrets.PROD_MAIL_PASSWORD }}
+            APP_KEY=${{ secrets.PRODUCTION_APP_KEY }}
+            DB_PASSWORD=${{ secrets.PRODUCTION_DB_PASSWORD }}
+            TYPESENSE_API_KEY=${{ secrets.PRODUCTION_TYPESENSE_API_KEY }}
+            MAIL_PASSWORD=${{ secrets.PRODUCTION_MAIL_PASSWORD }}
 
             # Static Application Configuration
             DOCKER_CONTAINER_NAME=actuallyfind

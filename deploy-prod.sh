@@ -49,17 +49,22 @@ VIRTUAL_HOST_SET="" docker compose --env-file .env -f docker-compose.yml up -d \
 echo "⏳ Waiting 10 seconds for the newly built container to stabilize..."
 sleep 10
 
-# 6. Granting execute permission to the swap script
+# 6. RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER
+echo "🛠️ Running migrations and setup on the inactive container (${TARGET_SLOT})..."
+# Execute the entrypoint setup phase only (Artisan commands)
+docker exec ${TARGET_SLOT} sh -c "php artisan migrate --force && php artisan db:seed --force"
+
+# 7. Granting execute permission to the swap script
 echo "🛠️ Granting execute permission to the swap script..."
 # NOTE: This assumes 'actuallyfind-swop.sh' is also present in ${WORK_DIR}
 chmod +x actuallyfind-swop.sh
 
-# 7. ATOMIC SWITCH: Execute the dedicated swap script
+# 8. ATOMIC SWITCH: Execute the dedicated swap script
 echo "⚡ Executing the atomic Blue/Green swap script..."
 # BASE_DOMAIN is passed as the actual domain
 BASE_DOMAIN="${APP_URL}" ./actuallyfind-swop.sh
 
-# 8. Restart the Queue service to connect to the new code base
+# 9. Restart the Queue service to connect to the new code base
 echo "🔁 Restarting Queue service with new code..."
 # Pass --env-file .env to ensure the queue service has access to app credentials.
 docker compose --env-file .env -f docker-compose.yml restart ${QUEUE_SERVICE}

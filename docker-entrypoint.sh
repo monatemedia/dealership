@@ -36,25 +36,7 @@ while true; do
     echo "Database not ready, sleeping for 2 seconds..."
     sleep 2
 done
-echo "Database ready. Running migrations and seeders..."
-
-# --- EXPLICITLY EXPORT DB VARIABLES FOR ARTISAN ---
-# Re-exporting these variables ensures the PHP child process (Artisan) inherits them,
-# guaranteeing the connection details, especially the DB_PASSWORD.
-export DB_CONNECTION="${DB_CONNECTION:-pgsql}"
-export DB_HOST="${DB_HOST:-actuallyfind-db}"
-export DB_PORT="${DB_PORT:-5432}"
-export DB_DATABASE="${DB_DATABASE:-actuallyfind_db}"
-export DB_USERNAME="${DB_USERNAME:-ACTUAL_PROD_DB_USER}"
-export DB_PASSWORD="${DB_PASSWORD}"
-
-# Run Migrations and Seeders (These will use the environment variables exported above)
-php artisan migrate --force
-
-# Run Essential Seeders (The large ones)
-echo "    INFO  Running Essential db:seed (expect long running process)..."
-php artisan db:seed --force
-echo "Migrations and seeding complete."
+echo "Database ready..."
 
 # --- 2. Application Setup ---
 
