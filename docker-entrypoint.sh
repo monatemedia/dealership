@@ -38,8 +38,17 @@ while true; do
 done
 echo "Database ready. Running migrations and seeders..."
 
-# Run Migrations and Seeders (These use the environment variables exported above)
+# Set environment variables for the current shell to pass to Artisan
+export DB_CONNECTION=pgsql
+export DB_HOST=${DB_HOST}
+export DB_PORT=${DB_PORT}
+export DB_DATABASE=${DB_DATABASE}
+export DB_USERNAME=${DB_USERNAME}
+export DB_PASSWORD=${DB_PASSWORD} # <-- IMPORTANT: Ensure this is exported for Artisan!
+
+# Run Migrations and Seeders (These will now inherit the exported DB variables)
 php artisan migrate --force
+
 # Run Essential Seeders (The large ones)
 echo "    INFO  Running Essential db:seed (expect long running process)..."
 php artisan db:seed --force
