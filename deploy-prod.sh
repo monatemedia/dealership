@@ -63,11 +63,39 @@ echo "🎯 Identified TARGET_SLOT for deployment and setup: ${TARGET_SLOT}"
 echo "⏳ Waiting 30 seconds for the newly built container to stabilize..."
 sleep 30
 
-# 7. RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER
+# --- 7. RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER ---
 echo "🛠️ Running migrations and setup on the inactive container (${TARGET_SLOT})..."
-# FIX: Only rely on loading and exporting the .env variables.
-# Laravel's connection logic will find DB_HOST, DB_PASSWORD, etc. from the shell environment.
-docker exec ${TARGET_SLOT} sh -c "set -a && . /var/www/html/.env && set +a && php artisan migrate --force --no-interaction && php artisan db:seed --force --no-interaction"
+
+# 1. Safely parse the .env file to get key=value pairs, ignoring comments and blanks.
+# The `docker exec` command will load these key=value pairs as environment variables.
+# We explicitly get all relevant Laravel/DB variables.
+DB_VARS=$(grep -E '^(DB_.*|APP_KEY|TYPESENSE_API_KEY)=' /home/edward/actuallyfind/.env | grep -v '^#')
+
+# 2. Execute migrations, passing the parsed variables as environment flags (-e).
+# This bypasses the nested shell's environment issues and guarantees Laravel sees the secrets.
+# We run the command once for migrate and then again for seed.
+
+docker exec \
+    ${DB_VARS} \
+    ${TARGET_SLOT} \
+    php artisan migrate --force --no-interaction
+
+# Check if migrations succeeded before seeding
+if [ $? -eq 0 ]; then
+    docker exec \
+        ${DB_VARS} \
+        ${TARGET_SLOT} \
+        php artisan db:seed --force --no-interaction
+
+    if [ $? -ne 0 ]; then
+        echo "❌ Database Seeding Failed!"
+        exit 1
+    fi
+else
+    echo "❌ Database Migration Failed! Check logs for authentication error."
+    exit 1
+fi
+echo "✅ Migrations and seeding complete."
 
 # 8. Granting execute permission to the swap script
 echo "🛠️ Granting execute permission to the swap script..."
