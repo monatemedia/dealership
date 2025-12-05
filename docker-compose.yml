@@ -142,8 +142,8 @@ services:
     container_name: actuallyfind-db
     restart: always
     environment:
-      POSTGRES_DB: ${DB_DATABASE}
-      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_DB: actuallyfind_db
+      POSTGRES_USER: ACTUAL_PROD_DB_USER
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - actuallyfind-db-data:/var/lib/postgresql
