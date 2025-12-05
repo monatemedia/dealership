@@ -63,46 +63,43 @@ echo "🎯 Identified TARGET_SLOT for deployment and setup: ${TARGET_SLOT}"
 echo "⏳ Waiting 30 seconds for the newly built container to stabilize..."
 sleep 30
 
-# --- NEW STEP 7: APP_KEY MANAGEMENT (CREATE IF MISSING) ---
+# 7: APP_KEY MANAGEMENT (CREATE IF MISSING) ---
 echo "🔑 Checking and generating APP_KEY..."
-# Use grep to check if the APP_KEY has a value assigned
-if grep -q '^APP_KEY=$' ${WORK_DIR}/.env; then
+# FIX: Use relative path '.env' instead of '${WORK_DIR}/.env'
+if grep -q '^APP_KEY=$' .env; then
     echo "⚠️ APP_KEY is missing a value. Generating a new one..."
 
     # 1. Generate the key inside the container and capture the output
     NEW_KEY=$(docker exec ${TARGET_SLOT} php artisan key:generate --show)
 
-    # 2. Extract the base64 value (e.g., 'base64:...')
-    # Laravel's output is often just the key string. We assume it's clean.
+    # 2. Extract the base64 value
     KEY_VALUE=$(echo "$NEW_KEY" | tail -n 1)
 
     # 3. Replace the old placeholder line with the new key in the host .env file
-    # Use 'sed' on the host machine. The new key replaces the old placeholder.
-    sed -i "/^APP_KEY=/c\APP_KEY=$KEY_VALUE" ${WORK_DIR}/.env
+    # FIX: Use relative path '.env'
+    sed -i "/^APP_KEY=/c\APP_KEY=$KEY_VALUE" .env
 
     if [ $? -ne 0 ]; then
         echo "❌ Failed to generate and update APP_KEY."
         exit 1
     fi
-    echo "✅ New APP_KEY generated and saved to ${WORK_DIR}/.env"
+    echo "✅ New APP_KEY generated and saved to .env"
 else
     echo "✅ APP_KEY already exists and is in use."
 fi
 
 
-# --- NEW STEP 8: RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER (Fixed Parsing) ---
+# 8: RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER (Fixed Parsing) ---
 echo "🛠️ Running migrations and setup on the inactive container (${TARGET_SLOT})..."
 
-# 1. Safely parse the .env file to get key=value pairs, including the newly set APP_KEY.
-# We ensure the output is space-separated.
-ENV_VARIABLES=$(grep -E '^(DB_.*|APP_KEY|TYPESENSE_API_KEY)=' ${WORK_DIR}/.env | grep -v '^#')
+# 8.1. Safely parse the .env file to get key=value pairs, including the newly set APP_KEY.
+# FIX: Use relative path '.env'
+ENV_VARIABLES=$(grep -E '^(DB_.*|APP_KEY|TYPESENSE_API_KEY)=' .env | grep -v '^#')
 
-# 2. Convert key=value pairs into a string of -e flags.
-# We use 'tr' to replace newlines with a space, then 'sed' to prepend '-e ' to each variable.
-# We add a leading '-e ' to the final string.
+# 8.2. Convert key=value pairs into a string of -e flags.
 ENV_FLAGS=$(echo "$ENV_VARIABLES" | tr '\n' ' ' | sed 's/ -e / -e /g' | sed 's/^/-e /')
 
-# 3. Execute migrations using the constructed -e flags.
+# 8.3. Execute migrations using the constructed -e flags.
 docker exec ${ENV_FLAGS} ${TARGET_SLOT} php artisan migrate --force --no-interaction
 
 # Check if migrations succeeded before seeding
