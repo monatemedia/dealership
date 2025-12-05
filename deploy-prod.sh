@@ -60,13 +60,14 @@ fi
 echo "🎯 Identified TARGET_SLOT for deployment and setup: ${TARGET_SLOT}"
 
 # 6. Wait for the new container to stabilize (passes health check)
-echo "⏳ Waiting 10 seconds for the newly built container to stabilize..."
+echo "⏳ Waiting 30 seconds for the newly built container to stabilize..."
 sleep 30
 
 # 7. RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER
 echo "🛠️ Running migrations and setup on the inactive container (${TARGET_SLOT})..."
-# Execute the entrypoint setup phase only (Artisan commands)
-docker exec ${TARGET_SLOT} sh -c "php artisan migrate --force && php artisan db:seed --force"
+# New: Explicitly sources the mounted .env file to ensure DB_PASSWORD is set
+# before php artisan runs. We must use 'set -a' to export variables found in the sourced file.
+docker exec ${TARGET_SLOT} sh -c "set -a && source /var/www/html/.env && set +a && php artisan migrate --force && php artisan db:seed --force"
 
 # 8. Granting execute permission to the swap script
 echo "🛠️ Granting execute permission to the swap script..."
