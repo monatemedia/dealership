@@ -327,6 +327,18 @@ jobs:
           # 3. FIX: Ensure the docker-entrypoint.sh is executable on the remote server
           ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/docker-entrypoint.sh"
 
+      - name: 🔐 Fix Web Container Directory Permissions
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.HOST }}
+          username: ${{ env.USER }}
+          key: ${{ env.SSH_KEY }}
+          script: |
+            # Give full permissions recursively to the directories mounted as volumes
+            chmod -R 777 ${{ env.WORK_DIR }}/storage
+            chmod -R 777 ${{ env.WORK_DIR }}/bootstrap/cache
+            echo "✅ Fixed permissions on storage and cache directories."
+
       # 3. Execute the script remotely (existing step)
       - name: Execute Deployment Script (Zero Downtime)
         run: |
@@ -349,6 +361,12 @@ jobs:
             # -----------------------------------------------------
 
             ./deploy-prod.sh'
+
+      # --- NEW STEP: WAIT FOR NGINX RELOAD ---
+      - name: ⏳ Wait for Nginx Proxy Reload
+        run: |
+          echo "Giving Nginx 15 seconds to detect the swap and reload configuration."
+          sleep 15
 
       # The External Health Check remains the same, checking the public URL
       - name: External Health Check (Public URL)
