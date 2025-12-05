@@ -368,16 +368,28 @@ jobs:
           echo "Giving Nginx 15 seconds to detect the swap and reload configuration."
           sleep 15
 
-      # The External Health Check remains the same, checking the public URL
+      # 4. The External Health Check step (modify the failure block)
       - name: External Health Check (Public URL)
         run: |
+          APP_URL="${{ env.APP_URL }}"
+          TARGET_SERVICE="actuallyfind-web-green" # Assuming green was the target slot in this run
+
           echo "🌐 Performing external health check..."
-          sleep 5
-          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ env.APP_URL }} || echo "000")
+          # The 15-second sleep is already correctly implemented before this step
+          sleep 5 # Wait a bit more after Nginx reload just in case
+
+          response=$(curl -s -o /dev/null -w "%{http_code}" ${APP_URL} || echo "000")
+
           if [ "$response" = "200" ]; then
             echo "✅ External health check passed (HTTP $response)"
           else
-            echo "❌ External health check failed (HTTP $response) at ${{ env.APP_URL }}"
+            echo "❌ External health check failed (HTTP $response) at ${APP_URL}"
+            echo "--- Fetching Logs for the Target Service (${TARGET_SERVICE}) ---"
+
+            # Fetch the last 50 lines of the target container's logs via SSH
+            ssh ${{ env.USER }}@${{ env.HOST }} \
+              "docker logs ${TARGET_SERVICE} --tail 50"
+
             exit 1
           fi
 
