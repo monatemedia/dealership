@@ -260,10 +260,14 @@ jobs:
           username: ${{ env.USER }}
           key: ${{ env.SSH_KEY }}
           script: |
-            # Use 'chown' recursively to ensure the SSH user owns the deployment directory.
-            # This is critical for SCP to succeed.
+            # 1. Clear files that SCP will upload/overwrite (prevents permission issues)
+            rm -f ${{ env.WORK_DIR }}/deploy-prod.sh
+            rm -f ${{ env.WORK_DIR }}/actuallyfind-swop.sh
+            rm -f ${{ env.WORK_DIR }}/docker-entrypoint.sh
+
+            # 2. This command will now succeed after the visudo change!
             sudo chown -R ${{ env.USER }}:${{ env.USER }} ${{ env.WORK_DIR }}
-            echo "✅ Corrected ownership on target directory: ${{ env.WORK_DIR }}"
+            echo "✅ Corrected ownership and cleared stale scripts in ${{ env.WORK_DIR }}"
 
       # 2. Upload the deployment script to the remote server
       - name: Transfer Deployment Script and Set Permissions
