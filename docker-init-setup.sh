@@ -63,27 +63,25 @@ echo "Database ready. Running essential setup..."
 
 # 1. Run Migrations
 echo "    INFO  Running Migrations..."
-# --- CRITICAL FIX: Use 'env' to explicitly pass variables to PHP ---
-# This forces the environment onto the php command, overriding potential restrictions.
+# CRITICAL FIX: Removed DB_PASSWORD from env call
 env \
     DB_CONNECTION="$DB_CONNECTION" \
     DB_HOST="$DB_HOST" \
     DB_PORT="$DB_PORT" \
     DB_DATABASE="$DB_DATABASE" \
     DB_USERNAME="$DB_USERNAME" \
-    DB_PASSWORD="$DB_PASSWORD" \
     APP_KEY="$APP_KEY" \
     php artisan migrate --force
 
 # 2. Run Essential Seeders (The slow ones)
 echo "    INFO  Running Essential db:seed..."
+# CRITICAL FIX: Removed DB_PASSWORD from env call
 env \
     DB_CONNECTION="$DB_CONNECTION" \
     DB_HOST="$DB_HOST" \
     DB_PORT="$DB_PORT" \
     DB_DATABASE="$DB_DATABASE" \
     DB_USERNAME="$DB_USERNAME" \
-    DB_PASSWORD="$DB_PASSWORD" \
     APP_KEY="$APP_KEY" \
     php artisan db:seed --force
 

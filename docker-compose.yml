@@ -157,6 +157,8 @@ services:
     container_name: actuallyfind-db
     restart: always
     environment:
+      # CRITICAL FIX: Tell the DB to trust connections from the Docker network
+      POSTGRES_HOST_AUTH_METHOD: trust
       # CRITICAL FIX: Explicitly set the variables here for Docker Compose
       # to guarantee the DB initializes with the correct user/pass.
       POSTGRES_DB: actuallyfind_db
