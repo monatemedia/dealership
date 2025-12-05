@@ -266,7 +266,6 @@ jobs:
           scp -o StrictHostKeyChecking=no \
               ./app-code/actuallyfind-swop.sh \
               ./app-code/docker-entrypoint.sh \
-              ./app-code/docker-init-setup.sh \
               ${USER}@${HOST}:${WORK_DIR}/
           # 2. Ensure the swap script is executable on the remote server
           ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/actuallyfind-swop.sh"
