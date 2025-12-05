@@ -196,7 +196,15 @@ jobs:
           ssh-private-key: ${{ env.SSH_KEY }}
 
       - name: Add Production Server to Known Hosts
-        run: ssh-keyscan -H ${{ env.HOST }} >> ~/.ssh/known_hosts
+        run: |
+          # Use -T 1 to set a timeout, and check the command's exit code
+          ssh-keyscan -v -H ${{ env.HOST }} 2>&1 >> ~/.ssh/known_hosts
+          if [ $? -ne 0 ]; then
+            echo "🚨 Error: ssh-keyscan failed to retrieve key from ${{ env.HOST }}. Check the host address and firewall rules."
+            exit 1
+          else
+            echo "✅ Successfully added host key."
+          fi
 
       - name: 🌐 Ensure External Docker Network Exists
         uses: appleboy/ssh-action@master
