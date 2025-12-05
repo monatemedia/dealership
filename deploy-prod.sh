@@ -65,11 +65,9 @@ sleep 30
 
 # 7. RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER
 echo "🛠️ Running migrations and setup on the inactive container (${TARGET_SLOT})..."
-# Single-line, robust command for docker exec:
-# 1. Runs 'sh -c'
-# 2. Uses the dot command '.' to load the mounted /var/www/html/.env
-# 3. Ensures the variables are exported (set -a) and then used to explicitly pass credentials to 'php artisan'
-docker exec ${TARGET_SLOT} sh -c "set -a && . /var/www/html/.env && set +a && php artisan migrate --force --no-interaction --env=production --host=\${DB_HOST} --database=\${DB_DATABASE} --username=\${DB_USERNAME} --password=\${DB_PASSWORD} && php artisan db:seed --force --no-interaction --env=production --host=\${DB_HOST} --database=\${DB_DATABASE} --username=\${DB_USERNAME} --password=\${DB_PASSWORD}"
+# FIX: Only rely on loading and exporting the .env variables.
+# Laravel's connection logic will find DB_HOST, DB_PASSWORD, etc. from the shell environment.
+docker exec ${TARGET_SLOT} sh -c "set -a && . /var/www/html/.env && set +a && php artisan migrate --force --no-interaction && php artisan db:seed --force --no-interaction"
 
 # 8. Granting execute permission to the swap script
 echo "🛠️ Granting execute permission to the swap script..."
