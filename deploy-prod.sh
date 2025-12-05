@@ -100,11 +100,12 @@ ENV_VARIABLES=$(grep -E '^(DB_.*|APP_KEY|TYPESENSE_API_KEY)=' .env | grep -v '^#
 ENV_FLAGS=$(echo "$ENV_VARIABLES" | tr '\n' ' ' | sed 's/ -e / -e /g' | sed 's/^/-e /')
 
 # 8.3. Execute migrations using the constructed -e flags.
-docker exec ${ENV_FLAGS} ${TARGET_SLOT} php artisan migrate --force --no-interaction
+docker exec "${ENV_FLAGS}" ${TARGET_SLOT} php artisan migrate --force --no-interaction
 
 # Check if migrations succeeded before seeding
 if [ $? -eq 0 ]; then
-    docker exec ${ENV_FLAGS} ${TARGET_SLOT} php artisan db:seed --force --no-interaction
+    # FIX: Double-quote ENV_FLAGS here too.
+    docker exec "${ENV_FLAGS}" ${TARGET_SLOT} php artisan db:seed --force --no-interaction
 
     if [ $? -ne 0 ]; then
         echo "❌ Database Seeding Failed!"
