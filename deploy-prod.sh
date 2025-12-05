@@ -88,27 +88,48 @@ else
     echo "✅ APP_KEY already exists and is in use."
 fi
 
-
-# 8: RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER (Fixed Parsing) ---
+# 8: RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER (Robust Parsing) ---
 echo "🛠️ Running migrations and setup on the inactive container (${TARGET_SLOT})..."
 
-# 8.1. Safely parse the .env file to get key=value pairs, including the newly set APP_KEY.
-# New Line: Explicitly list the necessary DB environment variables
+# 1. Safely parse the .env file for required variables, cleaning up invisible characters.
+# We explicitly list the variables to ensure only necessary data is processed.
 ENV_VARIABLES=$(grep -E '^(DB_CONNECTION|DB_HOST|DB_PORT|DB_DATABASE|DB_USERNAME|DB_PASSWORD|APP_KEY|TYPESENSE_API_KEY)=' .env | grep -v '^#')
 
-# 8.2. Convert key=value pairs into a string of -e flags.
-ENV_FLAGS=$(echo "$ENV_VARIABLES" | tr '\n' ' ' | sed 's/ -e / -e /g' | sed 's/^/-e /')
+# Initialize the flags string
+ENV_FLAGS=""
 
-# 8.3. Execute migrations using the constructed -e flags.
+# Read line by line to process each key=value pair securely
+# Use 'tr -d '\r'' to remove Windows carriage returns.
+# Use 'while IFS= read -r LINE' to preserve leading/trailing whitespace (though we expect none).
+while IFS= read -r LINE; do
+    # Remove potential trailing carriage returns from Windows
+    CLEAN_LINE=$(echo "$LINE" | tr -d '\r')
+
+    # Split the key and value
+    KEY=$(echo "$CLEAN_LINE" | cut -d '=' -f 1)
+    VALUE=$(echo "$CLEAN_LINE" | cut -d '=' -f 2-)
+
+    # Trim leading/trailing whitespace from the value (critical for passwords)
+    TRIMMED_VALUE=$(echo "$VALUE" | xargs)
+
+    # Build the flags string, ensuring the value is single-quoted for security
+    ENV_FLAGS+=" -e ${KEY}='${TRIMMED_VALUE}'"
+
+done <<< "$ENV_VARIABLES"
+
+# 2. Execute migrations using the constructed -e flags, quoted for single argument passing.
+# Note: The database port inside the Docker network is always 5432,
+# regardless of what DOCKER_POSTGRES_PORT is set to externally.
+echo "Running migrations with flags: ${ENV_FLAGS}"
 docker exec "${ENV_FLAGS}" ${TARGET_SLOT} php artisan migrate --force --no-interaction
 
 # Check if migrations succeeded before seeding
 if [ $? -eq 0 ]; then
-    # FIX: Double-quote ENV_FLAGS here too.
+    echo "✅ Database Migrations successful. Starting Seeding..."
     docker exec "${ENV_FLAGS}" ${TARGET_SLOT} php artisan db:seed --force --no-interaction
 
     if [ $? -ne 0 ]; then
-        echo "❌ Database Seeding Failed!"
+        echo "❌ Database Seeding Failed! Check logs."
         exit 1
     fi
 else
