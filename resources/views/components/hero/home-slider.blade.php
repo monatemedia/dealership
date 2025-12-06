@@ -21,7 +21,7 @@
         </x-slot:image>
 
         <x-hero.heading level="h1">
-           <strong>{{ $categoryName }}</strong> in <br>
+           Find {{ $categoryName }} in <br>
             <strong>Mzansi</strong>
         </x-hero.heading>
 

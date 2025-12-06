@@ -75,17 +75,17 @@ VIRTUAL_HOST_SET="" docker compose --env-file .env -f docker-compose.yml up -d \
 # -------------------------------------------------------------
 # 4. Force-restart DB (Required for clean password application)
 # -------------------------------------------------------------
-echo "🔄 Force-restarting DB container to ensure clean environment variables are applied..."
-docker compose restart actuallyfind-db
-if [ $? -ne 0 ]; then
-    echo "❌ DB restart failed!"
-    exit 1
-fi
-echo "✅ DB restarted successfully."
+# echo "🔄 Force-restarting DB container to ensure clean environment variables are applied..."
+# docker compose restart actuallyfind-db
+# if [ $? -ne 0 ]; then
+#     echo "❌ DB restart failed!"
+#     exit 1
+# fi
+# echo "✅ DB restarted successfully."
 
 # 5. Wait for the new container to stabilize
-echo "⏳ Waiting 30 seconds for the newly built container to stabilize..."
-sleep 30
+echo "⏳ Waiting 10 seconds for the newly built container to stabilize..."
+sleep 10
 
 # 6: APP_KEY MANAGEMENT (CREATE IF MISSING)
 echo "🔑 Checking and generating APP_KEY..."
