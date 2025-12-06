@@ -12,7 +12,7 @@ BASE_SERVICE_NAME="actuallyfind-web"
 # The deployment domain (e.g., yourdomain.com).
 # We strip the protocol (e.g., https://) from the APP_URL provided by the CI environment.
 # If APP_URL is not set, we default to the value passed via the BASE_DOMAIN argument.
-VIRTUAL_HOST_DOMAIN=$(echo "${APP_URL:-${BASE_DOMAIN}}" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
+VIRTUAL_HOST_DOMAIN=$(echo "${APP_URL:-${BASE_DOMAIN}}" | sed -e 's|^[^/]*//||' -e 's|/.*$||' | tr -d '\r')
 
 if [ -z "$VIRTUAL_HOST_DOMAIN" ]; then
     echo "❌ Error: VIRTUAL_HOST_DOMAIN could not be determined. APP_URL or BASE_DOMAIN must be set." >&2
@@ -25,8 +25,8 @@ echo "--- Current Status Check ---"
 get_host_status() {
     # Check if the VIRTUAL_HOST environment variable has a value set.
     # The output is simply the full VIRTUAL_HOST value, or an empty string if not found/empty.
-    # We use the same inspection method as deploy-prod.sh to be consistent.
-    docker inspect --format '{{range .Config.Env}}{{if eq (index (split . "=") 0) "VIRTUAL_HOST"}}{{(index (split . "=") 1)}}{{end}}{{end}}' "$1" 2>/dev/null | head -n 1
+    # CRITICALLY: We strip all whitespace (\s) and control characters (\r, \n).
+    docker inspect --format '{{range .Config.Env}}{{if eq (index (split . "=") 0) "VIRTUAL_HOST"}}{{(index (split . "=") 1)}}{{end}}{{end}}' "$1" 2>/dev/null | head -n 1 | tr -d '[:space:]'
 }
 
 # 1. Check current status of Blue and Green containers
