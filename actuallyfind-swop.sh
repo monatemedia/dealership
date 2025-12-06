@@ -7,11 +7,9 @@ set -eu  # Exit immediately if a command exits with a non-zero status or if an u
 # --- Configuration ---
 BLUE_SERVICE="actuallyfind-web-blue"
 GREEN_SERVICE="actuallyfind-web-green"
-BASE_SERVICE_NAME="actuallyfind-web"
 
 # The deployment domain (e.g., yourdomain.com).
-# We strip the protocol (e.g., https://) from the APP_URL provided by the CI environment.
-# If APP_URL is not set, we default to the value passed via the BASE_DOMAIN argument.
+# CRITICAL: We strip protocol, path, carriage returns, and all whitespace from the domain string.
 VIRTUAL_HOST_DOMAIN=$(echo "${APP_URL:-${BASE_DOMAIN}}" | sed -e 's|^[^/]*//||' -e 's|/.*$||' | tr -d '\r' | tr -d '[:space:]')
 
 if [ -z "$VIRTUAL_HOST_DOMAIN" ]; then
@@ -23,8 +21,8 @@ echo "--- Current Status Check ---"
 
 # Function to get the VIRTUAL_HOST status of a running container
 get_host_status() {
-    # CRITICAL: We strip all whitespace and control characters (like \r) to ensure accurate comparison.
-    # The output is the VIRTUAL_HOST value, or an empty string if not found/empty.
+    # CRITICAL: Strip all control characters (like \r, \n) and whitespace from the output.
+    # This guarantees the comparison strings are clean.
     docker inspect --format '{{range .Config.Env}}{{if eq (index (split . "=") 0) "VIRTUAL_HOST"}}{{(index (split . "=") 1)}}{{end}}{{end}}' "$1" 2>/dev/null | \
     head -n 1 | \
     tr -d '[:space:]' | \
@@ -44,9 +42,15 @@ LIVE_CONTAINER=""
 TARGET_CONTAINER=""
 
 # 2. Determine Live and Target services
-# We check only if the container has the public domain to determine if it is LIVE.
+# We use simple string comparisons based on the clean VIRTUAL_HOST_DOMAIN and host outputs.
 
-# Case A: Blue is Live
+# Check if both are accidentally live (True Error)
+if [ "${BLUE_HOST}" = "${VIRTUAL_HOST_DOMAIN}" ] && [ "${GREEN_HOST}" = "${VIRTUAL_HOST_DOMAIN}" ]; then
+    echo "❌ Error: Both slots are LIVE. Cannot safely proceed with swap." >&2
+    exit 1
+fi
+
+# Case A: Blue is Live (This is the most common path)
 if [ "${BLUE_HOST}" = "${VIRTUAL_HOST_DOMAIN}" ]; then
     LIVE_SERVICE="blue"
     LIVE_CONTAINER=${BLUE_SERVICE}
@@ -69,9 +73,9 @@ elif [ -z "${BLUE_HOST}" ] && [ -z "${GREEN_HOST}" ]; then
     TARGET_CONTAINER=${GREEN_SERVICE}
     echo "Initial state detected. Setting GREEN as Target."
 
-# Case D: Ambiguous/Error State (Both Live or unexpected configuration)
+# Case D: Ambiguous/Error State (Catch-all for failure, only reachable if status strings are corrupted)
 else
-    echo "❌ Error: Ambiguous live state detected. Both services may have the VIRTUAL_HOST set, or an unexpected state was found." >&2
+    echo "❌ Error: Ambiguous live state detected. Unexpected configuration found." >&2
     exit 1
 fi
 
