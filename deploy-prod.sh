@@ -12,6 +12,10 @@ DB_SERVICE="actuallyfind-db"
 TYPESENSE_SERVICE="actuallyfind-typesense"
 QUEUE_SERVICE="actuallyfind-queue"
 
+# Use the APP_URL variable to determine the VIRTUAL_HOST value
+# Strip 'https://' or 'http://' from APP_URL for VIRTUAL_HOST comparison.
+VIRTUAL_HOST_DOMAIN=$(echo "${APP_URL}" | sed -E 's/^(https?:\/\/)?//')
+
 echo "--- Starting Blue/Green Deployment on Remote Server ---"
 echo "✅ Current working directory is: $(pwd)"
 
@@ -23,34 +27,37 @@ echo "🏷️ Exported IMAGE_TAG=${IMAGE_TAG}"
 
 # -------------------------------------------------------------
 # 2. DETERMINE TARGET_SLOT (Robust check for VIRTUAL_HOST)
+#    This logic MUST mirror the check in actuallyfind-swop.sh
 # -------------------------------------------------------------
 echo "🎯 Determining LIVE_SLOT and TARGET_SLOT for deployment..."
-
 LIVE_SLOT=""
-# Check Blue slot: look for VIRTUAL_HOST with any content
-if docker inspect ${WEB_SERVICE_BASE}-blue | grep -q 'VIRTUAL_HOST=.\+'; then
+
+# Helper function to check VIRTUAL_HOST value
+get_host_status() {
+    local service_name=$1
+    # Check if the VIRTUAL_HOST environment variable matches the domain
+    docker inspect ${service_name} \
+        --format '{{range .Config.Env}}{{if eq (index (split . "=") 0) "VIRTUAL_HOST"}}{{(index (split . "=") 1)}}{{end}}{{end}}' 2>/dev/null
+}
+
+BLUE_HOST=$(get_host_status ${WEB_SERVICE_BASE}-blue)
+GREEN_HOST=$(get_host_status ${WEB_SERVICE_BASE}-green)
+
+# Use the VIRTUAL_HOST value to determine the truly live container
+if [ "${BLUE_HOST}" == "${VIRTUAL_HOST_DOMAIN}" ]; then
     LIVE_SLOT="${WEB_SERVICE_BASE}-blue"
-fi
-
-# Check Green slot: look for VIRTUAL_HOST with any content
-if [ -z "${LIVE_SLOT}" ]; then
-    if docker inspect ${WEB_SERVICE_BASE}-green | grep -q 'VIRTUAL_HOST=.\+'; then
-        LIVE_SLOT="${WEB_SERVICE_BASE}-green"
-    fi
-fi
-
-if [ "${LIVE_SLOT}" == "${WEB_SERVICE_BASE}-blue" ]; then
     export TARGET_SLOT="${WEB_SERVICE_BASE}-green"
-    echo "✅ LIVE_SLOT is ${LIVE_SLOT}. Targeting ${TARGET_SLOT} for new deployment."
-elif [ "${LIVE_SLOT}" == "${WEB_SERVICE_BASE}-green" ]; then
+elif [ "${GREEN_HOST}" == "${VIRTUAL_HOST_DOMAIN}" ]; then
+    LIVE_SLOT="${WEB_SERVICE_BASE}-green"
     export TARGET_SLOT="${WEB_SERVICE_BASE}-blue"
-    echo "✅ LIVE_SLOT is ${LIVE_SLOT}. Targeting ${TARGET_SLOT} for new deployment."
 else
-    # Initial deploy case or detection failed: Default to green target.
-    echo "⚠️ WARNING: Could not detect LIVE_SLOT. Assuming blue is LIVE for initial setup."
+    # Initial deploy or failure to detect: Default to green target.
+    # The swap script will handle the final switch.
+    LIVE_SLOT="none"
     export TARGET_SLOT="${WEB_SERVICE_BASE}-green"
 fi
 
+echo "✅ LIVE_SLOT detected as: ${LIVE_SLOT}."
 echo "🎯 Identified TARGET_SLOT for deployment and setup: ${TARGET_SLOT}"
 
 # -------------------------------------------------------------
@@ -59,6 +66,7 @@ echo "🎯 Identified TARGET_SLOT for deployment and setup: ${TARGET_SLOT}"
 echo "🚀 Recreating **ONLY** the inactive slot (${TARGET_SLOT}) and ensuring core services are up with the new image..."
 
 # We explicitly set VIRTUAL_HOST_SET="" for the target slot only.
+# This prevents Nginx-Proxy from trying to route traffic here prematurely.
 VIRTUAL_HOST_SET="" docker compose --env-file .env -f docker-compose.yml up -d \
   ${TARGET_SLOT} \
   ${DB_SERVICE} \
@@ -83,7 +91,8 @@ sleep 30
 echo "🔑 Checking and generating APP_KEY..."
 if grep -q '^APP_KEY=$' .env; then
     echo "⚠️ APP_KEY is missing a value. Generating a new one..."
-    NEW_KEY=$(docker exec ${TARGET_SLOT} php artisan key:generate --show)
+    # Execute the command inside the new TARGET_SLOT
+    NEW_KEY=$(docker compose run --rm -T --no-deps ${TARGET_SLOT} php artisan key:generate --show)
     KEY_VALUE=$(echo "$NEW_KEY" | tail -n 1)
     sed -i "/^APP_KEY=/c\APP_KEY=$KEY_VALUE" .env
     if [ $? -ne 0 ]; then
@@ -96,11 +105,13 @@ else
 fi
 
 # -------------------------------------------------------------
-# 7: RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER
+# 7: RUN MIGRATIONS ON THE INACTIVE TARGET CONTAINER
+#    (Seeding removed to mitigate downtime/DB locks)
 # -------------------------------------------------------------
-echo "🛠️ Running migrations and setup on the inactive container (${TARGET_SLOT})..."
+echo "🛠️ Running migrations on the inactive container (${TARGET_SLOT})..."
 
 # Safely read and export DB credentials from the remote .env file
+# (This may be redundant if defined in the image, but kept for robustness)
 export DB_PASSWORD=$(grep DB_PASSWORD .env | cut -d '=' -f 2- | tr -d '\r' | xargs)
 export DB_USERNAME=$(grep DB_USERNAME .env | cut -d '=' -f 2- | tr -d '\r' | xargs)
 export DB_DATABASE=$(grep DB_DATABASE .env | cut -d '=' -f 2- | tr -d '\r' | xargs)
@@ -140,9 +151,10 @@ echo "✅ Migrations and seeding complete."
 # -------------------------------------------------------------
 echo "🛠️ Granting execute permission to the swap script..."
 chmod +x actuallyfind-swop.sh
-
 echo "⚡ Executing the atomic Blue/Green swap script..."
-BASE_DOMAIN="${APP_URL}" ./actuallyfind-swop.sh
+
+# We pass the domain to the swap script so it knows what to set.
+BASE_DOMAIN="${VIRTUAL_HOST_DOMAIN}" ./actuallyfind-swop.sh
 
 # 9. Restart the Queue service
 echo "🔁 Restarting Queue service with new code..."
