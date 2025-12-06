@@ -102,7 +102,7 @@ echo "🛠️ Running migrations and setup on the inactive container (${TARGET_S
 echo "Running migrations using docker-compose run..."
 
 # 1. Run Migrations
-docker-compose run --rm -T \
+docker compose run --rm -T \
     -e IMAGE_TAG=${IMAGE_TAG} \
     ${TARGET_SLOT} php artisan migrate --force --no-interaction
 
@@ -111,7 +111,7 @@ if [ $? -eq 0 ]; then
     echo "✅ Database Migrations successful. Starting Seeding..."
 
     # 2. Run Seeding
-    docker-compose run --rm -T \
+    docker compose run --rm -T \
         -e IMAGE_TAG=${IMAGE_TAG} \
         ${TARGET_SLOT} php artisan db:seed --force --no-interaction
 
