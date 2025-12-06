@@ -59,6 +59,17 @@ fi
 
 echo "🎯 Identified TARGET_SLOT for deployment and setup: ${TARGET_SLOT}"
 
+# ----------------------------------------------
+# NEW STEP: Force-restart the DB to re-read the environment password cleanly
+# ----------------------------------------------
+echo "🔄 Force-restarting DB container to ensure clean environment variables are applied..."
+docker compose restart actuallyfind-db
+if [ $? -ne 0 ]; then
+    echo "❌ DB restart failed!"
+    exit 1
+fi
+echo "✅ DB restarted successfully."
+
 # 6. Wait for the new container to stabilize (passes health check)
 echo "⏳ Waiting 30 seconds for the newly built container to stabilize..."
 sleep 30
