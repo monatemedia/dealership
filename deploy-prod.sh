@@ -103,8 +103,9 @@ echo "Running migrations using docker-compose run..."
 
 # 1. Run Migrations
 docker compose run --rm -T \
+    --entrypoint="/bin/bash" \
     -e IMAGE_TAG=${IMAGE_TAG} \
-    ${TARGET_SLOT} php artisan migrate --force --no-interaction
+    ${TARGET_SLOT} -c "php artisan migrate --force --no-interaction"
 
 # Check if migrations succeeded before seeding
 if [ $? -eq 0 ]; then
@@ -112,8 +113,9 @@ if [ $? -eq 0 ]; then
 
     # 2. Run Seeding
     docker compose run --rm -T \
+        --entrypoint="/bin/bash" \
         -e IMAGE_TAG=${IMAGE_TAG} \
-        ${TARGET_SLOT} php artisan db:seed --force --no-interaction
+        ${TARGET_SLOT} -c "php artisan db:seed --force --no-interaction"
 
     if [ $? -ne 0 ]; then
         echo "❌ Database Seeding Failed! Check logs."
