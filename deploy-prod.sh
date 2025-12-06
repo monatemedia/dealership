@@ -34,30 +34,42 @@ docker pull ${FULL_IMAGE_NAME}
 export IMAGE_TAG=${DEPLOY_TAG}
 echo "🏷️ Exported IMAGE_TAG=${IMAGE_TAG}"
 
-# 4. Bring up the core services (DB/Typesense) and ensure all web slots are defined,
-# loading variables explicitly from .env for the application secrets.
-echo "🚀 Ensuring all core services and web slots (inactive/active) are running the new image..."
-# The DOCKER_*_PORT variables are exported from the CI step.
-# VIRTUAL_HOST_SET is passed as an empty variable to keep the new web containers offline.
-VIRTUAL_HOST_SET="" docker compose --env-file .env -f docker-compose.yml up -d \
-  ${WEB_SERVICE_BASE}-blue \
-  ${WEB_SERVICE_BASE}-green \
-  ${DB_SERVICE} \
-  ${TYPESENSE_SERVICE}; \
+# 4. Determine the TARGET_SLOT for setup before the swap
+# Check which container is currently running with the non-empty VIRTUAL_HOST environment variable.
 
-# 5. Determine the TARGET_SLOT for setup before the swap
-LIVE_SLOT=$(docker ps --filter "name=${WEB_SERVICE_BASE}" --filter "label=com.docker.compose.label=live" --format "{{.Names}}" | head -n 1)
-
-if [ "${LIVE_SLOT}" == "${WEB_SERVICE_BASE}-blue" ]; then
-    export TARGET_SLOT="${WEB_SERVICE_BASE}-green"
-elif [ "${LIVE_SLOT}" == "${WEB_SERVICE_BASE}-green" ]; then
-    export TARGET_SLOT="${WEB_SERVICE_BASE}-blue"
-else
-    # Initial deploy case: If neither is live, default to green.
-    export TARGET_SLOT="${WEB_SERVICE_BASE}-green"
+LIVE_SLOT=""
+# Check Blue slot
+if docker inspect -f '{{range .Config.Env}}{{if contains "VIRTUAL_HOST" .}}{{.}}{{end}}{{end}}' actuallyfind-web-blue | grep -q 'VIRTUAL_HOST='; then
+    LIVE_SLOT="actuallyfind-web-blue"
 fi
 
+# Check Green slot (only if Blue is not live)
+if [ -z "${LIVE_SLOT}" ]; then
+    if docker inspect -f '{{range .Config.Env}}{{if contains "VIRTUAL_HOST" .}}{{.}}{{end}}{{end}}' actuallyfind-web-green | grep -q 'VIRTUAL_HOST='; then
+        LIVE_SLOT="actuallyfind-web-green"
+    fi
+fi
+
+if [ "${LIVE_SLOT}" == "actuallyfind-web-blue" ]; then
+    export TARGET_SLOT="actuallyfind-web-green"
+elif [ "${LIVE_SLOT}" == "actuallyfind-web-green" ]; then
+    export TARGET_SLOT="actuallyfind-web-blue"
+else
+    # Initial deploy case or detection failed: Default to green and assume blue is live.
+    # This prevents the initial deploy from locking onto green if the live slot can't be found.
+    echo "⚠️ WARNING: Could not detect LIVE_SLOT. Assuming blue is live and targeting green."
+    export TARGET_SLOT="actuallyfind-web-green"
+fi
 echo "🎯 Identified TARGET_SLOT for deployment and setup: ${TARGET_SLOT}"
+
+# 5. RECREATE ONLY THE TARGET_SLOT (The logic from the old Step 4, but modified)
+echo "🚀 Recreating the inactive slot (${TARGET_SLOT}) with the new image..."
+
+# Use the appropriate VIRTUAL_HOST for the target slot (blank) and the new image tag
+VIRTUAL_HOST_SET="" docker compose --env-file .env -f docker-compose.yml up -d \
+    ${TARGET_SLOT} \
+    ${DB_SERVICE} \
+    ${TYPESENSE_SERVICE};
 
 # ----------------------------------------------
 # NEW STEP: Force-restart the DB to re-read the environment password cleanly

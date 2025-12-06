@@ -22,7 +22,7 @@
 
         <x-hero.heading level="h1">
            Find <strong>{{ $categoryName }}</strong> in <br>
-            <strong>Mzansi</strong>
+            <strong>South Africa</strong>
         </x-hero.heading>
 
         <x-hero.text>
