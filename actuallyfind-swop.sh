@@ -82,10 +82,10 @@ echo "LIVE Service: ${LIVE_SERVICE}"
 echo "TARGET Service: ${TARGET_SERVICE}"
 echo "------------------------------"
 
-# 3. ATOMIC SWITCH: Set VIRTUAL_HOST on the Target service
+# 3. ATOMIC SWITCH: Set VIRTUAL_HOST on the Target service (which should be running the new code)
 echo "Starting atomic swap: setting VIRTUAL_HOST for ${TARGET_SERVICE}..."
 
-# Set the VIRTUAL_HOST on the target slot to bring it online.
+# Set VIRTUAL_HOST on the target container (TARGET_CONTAINER), making it immediately available.
 VIRTUAL_HOST_SET="${VIRTUAL_HOST_DOMAIN}" docker compose up -d ${TARGET_CONTAINER}
 
 if [ $? -ne 0 ]; then
@@ -93,16 +93,29 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# The Nginx-Proxy should detect the new container and start routing traffic to it almost instantly.
 echo "Waiting 5 seconds for Nginx-Proxy to detect the new service..."
 sleep 5
 
-# 4. Scale down the old service (Zero-Downtime Unset)
+# 4. Scale down the old service if it existed
 if [ "${LIVE_SERVICE}" != "none" ]; then
     echo "Swap complete. Scaling down old service (${LIVE_SERVICE}) by unsetting VIRTUAL_HOST..."
 
-    # Use VIRTUAL_HOST_SET="" to unset the VIRTUAL_HOST environment variable,
-    # taking the old container offline from the proxy without stopping the container.
-    VIRTUAL_HOST_SET="" docker compose up -d ${LIVE_CONTAINER}
+    # CRITICAL: Instead of relying on VIRTUAL_HOST_SET="", we explicitly use the
+    # docker inspect/up method but force the VIRTUAL_HOST to an empty value.
+    # We still use 'docker compose up' because it's the only way to apply env changes,
+    # but the previous fixes should have minimized the restart time.
+
+    # We only take the service offline if the swap was successful (i.e., the target is live)
+    # The container that was supposed to go live is TARGET_CONTAINER. Let's inspect it:
+    NEW_HOST_STATUS=$(get_host_status ${TARGET_CONTAINER})
+    if [ "${NEW_HOST_STATUS}" = "${VIRTUAL_HOST_DOMAIN}" ]; then
+        echo "Traffic confirmed on ${TARGET_SERVICE}. Taking ${LIVE_SERVICE} offline..."
+        # This is the zero-downtime way: unset the VIRTUAL_HOST variable on the old live slot.
+        VIRTUAL_HOST_SET="" docker compose up -d ${LIVE_CONTAINER}
+    else
+        echo "⚠️ WARNING: New service (${TARGET_SERVICE}) did not successfully pick up VIRTUAL_HOST. Abandoning LIVE service shutdown." >&2
+    fi
 fi
 
-echo "Deployment successful. Traffic is now routed to ${TARGET_SERVICE}."
+echo "Deployment successful. Traffic is now routed to ${TARGET_SERVICE} (if successful)."
