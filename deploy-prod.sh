@@ -88,46 +88,32 @@ else
     echo "✅ APP_KEY already exists and is in use."
 fi
 
-# --- NEW STEP 8: RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER (Using BASH ARRAY) ---
+# --- NEW STEP 8: RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER (Using docker-compose run) ---
 echo "🛠️ Running migrations and setup on the inactive container (${TARGET_SLOT})..."
 
-# 1. Safely parse the .env file for required variables, cleaning up invisible characters.
-# We explicitly list the variables to ensure only necessary data is processed.
-ENV_VARIABLES=$(grep -E '^(DB_CONNECTION|DB_HOST|DB_PORT|DB_DATABASE|DB_USERNAME|DB_PASSWORD|APP_KEY|TYPESENSE_API_KEY)=' .env | grep -v '^#')
+# The TARGET_SLOT variable (e.g., actuallyfind-web-green) is the name of the
+# web service defined in your docker-compose.yml file.
+# We use 'docker-compose run' which safely inherits the environment from the host
+# and the service definition, bypassing complex shell parsing for ENV_FLAGS.
+# --rm: removes the container instance after the command completes.
+# -T: disables pseudo-tty allocation (good for non-interactive scripts).
+# -e: Inject the necessary image tag, which is often crucial for compose files.
 
-# Initialize the flags as a BASH ARRAY
-ENV_FLAGS_ARRAY=()
+echo "Running migrations using docker-compose run..."
 
-# Read line by line to process each key=value pair securely
-while IFS= read -r LINE; do
-    # Remove potential trailing carriage returns from Windows
-    CLEAN_LINE=$(echo "$LINE" | tr -d '\r')
-
-    # Split the key and value
-    KEY=$(echo "$CLEAN_LINE" | cut -d '=' -f 1)
-    VALUE=$(echo "$CLEAN_LINE" | cut -d '=' -f 2-)
-
-    # Trim leading/trailing whitespace from the value (critical for passwords)
-    TRIMMED_VALUE=$(echo "$VALUE" | xargs)
-
-    # Add the argument to the array. This keeps the -e flag separate from the key=value string.
-    ENV_FLAGS_ARRAY+=('-e')
-    ENV_FLAGS_ARRAY+=("${KEY}=${TRIMMED_VALUE}")
-
-done <<< "$ENV_VARIABLES"
-
-# 2. Execute migrations using the array expansion.
-# The ${ENV_FLAGS_ARRAY[@]} syntax expands the array into separate, correctly quoted arguments.
-echo "Running migrations with flags (array expansion)..."
-
-# Use the array expansion: the variable is NOT quoted here!
-docker exec "${ENV_FLAGS_ARRAY[@]}" ${TARGET_SLOT} php artisan migrate --force --no-interaction
+# 1. Run Migrations
+docker-compose run --rm -T \
+    -e IMAGE_TAG=${IMAGE_TAG} \
+    ${TARGET_SLOT} php artisan migrate --force --no-interaction
 
 # Check if migrations succeeded before seeding
 if [ $? -eq 0 ]; then
     echo "✅ Database Migrations successful. Starting Seeding..."
-    # Use the array expansion: the variable is NOT quoted here!
-    docker exec "${ENV_FLAGS_ARRAY[@]}" ${TARGET_SLOT} php artisan db:seed --force --no-interaction
+
+    # 2. Run Seeding
+    docker-compose run --rm -T \
+        -e IMAGE_TAG=${IMAGE_TAG} \
+        ${TARGET_SLOT} php artisan db:seed --force --no-interaction
 
     if [ $? -ne 0 ]; then
         echo "❌ Database Seeding Failed! Check logs."
@@ -138,6 +124,9 @@ else
     exit 1
 fi
 echo "✅ Migrations and seeding complete."
+
+# NOTE: You will need to remove the code blocks that defined and constructed ENV_FLAGS_ARRAY
+# from the previous step, as they are no longer needed.
 
 # 9. Granting execute permission to the swap script
 echo "🛠️ Granting execute permission to the swap script..."

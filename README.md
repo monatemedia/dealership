@@ -1065,18 +1065,21 @@ docker rm -f dealership-web dealership-queue dealership-db dealership-typesense 
 **GitHub Release:**
 The version tag automatically creates a GitHub Release at `https://github.com/your-username/dealership/releases/tag/v1.0.0`. You can add release notes there describing what's new, what's fixed, and any breaking changes.
 
-**Step 5: Clean up the server**
+**Step 5: Production Server Maintenance (CRITICAL)**
+Perform this step periodically or after every major release to prevent disk space issues.
+
 ```bash
-# 1. Remove the 'dealership' stack and its containers/volumes
+# 1. Remove the 'dealership' stack and its containers/volumes (Optional)
 docker rm -f dealership-web dealership-queue dealership-db dealership-typesense dealership-adminer
 
-# 2. Clean up dangling Docker resources
+# 2. Clean up unused Docker resources (images, stopped containers, build cache)
+# This reclaimed 7.241GB last time!
 docker system prune -af --volumes
 
-# 3. Clear package cache
-sudo apt-get clean
+# 3. Vacuum systemd journal (clears large system logs, keeps last 50MB)
+sudo journalctl --vacuum-size=50M
 
-# 4. Truncate large log files
+# 4. Truncate large application/system log files
 sudo truncate -s 0 /var/log/syslog
 sudo truncate -s 0 /var/log/kern.log
 sudo truncate -s 0 /var/log/auth.log
@@ -1085,17 +1088,16 @@ sudo truncate -s 0 /var/log/auth.log
 sudo rm -f /var/log/*.gz
 sudo rm -f /var/log/*.[0-9]
 
-# 6. Vacuum systemd journal (optional, keeps last 50MB)
-sudo journalctl --vacuum-size=50M
+# 6. Clear package caches
+sudo apt-get clean
 
-# 7. Verify free disk space
+# 7. Verify free disk space is ample (e.g., Use% < 80%)
 df -h /
-
-# 8. Verify inode space
+# 8. Verify inode space (important for many small files)
 df -i /
 ```
 
-This ensures the production server is clean, and prevents disk-full errors.
+This ensures the production server is clean, and prevents disk-full errors that halt deployment (e.g., scp: write remote ... Failure).
 
 ---
 
