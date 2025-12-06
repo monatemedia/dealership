@@ -606,7 +606,30 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Add PostGIS Geometry Column
   - [X] Create User Address Functionality
   - [X] Use In App
-- [ ] Set Up Production Docker Containers for TypeSense
+- [X] Set Up Production Docker Containers for TypeSense
+- [X] Set up production CI/CD
+- [ ] Get App Amazon SES Ready
+  - [ ] Technical Compliance & Feedback Loops
+    - [ ] Verify Domain
+    - [ ] Set Up DKIM & SPF
+    - [ ] Implement Bounce & Complaint Handling
+    - [ ] Create a Configuration Set
+  - [ ] Website & Legal Readiness
+    - [ ] Logo
+    - [ ] Footer
+    - [ ] Fully Functional Website
+    - [ ] Working Sign-Up Flow
+    - [ ] Clear Opt-In
+    - [ ] Visible Legal Pages
+      - [ ] Privacy Policy, 
+      - [ ] Terms of Service, 
+      - [ ] Contact Us
+    - [ ] Contact Information
+  - [ ] Sandbox Testing & Account Health
+    - [ ] Test Sending & Receiving
+    - [ ] Test Bounce Processing
+    - [ ] Ensure Good AWS Health
+  - [ ] Application Narrative (The Request Form)
 - [ ] Allow Unknown `Manufacturers` and `Models` to be created
 - [ ] Bugfix: App CSS to `carType` and `fueltype` components
 - [ ] Test Create & Edit Pages
