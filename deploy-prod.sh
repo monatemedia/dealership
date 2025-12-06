@@ -88,20 +88,25 @@ else
     echo "✅ APP_KEY already exists and is in use."
 fi
 
-# --- NEW STEP 8: RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER (Using docker-compose run) ---
+# --- NEW STEP 8: RUN MIGRATIONS/SEEDERS ON THE INACTIVE TARGET CONTAINER (Direct Export) ---
 echo "🛠️ Running migrations and setup on the inactive container (${TARGET_SLOT})..."
 
-# The TARGET_SLOT variable (e.g., actuallyfind-web-green) is the name of the
-# web service defined in your docker-compose.yml file.
-# We use 'docker-compose run' which safely inherits the environment from the host
-# and the service definition, bypassing complex shell parsing for ENV_FLAGS.
-# --rm: removes the container instance after the command completes.
-# -T: disables pseudo-tty allocation (good for non-interactive scripts).
-# -e: Inject the necessary image tag, which is often crucial for compose files.
+# 1. Safely read and export critical environment variables from the remote .env file.
+# This ensures the exact, remote .env password is used for the docker compose run command.
+# This is a highly robust way to read the variables without complex array parsing.
+export DB_PASSWORD=$(grep DB_PASSWORD .env | cut -d '=' -f 2- | tr -d '\r' | xargs)
+export DB_USERNAME=$(grep DB_USERNAME .env | cut -d '=' -f 2- | tr -d '\r' | xargs)
+export DB_DATABASE=$(grep DB_DATABASE .env | cut -d '=' -f 2- | tr -d '\r' | xargs)
 
-echo "Running migrations using docker-compose run..."
+# Note: We are now explicitly setting the environment variables in the script's shell
+# so that the 'docker compose run' command, which uses shell interpolation (${DB_PASSWORD}),
+# gets the clean, correct value from the remote .env.
+
+echo "Running migrations using docker compose run..."
 
 # 1. Run Migrations
+# We rely on the exported variables (DB_PASSWORD, DB_USERNAME, etc.) to be clean.
+# We keep the entrypoint override to ensure only the migration runs.
 docker compose run --rm -T \
     --entrypoint="/bin/bash" \
     -e IMAGE_TAG=${IMAGE_TAG} \
@@ -126,9 +131,6 @@ else
     exit 1
 fi
 echo "✅ Migrations and seeding complete."
-
-# NOTE: You will need to remove the code blocks that defined and constructed ENV_FLAGS_ARRAY
-# from the previous step, as they are no longer needed.
 
 # 9. Granting execute permission to the swap script
 echo "🛠️ Granting execute permission to the swap script..."
