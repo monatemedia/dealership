@@ -109,6 +109,7 @@ echo "Running migrations using docker compose run..."
 # We keep the entrypoint override to ensure only the migration runs.
 docker compose run --rm -T \
     --entrypoint="/bin/bash" \
+    --network proxy-network \
     -e IMAGE_TAG=${IMAGE_TAG} \
     ${TARGET_SLOT} -c "php artisan migrate --force --no-interaction"
 
@@ -119,6 +120,7 @@ if [ $? -eq 0 ]; then
     # 2. Run Seeding
     docker compose run --rm -T \
         --entrypoint="/bin/bash" \
+        --network proxy-network \
         -e IMAGE_TAG=${IMAGE_TAG} \
         ${TARGET_SLOT} -c "php artisan db:seed --force --no-interaction"
 
