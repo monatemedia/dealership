@@ -21,11 +21,10 @@ echo "--- Current Status Check ---"
 
 # Function to get the VIRTUAL_HOST status of a running container
 get_host_status() {
-    # We strip all non-printable characters AND whitespace to maximize cleanliness.
-    docker inspect --format '{{range .Config.Env}}{{if eq (index (split . "=") 0) "VIRTUAL_HOST"}}{{(index (split . "=") 1)}}{{end}}{{end}}' "$1" 2>/dev/null | \
-    head -n 1 | \
-    tr -d '[:cntrl:]' | \
-    tr -d '[:space:]'
+    local service_name=$1
+    # Use the same exact inspect command you found worked, but target a single service
+    docker inspect ${service_name} \
+        --format '{{range .Config.Env}}{{if eq (index (split . "=") 0) "VIRTUAL_HOST"}}{{(index (split . "=") 1)}}{{end}}{{end}}' 2>/dev/null
 }
 
 # 1. Check current status of Blue and Green containers
