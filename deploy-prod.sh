@@ -53,22 +53,8 @@ fi
 
 echo "🎯 Identified TARGET_SLOT for deployment and setup: ${TARGET_SLOT}"
 
-# --- NEW STEP 3: EXPLICITLY ENSURE LIVE_SLOT VIRTUAL_HOST IS SET ---
-echo "🔒 Ensuring LIVE_SLOT (${LIVE_SLOT}) maintains public VIRTUAL_HOST to guarantee zero downtime..."
-
-# This command ensures the LIVE_SLOT is explicitly set with the public VIRTUAL_HOST
-# and only re-creates the container if necessary, avoiding configuration loss.
-VIRTUAL_HOST_SET="${APP_URL}" docker compose --env-file .env -f docker-compose.yml up -d \
-    ${LIVE_SLOT}
-
-if [ $? -ne 0 ]; then
-    echo "❌ Failed to secure LIVE_SLOT VIRTUAL_HOST setting."
-    exit 1
-fi
-echo "✅ LIVE_SLOT secured with VIRTUAL_HOST=${APP_URL}."
-
 # -------------------------------------------------------------
-# 4. RECREATE ONLY THE TARGET_SLOT (Zero-Downtime Start)
+# 3. RECREATE ONLY THE TARGET_SLOT (Zero-Downtime Start)
 # -------------------------------------------------------------
 echo "🚀 Recreating **ONLY** the inactive slot (${TARGET_SLOT}) and ensuring core services are up with the new image..."
 

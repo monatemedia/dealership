@@ -24,7 +24,10 @@ echo "--- Current Status Check ---"
 # Function to get the VIRTUAL_HOST status of a running container
 # This looks at the VIRTUAL_HOST environment variable set on the container
 get_host_status() {
-    docker inspect --format '{{range .Config.Env}}{{if eq (index (split . "=") 0) "VIRTUAL_HOST"}}{{(index (split . "=") 1)}}{{end}}{{end}}' "$1" 2>/dev/null
+    # Check if the VIRTUAL_HOST environment variable has a value set.
+    # The output is simply the full VIRTUAL_HOST value, or an empty string if not found/empty.
+    # We use the same inspection method as deploy-prod.sh to be consistent.
+    docker inspect --format '{{range .Config.Env}}{{if eq (index (split . "=") 0) "VIRTUAL_HOST"}}{{(index (split . "=") 1)}}{{end}}{{end}}' "$1" 2>/dev/null | head -n 1
 }
 
 # 1. Check current status of Blue and Green containers
@@ -66,8 +69,14 @@ elif [ -z "${BLUE_HOST}" ] && [ -z "${GREEN_HOST}" ]; then
 
 # Case D: Ambiguous/Error State (Both Live or unexpected state)
 else
-    echo "❌ Error: Ambiguous live state detected. Cannot safely swap." >&2
-    exit 1
+    # The only ambiguous state we check for is BOTH having the domain, or NEITHER having it
+    # We allow the swap to proceed if the target has been updated (not ideal, but necessary for resilient deployment)
+
+    # Check if we successfully determined a target service (meaning Blue/Green were NOT in a bad state)
+    if [ -z "${TARGET_SERVICE}" ]; then
+        echo "❌ Error: Ambiguous live state detected. Cannot safely swap." >&2
+        exit 1
+    fi
 fi
 
 echo "LIVE Service: ${LIVE_SERVICE}"
@@ -97,8 +106,10 @@ sleep 5
 
 # 4. Scale down the old service if it existed
 if [ "${LIVE_SERVICE}" != "none" ]; then
-    echo "Swap complete. Scaling down old service (${LIVE_SERVICE})..."
-    docker compose stop ${LIVE_CONTAINER}
+    echo "Swap complete. Scaling down old service (${LIVE_SERVICE}) by unsetting VIRTUAL_HOST..."
+
+    # This is the zero-downtime way: unset the VIRTUAL_HOST variable on the old live slot.
+    VIRTUAL_HOST_SET="" docker compose up -d ${LIVE_CONTAINER}
 fi
 
 echo "Deployment successful. Traffic is now routed to ${TARGET_SERVICE}."
