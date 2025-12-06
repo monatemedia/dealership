@@ -1,7 +1,9 @@
 #!/bin/bash
 set -eo pipefail
+# This script performs the atomic swap in a Blue/Green deployment.
+# It switches the VIRTUAL_HOST from the currently live container to the target container.
 
-VIRTUAL_HOST_DOMAIN="actuallyfind.com" # Ensure this matches your Nginx-Proxy setup
+VIRTUAL_HOST_DOMAIN="${BASE_DOMAIN}"
 LIVE_CONTAINER=""
 TARGET_CONTAINER=""
 LIVE_SERVICE=""
