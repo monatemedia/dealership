@@ -9,4 +9,6 @@
     <x-flash-messages />
 
     {{ $slot }}
+
+    <x-layouts.footer :$footerLinks />
 </x-base-layout>

@@ -91,6 +91,10 @@ Route::get('/vehicle/{vehicle}', [VehicleController::class, 'show'])
 Route::get('/main-categories', [MainCategoryController::class, 'index'])
     ->name('main-categories.index');
 
+// Legal pages
+Route::view('/terms', 'legal.terms')->name('terms');
+Route::view('/privacy-policy', 'legal.privacy')->name('privacy');
+
 // -------------------------------
 // CATEGORY HIERARCHY ROUTES (Slug-based - MUST BE LAST)
 // -------------------------------
