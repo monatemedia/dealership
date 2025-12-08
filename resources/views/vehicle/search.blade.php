@@ -1,5 +1,5 @@
 {{-- resources/views/vehicle/search.blade.php --}}
-<x-app-layout title="Search">
+<x-app-layout title="Search" :managed-footer="true">
     <main>
         <section>
             <x-search-form /> {{-- Reusing the component from index.blade.php --}}
@@ -30,11 +30,20 @@
                         <option value="-published_at">Latest Listing First</option>
                     </select>
                 </div>
+
                 <div class="search-vehicle-results-wrapper">
                     {{-- 🔑 FIX: Pass fetched data from the controller to the sidebar component --}}
                     <x-vehicle.search-sidebar-filters :fuel-types="$fuelTypes" :main-categories="$mainCategories" />
                     <x-vehicle.search-results-list />
                 </div>
+
+                <div id="footer-trigger-global"
+                    x-data="{}"
+                    style="height: 1px; width: 100%; margin-top: 20px;"
+                    x-intersect="$dispatch('toggle-footer', true)"
+                    x-intersect:leave="$dispatch('toggle-footer', false)">
+                </div>
+
             </div>
         </section>
     </main>

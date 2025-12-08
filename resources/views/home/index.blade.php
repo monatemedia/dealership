@@ -3,7 +3,7 @@ $taxonomyService = app('App\Services\TaxonomyRouteService');
 $config = $taxonomyService->getConfig('main-category');
 @endphp
 
-<x-app-layout title="Home Page">
+<x-app-layout title="Home Page" :managed-footer="true">
 
     <x-hero.home-slider />
 

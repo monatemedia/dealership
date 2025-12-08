@@ -1269,6 +1269,8 @@ a.pagination-item:hover {
 .search-vehicle-results-wrapper {
   display: flex;
   gap: 1rem;
+    min-height: 80vh; /* Ensure the section takes up most of the screen */
+    align-items: stretch;
 }
 
 .search-vehicles-sidebar {
@@ -1295,6 +1297,8 @@ a.pagination-item:hover {
 
 .search-vehicles-results {
   flex: 1;
+  position: relative;
+  padding-bottom: 50px; /* Buffer space */
 }
 
 .search-vehicles-results .vehicle-items-listing {
@@ -2872,7 +2876,7 @@ input[type="checkbox"]:checked::after {
     display: grid;
     grid-template-columns: 1fr; /* 1 column on mobile */
     gap: 24px; /* Space between items */
-    min-height: 200px;
+    /* min-height: 200px; */
 }
 
 /* Tablet: 2 Columns */

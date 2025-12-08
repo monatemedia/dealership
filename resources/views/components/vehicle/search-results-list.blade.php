@@ -1,22 +1,15 @@
 {{-- resources/views/components/vehicle/search-results-list.blade.php --}}
-<div class="search-vehicles-results">
+<div class="search-vehicles-results" x-data="{ endReached: false }">
     <div id="loading-indicator" class="hidden" style="position: relative; min-height: 100px;">
         <div class="loader main">
             <div class="ball"></div><div class="ball"></div><div class="ball"></div><div class="ball"></div>
         </div>
     </div>
 
-    <div id="search-results" class="vehicle-items-listing">
-        </div>
+    <div id="search-results" class="vehicle-items-listing"></div>
 
     <div id="no-results" class="hidden text-center p-large">
-        No vehicles were found by given search criteria.
-    </div>
-
-    <div id="load-more-indicator" class="hidden" style="position: relative; height: 80px; margin: 2rem 0;">
-        <div class="loader main">
-            <div class="ball"></div><div class="ball"></div><div class="ball"></div><div class="ball"></div>
-        </div>
+        No vehicles found.
     </div>
 
     <div id="end-of-results" class="hidden text-center p-medium" style="color: var(--text-muted-color);">

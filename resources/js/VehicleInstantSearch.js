@@ -166,6 +166,12 @@ export class VehicleInstantSearch {
 
     async performSearch(clearResults = true) {
         if (this.isLoading) return;
+
+        // Dispatch event to hide footer if we are doing a fresh search
+        if (clearResults) {
+            window.dispatchEvent(new CustomEvent('toggle-footer', { detail: false }));
+        }
+
         this.isLoading = true;
         this.showLoading(clearResults);
 

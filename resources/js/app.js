@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import Alpine from 'alpinejs';
+import intersect from '@alpinejs/intersect';
 import { VehicleInstantSearch } from './VehicleInstantSearch'; // Import the class
 import { SearchRangeSlider } from './search/SearchRangeSlider';
 
@@ -922,8 +923,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
   // ----------------------------
-  // Start Alpine
+  // Alpine JS Initialization
   // ----------------------------
+  // Register Plugins
+  Alpine.plugin(intersect);
+  // Start Alpine
   window.Alpine = Alpine;
   Alpine.start();
 

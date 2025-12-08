@@ -73,7 +73,6 @@
                     // Add the 'geo-link-inactive' class when there are no listings
                     'geo-link-inactive': !hasListings
                 }"
-                // Base styles for the link container
                 class="geo-location-link"
             >
                 <i class="fa-solid fa-compass geo-icon-spacing"></i>
@@ -116,8 +115,10 @@
         </div>
 
         {{-- No Results Message --}}
-        <div id="no-results" class="status-container hidden">
-            <p class="no-results-text">No vehicles found.</p>
+        <div id="no-results" class="status-container hidden"
+            x-intersect="$dispatch('toggle-footer', true)"
+            x-intersect:leave="$dispatch('toggle-footer', false)">
+            <p class="no-results-text">No results found.</p>
         </div>
 
         {{-- Load More Indicator (Infinite Scroll) --}}
@@ -128,8 +129,10 @@
         </div>
 
         {{-- End of Results --}}
-        <div id="end-of-results" class="end-message hidden">
-            You've reached the end of the list.
+        <div id="end-of-results" class="hidden text-center p-medium"
+            x-intersect="$dispatch('toggle-footer', true)"
+            x-intersect:leave="$dispatch('toggle-footer', false)">
+            <p class="no-results-text">You've reached the end.</p>
         </div>
 
         {{-- 🔑 CRITICAL: APPLY FILTERS BUTTON (TARGET for the Geo Modal) --}}
