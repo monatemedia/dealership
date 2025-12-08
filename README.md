@@ -616,15 +616,17 @@ _For more examples, please refer to the [Documentation](https://example.com)_
     - [ ] Create a Configuration Set
   - [ ] Website & Legal Readiness
     - [ ] Logo
-    - [ ] Footer
+    - [X] Footer
     - [ ] Fully Functional Website
-    - [ ] Working Sign-Up Flow
-    - [ ] Clear Opt-In
+    - [X] Working Sign-Up Flow
+    - [X] Clear Opt-In
     - [ ] Visible Legal Pages
-      - [ ] Privacy Policy, 
-      - [ ] Terms of Service, 
+      - [X] Privacy Policy, 
+      - [X] Terms of Service, 
       - [ ] Contact Us
     - [ ] Contact Information
+      - [ ] Social Media
+      - [ ] Email for Webmaster, Social, Sales  
   - [ ] Sandbox Testing & Account Health
     - [ ] Test Sending & Receiving
     - [ ] Test Bounce Processing
