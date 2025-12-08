@@ -626,7 +626,12 @@ _For more examples, please refer to the [Documentation](https://example.com)_
       - [ ] Contact Us
     - [ ] Contact Information
       - [ ] Social Media
-      - [ ] Email for Webmaster, Social, Sales  
+      - [X] Email for 
+        - [X] Webmaster, 
+        - [X] No Reply, 
+        - [X] Social, 
+        - [X] Info, 
+        - [X] Edward
   - [ ] Sandbox Testing & Account Health
     - [ ] Test Sending & Receiving
     - [ ] Test Bounce Processing
