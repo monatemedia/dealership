@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ManufacturerController;
 use App\Http\Controllers\Api\ModelController;
 use App\Http\Controllers\Api\ProvinceController;
 use App\Http\Controllers\VehicleSearchController;
+use App\Http\Controllers\AwsSnsWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -70,3 +71,9 @@ Route::get('/fuel-types-by-sub/{subcategoryId}', [VehicleSearchController::class
 // MAXIMUM RANGE FOR SLIDER
 // -------------------------------
 Route::get('/vehicles/max-range/{cityId}', [VehicleSearchController::class, 'getMaxRange']);
+
+// -------------------------------
+// AWS SES WEBHOOK FOR EMAIL EVENTS
+// -------------------------------
+Route::post('/aws/ses-events', [AwsSnsWebhookController::class, 'handle'])
+    ->name('aws.ses.webhook');

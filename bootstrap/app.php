@@ -1,4 +1,4 @@
-<?php
+<?php // bootstrap/app.php
 
 use App\Http\Middleware\EnsureNotSelectingCategoryUnlessFromVehicleCreate;
 use App\Http\Middleware\TrustProxies;
