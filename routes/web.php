@@ -24,6 +24,9 @@ use Illuminate\Support\Facades\Route;
 // -------------------------------
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+
+Route::post('/api/aws/ses-events', [\App\Http\Controllers\AwsSnsWebhookController::class, 'handle'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
 // -------------------------------
 // AUTHENTICATED ROUTES (Specific paths first)
 // -------------------------------

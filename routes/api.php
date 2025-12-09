@@ -75,5 +75,5 @@ Route::get('/vehicles/max-range/{cityId}', [VehicleSearchController::class, 'get
 // -------------------------------
 // AWS SES WEBHOOK FOR EMAIL EVENTS
 // -------------------------------
-Route::post('/aws/ses-events', [AwsSnsWebhookController::class, 'handle'])
-    ->name('aws.ses.webhook');
+// Route::post('/aws/ses-events', [AwsSnsWebhookController::class, 'handle'])
+//     ->name('aws.ses.webhook');
