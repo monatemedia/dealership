@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VehicleSearchController;
 use App\Http\Controllers\VehicleTypeController;
 use App\Http\Controllers\WatchlistController;
+use App\Http\Controllers\AwsSnsWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -94,6 +95,10 @@ Route::get('/main-categories', [MainCategoryController::class, 'index'])
 // Legal pages
 Route::view('/terms', 'legal.terms')->name('terms');
 Route::view('/privacy-policy', 'legal.privacy')->name('privacy');
+
+// This route receives all notifications (Subscription, Bounce, Complaint) from AWS SNS.
+Route::post('aws/ses-events', [AwsSnsWebhookController::class, 'handle'])
+    ->name('aws.ses.webhook');
 
 // -------------------------------
 // CATEGORY HIERARCHY ROUTES (Slug-based - MUST BE LAST)
