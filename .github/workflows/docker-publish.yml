@@ -250,7 +250,6 @@ jobs:
           key: ${{ env.SSH_KEY }}
           script: |
             cd ${{ env.WORK_DIR }}
-
             # --- NEW LOGIC: READ AND PRESERVE EXISTING APP_KEY ---
             EXISTING_APP_KEY=$(grep '^APP_KEY=' .env 2>/dev/null)
 
@@ -260,7 +259,18 @@ jobs:
             # APP_KEY is intentionally omitted here; it is preserved or generated later.
             DB_PASSWORD=${{ secrets.PRODUCTION_DB_PASSWORD }}
             TYPESENSE_API_KEY=${{ secrets.PRODUCTION_TYPESENSE_API_KEY }}
-            MAIL_PASSWORD=${{ secrets.PRODUCTION_MAIL_PASSWORD }}
+
+            # 🔑 AWS SES Configuration
+            AWS_ACCESS_KEY_ID=${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY=${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION=eu-north-1
+            AWS_DEFAULT_REGION=eu-north-1
+
+            # 📬 Mailer Configuration
+            MAIL_MAILER=ses
+            MAIL_FROM_ADDRESS=noreply@actuallyfind.com # Ensure this is VERIFIED in SES
+            MAIL_FROM_NAME=${APP_NAME}
+
             # Static Application Configuration
             DOCKER_CONTAINER_NAME=actuallyfind
             ENVIRONMENT=production
