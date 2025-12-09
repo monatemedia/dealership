@@ -610,12 +610,13 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [X] Set up production CI/CD
 - [ ] Get App Amazon SES Ready
   - [ ] Technical Compliance & Feedback Loops
-    - [ ] Verify Domain
-    - [ ] Set Up DKIM & SPF
+    - [X] Verify Domain
+    - [X] Set Up DKIM & SPF
     - [ ] Implement Bounce & Complaint Handling
+      - [ ] Routes and Controller
     - [ ] Create a Configuration Set
   - [ ] Website & Legal Readiness
-    - [ ] Logo
+    - [X] Logo
     - [X] Footer
     - [ ] Fully Functional Website
     - [X] Working Sign-Up Flow
@@ -632,11 +633,16 @@ _For more examples, please refer to the [Documentation](https://example.com)_
         - [X] Social, 
         - [X] Info,  
         - [X] Edward
+        - [ ] dmarc.reports@actuallyfind.com
   - [ ] Sandbox Testing & Account Health
     - [ ] Test Sending & Receiving
     - [ ] Test Bounce Processing
     - [ ] Ensure Good AWS Health
   - [ ] Application Narrative (The Request Form)
+- [ ] Set Up OAuth
+  - [ ] GoogleOatuh
+  - [ ] FacebookOath
+- [ ] Set Up Social Media
 - [ ] Allow Unknown `Manufacturers` and `Models` to be created
 - [ ] Bugfix: App CSS to `carType` and `fueltype` components
 - [ ] Test Create & Edit Pages
