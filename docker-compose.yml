@@ -26,6 +26,7 @@ services:
       VIRTUAL_HOST: ${VIRTUAL_HOST_SET}
       LETSENCRYPT_HOST: ${VIRTUAL_HOST_SET}
       VIRTUAL_PORT: 80
+      CLIENT_MAX_BODY_SIZE: 1M
     env_file:
       - .env
     volumes:
@@ -70,6 +71,7 @@ services:
       VIRTUAL_HOST: ${VIRTUAL_HOST_SET}
       LETSENCRYPT_HOST: ${VIRTUAL_HOST_SET}
       VIRTUAL_PORT: 80
+      CLIENT_MAX_BODY_SIZE: 1M
     env_file:
       - ./.env
     volumes:
