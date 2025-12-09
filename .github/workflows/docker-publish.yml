@@ -260,18 +260,17 @@ jobs:
             DB_PASSWORD=${{ secrets.PRODUCTION_DB_PASSWORD }}
             TYPESENSE_API_KEY=${{ secrets.PRODUCTION_TYPESENSE_API_KEY }}
 
-            # 🔑 AWS SES Configuration
+            # 🔑 AWS SES SDK Configuration (Uses IAM Keys)
             AWS_ACCESS_KEY_ID=${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY=${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}
             AWS_REGION=eu-north-1
             AWS_DEFAULT_REGION=eu-north-1
 
-            # 📬 Mailer Configuration
-            MAIL_MAILER=smtp
-            MAIL_HOST=email-smtp.eu-north-1.amazonaws.com
-            MAIL_PORT=587
+            # 📬 Mailer Configuration: Use 'ses' driver to utilize the IAM keys above!
+            MAIL_MAILER=ses
+            # MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD are NOT needed for 'ses' mailer.
             MAIL_ENCRYPTION=tls
-            MAIL_FROM_ADDRESS=noreply@actuallyfind.com # Ensure this is VERIFIED in SES
+            MAIL_FROM_ADDRESS=noreply@actuallyfind.com
             MAIL_FROM_NAME=${APP_NAME}
 
             # Static Application Configuration
