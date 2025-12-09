@@ -267,7 +267,10 @@ jobs:
             AWS_DEFAULT_REGION=eu-north-1
 
             # 📬 Mailer Configuration
-            MAIL_MAILER=ses
+            MAIL_MAILER=smtp
+            MAIL_HOST=email-smtp.eu-north-1.amazonaws.com
+            MAIL_PORT=587
+            MAIL_ENCRYPTION=tls
             MAIL_FROM_ADDRESS=noreply@actuallyfind.com # Ensure this is VERIFIED in SES
             MAIL_FROM_NAME=${APP_NAME}
 
