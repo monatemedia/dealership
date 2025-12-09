@@ -630,7 +630,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
         - [X] Webmaster, 
         - [X] No Reply, 
         - [X] Social, 
-        - [X] Info, 
+        - [X] Info,  
         - [X] Edward
   - [ ] Sandbox Testing & Account Health
     - [ ] Test Sending & Receiving

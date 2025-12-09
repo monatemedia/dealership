@@ -2,9 +2,11 @@
 
 <header class="navbar">
     <div class="container navbar-content">
-        <a href="/" class="logo-wrapper">
-            <img src="/img/logoipsum-265.svg" alt="Logo" />
-        </a>
+        <div>
+            <a href="/" class="logo-wrapper">
+                <img src="/img/actuallyfind-logo.png" alt="logo" class="navbar-logo" />
+            </a>
+        </div>
         <button class="btn btn-default btn-navbar-toggle">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" style="width: 24px">

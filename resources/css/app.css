@@ -475,6 +475,21 @@ body.page-signup {
   margin-left: 0;
 }
 
+.navbar-logo {
+    /* Default for Desktop */
+    height: 48px;
+    max-width: 100%; /* Ensures it never pushes past the container width */
+    width: auto;
+    object-fit: contain;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .navbar-logo {
+        height: 32px; /* Scales down slightly for smaller mobile headers */
+    }
+}
+
 .navbar-nav {
   display: flex;
   align-items: stretch;
