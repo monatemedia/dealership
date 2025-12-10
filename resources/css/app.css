@@ -3079,3 +3079,110 @@ input[type="checkbox"]:checked::after {
     color: inherit;
     font-size: 0.875rem;
 }
+
+/* ===========================
+   Contact & Hours Section
+   =========================== */
+
+/* Generic Layout */
+.subtitle {
+    font-size: 1.1rem;
+}
+.section {
+    /* Use utility classes if available, otherwise define here */
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+}
+
+/* Contact Cards */
+.contact-cards {
+    display: grid;
+    /* Responsive grid layout */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+.contact-card {
+    background-color: var(--card-bg, #fff); /* Fallback for card-bg */
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+.icon-wrapper {
+    background-color: var(--primary-color);
+    color: #fff;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 1rem;
+}
+.contact-link {
+    color: var(--link-color);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+.contact-link:hover {
+    color: var(--primary-color-hover);
+}
+.contact-note {
+    font-size: 0.9rem;
+    color: var(--text-muted-color);
+}
+
+/* Hours Card */
+.hours-card, .current-time-card {
+    background-color: var(--card-bg, #fff); /* Fallback for card-bg */
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    max-width: 600px;
+    margin: 2rem auto; /* Centers the card */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+.hours-list {
+    list-style: none;
+    padding: 0;
+}
+.hours-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 1.1rem;
+}
+.hours-item:last-child {
+    border-bottom: none;
+}
+.hours-day i {
+    margin-right: 0.5rem;
+    color: var(--primary-color);
+}
+.hours-time.closed {
+    color: var(--error-color);
+    font-weight: 600;
+}
+
+/* Time Display */
+.current-time-card h3 i {
+    color: var(--primary-color);
+    margin-right: 0.5rem;
+}
+.time-display {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+.date-display {
+    font-size: 1rem;
+    color: var(--text-muted-color);
+    margin-top: 0.25rem;
+}

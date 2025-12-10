@@ -98,6 +98,10 @@ Route::get('/main-categories', [MainCategoryController::class, 'index'])
 Route::view('/terms', 'legal.terms')->name('terms');
 Route::view('/privacy-policy', 'legal.privacy')->name('privacy');
 
+// Other Pages
+Route::view('/contact', 'pages.contact')->name('contact');
+
+
 // -------------------------------
 // CATEGORY HIERARCHY ROUTES (Slug-based - MUST BE LAST)
 // -------------------------------
