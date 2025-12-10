@@ -115,7 +115,6 @@ echo "🛠️ Running migrations on the inactive container (${TARGET_SLOT})..."
 export DB_PASSWORD=$(grep DB_PASSWORD .env | cut -d '=' -f 2- | tr -d '\r' | xargs)
 export DB_USERNAME=$(grep DB_USERNAME .env | cut -d '=' -f 2- | tr -d '\r' | xargs)
 export DB_DATABASE=$(grep DB_DATABASE .env | cut -d '=' -f 2- | tr -d '\r' | xargs)
-
 echo "Running migrations using docker compose run..."
 
 # Run Migrations (using explicit entrypoint and --no-deps)
@@ -125,9 +124,9 @@ docker compose run --rm -T \
     -e IMAGE_TAG=${IMAGE_TAG} \
     ${TARGET_SLOT} -c "php artisan migrate --force --no-interaction"
 
-# Check if migrations succeeded before seeding
+# Check if migrations succeeded before seeding and typesense import
 if [ $? -eq 0 ]; then
-    echo "✅ Database Migrations successful. Starting Seeding..."
+    echo "✅ Database Migrations successful. Starting Seeding and Typesense Setup..."
 
     # Run Seeding
     docker compose run --rm -T \
@@ -135,19 +134,35 @@ if [ $? -eq 0 ]; then
         --no-deps \
         -e IMAGE_TAG=${IMAGE_TAG} \
         ${TARGET_SLOT} -c "php artisan db:seed --force --no-interaction"
-
     if [ $? -ne 0 ]; then
         echo "❌ Database Seeding Failed! Check logs."
         exit 1
     fi
+
+    # 🚀 START TYPESENSE
+    echo "🔍 Creating Typesense collections and importing initial data..."
+    # Corrected command: Run Typesense setup on the inactive slot
+    docker compose run --rm -T \
+        --entrypoint="/bin/bash" \
+        --no-deps \
+        -e IMAGE_TAG=${IMAGE_TAG} \
+        ${TARGET_SLOT} -c "php artisan typesense:create-collections --force --import"
+
+    if [ $? -ne 0 ]; then
+        echo "❌ Typesense Collection creation and import Failed! Check logs."
+        exit 1
+    fi
+    echo "✅ Typesense collections created and populated successfully."
+    # 🔚 END: ADDED TYPESENSE COMMAND HERE
+
 else
     echo "❌ Database Migration Failed! Check logs."
     exit 1
 fi
-echo "✅ Migrations and seeding complete."
+echo "✅ Migrations, seeding, and typesense setup complete."
 
 # -------------------------------------------------------------
-# 8. ATOMIC SWAP
+# 9. ATOMIC SWAP
 # -------------------------------------------------------------
 echo "🛠️ Granting execute permission to the swap script..."
 chmod +x actuallyfind-swop.sh
