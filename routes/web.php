@@ -20,12 +20,18 @@ use Illuminate\Support\Facades\Route;
 */
 
 // -------------------------------
+// AWS SES EVENTS WEBHOOK (No CSRF)
+// -------------------------------
+Route::post('/api/aws/ses-events',
+    [\App\Http\Controllers\AwsSnsWebhookController::class,
+    'handle'])->withoutMiddleware(
+        [\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]
+    )->name('aws.ses-events.handle');
+
+// -------------------------------
 // HOME
 // -------------------------------
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
-
-Route::post('/api/aws/ses-events', [\App\Http\Controllers\AwsSnsWebhookController::class, 'handle'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 // -------------------------------
 // AUTHENTICATED ROUTES (Specific paths first)

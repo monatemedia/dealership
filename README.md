@@ -639,6 +639,9 @@ _For more examples, please refer to the [Documentation](https://example.com)_
     - [X] Ensure Good AWS Health
   - [X] Application Narrative (The Request Form)
 - [ ] Remove unneeded manufacturers from db
+  - [ ] Create clean data
+  - [ ] Upload data to production db
+- [X] Move Footer Styles to CSS
 - [ ] Make current Main Categories into **Sections** 
 - [ ] Make current Subcategories into **Categories**
 - [ ] Set Up OAuth
@@ -646,7 +649,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [ ] FacebookOath
 - [ ] Set Up Social Media
 - [ ] Allow Unknown `Manufacturers` and `Models` to be created
-- [ ] Bugfix: App CSS to `carType` and `fueltype` components
+- [X] Bugfix: App CSS to `carType` and `fueltype` components
 - [ ] Test Create & Edit Pages
 - [ ] Add Group term: **Channels**
   - [ ] Individual categories:
