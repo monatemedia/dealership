@@ -5,17 +5,38 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Database\Seeders\DemoDataSeeder;
+use Illuminate\Support\Facades\App;
 
 class DemoCommand extends Command
 {
     protected $signature = 'db:demo {--count=1 : Number of times to run the seeder}';
     protected $description = 'Runs the DemoDataSeeder to populate the database with development/demo records.';
 
+    // 💡 NEW: Conditional Command Hiding
+    protected $hidden = false;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        // 💡 Check if the app is running in production environment
+        if (App::environment('production')) {
+            $this->hidden = true;
+        }
+    }
+
     /**
      * The handle method to execute the console command.
      */
     public function handle(): int
     {
+
+        // 💡 NEW: A final check and error message if somehow executed in production
+        if (App::environment('production')) {
+            $this->error("❌ The `db:demo` command is disabled in the production environment.");
+            return Command::FAILURE;
+        }
+
         // 💡 NEW: Check for the presence of the Faker library (which is a dev dependency)
         if (!class_exists(\Faker\Factory::class)) {
             $this->error("\n❌ Faker Library Missing (Dev Dependencies)");
