@@ -608,37 +608,39 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Use In App
 - [X] Set Up Production Docker Containers for TypeSense
 - [X] Set up production CI/CD
-- [ ] Get App Amazon SES Ready
-  - [ ] Technical Compliance & Feedback Loops
+- [X] Get App Amazon SES Ready
+  - [X] Technical Compliance & Feedback Loops
     - [X] Verify Domain
     - [X] Set Up DKIM & SPF
-    - [ ] Implement Bounce & Complaint Handling
-      - [ ] Routes and Controller
-    - [ ] Create a Configuration Set
-  - [ ] Website & Legal Readiness
+    - [X] Implement Bounce & Complaint Handling
+      - [X] Routes and Controller
+    - [X] Create a Configuration Set
+  - [X] Website & Legal Readiness
     - [X] Logo
     - [X] Footer
-    - [ ] Fully Functional Website
+    - [X] Fully Functional Website
     - [X] Working Sign-Up Flow
     - [X] Clear Opt-In
-    - [ ] Visible Legal Pages
+    - [X] Visible Legal Pages
       - [X] Privacy Policy, 
       - [X] Terms of Service, 
-      - [ ] Contact Us
-    - [ ] Contact Information
-      - [ ] Social Media
+      - [X] Contact Us
+    - [X] Contact Information
       - [X] Email for 
         - [X] Webmaster, 
         - [X] No Reply, 
         - [X] Social, 
         - [X] Info,  
         - [X] Edward
-        - [ ] dmarc.reports@actuallyfind.com
-  - [ ] Sandbox Testing & Account Health
-    - [ ] Test Sending & Receiving
-    - [ ] Test Bounce Processing
-    - [ ] Ensure Good AWS Health
-  - [ ] Application Narrative (The Request Form)
+        - [X] dmarc.reports@actuallyfind.com
+  - [X] Sandbox Testing & Account Health
+    - [X] Test Sending & Receiving
+    - [X] Test Bounce Processing
+    - [X] Ensure Good AWS Health
+  - [X] Application Narrative (The Request Form)
+- [ ] Remove unneeded manufacturers from db
+- [ ] Make current Main Categories into **Sections** 
+- [ ] Make current Subcategories into **Categories**
 - [ ] Set Up OAuth
   - [ ] GoogleOatuh
   - [ ] FacebookOath
@@ -646,8 +648,6 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [ ] Allow Unknown `Manufacturers` and `Models` to be created
 - [ ] Bugfix: App CSS to `carType` and `fueltype` components
 - [ ] Test Create & Edit Pages
-- [ ] Make current Main Categories into **Sections** 
-- [ ] Make current Subcategories into **Categories**
 - [ ] Add Group term: **Channels**
   - [ ] Individual categories:
     - [ ] Air
