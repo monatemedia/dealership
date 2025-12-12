@@ -1,6 +1,6 @@
 import sqlite3
 
-db_path = "vpic_make_model.sqlite"
+db_path = "make_model.sqlite"
 
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()

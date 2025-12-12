@@ -642,7 +642,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [ ] Create clean data
   - [ ] Upload data to production db
 - [X] Move Footer Styles to CSS
-- [ ] 
+- [ ] Fix losing text on location after deleting location
 - [ ] Troubleshot heart not clickable
 - [ ] Clean up github release versions
 - [ ] Make current Main Categories into **Sections** 

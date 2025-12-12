@@ -114,7 +114,7 @@ return [
 
         'vpic' => [
         'driver' => 'sqlite',
-        'database' => database_path('sources/vpic_make_model.sqlite'),
+        'database' => database_path('sources/make_model.sqlite'),
         'prefix' => '',
         'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
     ],

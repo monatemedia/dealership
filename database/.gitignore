@@ -3,3 +3,4 @@
 
 # But keep vpic.sqlite
 !vpic_make_model.sqlite
+!make_model.sqlite
