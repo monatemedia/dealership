@@ -34,10 +34,10 @@ elif [ "${GREEN_STATUS}" = "${VIRTUAL_HOST_DOMAIN}" ]; then
     TARGET_SERVICE="blue"
 else
     # Initial state (or both are somehow offline - dangerous)
-    # Default to Green as the first deployment target if the current one fails.
+    # Default to Blue as the first deployment target if the current one fails.
     echo "Initial state detected or LIVE container offline. Setting BLUE as LIVE_SLOT for safety."
-    LIVE_SERVICE="blue"
-    TARGET_SERVICE="green"
+    LIVE_SERVICE="green"
+    TARGET_SERVICE="blue"
 fi
 
 LIVE_CONTAINER="actuallyfind-web-${LIVE_SERVICE}"

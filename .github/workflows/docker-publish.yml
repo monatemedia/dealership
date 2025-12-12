@@ -331,6 +331,8 @@ jobs:
             rm -f ${{ env.WORK_DIR }}/deploy-prod.sh
             rm -f ${{ env.WORK_DIR }}/actuallyfind-swop.sh
             rm -f ${{ env.WORK_DIR }}/docker-entrypoint.sh
+            rm -f ${{ env.WORK_DIR }}/docker-compose.yml
+            rm -f ${{ env.WORK_DIR }}/check-live-status.sh
 
             # 2. Change ownership recursively (requires NOPASSWD in visudo to succeed)
             sudo chown -R ${{ env.USER }}:${{ env.USER }} ${{ env.WORK_DIR }}
@@ -350,6 +352,7 @@ jobs:
               ./app-code/actuallyfind-swop.sh \
               ./app-code/docker-entrypoint.sh \
               ./app-code/docker-compose.yml \
+              ./app-code/check-live-status.sh \
               ${USER}@${HOST}:${WORK_DIR}/
 
           # 1: Ensure the main deployment script is executable
@@ -360,6 +363,9 @@ jobs:
 
           # 3. FIX: Ensure the docker-entrypoint.sh is executable on the remote server
           ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/docker-entrypoint.sh"
+
+          # 4. Ensure the check-live-status.sh is executable on the remote server
+          ssh ${USER}@${HOST} "chmod +x ${WORK_DIR}/check-live-status.sh"
 
       - name: 🔐 Fix Web Container Directory Permissions
         uses: appleboy/ssh-action@master
