@@ -175,16 +175,38 @@ fi
 echo "✅ Migrations, seeding, and typesense setup complete."
 
 # -------------------------------------------------------------
-# 9. ATOMIC SWAP
+# 9. ATOMIC SWAP OR INITIAL DEPLOYMENT
 # -------------------------------------------------------------
-echo "🛠️ Granting execute permission to the swap script..."
-chmod +x actuallyfind-swop.sh
-echo "⚡ Executing the atomic Blue/Green swap script..."
 
-# We pass the domain to the swap script so it knows what to set.
-BASE_DOMAIN="${VIRTUAL_HOST_DOMAIN}" ./actuallyfind-swop.sh
+if [ "${LIVE_SLOT}" = "none" ]; then
+    # --- Case 1: Initial Deployment (No LIVE container found) ---
+    echo "🚀 Initial deployment detected. Activating ${TARGET_SLOT}."
+    # Bring up the TARGET_SLOT container and set its VIRTUAL_HOST to go LIVE.
+    VIRTUAL_HOST_SET="${VIRTUAL_HOST_DOMAIN}" docker compose --env-file .env -f docker-compose.yml up -d ${TARGET_SLOT}
 
-# 9. Restart the Queue service
+    if [ $? -ne 0 ]; then
+        echo "❌ Initial TARGET service bring-up failed." >&2
+        exit 1
+    fi
+    echo "✅ Initial service activated successfully."
+
+else
+    # --- Case 2: Standard Blue/Green Swap ---
+    echo "🛠️ Granting execute permission to the swap script..."
+    chmod +x actuallyfind-swop.sh
+    echo "⚡ Executing the atomic Blue/Green swap script..."
+
+    # We pass the domain to the swap script so it knows what to set.
+    BASE_DOMAIN="${VIRTUAL_HOST_DOMAIN}" ./actuallyfind-swop.sh
+
+    if [ $? -ne 0 ]; then
+        echo "❌ Blue/Green swap script failed." >&2
+        exit 1
+    fi
+    echo "✅ Atomic swap successful."
+fi
+
+# 9. Restart the Queue service (Moved after the swap/initial bring-up)
 echo "🔁 Restarting Queue service with new code..."
 docker compose --env-file .env -f docker-compose.yml restart ${QUEUE_SERVICE}
 

@@ -33,11 +33,11 @@ elif [ "${GREEN_STATUS}" = "${VIRTUAL_HOST_DOMAIN}" ]; then
     LIVE_SERVICE="green"
     TARGET_SERVICE="blue"
 else
-    # Initial state (or both are somehow offline - dangerous)
-    # Default to Blue as the first deployment target if the current one fails.
-    echo "Initial state detected or LIVE container offline. Setting BLUE as LIVE_SLOT for safety."
-    LIVE_SERVICE="green"
-    TARGET_SERVICE="blue"
+    # If no containers are live, this swap script cannot proceed.
+    echo "❌ Swap failed: No LIVE container detected. The system must be in an initial deployment state." >&2
+    # In a true Blue/Green setup, the initial deployment should be handled by the main script,
+    # and the swap script should only run when containers already exist.
+    exit 1
 fi
 
 LIVE_CONTAINER="actuallyfind-web-${LIVE_SERVICE}"
