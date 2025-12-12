@@ -63,10 +63,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/api/vehicle-image/status', [VehicleController::class, 'status'])
         ->name('api.vehicle-image.status');
 
-    // Watchlist
-    Route::get('/watchlist', [WatchlistController::class, 'index'])->name('watchlist.index');
-    Route::post('/watchlist/{vehicle}', [WatchlistController::class, 'storeDestroy'])->name('watchlist.storeDestroy');
-
     // Profile
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -79,6 +75,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     // Logout should ONLY be protected by 'auth'
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+    // Watchlist
+    Route::get('/watchlist', [WatchlistController::class, 'index'])->name('watchlist.index');
+    Route::post('/watchlist/{vehicle}', [WatchlistController::class, 'storeDestroy'])->name('watchlist.storeDestroy');
 });
 
 // -------------------------------
