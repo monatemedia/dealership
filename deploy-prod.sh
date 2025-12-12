@@ -27,7 +27,6 @@ echo "🏷️ Exported IMAGE_TAG=${IMAGE_TAG}"
 
 # -------------------------------------------------------------
 # 2. DETERMINE TARGET_SLOT (Robust check for VIRTUAL_HOST)
-#    This logic MUST mirror the check in actuallyfind-swop.sh
 # -------------------------------------------------------------
 echo "🎯 Determining LIVE_SLOT and TARGET_SLOT for deployment..."
 LIVE_SLOT=""
@@ -35,15 +34,29 @@ LIVE_SLOT=""
 # Helper function to check VIRTUAL_HOST value
 get_host_status() {
     local service_name=$1
-    # Check if the VIRTUAL_HOST environment variable matches the domain
-    docker inspect ${service_name} \
-        --format '{{range .Config.Env}}{{if eq (index (split . "=") 0) "VIRTUAL_HOST"}}{{(index (split . "=") 1)}}{{end}}{{end}}' 2>/dev/null
+    #
+    # Use || true to prevent 'docker inspect' from failing the script
+    # due to 'No such container'. The error is redirected to /dev/null anyway.
+    #
+    HOST_STATUS=$(docker inspect ${service_name} \
+        --format '{{range .Config.Env}}{{if eq (index (split . "=") 0) "VIRTUAL_HOST"}}{{(index (split . "=") 1)}}{{end}}{{end}}' 2>/dev/null || true)
+
+    # Check if the inspect command failed because the container doesn't exist.
+    # If the HOST_STATUS is empty *and* the container existed, it means VIRTUAL_HOST was empty.
+    # If the HOST_STATUS is empty and the container didn't exist, it means the script is bootstrapping.
+
+    if [ $? -eq 0 ]; then
+        echo "$HOST_STATUS"
+    else
+        # If the container inspect failed (e.g., container not found), return an empty string.
+        echo ""
+    fi
 }
 
 BLUE_HOST=$(get_host_status ${WEB_SERVICE_BASE}-blue)
 GREEN_HOST=$(get_host_status ${WEB_SERVICE_BASE}-green)
 
-# Use the VIRTUAL_HOST value to determine the truly live container
+# --- Check which container is LIVE ---
 if [ "${BLUE_HOST}" == "${VIRTUAL_HOST_DOMAIN}" ]; then
     LIVE_SLOT="${WEB_SERVICE_BASE}-blue"
     export TARGET_SLOT="${WEB_SERVICE_BASE}-green"
@@ -51,10 +64,10 @@ elif [ "${GREEN_HOST}" == "${VIRTUAL_HOST_DOMAIN}" ]; then
     LIVE_SLOT="${WEB_SERVICE_BASE}-green"
     export TARGET_SLOT="${WEB_SERVICE_BASE}-blue"
 else
-    # Initial deploy or failure to detect: Default to green target.
-    # The swap script will handle the final switch.
+    # Initial deploy or failure to detect: This is the critical change.
+    echo "⚠️ WARNING: Could not detect LIVE_SLOT. Assuming this is an initial deployment."
     LIVE_SLOT="none"
-    export TARGET_SLOT="${WEB_SERVICE_BASE}-green"
+    export TARGET_SLOT="${WEB_SERVICE_BASE}-blue" # Default to blue for initial run
 fi
 
 echo "✅ LIVE_SLOT detected as: ${LIVE_SLOT}."

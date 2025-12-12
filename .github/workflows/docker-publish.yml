@@ -161,7 +161,6 @@ jobs:
 
     # Map existing secrets and hardcoded values for the script
     env:
-      BASE_DOMAIN: actuallyfind.com
       APP_URL: ${{ needs.publish.outputs.app-url }}
       VERSION: ${{ needs.publish.outputs.version-tag }}
       HOST: ${{ secrets.PRODUCTION_HOST }}
@@ -383,7 +382,6 @@ jobs:
             export WORK_DIR="${{ env.WORK_DIR }}" && \
             export IMAGE_NAME="${{ env.IMAGE_NAME }}" && \
             export APP_URL="${{ env.APP_URL }}" && \
-            export BASE_DOMAIN="${{ env.BASE_DOMAIN }}" && \
             export WEB_SERVICE_BASE="${{ env.WEB_SERVICE_BASE }}" && \
             export DB_SERVICE="${{ env.DB_SERVICE }}" && \
             export TYPESENSE_SERVICE="${{ env.TYPESENSE_SERVICE }}" && \
