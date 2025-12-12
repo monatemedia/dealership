@@ -112,7 +112,7 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
-        'vpic' => [
+        'make_model' => [
         'driver' => 'sqlite',
         'database' => database_path('sources/make_model.sqlite'),
         'prefix' => '',
