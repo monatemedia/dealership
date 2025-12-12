@@ -71,8 +71,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
+});
 
-    // Logout
+// -------------------------------
+// AUTHENTICATED-ONLY ROUTES (Only needs Auth, NOT Verification)
+// -------------------------------
+Route::middleware(['auth'])->group(function () {
+    // Logout should ONLY be protected by 'auth'
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
 

@@ -1,4 +1,4 @@
-<?php
+<?php // app/Http/Controllers/LoginController.php
 
 namespace App\Http\Controllers;
 

@@ -1,4 +1,4 @@
-<?php
+<?php // app/Http/Controllers/SignupController.php
 
 namespace App\Http\Controllers;
 
