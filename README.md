@@ -642,6 +642,9 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [ ] Create clean data
   - [ ] Upload data to production db
 - [X] Move Footer Styles to CSS
+- [ ] Send production emails to queue
+- [ ] Stick footer to bottom of page
+- [ ] Create Backup logic
 - [ ] Fix losing text on location after deleting location
 - [ ] Troubleshot heart not clickable
 - [ ] Clean up github release versions
@@ -667,24 +670,24 @@ See the [open issues](https://github.com/monatemedia/dealership/issues) for a fu
 
 
 <!-- CONTRIBUTING -->
-# Contributing
+## Contributing
 
 We use the `GitFlow Branching Model`. To make a contribution, please fork the repo and create a pull request. You can also <a href="https://github.com/monatemedia/dealership/issues/new?labels=bug&template=bug-report---.md">report a bug</a>, or <a href="https://github.com/monatemedia/dealership/issues/new?labels=enhancement&template=feature-request---.md">request a feature</a>.
 
-## GitFlow Branching Model
+### GitFlow Branching Model
 
 This project follows the GitFlow branching strategy with automated CI/CD deployments.
 The goal is to keep `main` always production-ready while using `dev` as an integration branch.
 
 All work happens in short-lived branches that are deleted after merge.
 
-### Core Branches
+#### Core Branches
 
 **`main`** → always production-ready, deployed code. Automatically builds and deploys to production server when code is pushed or when version tags are created.
 
 **`dev`** → integration branch where features and fixes are merged before going to production. Used for local development on Docker Desktop.
 
-### Short-Lived Branches
+#### Short-Lived Branches
 
 Temporary branches, deleted after merge:
 
@@ -693,13 +696,13 @@ Temporary branches, deleted after merge:
 - **`release/<version>`** → staging branch to prepare a version before tagging and merging to `main`. Created from `dev`, merged into both `main` and `dev`. **Automatically deploys to staging environment for testing.**
 - **`hotfix/<name>`** → for urgent production fixes. Branched off `main`, merged back to both `main` and `dev`.
 
-### Deployment Environments
+#### Deployment Environments
 
 - **Production** → Triggered by creating version tags (e.g., `v1.0.0`). Deploys to production server.  Adminer is NOT included in production.
 - **Staging** → `release/*` branches automatically deploy to staging environment on VPS for QA/testing.  Adminer is included for database access.
 - **Local Development** → `dev` branch for development on Docker Desktop. **Adminer is included.**
 
-### Version Management
+#### Version Management
 
 This project uses **Git tags** as the source of truth for versioning. All deployments are tracked with semantic versioning (e.g., `v1.0.0`, `v2.1.5`).
 
@@ -711,11 +714,11 @@ This project uses **Git tags** as the source of truth for versioning. All deploy
 
 **Image tags are automatically managed** - the `IMAGE_TAG` environment variable in `.env` is updated during deployment.
 
-## Complete Release Workflow Example
+### Complete Release Workflow Example
 
 Here's a complete example from start to finish:
 
-### Scenario: Releasing version 1.2.0
+#### Scenario: Releasing version 1.2.0
 
 **Week 1-2: Development**
 ```bash
@@ -802,7 +805,7 @@ git push origin --delete release/1.2.0
 - Watch for any issues
 - Prepare hotfix if critical bugs are found
 
-### If a Critical Bug is Found
+#### If a Critical Bug is Found
 
 ```bash
 # Create hotfix
@@ -836,11 +839,11 @@ git push origin --delete hotfix/fix-search-crash
 
 ---
 
-## Working with Branches
+### Working with Branches
 
-### Core Branches
+#### Core Branches
 
-#### main
+##### main
 
 Always production-ready. Code here is what's deployed to production.
 
@@ -848,20 +851,20 @@ Always production-ready. Code here is what's deployed to production.
 - Code is pushed to `main`
 - A version tag is created (e.g., `v1.0.0`)
 
-#### dev
+##### dev
 
 Integration branch. Features and bugfixes merge here before going to production. Used for local development.
 
 ---
 
-## Short-Lived Branches
+### Short-Lived Branches
 
-### Feature Branches
+#### Feature Branches
 
 For new functionality.
 Created from `dev`, merged back into `dev`.
 
-#### CREATE A FEATURE BRANCH
+##### CREATE A FEATURE BRANCH
 
 ```bash
 # Make sure you're on dev
@@ -880,7 +883,7 @@ git push origin feature/<name>
 git branch --contains feature/<name>
 ```
 
-#### MERGE FEATURE BRANCH
+##### MERGE FEATURE BRANCH
 
 ```bash
 # Make sure all your work is committed on the feature branch
@@ -920,7 +923,7 @@ git push origin --delete feature/<name>
 git branch --all
 ```
 
-#### DELETE AN UNWANTED FEATURE BRANCH
+##### DELETE AN UNWANTED FEATURE BRANCH
 
 ```bash
 # Switch back to dev
@@ -942,11 +945,11 @@ Merge via Pull Request into `dev`.
 
 ---
 
-### Undo Last Commit
+#### Undo Last Commit
 
 For undoing your last commit.
 
-#### UNDO THE LAST COMMIT BUT KEEP YOUR CODE CHANGES (UNCOMMITTED)
+##### UNDO THE LAST COMMIT BUT KEEP YOUR CODE CHANGES (UNCOMMITTED)
 
 ```bash
 # - The commit is undone
@@ -954,7 +957,7 @@ For undoing your last commit.
 git reset --soft HEAD~1
 ```
 
-#### UNDO THE LAST COMMIT AND UNSTAGE THE FILES (KEEP IN WORKING DIRECTORY)
+##### UNDO THE LAST COMMIT AND UNSTAGE THE FILES (KEEP IN WORKING DIRECTORY)
 
 ```bash
 # - The commit is undone
@@ -962,7 +965,7 @@ git reset --soft HEAD~1
 git reset --mixed HEAD~1
 ```
 
-#### COMPLETELY DISCARD THE LAST COMMIT AND ALL ITS CHANGES
+##### COMPLETELY DISCARD THE LAST COMMIT AND ALL ITS CHANGES
 
 ```bash
 # - The commit and all associated changes are deleted.
@@ -970,7 +973,7 @@ git reset --mixed HEAD~1
 git reset --hard HEAD~1
 ```
 
-#### OPTIONAL CLEANUP
+##### OPTIONAL CLEANUP
 
 ```bash
 # - If you want to discard both commits and exactly match remote origin/dev
@@ -979,7 +982,7 @@ git reset --hard origin/dev
 
 ---
 
-### Bugfix Branches
+#### Bugfix Branches
 
 For fixing bugs (not urgent production issues).
 Created from `dev`, merged back into `dev`.
@@ -996,14 +999,14 @@ Merge via Pull Request into `dev`.
 
 ---
 
-### Release Branches
+#### Release Branches
 
 For preparing a version before tagging and merging into production.
 Created from `dev`, merged into both `main` and `dev`.
 
 **Release branches are automatically deployed to the staging environment for QA and testing.**
 
-#### CREATE AND DEPLOY TO STAGING
+##### CREATE AND DEPLOY TO STAGING
 
 ```bash
 # Make sure dev is up to date
@@ -1029,11 +1032,11 @@ git push origin release/1.0.0
 - Adminer is available for database access
 - Server's `.env` is updated with `IMAGE_TAG=v1.0.0`
 
-#### TEST ON STAGING
+##### TEST ON STAGING
 
 Visit your staging environment and thoroughly test all functionality.
 
-#### PROMOTE TO PRODUCTION
+##### PROMOTE TO PRODUCTION
 
 After successful testing on staging, it's time to deploy to production. Follow these steps carefully:
 
@@ -1143,12 +1146,12 @@ This ensures the production server is clean, and prevents disk-full errors that 
 
 ---
 
-### Hotfix Branches
+#### Hotfix Branches
 
 For urgent production fixes.
 Created from `main`, merged back into both `main` and `dev`.
 
-#### CREATE HOTFIX
+##### CREATE HOTFIX
 
 ```bash
 git checkout main
@@ -1158,7 +1161,7 @@ git checkout -b hotfix/<name>
 git push origin hotfix/<name>
 ```
 
-#### DEPLOY HOTFIX
+##### DEPLOY HOTFIX
 
 ```bash
 # Merge to main
@@ -1187,9 +1190,9 @@ If needed, you can manually deploy the hotfix branch to staging for testing befo
 
 ---
 
-## Version Management
+### Version Management
 
-### Semantic Versioning
+#### Semantic Versioning
 
 We use semantic versioning: `MAJOR.MINOR.PATCH` (e.g., `v1.0.0`, `v2.3.5`)
 
@@ -1197,7 +1200,7 @@ We use semantic versioning: `MAJOR.MINOR.PATCH` (e.g., `v1.0.0`, `v2.3.5`)
 - **MINOR** - New features (backwards compatible) (e.g., `v1.0.0` → `v1.1.0`)
 - **PATCH** - Bug fixes (e.g., `v1.0.0` → `v1.0.1`)
 
-### Git Tagging Quick Reference
+#### Git Tagging Quick Reference
 
 **Creating tags:**
 
@@ -1249,7 +1252,7 @@ git push origin --delete v1.0.0
 
 ✅ **DO** always prefix with `v`: `v1.0.0`, `v2.1.5`
 
-### When to Increment Version Numbers
+#### When to Increment Version Numbers
 
 **Increment MAJOR (v1.0.0 → v2.0.0):**
 - Breaking API changes
@@ -1269,7 +1272,7 @@ git push origin --delete v1.0.0
 - Performance improvements
 - Hotfixes from `hotfix/*` branches
 
-### Version Numbering Examples
+#### Version Numbering Examples
 
 Starting from `v1.0.0`:
 
@@ -1287,7 +1290,7 @@ git tag -a v1.2.0 -m "Release 1.2.0: Add user favorites"
 git tag -a v2.0.0 -m "Release 2.0.0: New API structure (breaking changes)"
 ```
 
-### Checking Current Version
+#### Checking Current Version
 
 **On your server:**
 ```bash
@@ -1304,7 +1307,7 @@ docker images ghcr.io/monatemedia/dealership
 docker compose config | grep "image:"
 ```
 
-### Rolling Back to Previous Version
+#### Rolling Back to Previous Version
 
 If you need to rollback to a previous version:
 
@@ -1323,7 +1326,7 @@ docker compose up -d
 docker compose up -d dealership-web dealership-queue dealership-db
 ```
 
-### Running Adminer Locally
+#### Running Adminer Locally
 
 For local development with Adminer:
 
@@ -1345,7 +1348,7 @@ docker compose up -d dealership-web dealership-queue dealership-db
 
 ---
 
-## Standard Workflow
+### Standard Workflow
 
 1. Fork or clone the project.
 
@@ -1367,7 +1370,7 @@ docker compose up -d dealership-web dealership-queue dealership-db
 
 ---
 
-## Summary of Branch Sources
+### Summary of Branch Sources
 
 - `feature/*` → from `dev`, merge into `dev`.
 - `bugfix/*` → from `dev`, merge into `dev`.
@@ -1376,9 +1379,9 @@ docker compose up -d dealership-web dealership-queue dealership-db
 
 ---
 
-## CI/CD Deployment Flow
+### CI/CD Deployment Flow
 
-### Automatic Deployments
+#### Automatic Deployments
 
 | Trigger | Environment | Docker Tags | Adminer |
 |---------|-------------|-------------|---------|
@@ -1387,7 +1390,7 @@ docker compose up -d dealership-web dealership-queue dealership-db
 | Push tag `v1.0.0` | Production | `:production`, `:v1.0.0` | ❌ No |
 | Local dev | Development | `:dev` | ✅ Yes |
 
-### Required GitHub Secrets
+#### Required GitHub Secrets
 
 **For Staging (Current VPS):**
 - `PAT` - GitHub Personal Access Token
@@ -1402,13 +1405,13 @@ docker compose up -d dealership-web dealership-queue dealership-db
 - `PRODUCTION_USER` - Production SSH username
 - `PRODUCTION_WORK_DIR` - Production project directory
 
-### Workflow Location
+#### Workflow Location
 
 `.github/workflows/docker-publish.yml`
 
 ---
 
-### Deployment Permissions
+#### Deployment Permissions
 
 The CI/CD pipeline automatically handles storage permissions after each deployment. The workflow:
 
@@ -1429,7 +1432,7 @@ docker exec actuallyfind-web chmod -R 775 /var/www/html/storage /var/www/html/bo
 ```
 ---
 
-## Best Practices
+### Best Practices
 
 1. **Always create release branches from dev** - never from feature branches
 2. **Test thoroughly on staging** before merging to main
@@ -1445,11 +1448,116 @@ docker exec actuallyfind-web chmod -R 775 /var/www/html/storage /var/www/html/bo
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Top contributors:
+## User Administration with Tinker
+
+This guide explains how to find and delete conflicting user data (e.g., duplicate emails/phone numbers) directly in the production database using Laravel's Tinker console.
+
+### 1\. Identify and Log into the Active Container
+
+The active container name changes after a deployment swap (green/blue). You must run the check script to get the current name.
+
+| Step | Command | Purpose |
+| :--- | :--- | :--- |
+| **1.1 Check Status** | `./check-live-status.sh` | Finds the current active container name (e.g., `actuallyfind-web-blue`). |
+| **1.2 Log In** | `docker exec -it <ACTIVE_CONTAINER_NAME> /bin/bash` | Executes an interactive shell inside the live web container. |
+| **1.3 Start Tinker** | `php artisan tinker` | Starts the Laravel console interface. |
+
+### 2\. Finding the Conflicting User's Data
+
+Before deleting a user, you must confirm their existence and get their unique ID. **Note:** Always use the *exact* email or phone number as stored in the database (e.g., include `.com`).
+
+#### A. Find the User Record (by Email or Phone)
+
+```php
+// Find by Email (must be exact match, e.g., 'ebaitsewe@gmail.com')
+>>> $user = App\Models\User::where('email', 'CONFLECTING_EMAIL')->first();
+
+// Find by Phone Number (must be exact match, e.g., '0783245326')
+>>> $user = App\Models\User::where('phone', 'CONFLECTING_PHONE_NUMBER')->first();
+```
+
+#### B. Display the User's ID and Details
+
+To confirm you have the correct user and to find their unique `id`, use the `dd()` (dump and die) function on the `$user` variable.
+
+```php
+// Run this immediately after finding the user to see the full data array.
+>>> dd($user);
+
+// The output will show the user's unique ID:
+/*
+App\Models\User^ {#6140
+  #attributes: array:12 [
+    "id" => 3  <-- THIS IS THE ID YOU NEED!
+    "name" => "Edward"
+    "email" => "ebaitsewe@gmail.com"
+    // ...
+  ]
+}
+*/
+```
+
+### 3\. Deleting the User Record (Three Methods)
+
+You have three reliable ways to delete the user. The `App\Models\User::destroy(ID)` method is often the simplest and most robust.
+
+| Method | Command | Reliability | Notes |
+| :--- | :--- | :--- | :--- |
+| **1. Delete by ID (Best)** | `App\Models\User::destroy(<USER_ID>);` | **High** | Uses the static `destroy()` method. Use the ID found in Step 2B. |
+| **2. Delete using Null-Safe Operator** | `$user?->delete();` | **High** | Requires the user to be stored in the `$user` variable. The `?->` safely deletes if the user exists. |
+| **3. Delete Directly by Query** | `App\Models\User::where('email', 'EMAIL')->delete();` | **Medium** | Simple, but requires the query to be repeated. |
+
+#### Example: Deleting User ID 3 (As found in your session)
+
+```php
+// Method 1 (Recommended)
+>>> App\Models\User::destroy(3);
+=> 1  // Indicates 1 record was successfully deleted.
+```
+
+### 4\. Verification and Exit
+
+After deletion, **always** verify the user is gone.
+
+#### A. Verify Deletion
+
+Check to ensure the record no longer exists by searching for it again. The result must be `null`.
+
+```php
+// Check by Email
+>>> App\Models\User::where('email', 'ebaitsewe@gmail.com')->first();
+=> null
+
+// Check by Phone
+>>> App\Models\User::where('phone', '0783245326')->first();
+=> null
+```
+
+#### B. Exit the Session
+
+```bash
+# Inside the Tinker shell
+>>> exit
+   INFO  Goodbye.
+
+# Inside the container's shell
+root@...:/var/www/html# exit
+exited
+
+# Back on the host machine
+edward@likeable-roll:~/actuallyfind$
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Top Contributors:
 
 <a href="https://github.com/monatemedia/dealership/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=monatemedia/dealership" alt="contrib.rocks image" />
 </a>
+
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
