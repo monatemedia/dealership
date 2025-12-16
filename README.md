@@ -638,10 +638,11 @@ _For more examples, please refer to the [Documentation](https://example.com)_
     - [X] Test Bounce Processing
     - [X] Ensure Good AWS Health
   - [X] Application Narrative (The Request Form)
-- [ ] Remove unneeded manufacturers from db
-  - [ ] Create clean data
+- [X] Remove unneeded manufacturers from db
+  - [X] Create clean data
   - [ ] Upload data to production db
 - [X] Move Footer Styles to CSS
+- [ ] Change Logo on signup and login pages
 - [ ] Send production emails to queue
 - [ ] Stick footer to bottom of page
 - [ ] Create Backup logic

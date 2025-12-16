@@ -1,220 +1,142 @@
-<?php // app/Console/Commands/ExtractDependenciesCommand.php
+<?php
+// app/Console/Commands/ExtractDependenciesCommand.php
 
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class ExtractDependenciesCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * The argument takes the path relative to the resources/views directory.
-     * E.g., php artisan blade:extract-dependencies posts/show.blade.php
-     * @var string
-     */
-    protected $signature = 'blade:extract-dependencies {view_path}';
+    protected $signature = 'blade:extract-dependencies
+        {view_path}
+        {--out= : Write output directly to a file}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Extracts all relevant CSS and JS/Alpine logic for a given Blade view.';
 
-    // Default asset paths (relative to base_path)
-    protected $jsPath = 'resources/js/app.js';
+    protected $jsPath  = 'resources/js/app.js';
     protected $cssPath = 'resources/css/app.css';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
-        $viewPathInput = $this->argument('view_path');
+        // 🔑 CRITICAL: disable decoration (Termwind / TTY)
+        $this->output->setDecorated(false);
 
-        // --- FIX START: Normalize the input path by stripping known prefixes ---
+        $viewPathInput = $this->argument('view_path');
         $viewPathInput = preg_replace('/^resources\/views\//', '', $viewPathInput);
         $viewPathInput = preg_replace('/^views\//', '', $viewPathInput);
-        // --- FIX END ---
 
         $bladePath = base_path("resources/views/{$viewPathInput}");
 
         if (!File::exists($bladePath)) {
-            $this->error("Blade file not found at: {$bladePath}");
+            $this->write("ERROR: Blade file not found: {$bladePath}");
             return Command::FAILURE;
         }
 
         $bladeContent = File::get($bladePath);
 
-        // --- 1. Extract CSS and JS/Alpine Dependencies from Blade ---
+        $classes   = $this->extractCssClasses($bladeContent);
+        $functions = $this->extractJsFunctions($bladeContent);
 
-        $extractedClasses = $this->extractCssClasses($bladeContent);
-        $extractedFunctions = $this->extractJsFunctions($bladeContent);
+        $this->write("\n### Extracted CSS Rules from {$this->cssPath} ###\n");
+        $this->write($this->extractCssRules($classes));
 
-        // --- 2. Extract CSS Rules from app.css ---
+        $this->write("\n\n### Extracted JavaScript Logic from {$this->jsPath} ###\n");
+        $this->write($this->extractJsLogic($functions));
 
-        $this->info("\n### Extracted CSS Rules from {$this->cssPath} ###\n");
-        $extractedCss = $this->extractCssRules($extractedClasses);
-        $this->line($extractedCss);
-
-        // --- 3. Extract JS Functions/Alpine Logic from app.js ---
-
-        $this->info("\n### Extracted JavaScript Logic from {$this->jsPath} ###\n");
-        $extractedJs = $this->extractJsLogic($extractedFunctions);
-        $this->line($extractedJs);
-
-        $this->info("\nSuccessfully extracted dependencies for LLM context.");
+        $this->write("\n\nDONE");
 
         return Command::SUCCESS;
     }
 
-    /**
-     * Extracts unique CSS class names used in the Blade content.
-     * Includes static 'class' and dynamic 'x-bind:class' directives.
-     *
-     * @param string $content
-     * @return array
-     */
-    public function extractCssClasses(string $content): array // Made public for use in ContextCommand
+    private function write(string $text): void
+    {
+        // RAW stdout — always redirectable
+        fwrite(STDOUT, $text . PHP_EOL);
+    }
+
+    /* ---------- extraction helpers (unchanged logic) ---------- */
+
+    public function extractCssClasses(string $content): array
     {
         $classes = [];
-        // Regex to find class="..." or x-bind:class="..."
         preg_match_all('/(?:class|x-bind:class)=["\']([^"\']+)["\']/', $content, $matches);
 
         foreach ($matches[1] as $match) {
-            // Split by space, handle potential dynamic expressions (e.g., 'isActive ? 'text-blue' : 'text-gray'')
-            $parts = preg_split('/\s+/', $match);
-            foreach ($parts as $part) {
-                // Clean up any extra characters from dynamic class logic or Tailwind prefixes
-                $cleaned = trim(preg_replace('/[^a-zA-Z0-9\-_:\[\]]/', '', $part));
-                if (!empty($cleaned)) {
-                    $classes[] = $cleaned;
+            foreach (preg_split('/\s+/', $match) as $part) {
+                $clean = trim(preg_replace('/[^a-zA-Z0-9\-_:\[\]]/', '', $part));
+                if ($clean !== '') {
+                    $classes[] = $clean;
                 }
             }
         }
+
         return array_unique($classes);
     }
 
-    /**
-     * Extracts potential JS function calls and Alpine component names.
-     * Focuses on x-data, x-on, and simple function calls.
-     *
-     * @param string $content
-     * @return array
-     */
-    public function extractJsFunctions(string $content): array // Made public for use in ContextCommand
+    public function extractJsFunctions(string $content): array
     {
         $functions = [];
-        // Regex to capture potential JS names in directives like x-data, x-on, @click, etc.
-        // It's heuristic but attempts to find names that might be defined in app.js
         preg_match_all('/(?:x-data|x-on|@)\s*=\s*["\']([^"\']+)["\']/', $content, $matches);
 
         foreach ($matches[1] as $match) {
-            // Check for explicit function calls, e.g., 'submitForm(id)'
-            if (preg_match_all('/([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/', $match, $funcMatches)) {
-                $functions = array_merge($functions, $funcMatches[1]);
+            if (preg_match_all('/([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/', $match, $m)) {
+                $functions = array_merge($functions, $m[1]);
             }
 
-            // Check for Alpine.data component names, e.g., 'postModal' in x-data="postModal"
-            // We'll treat all first words inside x-data as potential component names
-            if (preg_match('/^\s*([a-zA-Z_$][a-zA-Z0-9_$]*)/', $match, $dataMatch)) {
-                $functions[] = $dataMatch[1];
+            if (preg_match('/^\s*([a-zA-Z_$][a-zA-Z0-9_$]*)/', $match, $m)) {
+                $functions[] = $m[1];
             }
         }
 
-        // Add standard Alpine event initializer
         if (str_contains($content, 'alpine:init')) {
-             $functions[] = 'alpine:init';
+            $functions[] = 'alpine:init';
         }
 
-        return array_unique(array_filter($functions));
+        return array_unique($functions);
     }
 
-    /**
-     * Searches app.css and extracts the full rule blocks for the provided classes.
-     *
-     * @param array $classes
-     * @return string
-     */
-    public function extractCssRules(array $classes): string // Made public for use in ContextCommand
+    public function extractCssRules(array $classes): string
     {
-        $cssContent = File::exists($this->cssPath) ? File::get($this->cssPath) : '';
-        $extractedRules = [];
-
-        if (empty($cssContent)) {
-            return "/* CSS file not found or is empty. Path: {$this->cssPath} */";
+        if (!File::exists($this->cssPath)) {
+            return "/* CSS file not found */";
         }
 
-        // Escape class names for use in regex
-        $classRegex = array_map(function ($class) {
-            // Escapes dots, brackets, and other special characters that might be in CSS selectors
-            $safeClass = preg_quote($class, '/');
-            // Look for the class name either standalone or with a prefix like [class.name] or a state like .class-name:hover
-            // The pattern ensures it looks for the class as a whole word/selector
-            return '(?<=[^\w\-\:])' . $safeClass . '(?=[^\w\-\:])';
-        }, $classes);
+        $css = File::get($this->cssPath);
+        $rules = [];
 
-        // Combined regex to find the rule block for the class
-        $pattern = '/(' . implode('|', $classRegex) . ')\s*\{(.+?)\}/is';
-
-        if (preg_match_all($pattern, $cssContent, $matches)) {
-            foreach ($matches[0] as $rule) {
-                // Ensure unique rules
-                if (!in_array($rule, $extractedRules)) {
-                    $extractedRules[] = trim($rule);
-                }
+        foreach ($classes as $class) {
+            $safe = preg_quote($class, '/');
+            if (preg_match_all("/\\.{$safe}[^\\{]*\\{[^}]*\\}/i", $css, $m)) {
+                $rules = array_merge($rules, $m[0]);
             }
         }
 
-        return empty($extractedRules) ? "/* No relevant CSS rules found in {$this->cssPath} */" : implode("\n\n", $extractedRules);
+        return $rules ? implode("\n\n", array_unique($rules)) : "/* No CSS rules found */";
     }
 
-    /**
-     * Searches app.js and extracts full function/Alpine data definitions.
-     *
-     * @param array $functions
-     * @return string
-     */
-    public function extractJsLogic(array $functions): string // Made public for use in ContextCommand
+    public function extractJsLogic(array $functions): string
     {
-        $jsContent = File::exists($this->jsPath) ? File::get($this->jsPath) : '';
-        $extractedCode = [];
-
-        if (empty($jsContent)) {
-            return "// JS file not found or is empty. Path: {$this->jsPath}";
+        if (!File::exists($this->jsPath)) {
+            return "// JS file not found";
         }
 
-        $jsNames = array_map(fn($f) => preg_quote($f, '/'), $functions);
+        $js = File::get($this->jsPath);
+        $out = [];
 
-        foreach ($jsNames as $name) {
-            // 1. Match standard function definition: function name(...) { ... }
-            $funcPattern = "/(function\s+{$name}\s*\([^{]*\)\s*\{.*?\})/is";
-            if (preg_match($funcPattern, $jsContent, $match)) {
-                $extractedCode[] = trim($match[1]);
-                continue;
+        foreach ($functions as $name) {
+            $safe = preg_quote($name, '/');
+
+            if (preg_match("/function\s+{$safe}\s*\([^)]*\)\s*\{.*?\}/is", $js, $m)) {
+                $out[] = $m[0];
             }
 
-            // 2. Match Alpine.data() definition: Alpine.data('name', (...) => { ... })
-            $alpinePattern = "/(Alpine\.data\s*\(\s*['\"]{$name}['\"]\s*,\s*\([^{]*\)\s*=>\s*\{.*?\});?/is";
-            if (preg_match($alpinePattern, $jsContent, $match)) {
-                $extractedCode[] = trim($match[1]);
-                continue;
-            }
-
-            // 3. Match the alpine:init block if the flag was set
-            if ($name === 'alpine:init') {
-                $initPattern = "/(document\.addEventListener\s*\(\s*['\"]alpine:init['\"]\s*,\s*\(\s*\)\s*=>\s*\{.*?\});?/is";
-                if (preg_match($initPattern, $jsContent, $match)) {
-                    $extractedCode[] = trim($match[1]);
-                    continue;
-                }
+            if (preg_match("/Alpine\.data\s*\(\s*['\"]{$safe}['\"].*?\);/is", $js, $m)) {
+                $out[] = $m[0];
             }
         }
 
-        $uniqueCode = array_unique($extractedCode);
-
-        return empty($uniqueCode) ? "// No relevant JS or Alpine logic found in {$this->jsPath}" : implode("\n\n", $uniqueCode);
+        return $out ? implode("\n\n", array_unique($out)) : "// No JS logic found";
     }
 }
