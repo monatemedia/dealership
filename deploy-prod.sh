@@ -96,9 +96,22 @@ if [ $? -ne 0 ]; then
 fi
 echo "✅ DB restarted successfully."
 
-# 5. Wait for the new container to stabilize
-echo "⏳ Waiting 10 seconds for the newly built container to stabilize..."
-sleep 10
+# 5. Wait for the DB to be ready for connections
+echo "⏳ Waiting for database (${DB_SERVICE}) to be ready..."
+MAX_RETRIES=30
+COUNT=0
+
+until docker exec ${DB_SERVICE} pg_isready -U "${DB_USERNAME}" -d "${DB_DATABASE}" > /dev/null 2>&1; do
+    COUNT=$((COUNT + 1))
+    if [ $COUNT -ge $MAX_RETRIES ]; then
+        echo "❌ Error: Database was not ready after 60 seconds. Exiting."
+        exit 1
+    fi
+    echo "Still waiting for DB... ($COUNT/$MAX_RETRIES)"
+    sleep 2
+done
+
+echo "✅ Database is ready for connections."
 
 # 6: APP_KEY MANAGEMENT (CREATE IF MISSING)
 echo "🔑 Checking and generating APP_KEY..."

@@ -8,7 +8,7 @@
                     <div class="text-center">
                         <a href="/">
                             @if(app()->environment('production'))
-                                <img src="{{ asset('img/actuallyfind-logo.png') }}" alt="ActuallyFind Logo" />
+                                <img src="{{ asset('img/actuallyfind-logo.png') }}" alt="ActuallyFind Logo" class="navbar-logo"/>
                             @else
                                 <img src="{{ asset('img/logoipsum-265.svg') }}" alt="Development Logo" />
                             @endif
