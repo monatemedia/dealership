@@ -4,7 +4,11 @@
     <div class="container navbar-content">
         <div>
             <a href="/" class="logo-wrapper">
-                <img src="/img/actuallyfind-logo.png" alt="logo" class="navbar-logo" />
+                @if(app()->environment('production'))
+                    <img src="{{ asset('img/actuallyfind-logo.png') }}" alt="ActuallyFind Logo" class="navbar-logo" />
+                @else
+                    <img src="{{ asset('img/logoipsum-265.svg') }}" alt="Dev Logo" class="navbar-logo" />
+                @endif
             </a>
         </div>
         <button class="btn btn-default btn-navbar-toggle">

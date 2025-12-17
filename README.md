@@ -640,11 +640,15 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Application Narrative (The Request Form)
 - [X] Remove unneeded manufacturers from db
   - [X] Create clean data
-  - [ ] Upload data to production db
+  - [X] Upload data to production db
 - [X] Move Footer Styles to CSS
-- [ ] Change Logo on signup and login pages
+- [X] Make Footer Sticky
+- [X] Change Logo on 
+  - [X] Signup  
+  - [X] Login 
+  - [X] Header
+  - [X] favicon
 - [ ] Send production emails to queue
-- [ ] Stick footer to bottom of page
 - [ ] Create Backup logic
 - [ ] Fix losing text on location after deleting location
 - [ ] Troubleshot heart not clickable

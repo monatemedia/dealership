@@ -7,7 +7,11 @@
                 <div class="auth-page-form">
                     <div class="text-center">
                         <a href="/">
-                            <img src="/img/logoipsum-265.svg" alt="" />
+                            @if(app()->environment('production'))
+                                <img src="{{ asset('img/actuallyfind-logo.png') }}" alt="ActuallyFind Logo" />
+                            @else
+                                <img src="{{ asset('img/logoipsum-265.svg') }}" alt="Development Logo" />
+                            @endif
                         </a>
                     </div>
 

@@ -5,15 +5,15 @@
     <x-layouts.header />
     <x-flash-messages />
 
-    {{ $slot }}
+        {{ $slot }}
 
     {{-- The footer container now uses a simple window event to listen for updates --}}
-    <div x-data="{ show: {{ $managedFooter ? 'false' : 'true' }} }"
-         x-show="show"
-         x-on:toggle-footer.window="show = $event.detail"
-         {{-- x-transition:enter.duration.500ms --}}
-         style="display: none;" {{-- Replaces x-cloak to ensure it works even without specific CSS --}}
-         :style="show ? 'display: block' : 'display: none'">
+    <div class="footer-wrapper"
+        x-data="{ show: {{ $managedFooter ? 'false' : 'true' }} }"
+        x-show="show"
+        x-on:toggle-footer.window="show = $event.detail"
+        style="display: none;" {{-- Replaces x-cloak to ensure it works even without specific CSS --}}
+        :style="show ? 'display: block' : 'display: none'">
         <x-layouts.footer :$footerLinks />
     </div>
 </x-base-layout>

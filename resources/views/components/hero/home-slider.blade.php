@@ -13,7 +13,7 @@
     }
 @endphp
 
-<x-hero.slider>
+<x-hero.slider class="main.no-padding">
     <!-- Slide 1 -->
     <x-hero.slide>
         <x-slot:image>

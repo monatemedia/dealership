@@ -427,19 +427,39 @@ select:focus {
   padding: 0.25rem 0.75rem;
 }
 
-html,
-body {
-  min-height: 100%;
+/* Ensure the container takes up the full height of the screen */
+html, body {
+    height: 100%;
+    margin: 0;
 }
 
 body {
-  margin: 0;
-  color: var(--text-color);
-  background-color: var(--body-bg);
-  font-size: 14px;
-  font-family: var(--primary-font);
-  /* padding-top: var(--navbar-height); */
-  transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Minimum height is the full viewport */
+    overflow-x: hidden;
+
+    /* Your existing styles */
+    color: var(--text-color);
+    background-color: var(--body-bg);
+    font-size: 14px;
+    font-family: var(--primary-font);
+    transition: all 0.3s;
+}
+
+
+
+/* If a page has a <main> tag, it grows.
+   If a page uses a <div> with class 'content-grow', it grows.
+*/
+main, .content-grow {
+    padding: 1rem;
+    flex: 1 0 auto;
+    width: 100%;
+}
+
+main.no-padding {
+    padding: 0;
 }
 
 body.page-login,
@@ -584,14 +604,6 @@ body.page-signup {
   transition: all 0.3s;
 }
 
-main {
-  padding: 1rem;
-}
-
-main.no-padding {
-    padding: 0;
-}
-
 .card {
   background-color: white;
   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
@@ -682,6 +694,15 @@ main.no-padding {
   /* color: var(--primary-button-color); */
   border-color: var(--primary-button-border-color);
   /* box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2); */
+}
+
+/* -----------------------------------------------
+    Hero Slider Styles
+------------------------------------------------- */
+/* Ensure the hero doesn't shrink and stays full width */
+.main-hero-slider {
+    flex-shrink: 0;
+    width: 100%;
 }
 
 .hero-slides {
@@ -3190,6 +3211,12 @@ input[type="checkbox"]:checked::after {
 /* ===========================
    Footer Basic Styling
    =========================== */
+/* Ensure the footer wrappers don't shrink */
+.footer-wrapper,
+.footer-basic {
+    flex-shrink: 0;
+}
+
 .footer-basic {
     padding: 40px 0;
     background-color: #ffffff;
