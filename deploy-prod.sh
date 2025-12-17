@@ -5,6 +5,9 @@
 # Environment variables are passed from the GitHub Action.
 set -euo pipefail
 
+# --- FIX: Silence "VIRTUAL_HOST_SET" port warnings ---
+export VIRTUAL_HOST_SET=${VIRTUAL_HOST_SET:-""}
+
 DEPLOY_TAG="production"
 FULL_IMAGE_NAME="${IMAGE_NAME}:${DEPLOY_TAG}"
 WEB_SERVICE_BASE="actuallyfind-web"
@@ -19,6 +22,9 @@ VIRTUAL_HOST_DOMAIN=$(echo "${APP_URL}" | sed -E 's/^(https?:\/\/)?//')
 echo "--- Starting Blue/Green Deployment on Remote Server ---"
 echo "✅ Current working directory is: $(pwd)"
 
+# -------------------------------------------------------------
+# 1. PULL THE LATEST IMAGE
+# -------------------------------------------------------------
 # 1. Pull the latest Docker image
 echo "📥 Pulling latest image: ${FULL_IMAGE_NAME}"
 docker pull ${FULL_IMAGE_NAME}
@@ -86,68 +92,60 @@ VIRTUAL_HOST_SET="" docker compose --env-file .env -f docker-compose.yml up -d \
   ${TYPESENSE_SERVICE};
 
 # -------------------------------------------------------------
-# 4. Force-restart DB (Required for clean password application)
+# 4. Force-restart DB and Load Credentials
 # -------------------------------------------------------------
-echo "🔄 Force-restarting DB container to ensure clean environment variables are applied..."
-docker compose restart actuallyfind-db
-if [ $? -ne 0 ]; then
-    echo "❌ DB restart failed!"
-    exit 1
-fi
-echo "✅ DB restarted successfully."
+echo "🔄 Force-restarting DB container..."
+docker compose restart ${DB_SERVICE}
 
-# 5. Wait for the DB to be ready for connections
+# SAFE EXTRACTION: Added DB_PASSWORD here
+RAW_DB_USER=$(grep "^DB_USERNAME=" .env | cut -d '=' -f 2- | tr -d '\r' | xargs || true)
+RAW_DB_NAME=$(grep "^DB_DATABASE=" .env | cut -d '=' -f 2- | tr -d '\r' | xargs || true)
+RAW_DB_PASS=$(grep "^DB_PASSWORD=" .env | cut -d '=' -f 2- | tr -d '\r' | xargs || true)
+
+export DB_USERNAME="${RAW_DB_USER:-postgres}"
+export DB_DATABASE="${RAW_DB_NAME:-laravel}"
+export DB_PASSWORD="${RAW_DB_PASS:-}" # Bound to empty string if missing
+
+echo "✅ Credentials loaded (User: ${DB_USERNAME}, DB: ${DB_DATABASE})"
+
+# -------------------------------------------------------------
+# 5. Wait for the DB to be ready
+# -------------------------------------------------------------
 echo "⏳ Waiting for database (${DB_SERVICE}) to be ready..."
 MAX_RETRIES=30
 COUNT=0
 
+# Use the variables we just safely defined
 until docker exec ${DB_SERVICE} pg_isready -U "${DB_USERNAME}" -d "${DB_DATABASE}" > /dev/null 2>&1; do
     COUNT=$((COUNT + 1))
     if [ $COUNT -ge $MAX_RETRIES ]; then
-        echo "❌ Error: Database was not ready after 60 seconds. Exiting."
+        echo "❌ Error: Database was not ready after 60 seconds."
         exit 1
     fi
     echo "Still waiting for DB... ($COUNT/$MAX_RETRIES)"
     sleep 2
 done
 
-echo "✅ Database is ready for connections."
+echo "✅ Database is ready."
 
-# 6: APP_KEY MANAGEMENT (CREATE IF MISSING)
-echo "🔑 Checking and generating APP_KEY..."
-if grep -q '^APP_KEY=$' .env; then
-    echo "⚠️ APP_KEY is missing a value. Generating a new one..."
-    # Execute the command inside the new TARGET_SLOT
-    NEW_KEY=$(docker compose run --rm -T --no-deps ${TARGET_SLOT} php artisan key:generate --show)
-    KEY_VALUE=$(echo "$NEW_KEY" | tail -n 1)
-    sed -i "/^APP_KEY=/c\APP_KEY=$KEY_VALUE" .env
-    if [ $? -ne 0 ]; then
-        echo "❌ Failed to generate and update APP_KEY."
-        exit 1
-    fi
-    echo "✅ New APP_KEY generated and saved to .env"
-else
-    echo "✅ APP_KEY already exists and is in use."
-fi
+# 6: APP_KEY MANAGEMENT (Keep your existing Section 6 logic here)
+# ... [Omitted for brevity, keep your code] ...
 
 # -------------------------------------------------------------
-# 7: RUN MIGRATIONS ON THE INACTIVE TARGET CONTAINER
-#    (Seeding removed to mitigate downtime/DB locks)
+# 7: RUN MIGRATIONS
 # -------------------------------------------------------------
 echo "🛠️ Running migrations on the inactive container (${TARGET_SLOT})..."
 
-# Safely read and export DB credentials from the remote .env file
-# (This may be redundant if defined in the image, but kept for robustness)
-export DB_PASSWORD=$(grep DB_PASSWORD .env | cut -d '=' -f 2- | tr -d '\r' | xargs)
-export DB_USERNAME=$(grep DB_USERNAME .env | cut -d '=' -f 2- | tr -d '\r' | xargs)
-export DB_DATABASE=$(grep DB_DATABASE .env | cut -d '=' -f 2- | tr -d '\r' | xargs)
-echo "Running migrations using docker compose run..."
+# Note: We no longer need to grep DB credentials here because we exported them in Section 4.
 
-# Run Migrations (using explicit entrypoint and --no-deps)
+echo "Running migrations using docker compose run..."
 docker compose run --rm -T \
     --entrypoint="/bin/bash" \
     --no-deps \
     -e IMAGE_TAG=${IMAGE_TAG} \
+    -e DB_USERNAME=${DB_USERNAME} \
+    -e DB_PASSWORD=${DB_PASSWORD} \
+    -e DB_DATABASE=${DB_DATABASE} \
     ${TARGET_SLOT} -c "php artisan migrate --force --no-interaction"
 
 # Check if migrations succeeded before seeding and typesense import
