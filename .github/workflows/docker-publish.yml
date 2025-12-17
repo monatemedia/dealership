@@ -197,14 +197,26 @@ jobs:
 
       - name: Add Production Server to Known Hosts
         run: |
-          # Use -T 1 to set a timeout, and check the command's exit code
-          ssh-keyscan -v -H ${{ env.HOST }} 2>&1 >> ~/.ssh/known_hosts
-          if [ $? -ne 0 ]; then
-            echo "🚨 Error: ssh-keyscan failed to retrieve key from ${{ env.HOST }}. Check the host address and firewall rules."
-            exit 1
-          else
-            echo "✅ Successfully added host key."
-          fi
+          # Create the directory if it doesn't exist
+          mkdir -p ~/.ssh
+
+          echo "🔍 Scanning host key for ${{ env.HOST }}..."
+
+          # Try keyscan up to 3 times with a 10-second timeout per attempt
+          for i in {1..3}; do
+            # We use -T 10 for a generous timeout and redirected stderr to a temp file
+            if ssh-keyscan -T 10 -H ${{ env.HOST }} >> ~/.ssh/known_hosts; then
+              echo "✅ Successfully added host key on attempt $i."
+              exit 0
+            fi
+
+            echo "⚠️ Attempt $i failed. Retrying in 5 seconds..."
+            sleep 5
+          done
+
+          echo "🚨 Error: ssh-keyscan failed to retrieve key after 3 attempts."
+          echo "Check if the VPS firewall (UFW) allows port 22 or if the IP is correct."
+          exit 1
 
       - name: 🌐 Ensure External Docker Network Exists
         uses: appleboy/ssh-action@master
