@@ -350,13 +350,13 @@ return [
                         ],
                         // Taxonomy IDs
                         [
-                            'name' => 'main_category_id',
+                            'name' => 'section_id',
                             'type' => 'int32',
                             'facet' => true,
                             'optional' => true,
                         ],
                         [
-                            'name' => 'main_category_name',
+                            'name' => 'section_name',
                             'type' => 'string',
                             'facet' => false,
                             'optional' => true,

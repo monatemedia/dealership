@@ -1,21 +1,21 @@
-{{-- resources/views/components/search/search-main-category.blade.php --}}
-@props(['mainCategories', 'value' => null])
+{{-- resources/views/components/search/search-section.blade.php --}}
+@props(['sections', 'value' => null])
 
 <div class="select-container w-full">
     <select
-        name="main_category_id"
+        name="section_id"
         class="select-input"
-        {{-- Captures x-model="selectedMainCategory" from parent --}}
+        {{-- Captures x-model="selectedSection" from parent --}}
         {{ $attributes->whereStartsWith('x-') }}
         {{-- 🔑 DIAGNOSTIC: Log dispatch and send the event --}}
         @change="
             const id = $event.target.value;
-            console.log('MAIN CATEGORY DISPATCHED:', id);
-            $dispatch('main-category-selected', { id: id })
+            console.log('Section DISPATCHED:', id);
+            $dispatch('section-selected', { id: id })
         "
     >
-        <option value="">Main Category</option>
-        @foreach ($mainCategories as $category)
+        <option value="">Section</option>
+        @foreach ($sections as $category)
             <option
                 value="{{ $category->id }}"
                 @selected($value == $category->id)>

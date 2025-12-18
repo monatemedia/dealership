@@ -22,7 +22,7 @@ class Subcategory extends Model
         'description',
         'image_path',
         'slug',
-        'main_category_id',
+        'section_id',
     ];
 
     public function getRouteKeyName()
@@ -30,9 +30,9 @@ class Subcategory extends Model
         return 'slug';
     }
 
-    public function mainCategory(): BelongsTo
+    public function section(): BelongsTo
     {
-        return $this->belongsTo(MainCategory::class);
+        return $this->belongsTo(Section::class);
     }
 
     public function vehicleTypes(): HasMany

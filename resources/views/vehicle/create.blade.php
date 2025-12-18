@@ -8,11 +8,11 @@
     // if (is_null($subcategory)) {
     //     dd('$subcategory is null');
     // }
-    // if (!isset($mainCategory)) {
-    //     dd('$mainCategory is not set');
+    // if (!isset($section)) {
+    //     dd('$section is not set');
     // }
-    // if (is_null($mainCategory)) {
-    //     dd('$mainCategory is null', compact('subcategory'));
+    // if (is_null($section)) {
+    //     dd('$section is null', compact('subcategory'));
     // }
 
     // If we get here, both exist
@@ -59,7 +59,7 @@
                 <div class="form-content">
                     <div class="form-details">
                         {{-- Category fields (hidden) --}}
-                        <input type="hidden" name="main_category_id" value="{{ $mainCategory->id }}" />
+                        <input type="hidden" name="section_id" value="{{ $section->id }}" />
                         <input type="hidden" name="subcategory_id" value="{{ $subcategory->id }}" />
                         {{-- End Category fields (hidden) --}}
 

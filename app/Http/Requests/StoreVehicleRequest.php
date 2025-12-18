@@ -25,7 +25,7 @@ class StoreVehicleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'main_category_id' => 'required|exists:main_categories,id',
+            'section_id' => 'required|exists:sections,id',
             'subcategory_id' => 'required|exists:subcategories,id',
             'manufacturer_id' => 'required|exists:manufacturers,id',
             'model_id' => 'required|exists:models,id',
@@ -78,7 +78,7 @@ class StoreVehicleRequest extends FormRequest
         return [
             'required' => 'This field is required',
             'manufacturer_id.required' => 'Please select a manufacturer',
-            'main_category_id.required' => 'Please select a main category',
+            'section_id.required' => 'Please select a section',
             'subcategory_id.required' => 'Please select a sub-category',
             'vehicle_type_id.required' => 'Please select a vehicle type',
             'fuel_type_id.required' => 'Please select a fuel type',
@@ -104,7 +104,7 @@ class StoreVehicleRequest extends FormRequest
             'transmission_id' => 'transmission',
             'drivetrain_id' => 'drivetrain',
             'city_id' => 'city',
-            'main_category_id' => 'main category',
+            'section_id' => 'section',
             'subcategory_id' => 'sub-category',
 
         ];

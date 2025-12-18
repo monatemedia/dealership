@@ -25,7 +25,7 @@
                 <div class="form-content">
                     <div class="form-details">
                         {{-- Category fields (hidden) --}}
-                        <input type="hidden" name="main_category_id" value="{{ $mainCategory->id }}" />
+                        <input type="hidden" name="section_id" value="{{ $section->id }}" />
                         <input type="hidden" name="subcategory_id" value="{{ $subcategory->id }}" />
                         {{-- End Category fields (hidden) --}}
 

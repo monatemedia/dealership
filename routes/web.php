@@ -1,6 +1,6 @@
 <?php // routes/web.php
 
-use App\Http\Controllers\MainCategoryController;
+use App\Http\Controllers\SectionController;
 use App\Http\Controllers\SubcategoryController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\HomeController;
@@ -48,9 +48,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/vehicle/{vehicle}', [VehicleController::class, 'destroy'])->name('vehicle.destroy');
 
     // Multi-step vehicle creation flow
-    Route::get('/vehicle/create/main-categories', [MainCategoryController::class, 'indexMainCategories'])
-        ->name('vehicle.main-categories');
-    Route::get('/vehicle/create/sub-categories/{mainCategory:slug}', [SubcategoryController::class, 'indexSubcategories'])
+    Route::get('/vehicle/create/sections', [SectionController::class, 'indexSections'])
+        ->name('vehicle.sections');
+    Route::get('/vehicle/create/sub-categories/{Section:slug}', [SubcategoryController::class, 'indexSubcategories'])
         ->name('vehicle.sub-categories');
 
     // Vehicle images management
@@ -109,8 +109,8 @@ Route::get('/vehicle/{vehicle}', [VehicleController::class, 'show'])
     ->name('vehicle.show');
 
 // Category listing pages (specific paths)
-Route::get('/main-categories', [MainCategoryController::class, 'index'])
-    ->name('main-categories.index');
+Route::get('/sections', [SectionController::class, 'index'])
+    ->name('sections.index');
 
 // Legal pages
 Route::view('/terms', 'legal.terms')->name('terms');
@@ -124,18 +124,18 @@ Route::view('/contact', 'pages.contact')->name('contact');
 // CATEGORY HIERARCHY ROUTES (Slug-based - MUST BE LAST)
 // -------------------------------
 // 3️⃣ VEHICLE TYPES (most specific slug route - 3 segments)
-Route::get('/{mainCategory}/{subcategory}/vehicle-types', [VehicleTypeController::class, 'index'])
+Route::get('/{section}/{subcategory}/vehicle-types', [VehicleTypeController::class, 'index'])
     ->name('vehicle-types.index');
-Route::get('/{mainCategory}/{subcategory}/{vehicleType}', [VehicleTypeController::class, 'show'])
+Route::get('/{section}/{subcategory}/{vehicleType}', [VehicleTypeController::class, 'show'])
     ->name('vehicle-types.show');
 
 // 2️⃣ SUBCATEGORIES (2 segments)
 // This will handle URLs like /light-vehicles/sub-categories
-Route::get('/{mainCategory}/sub-categories', [SubcategoryController::class, 'index'])
-    ->name('main-category.sub-categories.index');
-Route::get('/{mainCategory}/{subcategory}', [SubcategoryController::class, 'show'])
+Route::get('/{section}/sub-categories', [SubcategoryController::class, 'index'])
+    ->name('section.sub-categories.index');
+Route::get('/{section}/{subcategory}', [SubcategoryController::class, 'show'])
     ->name('sub-categories.show');
 
-// 1️⃣ MAIN CATEGORIES (least specific - single segment, MUST BE LAST!)
-Route::get('/{mainCategory}', [MainCategoryController::class, 'show'])
-    ->name('main-categories.show');
+// 1️⃣ Sections (least specific - single segment, MUST BE LAST!)
+Route::get('/{section}', [SectionController::class, 'show'])
+    ->name('sections.show');

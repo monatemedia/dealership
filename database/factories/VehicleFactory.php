@@ -6,7 +6,7 @@ use App\Models\AccidentHistory;
 use App\Models\Color;
 use App\Models\Drivetrain;
 use App\Models\Interior;
-use App\Models\MainCategory;
+use App\Models\Section;
 use App\Models\Subcategory;
 use App\Models\Transmission;
 use App\Models\VehicleType;
@@ -35,11 +35,11 @@ class VehicleFactory extends Factory
 
         // Fetch a random manufacturer
         $manufacturer = Manufacturer::inRandomOrder()->first();
-        // Pick a random main category
-        $mainCategory = MainCategory::inRandomOrder()->first();
+        // Pick a random section
+        $section = Section::inRandomOrder()->first();
 
-        // Pick a random sub-category belonging to the main category (nullable)
-        $subcategory = Subcategory::where('main_category_id', $mainCategory->id)
+        // Pick a random sub-category belonging to the section (nullable)
+        $subcategory = Subcategory::where('section_id', $section->id)
             ->inRandomOrder()
             ->first();
 
@@ -49,7 +49,7 @@ class VehicleFactory extends Factory
             ->first();
 
         return [
-            'main_category_id' => $mainCategory->id,
+            'section_id' => $section->id,
             'subcategory_id' => $subcategory?->id, // nullable if no sub-category exists
 
             // Manufacturer

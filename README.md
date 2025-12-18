@@ -648,14 +648,14 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Login 
   - [X] Header
   - [X] favicon
+- [X] Troubleshot heart not clickable
+- [ ] Make current Main Categories into **Sections** 
+- [ ] Make current Subcategories into **Categories**
 - [ ] Send production emails to queue
 - [ ] Create Backup logic
 - [ ] Fix Images on Favourites page
 - [ ] Fix losing text on location after deleting location
-- [X] Troubleshot heart not clickable
 - [ ] Clean up github release versions
-- [ ] Make current Main Categories into **Sections** 
-- [ ] Make current Subcategories into **Categories**
 - [ ] Set Up OAuth
   - [ ] GoogleOatuh
   - [ ] FacebookOath

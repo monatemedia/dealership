@@ -1,5 +1,5 @@
 {{-- resources/views/components/vehicle/search-sidebar-filters.blade.php --}}
-@props(['fuelTypes' => collect(), 'mainCategories' => collect()])
+@props(['fuelTypes' => collect(), 'sections' => collect()])
 @php
     // Define Local Storage Keys (MUST match geo-search-modal.blade.php)
     $cityIdKey = 'geo_filter_city_id';
@@ -19,7 +19,7 @@
     <section class="find-a-vehicle">
         <form id="filter-form" class="find-a-vehicle-form card flex p-medium"
             x-data="{
-                selectedMainCategory: '{{ request('main_category_id', '') }}',
+                selectedSection: '{{ request('section_id', '') }}',
 
                 // 🔑 NEW STATE for Geo Persistence 🔑
                 currentCityId: null,
@@ -93,11 +93,11 @@
                 resetFilters() {
                     console.log('SIDEBAR RESET: Starting filter reset...');
                     // 1. Reset Alpine state
-                    this.selectedMainCategory = '';
+                    this.selectedSection = '';
                     this.currentCityId = null;
                     this.currentCityName = '';
                     this.currentRangeKm = 5;
-                    this.$dispatch('main-category-selected', { id: '' });
+                    this.$dispatch('section-selected', { id: '' });
 
                     // 2. Reset standard form inputs
                     document.getElementById('filter-form').reset();
@@ -126,10 +126,10 @@
             <input type="hidden" name="range_km" id="range_km_filter" value="">
 
             <div class="find-a-vehicle-inputs">
-                {{-- 1. Main Category --}}
+                {{-- 1. Section --}}
                 <div class="form-group">
-                    <label class="mb-medium">Main Category</label>
-                    <x-search.search-main-category :main-categories="$mainCategories" x-model="selectedMainCategory" />
+                    <label class="mb-medium">Section</label>
+                    <x-search.search-section :sections="$sections" x-model="selectedSection" />
                 </div>
                 {{-- 2. Subcategory --}}
                 <div class="form-group">

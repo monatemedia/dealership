@@ -14,10 +14,10 @@ if (isset($subcategory) && $subcategory) {
     $label = 'Sell Your ' . ($subcategory->singular ?? $subcategory->name);
     $href = route('vehicle.create', ['subcategory' => $subcategory->slug]);
 }
-// If on main category page
-elseif (isset($mainCategory) && $mainCategory) {
-    $label = 'Sell Your ' . ($mainCategory->singular ?? $mainCategory->name);
-    $href = route('vehicle.create', ['main_category' => $mainCategory->slug]);
+// If on section page
+elseif (isset($section) && $section) {
+    $label = 'Sell Your ' . ($section->singular ?? $section->name);
+    $href = route('vehicle.create', ['section' => $section->slug]);
 }
 @endphp
 

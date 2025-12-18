@@ -1,7 +1,7 @@
 <?php // app/Http/Controllers/SubcategoryController.php
 namespace App\Http\Controllers;
 
-use App\Models\MainCategory;
+use App\Models\Section;
 use App\Models\Subcategory;
 use App\Models\Vehicle;
 use App\Models\VehicleType;
@@ -9,13 +9,13 @@ use App\Models\VehicleType;
 class SubcategoryController extends Controller
 {
     /**
-     * Show all sub-categories for a main category
-     * Route: /{mainCategory}/sub-categories
+     * Show all sub-categories for a section
+     * Route: /{section}/sub-categories
      */
-    public function index(MainCategory $mainCategory)
+    public function index(Section $section)
     {
-        $subcategories = Subcategory::with('mainCategory')
-            ->where('main_category_id', $mainCategory->id)
+        $subcategories = Subcategory::with('section')
+            ->where('section_id', $section->id)
             ->get();
 
         $selectingForCreate = session('selecting_category_for_create', false);
@@ -24,13 +24,13 @@ class SubcategoryController extends Controller
             'categories' => $subcategories,
             'type' => 'Subcategory',
             'selectingForCreate' => $selectingForCreate,
-            'parentCategory' => $mainCategory,
+            'parentCategory' => $section,
         ]);
     }
 
-    public function show(MainCategory $mainCategory, Subcategory $subcategory)
+    public function show(Section $section, Subcategory $subcategory)
     {
-        $subcategory->load('mainCategory');
+        $subcategory->load('section');
 
         $vehicles = Vehicle::with(['primaryImage', 'manufacturer', 'model'])
             ->where('subcategory_id', $subcategory->id)

@@ -1,7 +1,7 @@
 <?php // app/Http/Controllers/HomeController.php
 namespace App\Http\Controllers;
 
-use App\Models\MainCategory;
+use App\Models\Section;
 use Illuminate\Http\Request;
 // You no longer need to import Cache or LengthAwarePaginator
 // use Illuminate\Support\Facades\Cache;
@@ -16,7 +16,7 @@ class HomeController extends Controller
         // by talking directly to Typesense (or your proxy API).
 
         // Get three vehicle categories for display (This is auxiliary data, caching this small list is optional)
-        $categories = MainCategory::take(3)->get();
+        $categories = Section::take(3)->get();
 
         // Pass a null or empty array for the vehicles placeholder data
         // since the frontend script will immediately replace it.

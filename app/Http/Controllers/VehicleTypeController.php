@@ -1,7 +1,7 @@
 <?php // app/Http/Controllers/VehicleTypeController.php
 namespace App\Http\Controllers;
 
-use App\Models\MainCategory;
+use App\Models\Section;
 use App\Models\Subcategory;
 use App\Models\VehicleType;
 use App\Models\Vehicle;
@@ -9,20 +9,19 @@ use App\Models\Vehicle;
 class VehicleTypeController extends Controller
 {
     /**
-     * Route: /{mainCategory:slug}/{subcategory:slug}/vehicle-types
+     * Route: /{section:slug}/{subcategory:slug}/vehicle-types
      * Both parameters are route model binding by slug
      */
-    public function index(MainCategory $mainCategory, Subcategory $subcategory)
+    public function index(Section $section, Subcategory $subcategory)
     {
         // Verify relationship
-        if ($subcategory->main_category_id !== $mainCategory->id) {
+        if ($subcategory->section_id !== $section->id) {
             abort(404);
         }
 
-        $subcategory->load('mainCategory');
-
+        $subcategory->load('section');
         $vehicleTypes = VehicleType::where('subcategory_id', $subcategory->id)
-            ->with('subcategory.mainCategory')
+            ->with('subcategory.section')
             ->get();
 
         $selectingForCreate = session()->has('selecting_category_for_create');
@@ -36,12 +35,12 @@ class VehicleTypeController extends Controller
     }
 
     /**
-     * Route: /{mainCategory:slug}/{subcategory:slug}/{vehicleType:slug}
+     * Route: /{section:slug}/{subcategory:slug}/{vehicleType:slug}
      */
-    public function show(MainCategory $mainCategory, Subcategory $subcategory, VehicleType $vehicleType)
+    public function show(Section $section, Subcategory $subcategory, VehicleType $vehicleType)
     {
         // Verify relationships
-        if ($subcategory->main_category_id !== $mainCategory->id ||
+        if ($subcategory->section_id !== $section->id ||
             $vehicleType->subcategory_id !== $subcategory->id) {
             abort(404);
         }

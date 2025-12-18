@@ -4,13 +4,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Vehicle Main Categories
+    | Vehicle Sections
     |--------------------------------------------------------------------------
     | A list of the main vehicle categories
     | NO LONGER IN USE
     |
     */
-    'main_categories' => [
+    'sections' => [
         'Powersport' => [
             'singular' => 'Powersport',
             'long_name' => 'Powersport Vehicles',

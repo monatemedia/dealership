@@ -16,26 +16,26 @@ class TaxonomyRouteService
      */
     public function resolveShowRoute(string $routeName, Model $category): string
     {
-        // Handle VehicleType: requires mainCategory -> subcategory -> vehicleType
+        // Handle VehicleType: requires section -> subcategory -> vehicleType
         if (isset($category->subcategory)) {
-            if (isset($category->subcategory->mainCategory)) {
+            if (isset($category->subcategory->section)) {
                 return route($routeName, [
-                    'mainCategory' => $category->subcategory->mainCategory->slug,
+                    'section' => $category->subcategory->section->slug,
                     'subcategory' => $category->subcategory->slug,
                     'vehicleType' => $category->slug,
                 ]);
             }
         }
 
-        // Handle Subcategory: requires mainCategory -> subcategory
-        if (isset($category->mainCategory)) {
+        // Handle Subcategory: requires section -> subcategory
+        if (isset($category->section)) {
             return route($routeName, [
-                'mainCategory' => $category->mainCategory->slug,
+                'section' => $category->section->slug,
                 'subcategory' => $category->slug,
             ]);
         }
 
-        // Handle MainCategory or simple single-parameter routes
+        // Handle Section or simple single-parameter routes
         return route($routeName, $category->slug);
     }
 
@@ -49,7 +49,7 @@ class TaxonomyRouteService
     public function resolveIndexParams(string $routeName, ?Model $parentCategory = null): array
     {
         // Routes that don't need parameters (show all items globally)
-        if (in_array($routeName, ['main-categories.index'])) {
+        if (in_array($routeName, ['sections.index'])) {
             return [];
         }
 
@@ -57,33 +57,33 @@ class TaxonomyRouteService
             return [];
         }
 
-        // Handle main-category.sub-categories.index route
-        // Route: /{mainCategory}/sub-categories
-        // Parent is a MainCategory
-        if ($routeName === 'main-category.sub-categories.index') {
+        // Handle section.sub-categories.index route
+        // Route: /{section}/sub-categories
+        // Parent is a section
+        if ($routeName === 'section.sub-categories.index') {
             return [
-                'mainCategory' => $parentCategory->slug,
+                'section' => $parentCategory->slug,
             ];
         }
 
         // Handle vehicle-types.index route
-        // Route: /{mainCategory}/{subcategory}/vehicle-types
+        // Route: /{section}/{subcategory}/vehicle-types
         // Parent is a Subcategory
         if ($routeName === 'vehicle-types.index') {
-            if (isset($parentCategory->mainCategory)) {
+            if (isset($parentCategory->section)) {
                 return [
-                    'mainCategory' => $parentCategory->mainCategory->slug,
+                    'section' => $parentCategory->section->slug,
                     'subcategory' => $parentCategory->slug,
                 ];
             }
         }
 
         // Handle fuel-types.index route (when you build it)
-        // Route: /{mainCategory}/{subcategory}/fuel-types
+        // Route: /{section}/{subcategory}/fuel-types
         if ($routeName === 'fuel-types.index') {
-            if (isset($parentCategory->mainCategory)) {
+            if (isset($parentCategory->section)) {
                 return [
-                    'mainCategory' => $parentCategory->mainCategory->slug,
+                    'section' => $parentCategory->section->slug,
                     'subcategory' => $parentCategory->slug,
                 ];
             }
@@ -101,17 +101,17 @@ class TaxonomyRouteService
     public function getTaxonomyConfig(string $type): array
     {
         $configs = [
-            'main-category' => [
-                'type' => 'Main Category',
-                'pluralType' => 'Main Categories',
-                'indexRouteName' => 'main-categories.index',
-                'showRouteName' => 'main-categories.show',
-                'createRouteParam' => 'main_category',
+            'section' => [
+                'type' => 'Section',
+                'pluralType' => 'Sections',
+                'indexRouteName' => 'sections.index',
+                'showRouteName' => 'sections.show',
+                'createRouteParam' => 'section',
             ],
             'sub-category' => [
                 'type' => 'Subcategory',
                 'pluralType' => 'Sub-Categories',
-                'indexRouteName' => 'main-category.sub-categories.index',
+                'indexRouteName' => 'section.sub-categories.index',
                 'showRouteName' => 'sub-categories.show',
                 'createRouteParam' => 'subcategory',
             ],

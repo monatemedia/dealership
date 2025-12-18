@@ -1,7 +1,7 @@
 {{-- resources/views/components/search/search-subcategory.blade.php --}}
 @props(['value' => null])
 @php
-    $initialId = request('main_category_id', '');
+    $initialId = request('section_id', '');
 @endphp
 
 <div class="select-container w-full"
@@ -58,7 +58,7 @@
         if (parentMainCatId) { fetchOptions(parentMainCatId); }
 
         $nextTick(() => {
-            window.addEventListener('main-category-selected', (e) => {
+            window.addEventListener('section-selected', (e) => {
                 console.log('SUBCAT RECEIVED EVENT (JS listener):', e.detail.id);
                 fetchOptions(e.detail.id);
             });

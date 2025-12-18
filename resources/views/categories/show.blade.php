@@ -18,8 +18,8 @@
     $categoryId = $category->id;
 
     // Determine the name of the foreign key based on the category type
-    if ($category instanceof \App\Models\MainCategory) {
-        $foreignKeyName = 'main_category_id';
+    if ($category instanceof \App\Models\Section) {
+        $foreignKeyName = 'section_id';
     } elseif ($category instanceof \App\Models\Subcategory) {
         $foreignKeyName = 'subcategory_id';
     } else {

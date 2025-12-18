@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreVehicleRequest;
 use App\Models\Condition;
 use App\Models\Feature;
-use App\Models\MainCategory;
+use App\Models\Section;
 use App\Models\OwnershipPaperwork;
 use App\Models\ServiceHistory;
 use App\Models\Subcategory;
@@ -62,8 +62,8 @@ class VehicleController extends Controller
      *
      * Multi-step flow:
      * - If subcategory provided: show create form
-     * - If main_category provided: redirect to subcategory selection
-     * - If nothing provided: redirect to main_category selection
+     * - If section provided: redirect to subcategory selection
+     * - If nothing provided: redirect to section selection
      */
     public function create(Request $request)
     {
@@ -78,18 +78,18 @@ class VehicleController extends Controller
         Gate::authorize('create', Vehicle::class);
 
         $subcategorySlug = $request->query('subcategory');
-        $mainCategorySlug = $request->query('main_category');
+        $sectionSlug = $request->query('section');
 
         // --- CASE 1: subcategory present ---
         if ($subcategorySlug) {
             $subcategory = Subcategory::where('slug', $subcategorySlug)->first();
 
             if (!$subcategory) {
-                return redirect()->route('main-categories.index')
+                return redirect()->route('sections.index')
                     ->with('error', "Invalid sub-category '{$subcategorySlug}'. Please select a valid one.");
             }
 
-            $subcategory->load('mainCategory');
+            $subcategory->load('section');
             $vehicleTypes = $subcategory->vehicleTypes()->get();
 
             // Get all configs
@@ -104,7 +104,7 @@ class VehicleController extends Controller
 
             return view('vehicle.create', [
                 'subcategory' => $subcategory,
-                'mainCategory' => $subcategory->mainCategory,
+                'section' => $subcategory->section,
                 'vehicleTypes' => $vehicleTypes,
 
                 // Fuel Types
@@ -145,13 +145,13 @@ class VehicleController extends Controller
             ]);
         }
 
-        // --- CASE 2: main_category present, but no subcategory ---
-        if ($mainCategorySlug) {
-            $mainCategory = MainCategory::where('slug', $mainCategorySlug)->first();
+        // --- CASE 2: section present, but no subcategory ---
+        if ($sectionSlug) {
+            $section = Section::where('slug', $sectionSlug)->first();
 
-            if (!$mainCategory) {
-                return redirect()->route('main-categories.index')
-                    ->with('error', "Invalid main category '{$mainCategorySlug}'.");
+            if (!$section) {
+                return redirect()->route('sections.index')
+                    ->with('error', "Invalid Section '{$sectionSlug}'.");
             }
 
             // Mark session: selecting sub-category for vehicle creation
@@ -160,8 +160,8 @@ class VehicleController extends Controller
                 'from_vehicle_create' => true, // <-- one-time flag
             ]);
 
-            return redirect()->route('main-category.sub-categories.index', [
-                'mainCategory' => $mainCategory->slug,
+            return redirect()->route('section.sub-categories.index', [
+                'section' => $section->slug,
             ])
             ->with('info', 'Please select a vehicle category to continue');
         }
@@ -172,7 +172,7 @@ class VehicleController extends Controller
             'from_vehicle_create' => true, // <-- one-time flag
         ]);
 
-        return redirect()->route('main-categories.index')
+        return redirect()->route('sections.index')
             ->with('info', 'Please select a section category to continue');
     }
 
@@ -229,8 +229,8 @@ class VehicleController extends Controller
                 ->with('error', 'The selected subcategory no longer exists. Please choose another.');
         }
 
-        // Automatically assign main_category_id
-        $data['main_category_id'] = $subcategory->main_category_id;
+        // Automatically assign section_id
+        $data['section_id'] = $subcategory->section_id;
         // dd($subcategory->toArray());
         // dd($data);
 
@@ -358,8 +358,8 @@ class VehicleController extends Controller
 
         // Eager load relationships
         $vehicle->load([
-            'vehicleType.subcategory.mainCategory',
-            'subcategory.mainCategory',
+            'vehicleType.subcategory.section',
+            'subcategory.section',
             'manufacturer',
             'model',
             'fuelType',
@@ -385,10 +385,9 @@ class VehicleController extends Controller
             abort(404, 'No subcategory found for this vehicle.');
         }
 
-        $mainCategory = $subcategory->mainCategory;
-
-        if (!$mainCategory) {
-            abort(404, 'No main category found for this subcategory.');
+        $section = $subcategory->section;
+        if (!$section) {
+            abort(404, 'No section found for this subcategory.');
         }
 
         // Get all the same config data as create
@@ -404,7 +403,7 @@ class VehicleController extends Controller
         return view('vehicle.edit', [
             'vehicle' => $vehicle,
             'subcategory' => $subcategory,
-            'mainCategory' => $mainCategory,
+            'section' => $section,
 
             // Fuel Types
             'fuelTypes' => $fuelConfig['fuel_types'],

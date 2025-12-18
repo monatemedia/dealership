@@ -2,7 +2,7 @@
 // database/seeders/VehicleCategorySeeder.php
 namespace Database\Seeders;
 
-use App\Models\MainCategory;
+use App\Models\Section;
 use App\Models\Subcategory;
 use App\Models\VehicleType;
 use Illuminate\Database\Seeder;
@@ -15,36 +15,36 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        // Step 1: Seed Main Categories
-        $mainCategories = config('categories.main_categories');
+        // Step 1: Seed Sections
+        $sections = config('categories.sections');
 
-        foreach ($mainCategories as $mainName => $mainData) {
-            $main = MainCategory::updateOrCreate(
-                ['name' => $mainName],
+        foreach ($sections as $sectionName => $sectionData) {
+            $section = Section::updateOrCreate(
+                ['name' => $sectionName],
                 [
-                    'singular' => $mainData['singular'],
-                    'long_name' => $mainData['long_name'],
-                    'description' => $mainData['description'],
-                    'image_path' => $mainData['image_path'],
-                    'slug' => Str::slug($mainName),
+                    'singular' => $sectionData['singular'],
+                    'long_name' => $sectionData['long_name'],
+                    'description' => $sectionData['description'],
+                    'image_path' => $sectionData['image_path'],
+                    'slug' => Str::slug($sectionName),
                 ]
             );
 
-            // Step 2: Seed Sub-Categories for this Main Category
-            if (isset($mainData['subcategories'])) {
-                foreach ($mainData['subcategories'] as $subName) {
+            // Step 2: Seed Sub-Categories for this Section
+            if (isset($sectionData['subcategories'])) {
+                foreach ($sectionData['subcategories'] as $subName) {
                     $subData = config('categories.subcategories.' . $subName);
 
                     if ($subData) {
                         $sub = Subcategory::updateOrCreate(
-                            ['name' => $subName, 'main_category_id' => $main->id],
+                            ['name' => $subName, 'section_id' => $section->id],
                             [
                                 'singular' => $subData['singular'],
                                 'long_name' => $subData['long_name'],
                                 'description' => $subData['description'],
                                 'image_path' => $subData['image_path'],
                                 'slug' => Str::slug($subName),
-                                'main_category_id' => $main->id,
+                                'section_id' => $section->id,
                             ]
                         );
 

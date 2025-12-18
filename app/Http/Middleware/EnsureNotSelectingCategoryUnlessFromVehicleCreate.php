@@ -18,8 +18,8 @@ class EnsureNotSelectingCategoryUnlessFromVehicleCreate
         // Pages involved in create flow
         $createFlowRoutes = [
             'vehicle.create',
-            'main-categories.index',
-            'main-category.sub-categories.index',
+            'sections.index',
+            'section.sub-categories.index',
         ];
 
         $inFlow = in_array($routeName, $createFlowRoutes);

@@ -1,7 +1,7 @@
 {{-- resources/views/components/hero/button.blade.php --}}
 @props([
     'href' => null,
-    'mainCategory' => null,
+    'section' => null,
     'subcategory' => null,
     'vehicleType' => null,
     'routeName' => 'vehicle.create',
@@ -23,11 +23,11 @@
         $singular = $subcategory->singular ?? $subcategory->name;
         $label = 'Sell Your ' . $singular;
         $href = route($routeName, ['subcategory' => $subcategory->slug]);
-    } elseif ($mainCategory) {
-        // Main category aware
-        $singular = $mainCategory->singular ?? $mainCategory->name;
+    } elseif ($section) {
+        // Section aware
+        $singular = $section->singular ?? $section->name;
         $label = 'Sell Your ' . $singular;
-        $href = route($routeName, ['main_category' => $mainCategory->slug]);
+        $href = route($routeName, ['section' => $section->slug]);
     } elseif ($vehicleType) {
         // Vehicle type aware
         $label = 'Sell Your ' . $vehicleType->name;

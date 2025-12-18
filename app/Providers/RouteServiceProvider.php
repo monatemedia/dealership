@@ -1,7 +1,7 @@
 <?php // app/Providers/RouteServiceProvider.php
 namespace App\Providers;
 
-use App\Models\MainCategory;
+use App\Models\Section;
 use App\Models\Subcategory;
 use App\Models\VehicleType;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -32,29 +32,29 @@ class RouteServiceProvider extends ServiceProvider
         // -------------------------------
 
         /**
-         * MainCategory Binding
-         * Resolve MainCategory by slug first
+         * Section Binding
+         * Resolve Section by slug first
          */
-        Route::bind('mainCategory', function ($value) {
-            return MainCategory::where('slug', $value)->firstOrFail();
+        Route::bind('section', function ($value) {
+            return Section::where('slug', $value)->firstOrFail();
         });
 
         /**
          * Subcategory Binding
-         * Bind Subcategory under MainCategory
-         * The mainCategory parameter is now already resolved to a model
+         * Bind Subcategory under Section
+         * The Section parameter is now already resolved to a model
          */
         Route::bind('subcategory', function ($value, $route) {
-            // Get the already-resolved MainCategory model
-            $mainCategory = $route->parameter('mainCategory');
+            // Get the already-resolved Section model
+            $section = $route->parameter('section');
 
-            // If mainCategory is still a string (shouldn't happen but safety check)
-            if (is_string($mainCategory)) {
-                $mainCategory = MainCategory::where('slug', $mainCategory)->firstOrFail();
+            // If Section is still a string (shouldn't happen but safety check)
+            if (is_string($section)) {
+                $section = Section::where('slug', $section)->firstOrFail();
             }
 
             return Subcategory::where('slug', $value)
-                ->where('main_category_id', $mainCategory->id)
+                ->where('section_id', $section->id)
                 ->firstOrFail();
         });
 

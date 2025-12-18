@@ -135,12 +135,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Vehicle Main Categories
+    | Vehicle Sections
     |--------------------------------------------------------------------------
     | A list of the main vehicle categories
     |
     */
-    'main_categories' => [
+    'sections' => [
         'Powersport' => [
             'singular' => 'Powersport',
             'long_name' => 'Powersport Vehicles',
@@ -194,7 +194,7 @@ return [
     | Vehicle Sub-categories
     |--------------------------------------------------------------------------
     | A list of vehicle sub-categories
-    | Subcategory should be included in a main category
+    | Subcategory should be included in a Section
     |
     */
     'subcategories' => [

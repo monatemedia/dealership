@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use App\Models\FuelType;
-use App\Models\MainCategory;
+use App\Models\Section;
 use App\Models\Subcategory;
 use App\Models\VehicleType;
 use App\Models\City;
@@ -80,8 +80,8 @@ class VehicleSearchController extends Controller
             // 🆕 STEP 3: Apply ALL other Filters from the sidebar (The old "Taxonomy Filters" block is expanded)
 
             // Category and Manufacturer Filters
-            if ($request->filled('main_category_id')) {
-                $builder->where('main_category_id', (int) $request->input('main_category_id'));
+            if ($request->filled('section_id')) {
+                $builder->where('section_id', (int) $request->input('section_id'));
             }
             if ($request->filled('subcategory_id')) {
                 $builder->where('subcategory_id', (int) $request->input('subcategory_id'));
@@ -146,7 +146,7 @@ class VehicleSearchController extends Controller
                 'manufacturer',
                 'model',
                 'primaryImage',
-                'mainCategory',
+                'section',
                 'subcategory',
                 'favouredUsers'
             ])
@@ -264,12 +264,12 @@ class VehicleSearchController extends Controller
      */
     public function index(Request $request)
     {
-        $mainCategories = MainCategory::orderBy('name')->get();
+        $sections = Section::orderBy('name')->get();
         $fuelTypes = FuelType::orderBy('name')->get();
 
         return view('vehicle.search', [
             'fuelTypes' => $fuelTypes,
-            'mainCategories' => $mainCategories,
+            'sections' => $sections,
         ]);
     }
 
@@ -312,12 +312,12 @@ class VehicleSearchController extends Controller
     }
 
     /**
-     * Get subcategories by main category
+     * Get subcategories by section
      */
-    public function getSubcategoriesByMainCategory(Request $request, $mainCategoryId)
+    public function getSubcategoriesBySection(Request $request, $sectionId)
     {
         try {
-            $subcategories = Subcategory::where('main_category_id', $mainCategoryId)
+            $subcategories = Subcategory::where('section_id', $sectionId)
                 ->orderBy('name')
                 ->get(['id', 'name']);
             return response()->json($subcategories);

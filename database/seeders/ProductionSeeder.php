@@ -20,7 +20,7 @@ class ProductionSeeder extends Seeder
             StorageLinkSeeder::class,
 
             // Core application data ONLY
-            CategorySeeder::class, // Runs first (creates Main/Sub Categories)
+            CategorySeeder::class, // Runs first (creates section/Sub Categories)
             VehicleTypeSeeder::class,
 
             FuelTypeSeeder::class, // Seed FuelTypes

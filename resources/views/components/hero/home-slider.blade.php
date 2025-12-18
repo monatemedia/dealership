@@ -1,7 +1,7 @@
 {{-- resources/views/components/hero/home-slider.blade.php --}}
 @php
     // Determine which category to display based on what's available
-    $displayCategory = $subcategory ?? $mainCategory ?? null;
+    $displayCategory = $subcategory ?? $section ?? null;
 
     // More explicit null handling for IDE
     if ($displayCategory !== null) {

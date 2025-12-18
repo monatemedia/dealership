@@ -33,7 +33,7 @@
 
                 <div class="search-vehicle-results-wrapper">
                     {{-- 🔑 FIX: Pass fetched data from the controller to the sidebar component --}}
-                    <x-vehicle.search-sidebar-filters :fuel-types="$fuelTypes" :main-categories="$mainCategories" />
+                    <x-vehicle.search-sidebar-filters :fuel-types="$fuelTypes" :sections="$sections" />
                     <x-vehicle.search-results-list />
                 </div>
 

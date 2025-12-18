@@ -10,7 +10,7 @@
 
 @props([
     'categories',
-    'type' => 'Main Category',
+    'type' => 'Section',
     'selectingForCreate' => false,
     'parentCategory' => null,
 ])

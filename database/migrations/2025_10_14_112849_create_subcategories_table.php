@@ -1,4 +1,4 @@
-<?php // database/migrations/2025_10_14_112837_create_main_categories_table.php
+<?php // database/migrations/2025_10_14_112837_create_sections_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('description');
             $table->string('image_path');
             $table->string('slug')->unique();
-            $table->foreignId('main_category_id')
-                ->constrained('main_categories')
+            $table->foreignId('section_id')
+                ->constrained('sections')
                 ->cascadeOnDelete();
         });
     }

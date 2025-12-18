@@ -65,7 +65,7 @@ Route::get('/vehicles/cities/{provinceId}', [VehicleSearchController::class, 'ge
 // -------------------------------
 // API ROUTES FOR STATIC SEARCH
 // -------------------------------
-Route::get('/subcategories-by-main/{mainCategoryId}', [VehicleSearchController::class, 'getSubcategoriesByMainCategory']);
+Route::get('/subcategories-by-section/{sectionId}', [VehicleSearchController::class, 'getSubcategoriesBySection']);
 Route::get('/vehicle-types-by-sub/{subcategoryId}', [VehicleSearchController::class, 'getVehicleTypesBySubcategory']);
 Route::get('/fuel-types-by-sub/{subcategoryId}', [VehicleSearchController::class, 'getFuelTypesBySubcategory']);
 

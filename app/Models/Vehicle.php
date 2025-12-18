@@ -22,7 +22,7 @@ class Vehicle extends Model
     ];
 
     protected $fillable = [
-        'main_category_id',
+        'section_id',
         'subcategory_id',
         'manufacturer_id',
         'model_id',
@@ -50,9 +50,9 @@ class Vehicle extends Model
     ];
 
     # Define the relationships
-    public function mainCategory() : BelongsTo
+    public function section() : BelongsTo
     {
-        return $this->belongsTo(MainCategory::class, 'main_category_id');
+        return $this->belongsTo(Section::class, 'section_id');
     }
 
     public function subcategory(): BelongsTo
@@ -237,7 +237,7 @@ class Vehicle extends Model
             'vehicleType',
             'fuelType',
             'city.province',
-            'mainCategory',
+            'section',
             'subcategory',
         ]);
 
@@ -254,8 +254,8 @@ class Vehicle extends Model
             'mileage' => (int) ($this->mileage ?? 0),
             'status' => (string) ($this->status ?? 'draft'),
             // Taxonomy IDs for filtering
-            'main_category_id' => (int) ($this->main_category_id ?? 0),
-            'main_category_name' => (string) ($this->mainCategory?->name ?? ''),
+            'section_id' => (int) ($this->section_id ?? 0),
+            'section_name' => (string) ($this->Section?->name ?? ''),
             'subcategory_id' => (int) ($this->subcategory_id ?? 0),
             'subcategory_name' => (string) ($this->subcategory?->name ?? ''),
             // Denormalized relationship data
