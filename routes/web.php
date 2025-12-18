@@ -41,7 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Define only 'index' and 'create' via resource, preventing name conflicts below.
     Route::resource('vehicle', VehicleController::class)->only(['index', 'create']);
 
-    // Vehicle management - specific paths (Manually defined, NO CONFLICTS now)
+    // Vehicle management - specific paths (Manually defined to avoid conflicts)
     Route::post('/vehicle', [VehicleController::class, 'store'])->name('vehicle.store');
     Route::get('/vehicle/{vehicle}/edit', [VehicleController::class, 'edit'])->name('vehicle.edit');
     Route::put('/vehicle/{vehicle}', [VehicleController::class, 'update'])->name('vehicle.update');
@@ -76,7 +76,7 @@ Route::middleware(['auth'])->group(function () {
     // Logout should ONLY be protected by 'auth'
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-    // Watchlist
+    // Watchlist - must be authenticated
     Route::get('/watchlist', [WatchlistController::class, 'index'])->name('watchlist.index');
     Route::post('/watchlist/{vehicle}', [WatchlistController::class, 'storeDestroy'])->name('watchlist.storeDestroy');
 });
@@ -85,6 +85,13 @@ Route::middleware(['auth'])->group(function () {
 // AUTHENTICATION ROUTES (Include before slug routes)
 // -------------------------------
 require __DIR__ . '/auth.php';
+
+// -------------------------------
+// API ROUTES REQUIRING SESSIONS (Specific paths first)
+// -------------------------------
+// InstantSearch API endpoint
+Route::get('/api/vehicles/search', [VehicleSearchController::class, 'instantSearch'])
+    ->name('vehicle.instantSearch');
 
 // -------------------------------
 // PUBLIC SPECIFIC ROUTES

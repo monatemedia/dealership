@@ -51,8 +51,10 @@ Route::prefix('cities')->group(function () {
 // -------------------------------
 // INSTANT SEARCH
 // -------------------------------
-Route::get('/vehicles/search', [VehicleSearchController::class, 'instantSearch'])
-    ->name('api.vehicle.search');
+// ⚠️ MOVED TO web.php - InstantSearch needs session support for authenticated users to use watchlist info
+// The /api/vehicles/search route is now in routes/web.php
+// Route::get('/vehicles/search', [VehicleSearchController::class, 'instantSearch'])
+//     ->name('api.vehicle.search');
 
 Route::get('/vehicles/filter-options', [VehicleSearchController::class, 'getFilterOptions'])
     ->name('api.vehicles.filter-options');

@@ -650,8 +650,9 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] favicon
 - [ ] Send production emails to queue
 - [ ] Create Backup logic
+- [ ] Fix Images on Favourites page
 - [ ] Fix losing text on location after deleting location
-- [ ] Troubleshot heart not clickable
+- [X] Troubleshot heart not clickable
 - [ ] Clean up github release versions
 - [ ] Make current Main Categories into **Sections** 
 - [ ] Make current Subcategories into **Categories**

@@ -460,43 +460,44 @@ document.addEventListener("DOMContentLoaded", function () {
   // - Used on "Listing" and "Search" Pages
   // ----------------------------
   const initAddToWatchlist = () => {
-    // Select add to watchlist buttons
-    const buttons = document.querySelectorAll('.btn-heart');
-    // Iterate over these buttons and add click event listener
-    buttons.forEach((button) => {
-        button.addEventListener('click', ev => {
-            // debugger;
-            // Get the button element on which click happened
-            const button = ev.currentTarget;
-            // We added data-url attribute to the button in blade file
-            // get the url
-            const url = button.dataset.url;
-            // Make request on the URL to add or remove the vehicle from watchlist
-            axios.post(url).then((response) => {
-                // Select both svg tags of the button
-                const toShow = button.querySelector('svg.hidden');
-                const toHide = button.querySelector('svg:not(.hidden)');
-                // Which was hidden must be displayed
-                toShow.classList.remove('hidden')
-                // Which was displayed must be hidden
-                toHide.classList.add('hidden')
-                // Show alert to the user
-                // alert(response.data.message)
-            })
-            .catch(error => {
-                // If error happened, we can log it to console
-                console.error(error.response)
-                // If error exists, and it has response with status 401
-                if (error?.response?.status === 401) {
-                    // Show alert to the user
-                    alert("Please log in first to add vehicles into your watchlist.")
-                } else {
-                    alert("Internal Server Error. Please Try again later!")
-                }
-            })
-        })
-    })
-  }
+    // Use event delegation on the document or a parent container
+    document.addEventListener('click', (ev) => {
+      // Check if the clicked element is or is inside a .btn-heart button
+      const button = ev.target.closest('.btn-heart');
+      if (!button) return; // Not a watchlist button, ignore
+
+      ev.preventDefault();
+
+      // Get the url from data attribute
+      const url = button.dataset.url;
+      if (!url) return;
+
+      // Make request to add or remove the vehicle from watchlist
+      axios.post(url)
+        .then((response) => {
+          // Select both svg tags of the button
+          const toShow = button.querySelector('svg.hidden');
+          const toHide = button.querySelector('svg:not(.hidden)');
+          // Which was hidden must be displayed
+          toShow.classList.remove('hidden');
+          // Which was displayed must be hidden
+          toHide.classList.add('hidden');
+          // Optional: Show alert to the user
+          // alert(response.data.message)
+          })
+          .catch(error => {
+            // If error happened, log it to console
+            console.error(error.response);
+            // If error exists, and it has response with status 401
+            if (error?.response?.status === 401) {
+              // Show alert to the user
+              alert("Please log in first to add vehicles into your watchlist.");
+            } else {
+              alert("Internal Server Error. Please Try again later!");
+            }
+          });
+    });
+  };
 
   // ----------------------------
   // Show Phone Number
