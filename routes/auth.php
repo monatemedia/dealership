@@ -31,7 +31,7 @@ Route::middleware(['guest'])->group(function () {
     // Socialite authentication routes
     Route::get('/login/oauth/{provider}', [SocialiteController::class, 'redirectToProvider'])
         ->name('login.oauth');
-    Route::get('/callback/oauth/{provider}', [SocialiteController::class, 'handleCallback']);
+    Route::get('/auth/{provider}/callback', [SocialiteController::class, 'handleCallback']);
 });
 
 // Routes for authenticated users
