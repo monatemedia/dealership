@@ -651,11 +651,11 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [X] Troubleshot heart not clickable
 - [X] Make current Main Categories into **Sections** 
 - [X] Make current Subcategories into **Categories**
+- [ ] Clean up github release versions
 - [ ] Send production emails to queue
 - [ ] Create Backup logic
 - [ ] Fix Images on Favourites page
 - [ ] Fix losing text on location after deleting location
-- [ ] Clean up github release versions
 - [ ] Set Up OAuth
   - [ ] GoogleOath
   - [ ] FacebookOath

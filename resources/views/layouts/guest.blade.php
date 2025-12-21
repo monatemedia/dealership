@@ -20,14 +20,14 @@
 
                     {{ $slot }}
 
-                    {{-- @if ($socialAuth)
-                    <div class="grid grid-cols-2 gap-1 social-auth-buttons">
+                    @if ($socialAuth)
+                    <div class="grid grid-cols-1 gap-1 social-auth-buttons">
                         <!-- Google Button -->
                         <x-google-button />
                         <!-- FaceBook Button -->
-                        <x-fb-button />
+                        {{-- <x-fb-button /> --}}
                     </div>
-                    @endif --}}
+                    @endif
 
                     @isset($footerLink)
                     <div class="login-text-dont-have-account">
