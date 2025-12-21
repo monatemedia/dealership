@@ -1071,7 +1071,7 @@ This is **critical** - the tag triggers the production deployment and creates a 
 git tag -a v1.0.0 -m "Release version 1.0.0"
 
 # Push the tag to trigger production deployment
-git push origin v1.0.0
+git push origin main --follow-tags
 ```
 
 ⚠️ **Important:** Always use the `-a` flag (annotated tag) and include a meaningful message with `-m`.
@@ -1213,6 +1213,9 @@ We use semantic versioning: `MAJOR.MINOR.PATCH` (e.g., `v1.0.0`, `v2.3.5`)
 ```bash
 # Annotated tag (REQUIRED - use this!)
 git tag -a v1.0.0 -m "Release version 1.0.0"
+
+# Push my current branch (main), and while you're at it, also push any annotated tags that point to the commits I'm currently uploading.
+git push origin main --follow-tags
 
 # Push a specific tag
 git push origin v1.0.0
