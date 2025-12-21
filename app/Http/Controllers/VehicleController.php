@@ -8,7 +8,7 @@ use App\Models\Feature;
 use App\Models\Section;
 use App\Models\OwnershipPaperwork;
 use App\Models\ServiceHistory;
-use App\Models\Subcategory;
+use App\Models\Category;
 use App\Models\Vehicle;
 use App\Services\VehicleImage\VehicleImageService;
 use Illuminate\Http\JsonResponse;
@@ -61,8 +61,8 @@ class VehicleController extends Controller
      * Show the form for creating a new resource.
      *
      * Multi-step flow:
-     * - If subcategory provided: show create form
-     * - If section provided: redirect to subcategory selection
+     * - If category provided: show create form
+     * - If section provided: redirect to category selection
      * - If nothing provided: redirect to section selection
      */
     public function create(Request $request)
@@ -77,34 +77,34 @@ class VehicleController extends Controller
 
         Gate::authorize('create', Vehicle::class);
 
-        $subcategorySlug = $request->query('subcategory');
+        $categorySlug = $request->query('category');
         $sectionSlug = $request->query('section');
 
-        // --- CASE 1: subcategory present ---
-        if ($subcategorySlug) {
-            $subcategory = Subcategory::where('slug', $subcategorySlug)->first();
+        // --- CASE 1: category present ---
+        if ($categorySlug) {
+            $category = Category::where('slug', $categorySlug)->first();
 
-            if (!$subcategory) {
+            if (!$category) {
                 return redirect()->route('sections.index')
-                    ->with('error', "Invalid sub-category '{$subcategorySlug}'. Please select a valid one.");
+                    ->with('error', "Invalid category '{$categorySlug}'. Please select a valid one.");
             }
 
-            $subcategory->load('section');
-            $vehicleTypes = $subcategory->vehicleTypes()->get();
+            $category->load('section');
+            $vehicleTypes = $category->vehicleTypes()->get();
 
             // Get all configs
-            $fuelConfig = $subcategory->getFuelTypeConfig();
-            $transmissionConfig = $subcategory->getTransmissionConfig(); // <-- ADDED
-            $drivetrainConfig = $subcategory->getDrivetrainConfig();   // <-- ADDED
-            $colorConfig = $subcategory->getColorConfig();              // NEW
-            $interiorConfig = $subcategory->getInteriorConfig();        // NEW
-            $accidentHistoryConfig = $subcategory->getAccidentHistoryConfig(); // NEW
+            $fuelConfig = $category->getFuelTypeConfig();
+            $transmissionConfig = $category->getTransmissionConfig(); // <-- ADDED
+            $drivetrainConfig = $category->getDrivetrainConfig();   // <-- ADDED
+            $colorConfig = $category->getColorConfig();              // NEW
+            $interiorConfig = $category->getInteriorConfig();        // NEW
+            $accidentHistoryConfig = $category->getAccidentHistoryConfig(); // NEW
             $serviceHistories = ServiceHistory::orderBy('order')->get();
             $conditions = Condition::orderBy('order')->get();
 
             return view('vehicle.create', [
-                'subcategory' => $subcategory,
-                'section' => $subcategory->section,
+                'category' => $category,
+                'section' => $category->section,
                 'vehicleTypes' => $vehicleTypes,
 
                 // Fuel Types
@@ -145,7 +145,7 @@ class VehicleController extends Controller
             ]);
         }
 
-        // --- CASE 2: section present, but no subcategory ---
+        // --- CASE 2: section present, but no category ---
         if ($sectionSlug) {
             $section = Section::where('slug', $sectionSlug)->first();
 
@@ -154,13 +154,13 @@ class VehicleController extends Controller
                     ->with('error', "Invalid Section '{$sectionSlug}'.");
             }
 
-            // Mark session: selecting sub-category for vehicle creation
+            // Mark session: selecting category for vehicle creation
             session([
                 'selecting_category_for_create' => true,
                 'from_vehicle_create' => true, // <-- one-time flag
             ]);
 
-            return redirect()->route('section.sub-categories.index', [
+            return redirect()->route('section.categories.index', [
                 'section' => $section->slug,
             ])
             ->with('info', 'Please select a vehicle category to continue');
@@ -217,21 +217,21 @@ class VehicleController extends Controller
         // Assign the authenticated user ID to the vehicle record
         $data['user_id'] = Auth::id();
 
-        // Ensure subcategory_id exists and is valid
-        if (empty($data['subcategory_id'])) {
+        // Ensure category_id exists and is valid
+        if (empty($data['category_id'])) {
             return redirect('vehicle.create')
-                ->with('error', 'Please select a valid subcategory before creating a vehicle.');
+                ->with('error', 'Please select a valid category before creating a vehicle.');
         }
 
-        $subcategory = Subcategory::find($data['subcategory_id']);
-        if (!$subcategory) {
+        $category = Category::find($data['category_id']);
+        if (!$category) {
             return redirect('vehicle.create')
-                ->with('error', 'The selected subcategory no longer exists. Please choose another.');
+                ->with('error', 'The selected category no longer exists. Please choose another.');
         }
 
         // Automatically assign section_id
-        $data['section_id'] = $subcategory->section_id;
-        // dd($subcategory->toArray());
+        $data['section_id'] = $category->section_id;
+        // dd($category->toArray());
         // dd($data);
 
         // Handle published_at: treat as user's local time, convert to UTC
@@ -332,10 +332,10 @@ class VehicleController extends Controller
             'favouredUsers'
         ]);
 
-        // Get feature groups for this subcategory with their features
+        // Get feature groups for this category with their features
         $featureGroups = \App\Models\FeatureGroup::with(['features'])
-            ->whereHas('subcategories', function($query) use ($vehicle) {
-                $query->where('subcategories.id', $vehicle->subcategory_id);
+            ->whereHas('categories', function($query) use ($vehicle) {
+                $query->where('categories.id', $vehicle->category_id);
             })
             ->get();
 
@@ -358,8 +358,8 @@ class VehicleController extends Controller
 
         // Eager load relationships
         $vehicle->load([
-            'vehicleType.subcategory.section',
-            'subcategory.section',
+            'vehicleType.category.section',
+            'category.section',
             'manufacturer',
             'model',
             'fuelType',
@@ -378,31 +378,31 @@ class VehicleController extends Controller
             'images',
         ]);
 
-        // Prefer vehicleType's subcategory if it exists; fallback to vehicle->subcategory
-        $subcategory = $vehicle->vehicleType?->subcategory ?? $vehicle->subcategory;
+        // Prefer vehicleType's category if it exists; fallback to vehicle->category
+        $category = $vehicle->vehicleType?->category ?? $vehicle->category;
 
-        if (!$subcategory) {
-            abort(404, 'No subcategory found for this vehicle.');
+        if (!$category) {
+            abort(404, 'No category found for this vehicle.');
         }
 
-        $section = $subcategory->section;
+        $section = $category->section;
         if (!$section) {
-            abort(404, 'No section found for this subcategory.');
+            abort(404, 'No section found for this category.');
         }
 
         // Get all the same config data as create
-        $fuelConfig = $subcategory->getFuelTypeConfig();
-        $transmissionConfig = $subcategory->getTransmissionConfig();
-        $drivetrainConfig = $subcategory->getDrivetrainConfig();
-        $colorConfig = $subcategory->getColorConfig();
-        $interiorConfig = $subcategory->getInteriorConfig();
-        $accidentHistoryConfig = $subcategory->getAccidentHistoryConfig();
+        $fuelConfig = $category->getFuelTypeConfig();
+        $transmissionConfig = $category->getTransmissionConfig();
+        $drivetrainConfig = $category->getDrivetrainConfig();
+        $colorConfig = $category->getColorConfig();
+        $interiorConfig = $category->getInteriorConfig();
+        $accidentHistoryConfig = $category->getAccidentHistoryConfig();
         $serviceHistories = ServiceHistory::orderBy('order')->get();
         $conditions = Condition::orderBy('order')->get();
 
         return view('vehicle.edit', [
             'vehicle' => $vehicle,
-            'subcategory' => $subcategory,
+            'category' => $category,
             'section' => $section,
 
             // Fuel Types

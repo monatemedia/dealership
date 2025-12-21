@@ -2,26 +2,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\Section;
-use App\Models\Subcategory;
+use App\Models\Category;
 use App\Models\VehicleType;
 use App\Models\Vehicle;
 
 class VehicleTypeController extends Controller
 {
     /**
-     * Route: /{section:slug}/{subcategory:slug}/vehicle-types
+     * Route: /{section:slug}/{category:slug}/vehicle-types
      * Both parameters are route model binding by slug
      */
-    public function index(Section $section, Subcategory $subcategory)
+    public function index(Section $section, Category $category)
     {
         // Verify relationship
-        if ($subcategory->section_id !== $section->id) {
+        if ($category->section_id !== $section->id) {
             abort(404);
         }
 
-        $subcategory->load('section');
-        $vehicleTypes = VehicleType::where('subcategory_id', $subcategory->id)
-            ->with('subcategory.section')
+        $category->load('section');
+        $vehicleTypes = VehicleType::where('category_id', $category->id)
+            ->with('category.section')
             ->get();
 
         $selectingForCreate = session()->has('selecting_category_for_create');
@@ -30,23 +30,23 @@ class VehicleTypeController extends Controller
             'categories' => $vehicleTypes,
             'type' => 'Vehicle Type',
             'selectingForCreate' => $selectingForCreate,
-            'parentCategory' => $subcategory,
+            'parentCategory' => $category,
         ]);
     }
 
     /**
-     * Route: /{section:slug}/{subcategory:slug}/{vehicleType:slug}
+     * Route: /{section:slug}/{category:slug}/{vehicleType:slug}
      */
-    public function show(Section $section, Subcategory $subcategory, VehicleType $vehicleType)
+    public function show(Section $section, Category $category, VehicleType $vehicleType)
     {
         // Verify relationships
-        if ($subcategory->section_id !== $section->id ||
-            $vehicleType->subcategory_id !== $subcategory->id) {
+        if ($category->section_id !== $section->id ||
+            $vehicleType->category_id !== $category->id) {
             abort(404);
         }
 
         $vehicles = Vehicle::with(['primaryImage', 'manufacturer', 'model'])
-            ->where('subcategory_id', $subcategory->id)
+            ->where('category_id', $category->id)
             ->where('vehicle_type_id', $vehicleType->id)
             ->latest()
             ->paginate(15);
@@ -56,7 +56,7 @@ class VehicleTypeController extends Controller
             'vehicles' => $vehicles,
             'childCategories' => collect(), // No children for vehicle types
             'childCategoryType' => null,
-            'parentCategory' => $subcategory,
+            'parentCategory' => $category,
         ]);
     }
 }

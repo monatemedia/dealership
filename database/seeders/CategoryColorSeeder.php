@@ -1,22 +1,22 @@
 <?php
-// database/seeders/SubcategoryColorSeeder.php
+// database/seeders/CategoryColorSeeder.php
 
 namespace Database\Seeders;
 
 use App\Models\ColorGroup;
-use App\Models\Subcategory;
+use App\Models\Category;
 use Illuminate\Database\Seeder;
 
-class SubcategoryColorSeeder extends Seeder
+class CategoryColorSeeder extends Seeder
 {
     public function run(): void
     {
-        $config = config('categories.colors_by_subcategory');
+        $config = config('categories.colors_by_category');
 
-        foreach ($config as $subcategoryName => $colorConfig) {
-            $subcategory = Subcategory::where('name', $subcategoryName)->first();
+        foreach ($config as $categoryName => $colorConfig) {
+            $category = Category::where('name', $categoryName)->first();
 
-            if (!$subcategory) {
+            if (!$category) {
                 continue;
             }
 
@@ -31,8 +31,8 @@ class SubcategoryColorSeeder extends Seeder
                     continue;
                 }
 
-                // Attach the group to the sub-category with pivot data
-                $subcategory->colorGroups()->syncWithoutDetaching([
+                // Attach the group to the category with pivot data
+                $category->colorGroups()->syncWithoutDetaching([
                     $group->id => [
                         'default_color' => $default,
                         'can_edit' => $canEdit

@@ -7,7 +7,7 @@ use App\Models\Color;
 use App\Models\Drivetrain;
 use App\Models\Interior;
 use App\Models\Section;
-use App\Models\Subcategory;
+use App\Models\Category;
 use App\Models\Transmission;
 use App\Models\VehicleType;
 use App\Models\City;
@@ -38,19 +38,19 @@ class VehicleFactory extends Factory
         // Pick a random section
         $section = Section::inRandomOrder()->first();
 
-        // Pick a random sub-category belonging to the section (nullable)
-        $subcategory = Subcategory::where('section_id', $section->id)
+        // Pick a random category belonging to the section (nullable)
+        $category = Category::where('section_id', $section->id)
             ->inRandomOrder()
             ->first();
 
-        // Pick a random vehicle type for this sub-category
-        $vehicleType = VehicleType::where('subcategory_id', $subcategory->id)
+        // Pick a random vehicle type for this category
+        $vehicleType = VehicleType::where('category_id', $category->id)
             ->inRandomOrder()
             ->first();
 
         return [
             'section_id' => $section->id,
-            'subcategory_id' => $subcategory?->id, // nullable if no sub-category exists
+            'category_id' => $category?->id, // nullable if no category exists
 
             // Manufacturer
             'manufacturer_id' => $manufacturer->id, // Assign the manufacturer ID

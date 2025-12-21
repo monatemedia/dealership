@@ -649,7 +649,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [X] Header
   - [X] favicon
 - [X] Troubleshot heart not clickable
-- [ ] Make current Main Categories into **Sections** 
+- [X] Make current Main Categories into **Sections** 
 - [ ] Make current Subcategories into **Categories**
 - [ ] Send production emails to queue
 - [ ] Create Backup logic

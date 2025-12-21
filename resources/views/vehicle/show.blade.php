@@ -136,7 +136,7 @@
                         <tbody>
                             <tr>
                                 <th>Category</th>
-                                <td>{{ $vehicle->subcategory->name }}</td>
+                                <td>{{ $vehicle->category->name }}</td>
                             </tr>
                             <tr>
                                 <th>Manufacturer</th>

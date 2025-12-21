@@ -16,7 +16,7 @@ return [
             'long_name' => 'Powersport Vehicles',
             'description' => 'High-performance vehicles designed for speed and agility.',
             'image_path' => 'https://images.unsplash.com/photo-1609630875171-b1321377ee65?q=80&w=680&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-            'subcategories' => [
+            'categories' => [
                 'Motorcycles',
                 'ATVs',
                 'UTVs',
@@ -28,21 +28,21 @@ return [
             'long_name' => 'Automotive Vehicles',
             'description' => 'A wide range of vehicles for personal and commercial use.',
             'image_path' => 'https://images.unsplash.com/photo-1704325053140-bffd91ea4861?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-            'subcategories' => ['Cars', 'Bakkies', 'Personal Trailers', 'Caravans', 'Motor Homes'],
+            'categories' => ['Cars', 'Bakkies', 'Personal Trailers', 'Caravans', 'Motor Homes'],
         ],
         'Transportors' => [
             'singular' => 'Transportor',
             'long_name' => 'Transportor Vehicles',
             'description' => 'Vehicles designed for transporting goods and people.',
             'image_path' => 'https://images.unsplash.com/photo-1712185908636-c5762a4f558a?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-            'subcategories' => ['Minibuses', 'Panel Vans', 'Buses', 'Rigid Trucks', 'Truck Tractors', 'Truck Trailers'],
+            'categories' => ['Minibuses', 'Panel Vans', 'Buses', 'Rigid Trucks', 'Truck Tractors', 'Truck Trailers'],
         ],
         'Pleasure Marine' => [
             'singular' => 'Pleasure Marine',
             'long_name' => 'Pleasure Marine Vehicles',
             'description' => 'Boats and ships for water travel.',
             'image_path' => 'https://images.unsplash.com/photo-1662657736642-83b53193d7f1?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-            'subcategories' => ['Personal Watercraft', 'Motorboats', 'Sailboats', ],
+            'categories' => ['Personal Watercraft', 'Motorboats', 'Sailboats', ],
         ],
         'Plant Machinery' => [
             'singular' => 'Plant Machinery',
@@ -50,14 +50,14 @@ return [
             'description' => 'Heavy-duty vehicles for various industrial applications.',
             'image_path' => 'https://images.pexels.com/photos/14704776/pexels-photo-14704776.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             // See: https://www.jungheinrich.co.za/products/forklift-knowledge-bank/which-type-of-forklift-fits-which-transport-task-776314#:~:text=Electric%20Tow%20Tractors.%20Tractors%20are%20designed%20to,trailers%20or%20in%20roll%20containers%2C%20for%20example.
-            'subcategories' => ['Pedestrian Pallet Trucks', 'Stackers', 'Forklifts', 'Reach Trucks', 'Order Pickers', 'Electric Tow Tractors', 'Narrow Aisle Trucks', 'Scissor Lifts', 'Other'],
+            'categories' => ['Pedestrian Pallet Trucks', 'Stackers', 'Forklifts', 'Reach Trucks', 'Order Pickers', 'Electric Tow Tractors', 'Narrow Aisle Trucks', 'Scissor Lifts', 'Other'],
         ],
         'Agri Machinery' => [
             'singular' => 'Agri Machinery',
             'long_name' => 'Agricultural Machinery Vehicles',
             'description' => 'Robust vehicles designed for farming and agricultural tasks.',
             'image_path' => 'https://images.pexels.com/photos/32958981/pexels-photo-32958981/free-photo-of-high-powered-ace-tractor-in-faridabad-india.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-            'subcategories' => ['Farm Tractors', 'Combines', 'Ploughs', 'Seeders', 'Sprayers', 'Balers', 'Cultivators', 'Grain Carts'],
+            'categories' => ['Farm Tractors', 'Combines', 'Ploughs', 'Seeders', 'Sprayers', 'Balers', 'Cultivators', 'Grain Carts'],
         ],
         'Yellow Metal' => [
             'singular' => 'Yellow Metal',
@@ -65,34 +65,34 @@ return [
             'description' => 'Robust vehicles designed for construction and industrial tasks.',
             'image_path' => 'https://images.pexels.com/photos/14704776/pexels-photo-14704776.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             // Applications: Digging, Loading, Material Handling, Earthmoving, Roadwork, Drilling, Mining, Demolition,
-            'subcategories' => ['Bulldozers', 'Snowcats',  'Industrial Tractors', 'Motor Graders', 'Excavators', 'Compact Excavators', 'Asphalt Pavers', 'Backhoe Loaders', 'Cold Planers', 'Compactors', 'Pipelayers', 'Road Reclaimers', 'Skid Steer Loaders', 'Telehandlers', 'Wheel Loaders', 'Wheel Tractor Scrapers', 'Articulated Trucks', 'Draglines', 'Drill Rigs', 'Electric Rope Shovels', 'Hydraulic Shovels', 'Material Handlers', 'Off-Highway Trucks', 'Track Loaders', 'Underground Hard Rock Loaders', 'Other',],
-            // 'subcategories' => ['Earthmoving and Grading', 'Excavation and Digging', 'Loading and Material Handling', 'Roadwork and Paving', 'Mining and Drilling', 'Specialty and Support Equipment', 'Yellow Metal Trucks', ],
+            'categories' => ['Bulldozers', 'Snowcats',  'Industrial Tractors', 'Motor Graders', 'Excavators', 'Compact Excavators', 'Asphalt Pavers', 'Backhoe Loaders', 'Cold Planers', 'Compactors', 'Pipelayers', 'Road Reclaimers', 'Skid Steer Loaders', 'Telehandlers', 'Wheel Loaders', 'Wheel Tractor Scrapers', 'Articulated Trucks', 'Draglines', 'Drill Rigs', 'Electric Rope Shovels', 'Hydraulic Shovels', 'Material Handlers', 'Off-Highway Trucks', 'Track Loaders', 'Underground Hard Rock Loaders', 'Other',],
+            // 'categories' => ['Earthmoving and Grading', 'Excavation and Digging', 'Loading and Material Handling', 'Roadwork and Paving', 'Mining and Drilling', 'Specialty and Support Equipment', 'Yellow Metal Trucks', ],
         ],
         'Commercial Marine' => [
             'singular' => 'Commercial Marine',
             'long_name' => 'Commercial Marine Vehicles',
             'description' => 'Boats and ships for water travel.',
             'image_path' => 'https://images.unsplash.com/photo-1662657736642-83b53193d7f1?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-            'subcategories' => ['Commercial Vessels', 'Specialized Vessels'],
+            'categories' => ['Commercial Vessels', 'Specialized Vessels'],
         ],
         'Aviation' => [
             'singular' => 'Aviation',
             'long_name' => 'Aviation Vehicles',
             'description' => 'Aircraft and related vehicles for air travel.',
             'image_path' => 'https://images.unsplash.com/photo-1715063860227-2878cafb5917?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-            'subcategories' => ['Ultralight Aircraft', 'Fixed Wing', 'Rotorcraft',],
+            'categories' => ['Ultralight Aircraft', 'Fixed Wing', 'Rotorcraft',],
         ],
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Vehicle Sub-categories
+    | Vehicle Categories
     |--------------------------------------------------------------------------
-    | A list of vehicle sub-categories
+    | A list of vehicle categories
     | NO LONGER IN USE
     |
     */
-    'subcategories' => [
+    'categories' => [
         'Motorcycles' => [
             'singular' => 'Motorcycle',
             'long_name' => 'Motorcycles & Powersports',

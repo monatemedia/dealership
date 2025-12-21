@@ -34,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
         // Share the year with all views
         View::share('year', date('Y'));
 
-        // Share section and sub categories with all views
+        // Share section and categories with all views
         View::composer('*', function ($view) {
             // Skip these views
             if (in_array($view->getName(), [
@@ -44,19 +44,19 @@ class AppServiceProvider extends ServiceProvider
             }
 
             $section = request()->route('section');
-            $subcategory = request()->route('subcategory');
+            $category = request()->route('category');
 
             // If route parameter is a string, fetch from database
             if ($section && is_string($section)) {
                 $section = \App\Models\Section::where('slug', $section)->first();
             }
 
-            if ($subcategory && is_string($subcategory)) {
-                $subcategory = \App\Models\Subcategory::where('slug', $subcategory)->first();
+            if ($category && is_string($category)) {
+                $category = \App\Models\Category::where('slug', $category)->first();
             }
 
             $view->with('section', $section)
-                 ->with('subcategory', $subcategory);
+                 ->with('category', $category);
         });
     }
 }

@@ -24,11 +24,11 @@ class FeatureGroup extends Model
     }
 
     /**
-     * The subcategories that can use this feature group
+     * The categories that can use this feature group
      */
-    public function subcategories(): BelongsToMany
+    public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(Subcategory::class, 'feature_group_subcategory')
+        return $this->belongsToMany(Category::class, 'feature_group_category')
             ->withPivot('can_edit');
     }
 }

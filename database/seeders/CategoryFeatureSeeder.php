@@ -1,22 +1,22 @@
-<?php // database/seeders/SubcategoryFeatureSeeder.php
+<?php // database/seeders/CategoryFeatureSeeder.php
 
 namespace Database\Seeders;
 
 use App\Models\FeatureGroup;
-use App\Models\Subcategory;
+use App\Models\Category;
 use Illuminate\Database\Seeder;
 
-class SubcategoryFeatureSeeder extends Seeder
+class CategoryFeatureSeeder extends Seeder
 {
     public function run(): void
     {
-        $config = config('categories.features_by_subcategory');
+        $config = config('categories.features_by_category');
 
-        foreach ($config as $subcategoryName => $settings) {
-            $subcategory = Subcategory::where('name', $subcategoryName)->first();
+        foreach ($config as $categoryName => $settings) {
+            $category = Category::where('name', $categoryName)->first();
 
-            if (!$subcategory) {
-                $this->command->warn("Subcategory not found: {$subcategoryName}");
+            if (!$category) {
+                $this->command->warn("Category not found: {$categoryName}");
                 continue;
             }
 
@@ -30,14 +30,14 @@ class SubcategoryFeatureSeeder extends Seeder
                     continue;
                 }
 
-                $subcategory->featureGroups()->syncWithoutDetaching([
+                $category->featureGroups()->syncWithoutDetaching([
                     $group->id => [
                         'can_edit' => $settings['can_edit']
                     ]
                 ]);
             }
 
-            $this->command->info("Linked features for: {$subcategoryName}");
+            $this->command->info("Linked features for: {$categoryName}");
         }
     }
 }

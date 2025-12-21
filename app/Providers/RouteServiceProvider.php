@@ -2,7 +2,7 @@
 namespace App\Providers;
 
 use App\Models\Section;
-use App\Models\Subcategory;
+use App\Models\Category;
 use App\Models\VehicleType;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -40,11 +40,11 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         /**
-         * Subcategory Binding
-         * Bind Subcategory under Section
+         * Category Binding
+         * Bind Category under Section
          * The Section parameter is now already resolved to a model
          */
-        Route::bind('subcategory', function ($value, $route) {
+        Route::bind('category', function ($value, $route) {
             // Get the already-resolved Section model
             $section = $route->parameter('section');
 
@@ -53,27 +53,27 @@ class RouteServiceProvider extends ServiceProvider
                 $section = Section::where('slug', $section)->firstOrFail();
             }
 
-            return Subcategory::where('slug', $value)
+            return Category::where('slug', $value)
                 ->where('section_id', $section->id)
                 ->firstOrFail();
         });
 
         /**
          * VehicleType Binding
-         * Bind VehicleType under Subcategory
-         * The subcategory parameter is now already resolved to a model
+         * Bind VehicleType under Category
+         * The category parameter is now already resolved to a model
          */
         Route::bind('vehicleType', function ($value, $route) {
-            // Get the already-resolved Subcategory model
-            $subcategory = $route->parameter('subcategory');
+            // Get the already-resolved Category model
+            $category = $route->parameter('category');
 
-            // If subcategory is still a string (shouldn't happen but safety check)
-            if (is_string($subcategory)) {
-                $subcategory = Subcategory::where('slug', $subcategory)->firstOrFail();
+            // If category is still a string (shouldn't happen but safety check)
+            if (is_string($category)) {
+                $category = Category::where('slug', $category)->firstOrFail();
             }
 
             return VehicleType::where('slug', $value)
-                ->where('subcategory_id', $subcategory->id)
+                ->where('category_id', $category->id)
                 ->firstOrFail();
         });
     }

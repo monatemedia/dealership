@@ -131,10 +131,10 @@
                     <label class="mb-medium">Section</label>
                     <x-search.search-section :sections="$sections" x-model="selectedSection" />
                 </div>
-                {{-- 2. Subcategory --}}
+                {{-- 2. Category --}}
                 <div class="form-group">
-                    <label class="mb-medium">Subcategory</label>
-                    <x-search.search-subcategory />
+                    <label class="mb-medium">Category</label>
+                    <x-search.search-category />
                 </div>
                 {{-- 3. Manufacturer --}}
                 <div class="form-group">

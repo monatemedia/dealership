@@ -1,4 +1,4 @@
-<?php
+<?php // app/Http/Middleware/EnsureNotSelectingCategoryUnlessFromVehicleCreate.php
 
 namespace App\Http\Middleware;
 
@@ -19,7 +19,7 @@ class EnsureNotSelectingCategoryUnlessFromVehicleCreate
         $createFlowRoutes = [
             'vehicle.create',
             'sections.index',
-            'section.sub-categories.index',
+            'section.categories.index',
         ];
 
         $inFlow = in_array($routeName, $createFlowRoutes);

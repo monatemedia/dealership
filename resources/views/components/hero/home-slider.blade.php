@@ -1,10 +1,11 @@
 {{-- resources/views/components/hero/home-slider.blade.php --}}
-@php
-    // Determine which category to display based on what's available
-    $displayCategory = $subcategory ?? $section ?? null;
+@props(['category' => null])
 
-    // More explicit null handling for IDE
-    if ($displayCategory !== null) {
+@php
+    // Use the passed category, or fallback to $section if it exists globally
+    $displayCategory = $category ?? $section ?? null;
+
+    if ($displayCategory) {
         $categoryName = $displayCategory->name;
         $categorySingular = $displayCategory->singular;
     } else {

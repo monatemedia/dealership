@@ -13,13 +13,13 @@ return new class extends Migration
     {
         // Check if table already exists (from old implementation)
         if (Schema::hasTable('vehicle_types')) {
-            // If it exists, we need to add the subcategory_id column if missing
-            if (!Schema::hasColumn('vehicle_types', 'subcategory_id')) {
+            // If it exists, we need to add the category_id column if missing
+            if (!Schema::hasColumn('vehicle_types', 'category_id')) {
                 Schema::table('vehicle_types', function (Blueprint $table) {
-                    $table->foreignId('subcategory_id')
+                    $table->foreignId('category_id')
                         ->after('name') // 'name' exists; 'slug' does not
                         ->nullable()
-                        ->constrained('subcategories')
+                        ->constrained('categories')
                         ->cascadeOnDelete();
                 });
             }
@@ -32,11 +32,11 @@ return new class extends Migration
                 $table->string('description');
                 $table->string('image_path');
                 $table->string('slug')->unique();
-                $table->foreignId('subcategory_id')
-                    ->constrained('subcategories')
+                $table->foreignId('category_id')
+                    ->constrained('categories')
                     ->cascadeOnDelete();
 
-                $table->unique(['name', 'subcategory_id']);
+                $table->unique(['name', 'category_id']);
             });
         }
     }

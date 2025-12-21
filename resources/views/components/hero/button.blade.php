@@ -2,7 +2,7 @@
 @props([
     'href' => null,
     'section' => null,
-    'subcategory' => null,
+    'category' => null,
     'vehicleType' => null,
     'routeName' => 'vehicle.create',
     'hideOnRoute' => null,
@@ -18,11 +18,11 @@
         // Use slot text if provided
         $label = trim($slot);
         $href = $href ?? route($routeName);
-    } elseif ($subcategory) {
-        // Sub-category aware
-        $singular = $subcategory->singular ?? $subcategory->name;
+    } elseif ($category) {
+        // category aware
+        $singular = $category->singular ?? $category->name;
         $label = 'Sell Your ' . $singular;
-        $href = route($routeName, ['subcategory' => $subcategory->slug]);
+        $href = route($routeName, ['category' => $category->slug]);
     } elseif ($section) {
         // Section aware
         $singular = $section->singular ?? $section->name;

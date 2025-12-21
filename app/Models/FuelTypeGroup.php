@@ -20,9 +20,9 @@ class FuelTypeGroup extends Model
         return $this->hasMany(FuelType::class);
     }
 
-    public function subcategories(): BelongsToMany
+    public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(Subcategory::class, 'fuel_type_group_subcategory')
+        return $this->belongsToMany(Category::class, 'fuel_type_group_category')
             ->withPivot('default_fuel_type', 'can_edit');
     }
 }

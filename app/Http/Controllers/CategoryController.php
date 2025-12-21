@@ -1,52 +1,52 @@
-<?php // app/Http/Controllers/SubcategoryController.php
+<?php // app/Http/Controllers/CategoryController.php
 namespace App\Http\Controllers;
 
 use App\Models\Section;
-use App\Models\Subcategory;
+use App\Models\Category;
 use App\Models\Vehicle;
 use App\Models\VehicleType;
 
-class SubcategoryController extends Controller
+class CategoryController extends Controller
 {
     /**
-     * Show all sub-categories for a section
-     * Route: /{section}/sub-categories
+     * Show all categories for a section
+     * Route: /{section}/categories
      */
     public function index(Section $section)
     {
-        $subcategories = Subcategory::with('section')
+        $categories = Category::with('section')
             ->where('section_id', $section->id)
             ->get();
 
         $selectingForCreate = session('selecting_category_for_create', false);
 
         return view('categories.index', [
-            'categories' => $subcategories,
-            'type' => 'Subcategory',
+            'categories' => $categories,
+            'type' => 'Category',
             'selectingForCreate' => $selectingForCreate,
             'parentCategory' => $section,
         ]);
     }
 
-    public function show(Section $section, Subcategory $subcategory)
+    public function show(Section $section, Category $category)
     {
-        $subcategory->load('section');
+        $category->load('section');
 
         $vehicles = Vehicle::with(['primaryImage', 'manufacturer', 'model'])
-            ->where('subcategory_id', $subcategory->id)
+            ->where('category_id', $category->id)
             ->latest()
             ->paginate(15);
 
-        $vehicleTypes = VehicleType::where('subcategory_id', $subcategory->id)
+        $vehicleTypes = VehicleType::where('category_id', $category->id)
             ->take(3)
             ->get();
 
         return view('categories.show', [
-            'category' => $subcategory,
+            'category' => $category,
             'vehicles' => $vehicles,
             'childCategories' => $vehicleTypes,
             'childCategoryType' => 'Vehicle Type',
-            'parentCategory' => $subcategory, // Pass subcategory as parent for button
+            'parentCategory' => $category, // Pass category as parent for button
         ]);
     }
 }

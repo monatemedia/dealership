@@ -18,9 +18,9 @@ class DrivetrainGroup extends Model
         return $this->hasMany(Drivetrain::class);
     }
 
-    public function subcategories(): BelongsToMany
+    public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(Subcategory::class, 'drivetrain_group_subcategory')
+        return $this->belongsToMany(Category::class, 'drivetrain_group_category')
             ->withPivot('default_drivetrain', 'can_edit');
     }
 }

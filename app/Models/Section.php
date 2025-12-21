@@ -27,9 +27,9 @@ class Section extends Model
         return 'slug';
     }
 
-    public function subcategories(): HasMany
+    public function categories(): HasMany
     {
-        return $this->hasMany(Subcategory::class);
+        return $this->hasMany(Category::class);
     }
 
     public function vehicles(): HasMany

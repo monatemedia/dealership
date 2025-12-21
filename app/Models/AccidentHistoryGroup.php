@@ -21,9 +21,9 @@ class AccidentHistoryGroup extends Model
         return $this->hasMany(AccidentHistory::class);
     }
 
-    public function subcategories(): BelongsToMany
+    public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(Subcategory::class, 'accident_history_group_subcategory')
+        return $this->belongsToMany(Category::class, 'accident_history_group_category')
             ->withPivot('default_accident_history', 'can_edit');
     }
 }

@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('interior_group_subcategory', function (Blueprint $table) {
+        Schema::create('interior_group_category', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subcategory_id')->constrained()->onDelete('cascade');
+            $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->foreignId('interior_group_id')->constrained()->onDelete('cascade');
             $table->string('default_interior')->nullable();
             $table->boolean('can_edit')->default(true);
 
-            $table->unique(['subcategory_id', 'interior_group_id'], 'sub_interior_group_unique');
+            $table->unique(['category_id', 'interior_group_id'], 'category_interior_group_unique');
         });
     }
 
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('interior_group_subcategory');
+        Schema::dropIfExists('interior_group_category');
     }
 };

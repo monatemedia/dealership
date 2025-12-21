@@ -1,20 +1,20 @@
-<?php // database/seeders/SubcategoryDrivetrainSeeder.php
+<?php // database/seeders/CategoryDrivetrainSeeder.php
 
 namespace Database\Seeders;
 
-use App\Models\Subcategory;
+use App\Models\Category;
 use App\Models\DrivetrainGroup;
 use Illuminate\Database\Seeder;
 
-class SubcategoryDrivetrainSeeder extends Seeder
+class CategoryDrivetrainSeeder extends Seeder
 {
     public function run(): void
     {
         $config = config('categories.drivetrain_by_category');
 
-        foreach ($config as $subcategoryName => $drivetrainConfig) {
-            $subcategory = Subcategory::where('name', $subcategoryName)->first();
-            if (!$subcategory) {
+        foreach ($config as $categoryName => $drivetrainConfig) {
+            $category = Category::where('name', $categoryName)->first();
+            if (!$category) {
                 continue;
             }
 
@@ -28,7 +28,7 @@ class SubcategoryDrivetrainSeeder extends Seeder
                     continue;
                 }
 
-                $subcategory->drivetrainGroups()->syncWithoutDetaching([
+                $category->drivetrainGroups()->syncWithoutDetaching([
                     $group->id => [
                         'default_drivetrain' => $default,
                         'can_edit' => $canEdit

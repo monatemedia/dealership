@@ -146,7 +146,7 @@ return [
             'long_name' => 'Powersport Vehicles',
             'description' => 'High-performance vehicles designed for speed and agility.',
             'image_path' => 'https://images.pexels.com/photos/33237473/pexels-photo-33237473/free-photo-of-orange-motocross-bike-under-tent-in-the-field.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-            'subcategories' => [
+            'categories' => [
                 'Motorcycles',
                 'ATVs',
                 'Side by Sides',
@@ -157,7 +157,7 @@ return [
             'long_name' => 'Light Vehicles',
             'description' => 'A wide range of vehicles for personal and commercial use.',
             'image_path' => 'https://images.pexels.com/photos/11095885/pexels-photo-11095885.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-            'subcategories' => [
+            'categories' => [
                 'Cars',
                 'Personal Trailers',
                 'Caravans',
@@ -169,7 +169,7 @@ return [
             'long_name' => 'Light Commercial Vehicles',
             'description' => 'Bakkies, Minibuses and Panel Vans.',
             'image_path' => 'https://images.pexels.com/photos/16058147/pexels-photo-16058147/free-photo-of-ford-ranger-pickup-truck.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-            'subcategories' => [
+            'categories' => [
                 'Bakkies',
                 'Minibuses',
                 'Panel Vans',
@@ -180,7 +180,7 @@ return [
             'long_name' => 'Buses, Trucks and Truck Trailers.',
             'description' => 'Vehicles designed for transporting goods and people.',
             'image_path' => 'https://images.pexels.com/photos/33095902/pexels-photo-33095902/free-photo-of-orange-truck-parked-by-industrial-building.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-            'subcategories' => [
+            'categories' => [
                 'Buses',
                 'Rigid Trucks',
                 'Truck Tractors',
@@ -191,13 +191,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Vehicle Sub-categories
+    | Vehicle Categories
     |--------------------------------------------------------------------------
-    | A list of vehicle sub-categories
-    | Subcategory should be included in a Section
+    | A list of vehicle categories
+    | Category should be included in a Section
     |
     */
-    'subcategories' => [
+    'categories' => [
         'Motorcycles' => [
             'singular' => 'Motorcycle',
             'long_name' => 'Motorcycles & Powersports',
@@ -286,12 +286,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Vehicle Types by Subcategory
+    | Vehicle Types by Category
     |--------------------------------------------------------------------------
     | A static list of vehicle types used across the application.
     |
     */
-    'vehicle_types_by_subcategory' => [
+    'vehicle_types_by_category' => [
         'Motorcycles' => [
             [
                 'name' => 'Standard',
@@ -775,16 +775,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Fuel Types by Subcategory
+    | Fuel Types by Category
     |--------------------------------------------------------------------------
-    | Maps sub-categories to their allowed fuel type groups from config/lookups.php
-    | Each sub-category includes:
+    | Maps categories to their allowed fuel type groups from config/lookups.php
+    | Each category includes:
     | - 'groups': Array of fuel type group names from lookups.fuel_types
     | - 'default': Default fuel type value for the category
     | - 'can_edit': Boolean indicating if the user can change the fuel type
     |
     */
-    'fuel_types_by_subcategory' => [
+    'fuel_types_by_category' => [
         // Powersport vehicles - only Powersport fuel types
         'Motorcycles' => [
             'groups' => ['Powersport'],
@@ -865,7 +865,7 @@ return [
     |--------------------------------------------------------------------------
     | Transmissions by Category
     |--------------------------------------------------------------------------
-    | Maps sub-categories to their allowed transmission groups.
+    | Maps categories to their allowed transmission groups.
     */
     'transmissions_by_category' => [
         // Powersport
@@ -939,7 +939,7 @@ return [
     |--------------------------------------------------------------------------
     | Drivetrain by Category
     |--------------------------------------------------------------------------
-    | Maps sub-categories to their allowed drive train groups.
+    | Maps categories to their allowed drive train groups.
     */
     'drivetrain_by_category' => [
         // Powersport
@@ -1012,11 +1012,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Colors by Subcategory
+    | Colors by Category
     |--------------------------------------------------------------------------
-    | Maps sub-categories to their allowed color groups from config/lookups.php
+    | Maps categories to their allowed color groups from config/lookups.php
     */
-    'colors_by_subcategory' => [
+    'colors_by_category' => [
         'Motorcycles' => [
             'groups' => ['Standard', 'Metallic', 'Matte', 'Special', 'Other'],
             'default' => 'Black',
@@ -1091,11 +1091,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Interiors by Subcategory
+    | Interiors by Category
     |--------------------------------------------------------------------------
-    | Maps sub-categories to their allowed interior groups from config/lookups.php
+    | Maps categories to their allowed interior groups from config/lookups.php
     */
-    'interiors_by_subcategory' => [
+    'interiors_by_category' => [
         'Motorcycles' => [
             'groups' => ['None'],
             'default' => 'None / Not Specified',
@@ -1170,11 +1170,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Accident History by Subcategory
+    | Accident History by Category
     |--------------------------------------------------------------------------
-    | Maps sub-categories to their allowed accident history groups from config/lookups.php
+    | Maps categories to their allowed accident history groups from config/lookups.php
     */
-    'accident_history_by_subcategory' => [
+    'accident_history_by_category' => [
         'Motorcycles' => [
             'groups' => ['None', 'Minor', 'Moderate', 'Severe'],
             'default' => 'No Accidents Reported',
@@ -1249,15 +1249,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Features by Subcategory
+    | Features by Category
     |--------------------------------------------------------------------------
-    | Maps sub-categories to their allowed feature groups from config/features.php
-    | Each sub-category includes:
+    | Maps categories to their allowed feature groups from config/features.php
+    | Each category includes:
     | - 'groups': Array of feature group names from features.features
     | - 'can_edit': Boolean indicating if the user can change features
     |
     */
-    'features_by_subcategory' => [
+    'features_by_category' => [
         // Motorcycles - specific features
         'Motorcycles' => [
             'groups' => ['Motorcycle Specific', 'Safety Features', 'Technology'],

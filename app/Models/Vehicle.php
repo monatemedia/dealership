@@ -23,7 +23,7 @@ class Vehicle extends Model
 
     protected $fillable = [
         'section_id',
-        'subcategory_id',
+        'category_id',
         'manufacturer_id',
         'model_id',
         'year',
@@ -55,9 +55,9 @@ class Vehicle extends Model
         return $this->belongsTo(Section::class, 'section_id');
     }
 
-    public function subcategory(): BelongsTo
+    public function category(): BelongsTo
     {
-        return $this->belongsTo(Subcategory::class, 'subcategory_id');
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     /**
@@ -66,7 +66,7 @@ class Vehicle extends Model
      */
     public function vehicleCategory(): BelongsTo
     {
-        return $this->subcategory();
+        return $this->category();
     }
 
     // Define method for `VehicleType` and the return type
@@ -238,7 +238,7 @@ class Vehicle extends Model
             'fuelType',
             'city.province',
             'section',
-            'subcategory',
+            'category',
         ]);
 
         // 🔑 NEW: Get city coordinates for geo-filtering
@@ -256,8 +256,8 @@ class Vehicle extends Model
             // Taxonomy IDs for filtering
             'section_id' => (int) ($this->section_id ?? 0),
             'section_name' => (string) ($this->Section?->name ?? ''),
-            'subcategory_id' => (int) ($this->subcategory_id ?? 0),
-            'subcategory_name' => (string) ($this->subcategory?->name ?? ''),
+            'category_id' => (int) ($this->category_id ?? 0),
+            'category_name' => (string) ($this->category?->name ?? ''),
             // Denormalized relationship data
             'manufacturer_id' => (int) ($this->manufacturer_id ?? 0),
             'manufacturer_name' => (string) ($this->manufacturer?->name ?? ''),

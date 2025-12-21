@@ -1,7 +1,7 @@
 {{-- resources/views/vehicle/edit.blade.php --}}
 @php
-    // Get the singular form for the subcategory
-    $singular = $subcategory->singular ?? 'Vehicle';
+    // Get the singular form for the category
+    $singular = $category->singular ?? 'Vehicle';
 @endphp
 
 <x-app-layout title="Edit {{ $vehicle->getTitle() }}">
@@ -26,14 +26,14 @@
                     <div class="form-details">
                         {{-- Category fields (hidden) --}}
                         <input type="hidden" name="section_id" value="{{ $section->id }}" />
-                        <input type="hidden" name="subcategory_id" value="{{ $subcategory->id }}" />
+                        <input type="hidden" name="category_id" value="{{ $category->id }}" />
                         {{-- End Category fields (hidden) --}}
 
                         <div class="row">
                             <div class="col">
                                 <div class="form-group">
                                     <label>Category</label>
-                                    <input type="text" readonly value="{{ $subcategory->long_name }}" />
+                                    <input type="text" readonly value="{{ $category->long_name }}" />
                                 </div>
                             </div>
                         </div>
@@ -74,7 +74,7 @@
                         <div class="form-group @error('vehicle_type_id') has-error @enderror">
                             <label>Vehicle Type</label>
                             <x-radio-list-vehicle-type
-                                :subcategory="$subcategory"
+                                :category="$category"
                                 :value="old('vehicle_type_id', $vehicle->vehicle_type_id)"
                             />
                             <p class="error-message">
@@ -398,7 +398,7 @@
                             storage-key="vehicle-features-section"
                         >
                             <x-checkbox-vehicle-features
-                                :subcategory="$subcategory"
+                                :category="$category"
                                 :vehicle="$vehicle"
                             />
                         </x-collapsible-section>

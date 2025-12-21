@@ -25,9 +25,9 @@ return new class extends Migration
                 $table->unsignedBigInteger('section_id')->nullable()->after('id');
             }
 
-            // Add subcategory_id column if missing
-            if (!Schema::hasColumn('vehicles', 'subcategory_id')) {
-                $table->unsignedBigInteger('subcategory_id')->nullable()->after('section_id');
+            // Add category_id column if missing
+            if (!Schema::hasColumn('vehicles', 'category_id')) {
+                $table->unsignedBigInteger('category_id')->nullable()->after('section_id');
             }
         });
 
@@ -38,9 +38,9 @@ return new class extends Migration
                   ->on('sections')
                   ->nullOnDelete();
 
-            $table->foreign('subcategory_id')
+            $table->foreign('category_id')
                   ->references('id')
-                  ->on('subcategories')
+                  ->on('categories')
                   ->nullOnDelete();
         });
     }
@@ -52,8 +52,8 @@ return new class extends Migration
     {
         Schema::table('vehicles', function (Blueprint $table) {
             $table->dropForeign(['section_id']);
-            $table->dropForeign(['subcategory_id']);
-            $table->dropColumn(['section_id', 'subcategory_id']);
+            $table->dropForeign(['category_id']);
+            $table->dropColumn(['section_id', 'category_id']);
 
             // Restore old vehicle_category_id field
             $table->unsignedBigInteger('vehicle_category_id')->nullable()->after('id');

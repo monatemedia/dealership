@@ -1,4 +1,4 @@
-<?php // app/Models/Subcategory.php
+<?php // app/Models/Category.php
 
 namespace App\Models;
 
@@ -8,12 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Subcategory extends Model
+class Category extends Model
 {
     use HasFactory;
 
     public $timestamps = false;
-    protected $table = 'subcategories';
+    protected $table = 'categories';
 
     protected $fillable = [
         'name',
@@ -47,26 +47,26 @@ class Subcategory extends Model
 
     public function fuelTypeGroups(): BelongsToMany
     {
-        return $this->belongsToMany(FuelTypeGroup::class, 'fuel_type_group_subcategory')
+        return $this->belongsToMany(FuelTypeGroup::class, 'fuel_type_group_category')
             ->withPivot('default_fuel_type', 'can_edit');
     }
 
     // ADD THIS
     public function transmissionGroups(): BelongsToMany
     {
-        return $this->belongsToMany(TransmissionGroup::class, 'transmission_group_subcategory')
+        return $this->belongsToMany(TransmissionGroup::class, 'transmission_group_category')
             ->withPivot('default_transmission', 'can_edit');
     }
 
     // ADD THIS
     public function drivetrainGroups(): BelongsToMany
     {
-        return $this->belongsToMany(DrivetrainGroup::class, 'drivetrain_group_subcategory')
+        return $this->belongsToMany(DrivetrainGroup::class, 'drivetrain_group_category')
             ->withPivot('default_drivetrain', 'can_edit');
     }
 
     /**
-     * Get all available fuel types for this sub-category
+     * Get all available fuel types for this category
      */
     public function availableFuelTypes()
     {
@@ -75,7 +75,7 @@ class Subcategory extends Model
     }
 
     /**
-     * Get the fuel type configuration for this sub-category
+     * Get the fuel type configuration for this category
      */
     public function getFuelTypeConfig(): array
     {
@@ -98,7 +98,7 @@ class Subcategory extends Model
 
     // ADD THIS
     /**
-     * Get all available transmissions for this sub-category
+     * Get all available transmissions for this category
      */
     public function availableTransmissions()
     {
@@ -108,7 +108,7 @@ class Subcategory extends Model
 
     // ADD THIS
     /**
-     * Get the transmission configuration for this sub-category
+     * Get the transmission configuration for this category
      */
     public function getTransmissionConfig(): array
     {
@@ -131,7 +131,7 @@ class Subcategory extends Model
 
     // ADD THIS
     /**
-     * Get all available drive trains for this sub-category
+     * Get all available drive trains for this category
      */
     public function availableDrivetrains()
     {
@@ -140,7 +140,7 @@ class Subcategory extends Model
     }
 
     /**
-     * Get the drive train configuration for this sub-category
+     * Get the drive train configuration for this category
      */
     public function getDrivetrainConfig(): array
     {
@@ -163,24 +163,24 @@ class Subcategory extends Model
 
     public function colorGroups(): BelongsToMany
     {
-        return $this->belongsToMany(ColorGroup::class, 'color_group_subcategory')
+        return $this->belongsToMany(ColorGroup::class, 'color_group_category')
             ->withPivot('default_color', 'can_edit');
     }
 
     public function interiorGroups(): BelongsToMany
     {
-        return $this->belongsToMany(InteriorGroup::class, 'interior_group_subcategory')
+        return $this->belongsToMany(InteriorGroup::class, 'interior_group_category')
             ->withPivot('default_interior', 'can_edit');
     }
 
     public function accidentHistoryGroups(): BelongsToMany
     {
-        return $this->belongsToMany(AccidentHistoryGroup::class, 'accident_history_group_subcategory')
+        return $this->belongsToMany(AccidentHistoryGroup::class, 'accident_history_group_category')
             ->withPivot('default_accident_history', 'can_edit');
     }
 
     /**
-     * Get all available colors for this sub-category
+     * Get all available colors for this category
      */
     public function availableColors()
     {
@@ -189,7 +189,7 @@ class Subcategory extends Model
     }
 
     /**
-     * Get the color configuration for this sub-category
+     * Get the color configuration for this category
      */
     public function getColorConfig(): array
     {
@@ -211,7 +211,7 @@ class Subcategory extends Model
     }
 
     /**
-     * Get all available interiors for this sub-category
+     * Get all available interiors for this category
      */
     public function availableInteriors()
     {
@@ -220,7 +220,7 @@ class Subcategory extends Model
     }
 
     /**
-     * Get the interior configuration for this sub-category
+     * Get the interior configuration for this category
      */
     public function getInteriorConfig(): array
     {
@@ -242,7 +242,7 @@ class Subcategory extends Model
     }
 
     /**
-     * Get all available accident histories for this sub-category
+     * Get all available accident histories for this category
      */
     public function availableAccidentHistories()
     {
@@ -251,7 +251,7 @@ class Subcategory extends Model
     }
 
     /**
-     * Get the accident history configuration for this sub-category
+     * Get the accident history configuration for this category
      */
     public function getAccidentHistoryConfig(): array
     {
@@ -273,7 +273,7 @@ class Subcategory extends Model
     }
 
     /**
-     * Get all available features for this sub-category
+     * Get all available features for this category
      */
     public function availableFeatures()
     {
@@ -282,7 +282,7 @@ class Subcategory extends Model
     }
 
     /**
-     * Get feature configuration for this subcategory
+     * Get feature configuration for this category
      * Returns: [
      *   'can_edit' => bool,
      *   'groups' => Collection (grouped features by group name),
@@ -291,7 +291,7 @@ class Subcategory extends Model
      */
     public function getFeatureConfig(): array
     {
-        // Get all feature groups for this subcategory with their features
+        // Get all feature groups for this category with their features
         $featureGroups = $this->featureGroups()
             ->with('features')
             ->get();
@@ -325,7 +325,7 @@ class Subcategory extends Model
     // Make sure you have the featureGroups relationship defined
     public function featureGroups(): BelongsToMany
     {
-        return $this->belongsToMany(FeatureGroup::class, 'feature_group_subcategory')
+        return $this->belongsToMany(FeatureGroup::class, 'feature_group_category')
             ->withPivot('can_edit');
     }
 }

@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\VehicleType;
-use App\Models\Subcategory;
+use App\Models\Category;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -11,20 +11,20 @@ class VehicleTypeSeeder extends Seeder
 {
     public function run(): void
     {
-        $vehicleTypesConfig = config('categories.vehicle_types_by_subcategory');
+        $vehicleTypesConfig = config('categories.vehicle_types_by_category');
 
-        foreach ($vehicleTypesConfig as $subcategoryName => $types) {
-            $subcategory = Subcategory::where('name', $subcategoryName)->first();
+        foreach ($vehicleTypesConfig as $categoryName => $types) {
+            $category = Category::where('name', $categoryName)->first();
 
-            if (!$subcategory) continue;
+            if (!$category) continue;
 
             foreach ($types as $typeData) {
-                $slug = Str::slug($typeData['name'] . '-' . $subcategory->name);
+                $slug = Str::slug($typeData['name'] . '-' . $category->name);
 
                 VehicleType::updateOrCreate(
                     [
                         'name' => $typeData['name'],
-                        'subcategory_id' => $subcategory->id,
+                        'category_id' => $category->id,
                     ],
                     [
                         'long_name' => $typeData['long_name'] ?? $typeData['name'],

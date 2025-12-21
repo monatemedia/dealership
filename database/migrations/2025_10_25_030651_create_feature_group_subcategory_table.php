@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('feature_group_subcategory', function (Blueprint $table) {
+        Schema::create('feature_group_category', function (Blueprint $table) {
             $table->foreignId('feature_group_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('subcategory_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->boolean('can_edit')->default(true);
-            $table->primary(['feature_group_id', 'subcategory_id'], 'fgs_primary');
+            $table->primary(['feature_group_id', 'category_id'], 'fgs_primary');
         });
     }
 
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('feature_group_subcategory');
+        Schema::dropIfExists('feature_group_category');
     }
 };

@@ -20,7 +20,7 @@ class ProductionSeeder extends Seeder
             StorageLinkSeeder::class,
 
             // Core application data ONLY
-            CategorySeeder::class, // Runs first (creates section/Sub Categories)
+            CategorySeeder::class, // Runs first (creates section/categories)
             VehicleTypeSeeder::class,
 
             FuelTypeSeeder::class, // Seed FuelTypes
@@ -35,13 +35,13 @@ class ProductionSeeder extends Seeder
             OwnershipPaperworkSeeder::class, // Add this line
 
             // Linkers (must run after categories and types are seeded)
-            SubcategoryFuelTypeSeeder::class,
-            SubcategoryTransmissionSeeder::class, // Add new linker
-            SubcategoryDrivetrainSeeder::class, // Add new linker
-            SubcategoryColorSeeder::class,
-            SubcategoryInteriorSeeder::class,
-            SubcategoryAccidentHistorySeeder::class,
-            SubcategoryFeatureSeeder::class, // Add new linker
+            CategoryFuelTypeSeeder::class,
+            CategoryTransmissionSeeder::class, // Add new linker
+            CategoryDrivetrainSeeder::class, // Add new linker
+            CategoryColorSeeder::class,
+            CategoryInteriorSeeder::class,
+            CategoryAccidentHistorySeeder::class,
+            CategoryFeatureSeeder::class, // Add new linker
 
             SouthAfricanCitySeeder::class,
             ProductionManufacturerSeeder::class,

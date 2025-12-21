@@ -1,35 +1,36 @@
 {{-- resources/views/categories/show.blade.php --}}
-@props([
+{{-- @props([
     'category',
-    'vehicles', // NOTE: This variable is now redundant for rendering, but kept for context.
+    'vehicles',
     'childCategories' => null,
     'childCategoryType' => null,
     'parentCategory' => null,
-])
+]) --}}
+
 @php
     use Illuminate\Support\Str;
-    $taxonomyService = app('App\Services\TaxonomyRouteService');
-    $config = [];
-    if ($childCategoryType) {
-        $config = $taxonomyService->getConfig($childCategoryType);
+
+    // Grab the object regardless of whether Laravel named it $category or $section
+    $activeCategory = $category ?? $section ?? $parentCategory;
+
+    if (!$activeCategory) {
+         throw new \Exception("Category data missing. Check Route Model Binding in SectionController.");
     }
 
-    // Define the category ID for JS filtering
+    // Standardize it back to $category for the rest of the template
+    $category = $activeCategory;
+
     $categoryId = $category->id;
 
-    // Determine the name of the foreign key based on the category type
     if ($category instanceof \App\Models\Section) {
         $foreignKeyName = 'section_id';
-    } elseif ($category instanceof \App\Models\Subcategory) {
-        $foreignKeyName = 'subcategory_id';
     } else {
-        // Fallback if Category is a different type (e.g., VehicleType)
         $foreignKeyName = 'category_id';
     }
 @endphp
 
 <x-app-layout :title="$category->name">
-    <x-hero.home-slider />
+    <x-hero.home-slider :category="$category" />
     <main>
         {{-- DEBUG: Remove later --}}
         {{-- @if(config('app.debug'))

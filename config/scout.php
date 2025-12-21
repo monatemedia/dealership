@@ -362,13 +362,13 @@ return [
                             'optional' => true,
                         ],
                         [
-                            'name' => 'subcategory_id',
+                            'name' => 'category_id',
                             'type' => 'int32',
                             'facet' => true,
                             'optional' => true,
                         ],
                         [
-                            'name' => 'subcategory_name',
+                            'name' => 'category_name',
                             'type' => 'string',
                             'facet' => false,
                             'optional' => true,

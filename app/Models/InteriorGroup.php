@@ -21,9 +21,9 @@ class InteriorGroup extends Model
         return $this->hasMany(Interior::class);
     }
 
-    public function subcategories(): BelongsToMany
+    public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(Subcategory::class, 'interior_group_subcategory')
+        return $this->belongsToMany(Category::class, 'interior_group_category')
             ->withPivot('default_interior', 'can_edit');
     }
 }

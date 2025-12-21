@@ -20,7 +20,7 @@ class VehicleType extends Model
         'description',
         'image_path',
         'slug',
-        'subcategory_id',
+        'category_id',
     ];
 
     public function getRouteKeyName()
@@ -28,9 +28,9 @@ class VehicleType extends Model
         return 'slug';
     }
 
-    public function subcategory(): BelongsTo
+    public function category(): BelongsTo
     {
-        return $this->belongsTo(Subcategory::class);
+        return $this->belongsTo(Category::class);
     }
 
     public function vehicles(): HasMany

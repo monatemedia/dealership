@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Section;
-use App\Models\Subcategory;
+use App\Models\Category;
 use App\Models\VehicleType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -30,13 +30,13 @@ class CategorySeeder extends Seeder
                 ]
             );
 
-            // Step 2: Seed Sub-Categories for this Section
-            if (isset($sectionData['subcategories'])) {
-                foreach ($sectionData['subcategories'] as $subName) {
-                    $subData = config('categories.subcategories.' . $subName);
+            // Step 2: Seed Categories for this Section
+            if (isset($sectionData['categories'])) {
+                foreach ($sectionData['categories'] as $subName) {
+                    $subData = config('categories.categories.' . $subName);
 
                     if ($subData) {
-                        $sub = Subcategory::updateOrCreate(
+                        $sub = Category::updateOrCreate(
                             ['name' => $subName, 'section_id' => $section->id],
                             [
                                 'singular' => $subData['singular'],
@@ -48,19 +48,19 @@ class CategorySeeder extends Seeder
                             ]
                         );
 
-                        // Step 3: Seed Vehicle Types for this Subcategory
+                        // Step 3: Seed Vehicle Types for this Category
                         $vehicleTypes = config('categories.vehicle_types.' . $subName, []);
 
                         foreach ($vehicleTypes as $typeData) {
                             VehicleType::updateOrCreate(
-                                ['name' => $typeData['name'], 'subcategory_id' => $sub->id],
+                                ['name' => $typeData['name'], 'category_id' => $sub->id],
                                 [
                                     'name' => $typeData['name'],
                                     'long_name' => $typeData['long_name'],
                                     'description' => $typeData['description'],
                                     'image_path' => $typeData['image_path'],
                                     'slug' => Str::slug($typeData['name']),
-                                    'subcategory_id' => $sub->id,
+                                    'category_id' => $sub->id,
                                 ]
                             );
                         }

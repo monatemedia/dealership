@@ -6,7 +6,7 @@ use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use App\Models\FuelType;
 use App\Models\Section;
-use App\Models\Subcategory;
+use App\Models\Category;
 use App\Models\VehicleType;
 use App\Models\City;
 
@@ -83,8 +83,8 @@ class VehicleSearchController extends Controller
             if ($request->filled('section_id')) {
                 $builder->where('section_id', (int) $request->input('section_id'));
             }
-            if ($request->filled('subcategory_id')) {
-                $builder->where('subcategory_id', (int) $request->input('subcategory_id'));
+            if ($request->filled('category_id')) {
+                $builder->where('category_id', (int) $request->input('category_id'));
             }
             if ($request->filled('manufacturer_id')) {
                 $builder->where('manufacturer_id', (int) $request->input('manufacturer_id'));
@@ -147,7 +147,7 @@ class VehicleSearchController extends Controller
                 'model',
                 'primaryImage',
                 'section',
-                'subcategory',
+                'category',
                 'favouredUsers'
             ])
             ->select('vehicles.*')
@@ -312,27 +312,27 @@ class VehicleSearchController extends Controller
     }
 
     /**
-     * Get subcategories by section
+     * Get categories by section
      */
-    public function getSubcategoriesBySection(Request $request, $sectionId)
+    public function getCategoriesBySection(Request $request, $sectionId)
     {
         try {
-            $subcategories = Subcategory::where('section_id', $sectionId)
+            $categories = Category::where('section_id', $sectionId)
                 ->orderBy('name')
                 ->get(['id', 'name']);
-            return response()->json($subcategories);
+            return response()->json($categories);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to fetch subcategories: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Failed to fetch categories: ' . $e->getMessage()], 500);
         }
     }
 
     /**
-     * Get vehicle types by subcategory
+     * Get vehicle types by category
      */
-    public function getVehicleTypesBySubcategory(Request $request, $subcategoryId)
+    public function getVehicleTypesByCategory(Request $request, $categoryId)
     {
         try {
-            $vehicleTypes = VehicleType::where('subcategory_id', $subcategoryId)
+            $vehicleTypes = VehicleType::where('category_id', $categoryId)
                 ->orderBy('name')
                 ->get(['id', 'name']);
             return response()->json($vehicleTypes);
@@ -342,16 +342,16 @@ class VehicleSearchController extends Controller
     }
 
     /**
-     * Get fuel types by subcategory
+     * Get fuel types by category
      */
-    public function getFuelTypesBySubcategory(Request $request, $subcategoryId)
+    public function getFuelTypesBycategory(Request $request, $categoryId)
     {
         try {
-            $subcategory = Subcategory::find($subcategoryId);
-            if (!$subcategory) {
+            $category = Category::find($categoryId);
+            if (!$category) {
                 return response()->json([], 404);
             }
-            $fuelTypes = $subcategory->availableFuelTypes()->map(fn($ft) => ['id' => $ft->id, 'name' => $ft->name]);
+            $fuelTypes = $category->availableFuelTypes()->map(fn($ft) => ['id' => $ft->id, 'name' => $ft->name]);
             return response()->json($fuelTypes);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to fetch fuel types: ' . $e->getMessage()], 500);

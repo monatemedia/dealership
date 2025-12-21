@@ -1,7 +1,7 @@
 {{-- resources/views/components/search/search-vehicle-type.blade.php --}}
 @props(['value' => null])
 @php
-    $initialSubcatId = request('subcategory_id', '');
+    $initialSubcatId = request('category_id', '');
 @endphp
 
 <div class="select-container w-full"
@@ -45,7 +45,7 @@
     x-init="
         if (parentSubcatId) { fetchOptions(parentSubcatId); }
         $nextTick(() => {
-            window.addEventListener('subcategory-selected', (e) => {
+            window.addEventListener('category-selected', (e) => {
                 fetchOptions(e.detail.id);
             });
         });

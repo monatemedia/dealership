@@ -1,22 +1,22 @@
 <?php
-// database/seeders/SubcategoryInteriorSeeder.php
+// database/seeders/CategoryInteriorSeeder.php
 
 namespace Database\Seeders;
 
 use App\Models\InteriorGroup;
-use App\Models\Subcategory;
+use App\Models\Category;
 use Illuminate\Database\Seeder;
 
-class SubcategoryInteriorSeeder extends Seeder
+class CategoryInteriorSeeder extends Seeder
 {
     public function run(): void
     {
-        $config = config('categories.interiors_by_subcategory');
+        $config = config('categories.interiors_by_category');
 
-        foreach ($config as $subcategoryName => $interiorConfig) {
-            $subcategory = Subcategory::where('name', $subcategoryName)->first();
+        foreach ($config as $categoryName => $interiorConfig) {
+            $category = Category::where('name', $categoryName)->first();
 
-            if (!$subcategory) {
+            if (!$category) {
                 continue;
             }
 
@@ -31,8 +31,8 @@ class SubcategoryInteriorSeeder extends Seeder
                     continue;
                 }
 
-                // Attach the group to the sub-category with pivot data
-                $subcategory->interiorGroups()->syncWithoutDetaching([
+                // Attach the group to the category with pivot data
+                $category->interiorGroups()->syncWithoutDetaching([
                     $group->id => [
                         'default_interior' => $default,
                         'can_edit' => $canEdit

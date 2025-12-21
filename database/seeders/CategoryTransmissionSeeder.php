@@ -1,20 +1,20 @@
-<?php // database/seeders/SubcategoryTransmissionSeeder.php
+<?php // database/seeders/CategoryTransmissionSeeder.php
 
 namespace Database\Seeders;
 
-use App\Models\Subcategory;
+use App\Models\Category;
 use App\Models\TransmissionGroup;
 use Illuminate\Database\Seeder;
 
-class SubcategoryTransmissionSeeder extends Seeder
+class CategoryTransmissionSeeder extends Seeder
 {
     public function run(): void
     {
         $config = config('categories.transmissions_by_category');
 
-        foreach ($config as $subcategoryName => $transmissionConfig) {
-            $subcategory = Subcategory::where('name', $subcategoryName)->first();
-            if (!$subcategory) {
+        foreach ($config as $categoryName => $transmissionConfig) {
+            $category = Category::where('name', $categoryName)->first();
+            if (!$category) {
                 continue;
             }
 
@@ -28,7 +28,7 @@ class SubcategoryTransmissionSeeder extends Seeder
                     continue;
                 }
 
-                $subcategory->transmissionGroups()->syncWithoutDetaching([
+                $category->transmissionGroups()->syncWithoutDetaching([
                     $group->id => [
                         'default_transmission' => $default,
                         'can_edit' => $canEdit

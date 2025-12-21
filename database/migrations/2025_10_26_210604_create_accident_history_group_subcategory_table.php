@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('accident_history_group_subcategory', function (Blueprint $table) {
+        Schema::create('accident_history_group_category', function (Blueprint $table) {
             $table->id();
 
             // Short, explicit foreign key names to avoid MySQL's 64-char limit
-            $table->foreignId('subcategory_id')
+            $table->foreignId('category_id')
                 ->constrained()
                 ->onDelete('cascade');
 
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('default_accident_history')->nullable();
             $table->boolean('can_edit')->default(true);
 
-            $table->unique(['subcategory_id', 'accident_history_group_id'], 'sub_accident_group_unique');
+            $table->unique(['category_id', 'accident_history_group_id'], 'category_accident_group_unique');
         });
     }
 
@@ -35,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('accident_history_group_subcategory');
+        Schema::dropIfExists('accident_history_group_category');
     }
 };

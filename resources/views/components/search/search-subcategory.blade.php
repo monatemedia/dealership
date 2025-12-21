@@ -1,4 +1,4 @@
-{{-- resources/views/components/search/search-subcategory.blade.php --}}
+{{-- resources/views/components/search/search-category.blade.php --}}
 @props(['value' => null])
 @php
     $initialId = request('section_id', '');
@@ -10,7 +10,7 @@
         parentMainCatId: '{{ $initialId }}',
         options: [],
         isLoading: false,
-        selectedSubcategoryId: '{{ request('subcategory_id', '') }}',
+        selectedCategoryId: '{{ request('category_id', '') }}',
 
         // Computed check for enabled state
         isEnabled() {
@@ -20,38 +20,38 @@
             return enabled;
         },
 
-        // Fetch subcategories from the API
+        // Fetch categories from the API
         async fetchOptions(mainCatId) {
             // DIAGNOSTIC: Log when fetchOptions is called
             console.log('SUBCAT fetchOptions called with:', mainCatId);
 
             this.parentMainCatId = mainCatId;
             this.options = [];
-            this.selectedSubcategoryId = '';
+            this.selectedCategoryId = '';
 
             if (!this.isEnabled()) {
-                this.$dispatch('subcategory-selected', { id: '' });
+                this.$dispatch('category-selected', { id: '' });
                 return;
             }
 
             this.isLoading = true;
             try {
                 // IMPORTANT: Confirm this API route is correct in your routes/api.php
-                const response = await fetch(`/api/subcategories-by-main/${mainCatId}`);
+                const response = await fetch(`/api/categories-by-main/${mainCatId}`);
                 if (response.ok) {
                     this.options = await response.json();
                     console.log('SUBCAT API Success. Options count:', this.options.length);
                 } else {
-                    console.error('Failed to fetch subcategories. Status:', response.status);
+                    console.error('Failed to fetch categories. Status:', response.status);
                     this.options = [];
                 }
             } catch (error) {
-                console.error('Error fetching subcategories:', error);
+                console.error('Error fetching categories:', error);
                 this.options = [];
             } finally {
                 this.isLoading = false;
             }
-            this.$dispatch('subcategory-selected', { id: this.selectedSubcategoryId });
+            this.$dispatch('category-selected', { id: this.selectedCategoryId });
         }
     }"
     x-init="
@@ -70,10 +70,10 @@
     "
 >
     <select
-        name="subcategory_id"
+        name="category_id"
         class="select-input"
-        x-model="selectedSubcategoryId"
-        @change="$dispatch('subcategory-selected', { id: $event.target.value })"
+        x-model="selectedCategoryId"
+        @change="$dispatch('category-selected', { id: $event.target.value })"
         {{-- Bind disabled state (disabled if not enabled OR if loading) --}}
         x-bind:disabled="!isEnabled() || isLoading"
         {{-- Bind classes for greying out --}}
@@ -82,9 +82,9 @@
             'select-input': true
         }"
     >
-        <option value="" x-text="isLoading ? 'Loading...' : 'Subcategory'"></option>
+        <option value="" x-text="isLoading ? 'Loading...' : 'Category'"></option>
         <template x-for="option in options" :key="option.id">
-            <option :value="option.id" x-text="option.name" :selected="option.id == selectedSubcategoryId"></option>
+            <option :value="option.id" x-text="option.name" :selected="option.id == selectedCategoryId"></option>
         </template>
     </select>
 </div>

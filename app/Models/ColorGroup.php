@@ -21,9 +21,9 @@ class ColorGroup extends Model
         return $this->hasMany(Color::class);
     }
 
-    public function subcategories(): BelongsToMany
+    public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(Subcategory::class, 'color_group_subcategory')
+        return $this->belongsToMany(Category::class, 'color_group_category')
             ->withPivot('default_color', 'can_edit');
     }
 }

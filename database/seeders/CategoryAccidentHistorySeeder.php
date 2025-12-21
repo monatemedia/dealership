@@ -1,22 +1,22 @@
 <?php
-// database/seeders/SubcategoryAccidentHistorySeeder.php
+// database/seeders/CategoryAccidentHistorySeeder.php
 
 namespace Database\Seeders;
 
 use App\Models\AccidentHistoryGroup;
-use App\Models\Subcategory;
+use App\Models\Category;
 use Illuminate\Database\Seeder;
 
-class SubcategoryAccidentHistorySeeder extends Seeder
+class CategoryAccidentHistorySeeder extends Seeder
 {
     public function run(): void
     {
-        $config = config('categories.accident_history_by_subcategory');
+        $config = config('categories.accident_history_by_category');
 
-        foreach ($config as $subcategoryName => $accidentConfig) {
-            $subcategory = Subcategory::where('name', $subcategoryName)->first();
+        foreach ($config as $categoryName => $accidentConfig) {
+            $category = Category::where('name', $categoryName)->first();
 
-            if (!$subcategory) {
+            if (!$category) {
                 continue;
             }
 
@@ -31,8 +31,8 @@ class SubcategoryAccidentHistorySeeder extends Seeder
                     continue;
                 }
 
-                // Attach the group to the sub-category with pivot data
-                $subcategory->accidentHistoryGroups()->syncWithoutDetaching([
+                // Attach the group to the category with pivot data
+                $category->accidentHistoryGroups()->syncWithoutDetaching([
                     $group->id => [
                         'default_accident_history' => $default,
                         'can_edit' => $canEdit

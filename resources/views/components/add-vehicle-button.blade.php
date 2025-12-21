@@ -9,10 +9,10 @@ $inCreateFlow = Route::currentRouteNamed('vehicle.create')
 $label = 'Sell Your Vehicle';
 $href = route('vehicle.create');
 
-// If on sub-category page
-if (isset($subcategory) && $subcategory) {
-    $label = 'Sell Your ' . ($subcategory->singular ?? $subcategory->name);
-    $href = route('vehicle.create', ['subcategory' => $subcategory->slug]);
+// If on category page
+if (isset($category) && $category) {
+    $label = 'Sell Your ' . ($category->singular ?? $category->name);
+    $href = route('vehicle.create', ['category' => $category->slug]);
 }
 // If on section page
 elseif (isset($section) && $section) {

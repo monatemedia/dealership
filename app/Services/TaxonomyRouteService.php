@@ -16,22 +16,22 @@ class TaxonomyRouteService
      */
     public function resolveShowRoute(string $routeName, Model $category): string
     {
-        // Handle VehicleType: requires section -> subcategory -> vehicleType
-        if (isset($category->subcategory)) {
-            if (isset($category->subcategory->section)) {
+        // Handle VehicleType: requires section -> category -> vehicleType
+        if (isset($category->category)) {
+            if (isset($category->category->section)) {
                 return route($routeName, [
-                    'section' => $category->subcategory->section->slug,
-                    'subcategory' => $category->subcategory->slug,
+                    'section' => $category->category->section->slug,
+                    'category' => $category->category->slug,
                     'vehicleType' => $category->slug,
                 ]);
             }
         }
 
-        // Handle Subcategory: requires section -> subcategory
+        // Handle Category: requires section -> category
         if (isset($category->section)) {
             return route($routeName, [
                 'section' => $category->section->slug,
-                'subcategory' => $category->slug,
+                'category' => $category->slug,
             ]);
         }
 
@@ -57,34 +57,34 @@ class TaxonomyRouteService
             return [];
         }
 
-        // Handle section.sub-categories.index route
-        // Route: /{section}/sub-categories
+        // Handle section.categories.index route
+        // Route: /{section}/categories
         // Parent is a section
-        if ($routeName === 'section.sub-categories.index') {
+        if ($routeName === 'section.categories.index') {
             return [
                 'section' => $parentCategory->slug,
             ];
         }
 
         // Handle vehicle-types.index route
-        // Route: /{section}/{subcategory}/vehicle-types
-        // Parent is a Subcategory
+        // Route: /{section}/{category}/vehicle-types
+        // Parent is a Category
         if ($routeName === 'vehicle-types.index') {
             if (isset($parentCategory->section)) {
                 return [
                     'section' => $parentCategory->section->slug,
-                    'subcategory' => $parentCategory->slug,
+                    'category' => $parentCategory->slug,
                 ];
             }
         }
 
         // Handle fuel-types.index route (when you build it)
-        // Route: /{section}/{subcategory}/fuel-types
+        // Route: /{section}/{category}/fuel-types
         if ($routeName === 'fuel-types.index') {
             if (isset($parentCategory->section)) {
                 return [
                     'section' => $parentCategory->section->slug,
-                    'subcategory' => $parentCategory->slug,
+                    'category' => $parentCategory->slug,
                 ];
             }
         }
@@ -108,12 +108,12 @@ class TaxonomyRouteService
                 'showRouteName' => 'sections.show',
                 'createRouteParam' => 'section',
             ],
-            'sub-category' => [
-                'type' => 'Subcategory',
-                'pluralType' => 'Sub-Categories',
-                'indexRouteName' => 'section.sub-categories.index',
-                'showRouteName' => 'sub-categories.show',
-                'createRouteParam' => 'subcategory',
+            'category' => [
+                'type' => 'Category',
+                'pluralType' => 'Categories',
+                'indexRouteName' => 'section.categories.index',
+                'showRouteName' => 'categories.show',
+                'createRouteParam' => 'category',
             ],
             'vehicle-type' => [
                 'type' => 'Vehicle Type',
