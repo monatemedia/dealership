@@ -217,7 +217,11 @@ else
     echo "✅ Atomic swap successful."
 fi
 
-# 9. Restart the Queue service (Moved after the swap/initial bring-up)
+# 9. Tell the worker to finish its current job and then exit, allowing Docker to restart it cleanly.
+echo "🛎️ Signaling Queue worker to gracefully restart..."
+docker exec ${QUEUE_SERVICE} php artisan queue:restart || true
+
+# 10. Restart the Queue service (Moved after the swap/initial bring-up)
 echo "🔁 Restarting Queue service with new code..."
 docker compose --env-file .env -f docker-compose.yml restart ${QUEUE_SERVICE}
 

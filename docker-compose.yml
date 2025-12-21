@@ -93,7 +93,7 @@ services:
   # SHARED SERVICES
   # ----------------------------------------------
   actuallyfind-queue:
-    image: ghcr.io/monatemedia/dealership:${IMAGE_TAG:-production} # Pulled image
+    image: ghcr.io/monatemedia/dealership:${IMAGE_TAG:-production}
     container_name: actuallyfind-queue
     depends_on:
       actuallyfind-db:
@@ -101,9 +101,11 @@ services:
       actuallyfind-typesense:
         condition: service_started
     restart: always
-    entrypoint: /bin/bash -c "echo 'Waiting for database connection...'; PGPASSWORD=${DB_PASSWORD} until pg_isready -h actuallyfind-db -p 5432 -U ${DB_USERNAME} -d ${DB_DATABASE}; do echo 'Database not ready, sleeping for 1 second...'; sleep 1; done; echo 'Database is ready. Starting queue worker...'; php artisan queue:work --verbose --tries=3 --timeout=300 --sleep=3 --max-jobs=1000"
+    # Use the same entrypoint as the web app to run migrations/setup
+    entrypoint: /usr/local/bin/docker-entrypoint.sh
+    # OVERRIDE the command to start the worker instead of Apache
+    command: php artisan queue:work --verbose --tries=3 --timeout=300
     environment:
-      # Database variables for Larvel (Pulled from shell interpolation)
       DB_CONNECTION: pgsql
       DB_HOST: actuallyfind-db
       DB_PORT: 5432
@@ -116,6 +118,7 @@ services:
       - ./.env:/var/www/html/.env
       - ./storage:/var/www/html/storage
       - ./bootstrap/cache:/var/www/html/bootstrap/cache
+      - ./docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
     mem_limit: 512M
     networks:
       - proxy-network
