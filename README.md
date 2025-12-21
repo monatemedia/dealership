@@ -651,17 +651,19 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [X] Troubleshot heart not clickable
 - [X] Make current Main Categories into **Sections** 
 - [X] Make current Subcategories into **Categories**
-- [ ] Clean up github release versions
+- [X] Bugfix: App CSS to `carType` and `fueltype` components
+- [X] Clean up github release versions
+- [ ] Set Up OAuth
+  - [X] GoogleOath
+  - [ ] FacebookOath
+    - [ ] Send Appeal For Access
+    - [ ] Set Up Facebook OAuth
 - [ ] Send production emails to queue
 - [ ] Create Backup logic
 - [ ] Fix Images on Favourites page
 - [ ] Fix losing text on location after deleting location
-- [ ] Set Up OAuth
-  - [ ] GoogleOath
-  - [ ] FacebookOath
 - [ ] Set Up Social Media
 - [ ] Allow Unknown `Manufacturers` and `Models` to be created
-- [X] Bugfix: App CSS to `carType` and `fueltype` components
 - [ ] Test Create & Edit Pages
 - [ ] Add Group term: **Channels**
   - [ ] Individual categories:
