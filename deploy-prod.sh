@@ -89,7 +89,8 @@ echo "🚀 Recreating **ONLY** the inactive slot (${TARGET_SLOT}) and ensuring c
 VIRTUAL_HOST_SET="" docker compose --env-file .env -f docker-compose.yml up -d \
   ${TARGET_SLOT} \
   ${DB_SERVICE} \
-  ${TYPESENSE_SERVICE};
+  ${TYPESENSE_SERVICE} \
+  ${QUEUE_SERVICE};
 
 # -------------------------------------------------------------
 # 4. Force-restart DB and Load Credentials

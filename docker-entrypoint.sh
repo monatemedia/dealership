@@ -1,5 +1,7 @@
 #!/bin/bash
-set -eecho "Running application setup..."
+set -e
+
+echo "Running application setup..."
 
 # --- 1. Database Wait, Migration, and Seeding ---
 
@@ -55,4 +57,6 @@ php artisan view:clear
 php artisan storage:link
 echo "Application setup complete. Starting Apache web server..."
 
-exec apache2-foreground
+# Instead of: exec apache2-foreground
+# Use "$@" which means "execute whatever command was passed by docker-compose"
+exec "$@"
