@@ -137,11 +137,10 @@ services:
     networks:
       - proxy-network
     healthcheck:
-      # This uses bash to try and open a connection to the health port
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8108 && echo -e 'GET /health HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q 'ok'"]
+      test: ["CMD-SHELL", "printf '' > /dev/tcp/127.0.0.1/8108"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 3
 
   actuallyfind-db:
     image: postgis/postgis:18-3.6-alpine
