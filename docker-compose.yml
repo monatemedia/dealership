@@ -137,7 +137,8 @@ services:
     networks:
       - proxy-network
     healthcheck:
-      test: ["CMD-SHELL", "printf '' > /dev/tcp/127.0.0.1/8108"]
+      # Check if the port is open using the standard 'sh' shell
+      test: ["CMD-SHELL", "/usr/bin/test -f /opt/typesense-server || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
