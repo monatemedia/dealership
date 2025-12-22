@@ -137,8 +137,8 @@ services:
     networks:
       - proxy-network
     healthcheck:
-      # Typesense images usually have curl or you can use /bin/sh to check the port
-      test: ["CMD-SHELL", "printf 'GET /health HTTP/1.1\nHost: localhost:8108\n\n' > /dev/tcp/127.0.0.1/8108"]
+      # This uses bash to try and open a connection to the health port
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8108 && echo -e 'GET /health HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q 'ok'"]
       interval: 10s
       timeout: 5s
       retries: 5
