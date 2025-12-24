@@ -838,9 +838,23 @@ document.addEventListener("DOMContentLoaded", function () {
               // 3. Update the image previews on the main form
               mainFormImagePreviews.innerHTML = '';
               validItems.forEach(item => {
+                  // Create the wrapper div
+                  const wrapper = document.createElement('div');
+                  wrapper.className = 'vehicle-form-image-preview';
+
+                  // Create the image
                   const img = document.createElement('img');
                   img.src = item.image; // Use the base64 preview
-                  mainFormImagePreviews.appendChild(img);
+
+                  // Add the delete icon (optional, but keeps UI consistent)
+                  const deleteIcon = document.createElement('div');
+                  deleteIcon.className = 'delete-icon';
+                  deleteIcon.innerHTML = '<i class="fa-solid fa-times"></i>';
+                  // Add logic here if you want the main page 'X' to re-open modal
+
+                  wrapper.appendChild(img);
+                  wrapper.appendChild(deleteIcon);
+                  mainFormImagePreviews.appendChild(wrapper);
               });
 
               // 4. Reset component state for the next time it opens
@@ -903,9 +917,7 @@ document.addEventListener("DOMContentLoaded", function () {
       renderList();
   }
 
-  // ----------------------------
-  // Initialize on page
-  // ----------------------------
+  // Initialize on page load
   document.querySelectorAll('.sortable-list-wrapper').forEach(wrapper => {
       initSortableVehicleImages(wrapper);
   });

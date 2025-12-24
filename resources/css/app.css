@@ -1168,15 +1168,35 @@ a.pagination-item:hover {
   cursor: pointer;
 }
 
+
+/* The Images Container Using Grid */
+/* Update this container to use Grid */
 .vehicle-form-images {
-  display: flex;
-  gap: 0.25rem;
-  flex-wrap: wrap;
-  justify-content: start;
+  display: grid;
+  /* This ensures that on mobile, images are at least 80px but fill available space */
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  width: 100%;
 }
 
+/* Ensure the wrapper is a square and stays in bounds */
 .vehicle-form-image-preview {
   position: relative;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Force the image to fit the container precisely */
+.vehicle-form-image-preview img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
 }
 
 .vehicle-form-image-preview .delete-icon {
