@@ -163,7 +163,7 @@ class VehicleController extends Controller
             return redirect()->route('section.categories.index', [
                 'section' => $section->slug,
             ])
-            ->with('info', 'Please select a vehicle category to continue');
+            ->with('info', 'Please select a category');
         }
 
         // --- CASE 3: neither present ---
@@ -173,7 +173,7 @@ class VehicleController extends Controller
         ]);
 
         return redirect()->route('sections.index')
-            ->with('info', 'Please select a section category to continue');
+            ->with('info', 'Please select a section');
     }
 
     /**
