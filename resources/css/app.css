@@ -1131,7 +1131,9 @@ a.pagination-item:hover {
 }
 
 .form-images {
-  width: 280px;
+  /* Change width to max-width so it can shrink on smaller screens */
+  max-width: 280px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   padding-left: 1rem;
@@ -1170,33 +1172,30 @@ a.pagination-item:hover {
 
 
 /* The Images Container Using Grid */
-/* Update this container to use Grid */
 .vehicle-form-images {
   display: grid;
-  /* This ensures that on mobile, images are at least 80px but fill available space */
+  /* Creates as many columns as will fit, minimum 80px wide */
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 0.5rem;
+  gap: 0.75rem;
+  width: 100%;
+  align-items: start; /* Ensures they all align to the top of their grid cell */
   margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
-  width: 100%;
 }
 
-/* Ensure the wrapper is a square and stays in bounds */
+/* Update your CSS to target the wrapper div your JS should be creating */
 .vehicle-form-image-preview {
-  position: relative;
-  aspect-ratio: 1 / 1;
-  width: 100%;
-  overflow: hidden;
+    width: 100%;
+    aspect-ratio: 1 / 1; /* This is the most important line */
+    overflow: hidden;
+    border-radius: 8px;
+    background-color: #f3f4f6; /* Placeholder color while loading */
 }
 
-/* Force the image to fit the container precisely */
 .vehicle-form-image-preview img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover;
-  border-radius: 10px;
-  display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .vehicle-form-image-preview .delete-icon {
@@ -1565,7 +1564,9 @@ a.pagination-item:hover {
   }
 
   .add-new-vehicle-form .form-content .form-images {
-    align-self: center;
+    align-self: stretch; /* Change from center to stretch */
+    padding-left: 0;
+    margin-top: 1rem;
   }
 
   .show-filters-button {
