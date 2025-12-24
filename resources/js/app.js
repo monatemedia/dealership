@@ -842,18 +842,11 @@ document.addEventListener("DOMContentLoaded", function () {
                   const wrapper = document.createElement('div');
                   wrapper.className = 'vehicle-form-image-preview';
 
-                  // Create the image
+                  // Create the img element
                   const img = document.createElement('img');
                   img.src = item.image; // Use the base64 preview
 
-                  // Add the delete icon (optional, but keeps UI consistent)
-                  const deleteIcon = document.createElement('div');
-                  deleteIcon.className = 'delete-icon';
-                  deleteIcon.innerHTML = '<i class="fa-solid fa-times"></i>';
-                  // Add logic here if you want the main page 'X' to re-open modal
-
                   wrapper.appendChild(img);
-                  wrapper.appendChild(deleteIcon);
                   mainFormImagePreviews.appendChild(wrapper);
               });
 
