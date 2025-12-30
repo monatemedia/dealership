@@ -658,6 +658,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [ ] FacebookOath
     - [ ] Send Appeal For Access
     - [ ] Set Up Facebook OAuth
+- [ ] Debug Dev VPS App
 - [ ] Create Social Media Accounts
 - [ ] Post. Grow. Repeat.
 - [ ] Get Analytics with https://github.com/panphp/pan 
