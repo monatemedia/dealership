@@ -35,6 +35,34 @@ class DemoDataSeeder extends Seeder
 
     protected function seedData(): void
     {
+        $password = 'password';
+        $email = 'user@example.com';
+
+        // Check if user exists or create them
+        $user = User::firstOrCreate(
+            ['email' => $email],
+            [
+                'name' => 'Demo User',
+                'password' => bcrypt($password),
+            ]
+        );
+
+        // Output status and details
+        if ($user->wasRecentlyCreated) {
+            $this->command->info("✔ Created new user:");
+        } else {
+            $this->command->warn("ℹ User already exists:");
+        }
+
+        // Display Table-style details for clarity
+        $this->command->table(
+            ['Attribute', 'Value'],
+            [
+                ['Name', $user->name],
+                ['Email', $user->email],
+                ['Password', $password],
+            ]
+        );
         // Basic users
         $this->command->info('Creating basic users...');
         User::factory()->count(3)->create();
