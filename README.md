@@ -661,6 +661,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [ ] Debug Dev VPS App
   - [X] Restart docker with `sudo systemctl restart docker`
   - [X] Remove All Containers
+  - [X] Fix and Test Pipeline
 - [ ] Create Social Media Accounts
 - [ ] Post. Grow. Repeat.
 - [ ] Get Analytics with https://github.com/panphp/pan 
