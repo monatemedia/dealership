@@ -246,7 +246,7 @@ cp .env.local .env
 php artisan migrate:fresh --seed
 ```
 
-- **For local development (Demo Data):** Use the custom db:demo command to populate the database with fake user, vehicle, and image records for development and testing. This command runs the DemoDataSeeder.
+- **For test development (Demo Data):** Use the custom db:demo command to populate the database with fake user, vehicle, and image records for development and testing. This command runs the DemoDataSeeder.
 
 ```sh
 # Seed a standard set of demo data
@@ -259,6 +259,31 @@ This command also accepts an optional --count option to run the seeder multiple 
 # Run the seeder 10 times to generate more data
 php artisan db:demo --count=10
 ```
+
+The `db:demo` command will also create a test user
+
+Since the phone number is generated randomly using `fake()->numerify('#########')` during the seeding process, I have included a placeholder for it in the table.
+
+Here is a clean Markdown table you can use in your `README.md` or technical documentation:
+
+#### Test Credentials
+
+The following user is created (or retrieved) during the seeding process to allow for immediate login and testing of the application features.
+
+| Attribute | Value | Note |
+| --- | --- | --- |
+| **Name** | `Demo User` | Display name for the account |
+| **Email** | `user@example.com` | Primary login identifier |
+| **Password** | `password` | Plain-text password for local testing |
+| **Phone** | *Randomly Generated* | Generated via `fake()->numerify()` |
+| **Status** | `Verified` | `email_verified_at` is set to current timestamp |
+
+
+> **Quick Login:**
+> * **Username:** `user@example.com`
+> * **Password:** `password`
+> 
+> 
 
 ---
 
