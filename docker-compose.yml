@@ -1,3 +1,5 @@
+name: actuallyfind-production
+
 services:
   # ----------------------------------------------
   # BLUE SERVICE SLOT (New Deployments start here if LIVE is GREEN)
