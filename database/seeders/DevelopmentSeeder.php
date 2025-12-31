@@ -15,10 +15,7 @@ class DevelopmentSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Run the essential production seeders first
-        $this->call(ProductionSeeder::class);
-
-        // 2. Run seeders with fake/demo data
-        // $this->call(DemoDataSeeder::class);
+        // 1. Run the DemoDataSeeder to populate demo data
+        $this->call(DemoDataSeeder::class);
     }
 }

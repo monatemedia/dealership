@@ -1,4 +1,4 @@
-<?php
+<?php // database/factories/UserFactory.php
 
 namespace Database\Factories;
 

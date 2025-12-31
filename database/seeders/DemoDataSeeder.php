@@ -44,14 +44,16 @@ class DemoDataSeeder extends Seeder
             [
                 'name' => 'Demo User',
                 'password' => bcrypt($password),
+                'phone' => fake()->numerify('#########'), // Use factory-like generation
+                'email_verified_at' => now(),
             ]
         );
 
-        // Output status and details
+        // Console output logic...
         if ($user->wasRecentlyCreated) {
-            $this->command->info("✔ Created new user:");
+            $this->command->info("✔ Created new user: {$user->email}");
         } else {
-            $this->command->warn("ℹ User already exists:");
+            $this->command->warn("ℹ User already exists: {$user->email}");
         }
 
         // Display Table-style details for clarity
@@ -61,20 +63,28 @@ class DemoDataSeeder extends Seeder
                 ['Name', $user->name],
                 ['Email', $user->email],
                 ['Password', $password],
+                ['Phone', $user->phone],
             ]
         );
+
         // Basic users
         $this->command->info('Creating basic users...');
         User::factory()->count(3)->create();
 
-        // Users with vehicles
         $this->command->info('Creating users with vehicles...');
         User::factory()
-            ->count(2) // Create users with vehicles
+            ->count(2)
             ->has(
-                // Each user has 50 vehicles
                 Vehicle::factory()
                     ->count(50)
+                    // FORCE the vehicle to belong to the user currently being created
+                    // This prevents the Factory from picking the Demo User randomly
+                    ->state(function (array $attributes, User $user) {
+                        return [
+                            'user_id' => $user->id,
+                            'phone' => $user->phone
+                        ];
+                    })
                     ->has(
                         // Each vehicle has 5 images with positions 1 to 5
                         VehicleImage::factory()

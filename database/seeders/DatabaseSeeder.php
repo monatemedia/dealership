@@ -13,10 +13,11 @@ class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
-     * By default, this runs the development seeder.
+     * By default, this runs the production seeder.
      */
     public function run(): void
     {
-        $this->call(DevelopmentSeeder::class);
+        // The production seeder is responsible for populating the core application data
+        $this->call(ProductionSeeder::class);
     }
 }
