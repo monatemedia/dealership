@@ -1078,6 +1078,8 @@ git push origin release/1.0.0
 
 Visit your staging environment and thoroughly test all functionality.
 
+https://dealership.monatemedia.com/
+
 ##### PROMOTE TO PRODUCTION
 
 After successful testing on staging, it's time to deploy to production. Follow these steps carefully:
