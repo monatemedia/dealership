@@ -1131,15 +1131,11 @@ a.pagination-item:hover {
 }
 
 .form-images {
-  /* Change width to max-width so it can shrink on smaller screens */
-  max-width: 280px;
-  width: 100%;
+  width: 280px; /* Default for desktop */
   display: flex;
   flex-direction: column;
-  padding-left: 1rem;
-  border-left: 1px solid rgb(224, 224, 224);
   align-items: center;
-  justify-content: start;
+  min-height: min-content; /* Force it to grow with children */
 }
 
 .form-image-upload {
@@ -1173,29 +1169,29 @@ a.pagination-item:hover {
 
 /* The Images Container Using Grid */
 .vehicle-form-images {
-  display: grid;
-  /* Creates as many columns as will fit, minimum 80px wide */
+  display: grid !important;
+  /* Use 'auto-fill' with a smaller minimum to ensure 2 or 3 can fit */
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 0.75rem;
+  gap: 10px;
   width: 100%;
-  align-items: start; /* Ensures they all align to the top of their grid cell */
-  margin-top: 1.5rem;
+  overflow: visible; /* Ensure nothing is cut off */
 }
 
 /* Update your CSS to target the wrapper div your JS should be creating */
 .vehicle-form-image-preview {
-    width: 100%;
-    aspect-ratio: 1 / 1; /* This is the most important line */
-    overflow: hidden;
-    border-radius: 8px;
-    background-color: #f3f4f6; /* Placeholder color while loading */
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #eee;
 }
 
 .vehicle-form-image-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .vehicle-form-image-preview .delete-icon {
@@ -1540,8 +1536,10 @@ a.pagination-item:hover {
   }
 
   .add-new-vehicle-form .form-images {
+    width: 100% !important; /* Allow it to be full phone width */
+    max-width: 100%;
     border-left: none;
-    order: 1;
+    padding: 1rem 0;
   }
 
   .add-new-vehicle-form .form-content {
@@ -3305,3 +3303,8 @@ input[type="checkbox"]:checked::after {
     color: #aaa;
     margin-bottom: 0;
 }
+
+/* DEBUG MODE - Remove after fixing */
+.form-images { border: 3px solid red !important; }
+#imagePreviews { border: 3px solid blue !important; min-height: 100px; }
+.vehicle-form-image-preview { border: 2px solid green !important; }
