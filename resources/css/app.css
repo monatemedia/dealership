@@ -1131,16 +1131,11 @@ a.pagination-item:hover {
 }
 
 .form-images {
-  width: 280px;
-  display: flex;
-  flex-direction: column;
-  padding-left: 1rem;
-  border-left: 1px solid rgb(224, 224, 224);
-  /* CHANGE THIS: */
-  align-items: stretch;
-  justify-content: start;
-  height: auto; /* Ensure no fixed height is inherited */
-  min-height: min-content;
+    width: 280px; /* Desktop width */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch !important; /* Force children to fill width, no centering */
+    justify-content: flex-start;
 }
 
 .form-image-upload {
@@ -1174,22 +1169,23 @@ a.pagination-item:hover {
 
 /* The Images Container Using Grid */
 .vehicle-form-images {
-  display: grid !important;
-  /* Use 'auto-fill' with a smaller minimum to ensure 2 or 3 can fit */
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 10px;
-  width: 100%;
-  overflow: visible; /* Ensure nothing is cut off */
+    display: grid !important;
+    /* Use 1fr to ensure they fill the available space evenly */
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    width: 100%;
+    margin-top: 1rem;
+    /* This prevents the "pushed down" ghosting */
+    align-content: start;
 }
 
 /* Update your CSS to target the wrapper div your JS should be creating */
 .vehicle-form-image-preview {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  position: relative;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #eee;
+    display: block; /* Ensure it's not inline-block */
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    margin: 0 !important; /* Remove any ghost margins */
+    padding: 0 !important;
 }
 
 .vehicle-form-image-preview img {
@@ -1568,9 +1564,10 @@ a.pagination-item:hover {
   }
 
   .add-new-vehicle-form .form-content .form-images {
-    align-self: stretch; /* Change from center to stretch */
-    padding-left: 0;
-    margin-top: 1rem;
+        width: 100% !important;
+        align-self: stretch !important;
+        align-items: stretch !important;
+        padding: 0;
   }
 
   .show-filters-button {
