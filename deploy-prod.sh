@@ -15,9 +15,8 @@ DB_SERVICE="actuallyfind-db"
 TYPESENSE_SERVICE="actuallyfind-typesense"
 QUEUE_SERVICE="actuallyfind-queue"
 
-# Use the APP_URL variable to determine the VIRTUAL_HOST value
-# Strip 'https://' or 'http://' from APP_URL for VIRTUAL_HOST comparison.
-VIRTUAL_HOST_DOMAIN=$(echo "${APP_URL}" | sed -E 's/^(https?:\/\/)?//')
+# Use the APP_URL variable to determine the VIRTUAL_HOST value# Clean the domain variable
+VIRTUAL_HOST_DOMAIN=$(echo "${APP_URL}" | sed -E 's/^(https?:\/\/)?//' | sed 's/\/.*//' | tr -d '\r' | xargs)
 
 echo "--- Starting Blue/Green Deployment on Remote Server ---"
 echo "✅ Current working directory is: $(pwd)"
@@ -38,31 +37,29 @@ echo "🎯 Determining LIVE_SLOT and TARGET_SLOT for deployment..."
 LIVE_SLOT=""
 
 # Helper function to check VIRTUAL_HOST value
+# -------------------------------------------------------------
+# 2. DETERMINE TARGET_SLOT
+# -------------------------------------------------------------
+echo "🎯 Determining LIVE_SLOT and TARGET_SLOT for deployment..."
+
 get_host_status() {
     local service_name=$1
-    #
-    # Use || true to prevent 'docker inspect' from failing the script
-    # due to 'No such container'. The error is redirected to /dev/null anyway.
-    #
-    HOST_STATUS=$(docker inspect ${service_name} \
-        --format '{{range .Config.Env}}{{if eq (index (split . "=") 0) "VIRTUAL_HOST"}}{{(index (split . "=") 1)}}{{end}}{{end}}' 2>/dev/null || true)
-
-    # Check if the inspect command failed because the container doesn't exist.
-    # If the HOST_STATUS is empty *and* the container existed, it means VIRTUAL_HOST was empty.
-    # If the HOST_STATUS is empty and the container didn't exist, it means the script is bootstrapping.
-
-    if [ $? -eq 0 ]; then
-        echo "$HOST_STATUS"
-    else
-        # If the container inspect failed (e.g., container not found), return an empty string.
+    if [ ! "$(docker ps -q -f name=^/${service_name}$)" ]; then
         echo ""
+        return
     fi
+    docker inspect "${service_name}" --format '{{range .Config.Env}}{{println .}}{{end}}' | \
+    grep '^VIRTUAL_HOST=' | cut -d'=' -f2 | tr -d '\r' || echo ""
 }
 
 BLUE_HOST=$(get_host_status ${WEB_SERVICE_BASE}-blue)
 GREEN_HOST=$(get_host_status ${WEB_SERVICE_BASE}-green)
 
-# --- Check which container is LIVE ---
+echo "🔍 Detection Results:"
+echo "   - Target: [${VIRTUAL_HOST_DOMAIN}]"
+echo "   - Blue:   [${BLUE_HOST}]"
+echo "   - Green:  [${GREEN_HOST}]"
+
 if [ "${BLUE_HOST}" == "${VIRTUAL_HOST_DOMAIN}" ]; then
     LIVE_SLOT="${WEB_SERVICE_BASE}-blue"
     export TARGET_SLOT="${WEB_SERVICE_BASE}-green"
@@ -70,14 +67,13 @@ elif [ "${GREEN_HOST}" == "${VIRTUAL_HOST_DOMAIN}" ]; then
     LIVE_SLOT="${WEB_SERVICE_BASE}-green"
     export TARGET_SLOT="${WEB_SERVICE_BASE}-blue"
 else
-    # Initial deploy or failure to detect: This is the critical change.
-    echo "⚠️ WARNING: Could not detect LIVE_SLOT. Assuming this is an initial deployment."
+    echo "⚠️  No LIVE_SLOT detected or domain mismatch. Bootstrapping Blue."
     LIVE_SLOT="none"
-    export TARGET_SLOT="${WEB_SERVICE_BASE}-blue" # Default to blue for initial run
+    export TARGET_SLOT="${WEB_SERVICE_BASE}-blue"
 fi
 
 echo "✅ LIVE_SLOT detected as: ${LIVE_SLOT}."
-echo "🎯 Identified TARGET_SLOT for deployment and setup: ${TARGET_SLOT}"
+echo "🎯 Identified TARGET_SLOT for deployment and setup: ${TARGET_SLOT}"\
 
 # -------------------------------------------------------------
 # 3. RECREATE ONLY THE TARGET_SLOT (Zero-Downtime Start)
