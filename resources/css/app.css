@@ -1212,6 +1212,22 @@ a.pagination-item:hover {
   transition: all 0.3s;
 }
 
+#imagePreviews {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  /* ADD THESE: */
+  height: auto;
+  min-height: 10px;
+  overflow: visible;
+}
+
+/* DEBUG MODE - Remove after fixing */
+/* .form-images { border: 3px solid red !important; }
+#imagePreviews { border: 3px solid blue !important; min-height: 100px; }
+.vehicle-form-image-preview { border: 2px solid green !important; } */
+
 .vehicle-form-image-preview:hover .delete-icon {
   opacity: 1;
 }
@@ -3306,19 +3322,3 @@ input[type="checkbox"]:checked::after {
     color: #aaa;
     margin-bottom: 0;
 }
-
-#imagePreviews {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 1rem;
-  width: 100%;
-  /* ADD THESE: */
-  height: auto;
-  min-height: 10px;
-  overflow: visible;
-}
-
-/* DEBUG MODE - Remove after fixing */
-.form-images { border: 3px solid red !important; }
-#imagePreviews { border: 3px solid blue !important; min-height: 100px; }
-.vehicle-form-image-preview { border: 2px solid green !important; }
