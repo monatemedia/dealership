@@ -683,12 +683,16 @@ _For more examples, please refer to the [Documentation](https://example.com)_
   - [ ] FacebookOath
     - [ ] Send Appeal For Access
     - [ ] Set Up Facebook OAuth
-- [ ] Debug Dev VPS App
+- [X] Debug Dev VPS App
   - [X] Restart docker with `sudo systemctl restart docker`
   - [X] Remove All Containers
   - [X] Fix and Test Pipeline
   - [X] Retest Pipeline
-- [ ] Create Demo User
+- [X] Create Demo User
+- [ ] Final Checks
+  - [ ] Comment Out Color Section from `Create` and `Update` pages
+  - [ ] Allow Unknown `Manufacturers` and `Models` to be created
+  - [ ] Final Configuration of the Menu Names
 - [ ] Create Social Media Accounts
 - [ ] Post. Grow. Repeat.
 - [ ] Get Analytics with https://github.com/panphp/pan 
@@ -696,8 +700,6 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [ ] Create Backup logic
 - [ ] Fix Images on Favourites page
 - [ ] Fix losing text on location after deleting location
-- [ ] Set Up Social Media
-- [ ] Allow Unknown `Manufacturers` and `Models` to be created
 - [ ] Test Create & Edit Pages
 - [ ] Add Group term: **Channels**
   - [ ] Individual categories:
