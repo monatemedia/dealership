@@ -11,38 +11,37 @@ class CityController extends Controller
     public function search(Request $request): JsonResponse
     {
         $query = $request->input('q', '');
-        $withProvince = $request->boolean('with_province'); // Check for the new parameter
+        $provinceId = $request->input('province_id'); // Get the constraint
+        $withProvince = $request->boolean('with_province');
 
         if (strlen($query) < 2) {
             return response()->json([]);
         }
 
-        // Use Scout search for fuzzy text matching
+        // 1. Initialize the search
         $searchQuery = City::search($query);
 
-        // Fetch the results and eagerly load the province relationship
-        $cities = $searchQuery
-            ->take(20)
-            ->get();
+        // 2. Apply the province constraint if it exists
+        // Note: Laravel Scout supports 'where' on indexed fields
+        if ($provinceId) {
+            $searchQuery->where('province_id', (int) $provinceId);
+        }
 
-        // 🔑 FIX: Hydrate the results with the province relationship if requested
+        $cities = $searchQuery->take(20)->get();
+
         if ($withProvince) {
             $cities->load('province');
         }
 
-        // 🔑 FIX: Map the results to include the province object
         $mappedCities = $cities
-            // Filter out any cities that might be missing a province after hydration (optional)
-            ->filter(fn($city) => $city->province)
             ->map(fn($city) => [
                 'id' => $city->id,
                 'name' => $city->name,
                 'province_id' => $city->province_id,
-                // CRITICAL: Include the province object
-                'province' => [
+                'province' => $city->relationLoaded('province') && $city->province ? [
                     'id' => $city->province->id,
                     'name' => $city->province->name,
-                ],
+                ] : null,
             ]);
 
         return response()->json($mappedCities);

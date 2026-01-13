@@ -182,120 +182,81 @@ class VehicleController extends Controller
      */
     public function store(StoreVehicleRequest $request)
     {
-        // Get the user from the request object
         $user = $request->user();
 
-        /**
-         * Ensure user profile is complete (has phone number)
-         * If not, store the intended route and redirect them to profile settings
-         * so they can update their phone number before listing a vehicle.
-         */
+        // 1. Check user profile requirements
         if (!$user->phone) {
-            // Store intended route
             session(['url.intended' => route('vehicle.create')]);
-            // Redirect to profile.index with a warning message
-            // to provide a phone number before adding a vehicle
             return redirect()->route('profile.index')
                 ->with('warning', 'Please provide a phone number before adding a vehicle');
         }
 
-        // Authorize user to create a vehicle (policy check)
+        // 2. Authorize
         Gate::authorize('create', Vehicle::class);
 
-        // Get validated request data
+        // 3. Get validated data FIRST
         $data = $request->validated();
 
-        $selectedFeatures = $data['features'] ?? []; // Extract array of feature names
-        $selectedPaperwork = $data['ownership_paperwork'] ?? []; // Extract array of ownership paperwork
-        $images = $request->file('images') ?: []; // Extract uploaded images
+        dd($data);
 
-        // Limit images to a maximum of 12
+        // 4. Resolve Manufacturer and Model (using your new helper methods)
+        // We pass the raw input from the request to resolve either the ID or create a new entry
+        $data['manufacturer_id'] = $this->resolveManufacturerId($request->input('manufacturer_id'));
+        $data['model_id'] = $this->resolveModelId($data['manufacturer_id'], $request->input('model_id'));
+
+        // 5. Category and Section Logic
+        $category = Category::findOrFail($data['category_id']);
+        $data['section_id'] = $category->section_id;
+        $data['user_id'] = Auth::id();
+
+        // 6. Handle published_at timezone conversion
+        if (!empty($data['published_at'])) {
+            $data['published_at'] = Carbon::createFromFormat(
+                'Y-m-d\TH:i',
+                $data['published_at'],
+                'Africa/Johannesburg'
+            )->setTimezone('UTC');
+        } else {
+            $data['published_at'] = now();
+        }
+
+        // 7. Create the Vehicle record (ONLY ONCE)
+        $vehicle = Vehicle::create($data);
+
+        // 8. Handle Relationships (Features and Paperwork)
+        $selectedFeatures = $data['features'] ?? [];
+        $selectedPaperwork = $data['ownership_paperwork'] ?? [];
+
+        $featureIds = Feature::whereIn('name', $selectedFeatures)->pluck('id');
+        $vehicle->features()->sync($featureIds);
+
+        $paperworkIds = OwnershipPaperwork::whereIn('name', $selectedPaperwork)->pluck('id');
+        $vehicle->ownershipPaperwork()->sync($paperworkIds);
+
+        // 9. Handle Image Uploads
+        $images = $request->file('images') ?: [];
         if (count($images) > 12) {
             $images = array_slice($images, 0, 12);
         }
 
-        // Assign the authenticated user ID to the vehicle record
-        $data['user_id'] = Auth::id();
-
-        // Ensure category_id exists and is valid
-        if (empty($data['category_id'])) {
-            return redirect('vehicle.create')
-                ->with('error', 'Please select a valid category before creating a vehicle.');
-        }
-
-        $category = Category::find($data['category_id']);
-        if (!$category) {
-            return redirect('vehicle.create')
-                ->with('error', 'The selected category no longer exists. Please choose another.');
-        }
-
-        // Automatically assign section_id
-        $data['section_id'] = $category->section_id;
-        // dd($category->toArray());
-        // dd($data);
-
-        // Handle published_at: treat as user's local time, convert to UTC
-        if (!empty($data['published_at'])) {
-            // datetime-local gives us: "2025-10-29T14:30"
-            // We assume this is in Africa/Johannesburg timezone
-            $data['published_at'] = Carbon::createFromFormat(
-                'Y-m-d\TH:i',
-                $data['published_at'],
-                'Africa/Johannesburg' // User's timezone (hardcoded for SA market)
-            )->setTimezone('UTC'); // Convert to UTC for storage
-        } else {
-            // If not provided, publish immediately
-            $data['published_at'] = now(); // This will be in UTC
-        }
-
-        // Create the Vehicle record
-        $vehicle = Vehicle::create($data);
-
-        // Map feature names to IDs
-        $featureIds = Feature::whereIn('name', $selectedFeatures)->pluck('id');
-        $vehicle->features()->sync($featureIds);
-
-        // Add ownership paperwork sync
-        $paperworkIds = OwnershipPaperwork::whereIn('name', $selectedPaperwork)->pluck('id');
-        $vehicle->ownershipPaperwork()->sync($paperworkIds);
-
-        /**
-         * Handle image uploads:
-         * - Save each image to the private processing queue directory
-         * - Create a VehicleImage record with the full temporary path
-         * - Dispatch the processing job for each image
-         */
         foreach ($images as $i => $image) {
             $position = $i + 1;
-
-            // Generate a unique filename while preserving the extension
             $filename = uniqid() . '.' . $image->getClientOriginalExtension();
 
-            // Store the file in the private/processing_queue directory
-            // 'private' here corresponds to storage/app/private
-            $storedPath = Storage::disk('private')
-                ->putFileAs('processing_queue', $image, $filename);
+            $storedPath = Storage::disk('private')->putFileAs('processing_queue', $image, $filename);
+            $fullTempPath = str_replace('\\', '/', Storage::disk('private')->path($storedPath));
 
-            // Get the absolute full path to where the file was stored
-            $fullTempPath = Storage::disk('private')->path($storedPath);
-
-            // Normalize slashes for cross-OS compatibility
-            $fullTempPath = str_replace('\\', '/', $fullTempPath);
-
-            // Create a VehicleImage record with all required fields
             $vehicleImage = $vehicle->images()->create([
                 'original_filename' => $image->getClientOriginalName(),
-                'temp_file_path' => $fullTempPath, // critical for the job to find the file
-                'image_path' => '', // will be set after processing
+                'temp_file_path' => $fullTempPath,
+                'image_path' => '',
                 'position' => $position,
                 'status' => 'pending',
             ]);
 
-            // Dispatch the image processing job with the VehicleImage ID
             ProcessVehicleImage::dispatch($vehicleImage->id);
         }
 
-        // Redirect back to the index with a success message
         return redirect()->route('vehicle.index')
             ->with('success', 'Vehicle was created');
     }
@@ -443,48 +404,50 @@ class VehicleController extends Controller
         ]);
     }
 
-    /**
-     * app/Http/Controllers/VehicleController::update
-     * Update the specified resource in storage.
-     */
-    public function update(StoreVehicleRequest $request, Vehicle $vehicle)
-    {
-        Gate::authorize('update', $vehicle);
+/**
+ * Update the specified resource in storage.
+ */
+public function update(StoreVehicleRequest $request, Vehicle $vehicle)
+{
+    Gate::authorize('update', $vehicle);
 
-        $data = $request->validated(); // Get request data
-        $selectedFeatures = $data['features'] ?? []; // array of feature names
-        $selectedPaperwork = $data['ownership_paperwork'] ?? []; // array of ownership paperwork
+    $data = $request->validated();
 
-        // ADD THIS: Handle published_at timezone conversion
-        if (!empty($data['published_at'])) {
-            $data['published_at'] = Carbon::createFromFormat(
-                'Y-m-d\TH:i',
-                $data['published_at'],
-                'Africa/Johannesburg'
-            )->setTimezone('UTC');
-        }
+    // 1. Resolve Manufacturer and Model IDs
+    // This handles both existing IDs and new free-text input
+    $data['manufacturer_id'] = $this->resolveManufacturerId($request->input('manufacturer_id'));
+    $data['model_id'] = $this->resolveModelId($data['manufacturer_id'], $request->input('model_id'));
 
-        // Update vehicle details
-        $vehicle->update($data);
-
-        // Update pivot table for features
-        $featureIds = Feature::whereIn('name', $selectedFeatures)->pluck('id');
-        $vehicle->features()->sync($featureIds);
-
-        // Add ownership paperwork sync
-        $paperworkIds = OwnershipPaperwork::whereIn('name', $selectedPaperwork)->pluck('id');
-        $vehicle->ownershipPaperwork()->sync($paperworkIds);
-
-        // Check if user wants to go to images page (for future use)
-        if ($request->has('redirect_to_images')) {
-            return redirect()->route('vehicle.images', $vehicle)
-                ->with('success', 'Vehicle was updated. Now manage your images.');
-        }
-
-        // Default: redirect back to vehicle listing
-        return redirect()->route('vehicle.index')
-            ->with('success', 'Vehicle was updated');
+    // 2. Handle published_at timezone conversion
+    if (!empty($data['published_at'])) {
+        $data['published_at'] = \Carbon\Carbon::createFromFormat(
+            'Y-m-d\TH:i',
+            $data['published_at'],
+            'Africa/Johannesburg'
+        )->setTimezone('UTC');
     }
+
+    // 3. Update vehicle details
+    $vehicle->update($data);
+
+    // 4. Update Pivot Tables (Features & Paperwork)
+    $selectedFeatures = $data['features'] ?? [];
+    $featureIds = Feature::whereIn('name', $selectedFeatures)->pluck('id');
+    $vehicle->features()->sync($featureIds);
+
+    $selectedPaperwork = $data['ownership_paperwork'] ?? [];
+    $paperworkIds = OwnershipPaperwork::whereIn('name', $selectedPaperwork)->pluck('id');
+    $vehicle->ownershipPaperwork()->sync($paperworkIds);
+
+    // 5. Redirect Logic
+    if ($request->has('redirect_to_images')) {
+        return redirect()->route('vehicle.images', $vehicle)
+            ->with('success', 'Vehicle updated. Now manage your images.');
+    }
+
+    return redirect()->route('vehicle.index')
+        ->with('success', 'Vehicle updated successfully.');
+}
 
     /**
      * Remove the specified resource from storage.
@@ -840,5 +803,58 @@ class VehicleController extends Controller
     public function showPhone(Vehicle $vehicle)
     {
         return response()->json(['phone' => $vehicle->phone]);
+    }
+
+private function resolveManufacturerId($input): int
+{
+    // If the user selected an existing item from a dropdown, it's an ID
+    if (is_numeric($input) && Manufacturer::where('id', $input)->exists()) {
+        return (int) $input;
+    }
+
+    // If it's a string (new manufacturer), normalize it
+    $name = trim($input);
+    $normalized = strtolower($name);
+
+    // Check Aliases first to avoid duplicates
+    $alias = \App\Models\ManufacturerAlias::where('alias', $normalized)->first();
+    if ($alias) return $alias->manufacturer_id;
+
+    // Check if the name exists but was sent as a string instead of an ID
+    $existing = Manufacturer::whereRaw('LOWER(name) = ?', [$normalized])->first();
+    if ($existing) return $existing->id;
+
+    // Create new
+    $new = Manufacturer::create([
+        'name' => $name,
+        'source' => \App\Enums\DataSource::USER->value
+    ]);
+
+    $new->aliases()->create(['alias' => $normalized]);
+    return $new->id;
+}
+
+    private function resolveModelId(int $manufacturerId, $input): int
+    {
+        if (is_numeric($input) && \App\Models\Model::where('id', $input)->exists()) {
+            return (int) $input;
+        }
+
+        $normalized = strtolower(trim($input));
+
+        // Check Aliases specifically for this manufacturer
+        $alias = \App\Models\ModelAlias::where('alias', $normalized)
+            ->whereHas('model', fn($q) => $q->where('manufacturer_id', $manufacturerId))
+            ->first();
+        if ($alias) return $alias->model_id;
+
+        $model = \App\Models\Model::firstOrCreate(
+            ['name' => $input, 'manufacturer_id' => $manufacturerId],
+            ['source' => \App\Enums\DataSource::USER->value]
+        );
+
+        $model->aliases()->firstOrCreate(['alias' => $normalized]);
+
+        return $model->id;
     }
 }

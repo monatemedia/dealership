@@ -318,6 +318,14 @@ php artisan typesense:start
 php artisan typesense:create-collections --force --import
 ```
 
+The following user is created (or retrieved) during the seeding process to allow for immediate login and testing of the application features.
+
+| Attribute | Value | Note |
+| --- | --- | --- |
+| **Name** | `Demo User` | Display name for the account |
+| **Email** | `user@example.com` | Primary login identifier |
+| **Password** | `password` | Plain-text password for local testing |
+
 ---
 
 #### Typesense Artisan Commands

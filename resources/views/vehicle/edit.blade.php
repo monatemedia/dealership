@@ -313,8 +313,10 @@
                                         <p class="error-message">{{ $errors->first('interior_id') }}</p>
                                     </div>
                                 </div>
+                            </div>
 
                                 {{-- Accident History --}}
+                            <div class="row">
                                 <div class="col">
                                     <div class="form-group @error('accident_history_id') has-error @enderror">
                                         <label>Accident History</label>

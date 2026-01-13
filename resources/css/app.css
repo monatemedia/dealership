@@ -2187,8 +2187,11 @@ a.pagination-item:hover {
     cursor: pointer;
 }
 
-.select-item:hover {
-    background-color: #f3f4f6; /* gray-100 */
+.select-item:hover,
+.select-item.is-active  {
+    background-color: #f3f4f6; /* gray-100 */            /* Adjust this color to match your design */
+    cursor: pointer;
+    outline: none;
 }
 
 /* The informational text (e.g., "Loading...", "No results") */
