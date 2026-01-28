@@ -283,6 +283,12 @@ jobs:
             DB_PASSWORD=${{ secrets.PRODUCTION_DB_PASSWORD }}
             TYPESENSE_API_KEY=${{ secrets.PRODUCTION_TYPESENSE_API_KEY }}
 
+            # --- PORT MAPPINGS (Saved so Audit Script sees them) ---
+            DOCKER_LARAVEL_PORT=${{ env.DOCKER_LARAVEL_PORT }}
+            DOCKER_POSTGRES_PORT=${{ env.DOCKER_POSTGRES_PORT }}
+            DOCKER_ADMINER_PORT=${{ env.DOCKER_ADMINER_PORT }}
+            DOCKER_TYPESENSE_PORT=${{ env.DOCKER_TYPESENSE_PORT }}
+
             # 🔑 AWS SES SDK Configuration (Uses IAM Keys)
             AWS_ACCESS_KEY_ID=${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY=${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}
