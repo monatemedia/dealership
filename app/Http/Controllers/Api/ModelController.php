@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Model;
+use App\Enums\DataSource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -18,7 +19,8 @@ class ModelController extends Controller
             return response()->json([]);
         }
 
-        $searchQuery = Model::search($query);
+        $searchQuery = Model::search($query)
+            ->where('source', DataSource::ORIGINAL->value); // Only show original models
 
         // Filter by manufacturer if provided
         if ($manufacturerId) {
@@ -39,6 +41,8 @@ class ModelController extends Controller
 
     public function show(int $id): JsonResponse
     {
+        // Allow showing user-generated models by ID (for editing existing vehicles)
+        // But in practice, the dropdowns won't surface them
         $model = Model::findOrFail($id);
 
         return response()->json([

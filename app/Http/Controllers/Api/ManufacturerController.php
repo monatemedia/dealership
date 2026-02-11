@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Manufacturer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Enums\DataSource;
 
 class ManufacturerController extends Controller
 {
@@ -18,6 +19,7 @@ class ManufacturerController extends Controller
         }
 
         $manufacturers = Manufacturer::search($query)
+            ->where('source', DataSource::ORIGINAL->value) // Only show original manufacturer
             ->take(20)
             ->get()
             ->map(fn($manufacturer) => [
@@ -30,6 +32,8 @@ class ManufacturerController extends Controller
 
     public function show(int $id): JsonResponse
     {
+        // Allow showing user-generated manufacturers by ID (for editing existing vehicles)
+        // But in practice, the dropdowns won't surface them
         $manufacturer = Manufacturer::findOrFail($id);
 
         return response()->json([
