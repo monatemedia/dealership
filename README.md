@@ -151,6 +151,7 @@ When running the application you need to have the following installed
   gifsicle --version
   cwebp -version
   svgo --version
+  
   ```
 
 ##### Install on Mac
@@ -181,6 +182,7 @@ When running the application you need to have the following installed
   gifsicle --version
   cwebp -version
   svgo --version
+
   ```
 
 ##### Install on Windows
@@ -211,6 +213,7 @@ When running the application you need to have the following installed
   gifsicle --version
   cwebp -version
   svgo --version
+
   ```
 
 ---
@@ -294,6 +297,7 @@ The following user is created (or retrieved) during the seeding process to allow
 ```sh
 # Start the PHP server
 php artisan serve
+
 ```
 
 - In a second terminal run
@@ -301,6 +305,7 @@ php artisan serve
 ```sh
 # Start the Vite dev server
 npm run build && npm run dev
+
 ```
 
 - In a third terminal run
@@ -308,14 +313,16 @@ npm run build && npm run dev
 ```sh
 # Start the queue worker
 php artisan queue:work
+
 ```
 
 - In a fourth terminal run
 
 ```sh
-# Start Typesense and import data
+# Start Typesense and imp ort data
 php artisan typesense:start
 php artisan typesense:create-collections --force --import
+
 ```
 
 The following user is created (or retrieved) during the seeding process to allow for immediate login and testing of the application features.

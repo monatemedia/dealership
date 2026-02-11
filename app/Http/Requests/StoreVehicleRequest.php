@@ -10,6 +10,14 @@ use App\Services\VinValidatorService;
 class StoreVehicleRequest extends FormRequest
 {
     /**
+     * Prepare the data for validation.
+     */
+    // protected function prepareForValidation()
+    // {
+    //     dd($this->all());
+    // }
+
+    /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
@@ -27,8 +35,8 @@ class StoreVehicleRequest extends FormRequest
         return [
             'section_id' => 'required|exists:sections,id',
             'category_id' => 'required|exists:categories,id',
-            'manufacturer_id' => 'required|exists:manufacturers,id',
-            'model_id' => 'required|exists:models,id',
+            'manufacturer_id' => 'required',
+            'model_id' => 'required',
             'year' => ['required', 'integer', 'min:1900', 'max:' . date('Y')],
             'price' => 'required|integer|min:0',
             'vin' => [

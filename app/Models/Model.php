@@ -14,7 +14,14 @@ class Model extends EloquentModel
 
     public $timestamps = false;
 
-    protected $fillable = ['name', 'manufacturer_id'];
+    // Updated fillable to include source and AI tracking columns
+    protected $fillable = [
+        'name',
+        'manufacturer_id',
+        'source',
+        'last_ai_check_at',
+        'ai_retry_count'
+    ];
     protected $keyType = 'int';
     public $incrementing = true;
 
@@ -51,5 +58,9 @@ class Model extends EloquentModel
     public function vehicles(): HasMany
     {
         return $this->hasMany(Vehicle::class);
+    }
+
+    public function aliases() {
+        return $this->hasMany(ModelAlias::class);
     }
 }

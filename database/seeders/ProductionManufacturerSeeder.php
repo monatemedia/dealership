@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Manufacturer;
+use App\Enums\DataSource;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -22,22 +23,29 @@ class ProductionManufacturerSeeder extends Seeder
             ->get()
             ->map(fn($m) => [
                 'name' => $m->name,
-                // Timestamps removed as per model definition
+                'source' => DataSource::ORIGINAL->value,
             ])
             ->all();
-
-        $totalManufacturers = count($manufacturers);
 
         // Use upsert for idempotent bulk insert. Using 'name' in the update array
         // forces PostgreSQL to use ON CONFLICT DO UPDATE SET name = EXCLUDED.name.
         DB::table('manufacturers')->upsert(
             $manufacturers,
-            ['name'], // Unique key
-            ['name'] // Update an existing field to itself if conflict occurs
+            ['name'],
+            ['source']
         );
 
-        $this->command->info("Processed {$totalManufacturers} manufacturers.");
-        unset($manufacturers);
+        // --- NEW: Populate Manufacturer Aliases for instant lookup ---
+        $this->command->info("Creating manufacturer aliases...");
+        $allManufacturers = Manufacturer::all();
+        $mAliases = $allManufacturers->map(fn($m) => [
+            'alias' => strtolower(trim($m->name)),
+            'manufacturer_id' => $m->id
+        ])->all();
+        DB::table('manufacturer_aliases')->upsert($mAliases, ['alias'], ['manufacturer_id']);
+        // ------------------------------------------------------------
+
+        unset($manufacturers, $mAliases);
         gc_collect_cycles();
 
         // Step 2: Build manufacturer lookup map
@@ -66,7 +74,7 @@ class ProductionManufacturerSeeder extends Seeder
                         $modelsToUpsert[] = [
                             'name' => $row->model_name,
                             'manufacturer_id' => $manufacturerId,
-                            // Timestamps removed as per model definition
+                            'source' => DataSource::ORIGINAL->value,
                         ];
                     }
                 }
@@ -74,11 +82,27 @@ class ProductionManufacturerSeeder extends Seeder
                 // Use upsert for idempotent operation. Using 'name' in the update array
                 // forces PostgreSQL to use ON CONFLICT DO UPDATE SET name = EXCLUDED.name.
                 if (!empty($modelsToUpsert)) {
+                    // 1. Upsert Models
                     DB::table('models')->upsert(
                         $modelsToUpsert,
-                        ['name', 'manufacturer_id'], // Composite unique key
-                        ['name'] // Update an existing field to itself if conflict occurs
+                        ['name', 'manufacturer_id'],
+                        ['source']
                     );
+
+                    // 2. Fetch the IDs of the models we just inserted to create aliases
+                    // (This is slightly slower but ensures the alias table is primed)
+                    $insertedModels = \App\Models\Model::whereIn('name', array_column($modelsToUpsert, 'name'))
+                        ->whereIn('manufacturer_id', array_column($modelsToUpsert, 'manufacturer_id'))
+                        ->get();
+
+                    foreach ($insertedModels as $im) {
+                        $modelAliases[] = [
+                            'alias' => strtolower(trim($im->name)),
+                            'model_id' => $im->id
+                        ];
+                    }
+
+                    DB::table('model_aliases')->upsert($modelAliases, ['alias', 'model_id'], ['model_id']);
                 }
 
                 $processedModels += count($rows);
@@ -87,8 +111,6 @@ class ProductionManufacturerSeeder extends Seeder
                 if ($processedModels % 5000 === 0 || $processedModels >= $totalModels) {
                     $this->command->info("Processed {$processedModels}/{$totalModels} models...");
                 }
-                unset($modelsToUpsert);
-                gc_collect_cycles();
             });
 
         $this->command->info("Finished seeding manufacturers and models.");

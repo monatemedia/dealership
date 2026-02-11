@@ -11,6 +11,7 @@ class Manufacturer extends Model
 {
     /** @use HasFactory<\Database\Factories\ManufacturerFactory> */
     use HasFactory, Searchable;
+    protected $fillable = ['name', 'source', 'last_ai_check_at', 'ai_retry_count'];
     public $timestamps = false;
 
     // ADD THESE LINES:
@@ -50,5 +51,9 @@ class Manufacturer extends Model
     public function models(): HasMany
     {
         return $this->hasMany(\App\Models\Model::class);
+    }
+
+    public function aliases() {
+        return $this->hasMany(ManufacturerAlias::class);
     }
 }

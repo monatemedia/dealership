@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreVehicleRequest;
+use App\Models\Manufacturer;
+use App\Models\Model;
+use App\Models\ManufacturerAlias;
+use App\Models\ModelAlias;
 use App\Models\Condition;
 use App\Models\Feature;
 use App\Models\Section;
@@ -197,7 +201,7 @@ class VehicleController extends Controller
         // 3. Get validated data FIRST
         $data = $request->validated();
 
-        dd($data);
+        // dd($data);
 
         // 4. Resolve Manufacturer and Model (using your new helper methods)
         // We pass the raw input from the request to resolve either the ID or create a new entry
@@ -817,7 +821,7 @@ private function resolveManufacturerId($input): int
     $normalized = strtolower($name);
 
     // Check Aliases first to avoid duplicates
-    $alias = \App\Models\ManufacturerAlias::where('alias', $normalized)->first();
+    $alias = ManufacturerAlias::where('alias', $normalized)->first();
     if ($alias) return $alias->manufacturer_id;
 
     // Check if the name exists but was sent as a string instead of an ID
@@ -836,19 +840,19 @@ private function resolveManufacturerId($input): int
 
     private function resolveModelId(int $manufacturerId, $input): int
     {
-        if (is_numeric($input) && \App\Models\Model::where('id', $input)->exists()) {
+        if (is_numeric($input) && Model::where('id', $input)->exists()) {
             return (int) $input;
         }
 
         $normalized = strtolower(trim($input));
 
         // Check Aliases specifically for this manufacturer
-        $alias = \App\Models\ModelAlias::where('alias', $normalized)
+        $alias = ModelAlias::where('alias', $normalized)
             ->whereHas('model', fn($q) => $q->where('manufacturer_id', $manufacturerId))
             ->first();
         if ($alias) return $alias->model_id;
 
-        $model = \App\Models\Model::firstOrCreate(
+        $model = Model::firstOrCreate(
             ['name' => $input, 'manufacturer_id' => $manufacturerId],
             ['source' => \App\Enums\DataSource::USER->value]
         );
