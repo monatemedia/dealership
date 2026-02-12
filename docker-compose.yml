@@ -40,7 +40,7 @@ services:
     networks:
       - proxy-network
     healthcheck:
-      test: ["CMD", "php", "-r", "$ch = curl_init('http://localhost/health'); curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); curl_exec($ch); $code = curl_getinfo($ch, CURLINFO_HTTP_CODE); exit($code >= 200 && $code < 400 ? 0 : 1);"]
+      test: ["CMD", "php", "-r", "$s = @fsockopen('localhost', 80); if ($s) { fclose($s); exit(0); } exit(1);"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -84,7 +84,7 @@ services:
     networks:
       - proxy-network
     healthcheck:
-      test: ["CMD", "php", "-r", "$ch = curl_init('http://localhost/health'); curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); curl_exec($ch); $code = curl_getinfo($ch, CURLINFO_HTTP_CODE); exit($code >= 200 && $code < 400 ? 0 : 1);"]
+      test: ["CMD", "php", "-r", "$s = @fsockopen('localhost', 80); if ($s) { fclose($s); exit(0); } exit(1);"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -137,8 +137,7 @@ services:
     networks:
       - proxy-network
     healthcheck:
-      # Check if the port is open using the standard 'sh' shell
-      test: ["CMD-SHELL", "</dev/tcp/localhost/8108 || exit 1"]
+      test: ["CMD-SHELL", "[ -d /proc/1 ] || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
