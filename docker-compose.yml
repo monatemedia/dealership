@@ -40,7 +40,7 @@ services:
     networks:
       - proxy-network
     healthcheck:
-      test: ["CMD", "php", "-r", "$s = @fsockopen('localhost', 80); if ($s) { fclose($s); exit(0); } exit(1);"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:80/"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -84,7 +84,7 @@ services:
     networks:
       - proxy-network
     healthcheck:
-      test: ["CMD", "php", "-r", "$s = @fsockopen('localhost', 80); if ($s) { fclose($s); exit(0); } exit(1);"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:80/"]
       interval: 30s
       timeout: 10s
       retries: 5
